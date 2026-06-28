@@ -113,6 +113,11 @@
           <strong>Order:</strong> {{ selectedOrder.orderNo }} |
           <strong>Total:</strong> ${{ selectedOrder.finalAmount?.toFixed(2) }}
         </p>
+        <el-alert type="warning" :closable="false" show-icon style="margin-bottom:16px">
+          <template #title>
+            Wholesale cost will be auto-deducted from your wallet upon shipping
+          </template>
+        </el-alert>
         <el-form-item label="Carrier">
           <el-select v-model="shipForm.carrier" placeholder="Select carrier" style="width:100%">
             <el-option v-for="c in carriers" :key="c.id" :label="c.name" :value="c.id" />

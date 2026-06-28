@@ -54,7 +54,7 @@ const create = async (req, res) => {
     if (order.shopId.toString() !== shop._id.toString()) return res.json(fail('Unauthorized'));
 
     const existing = await Shipping.findOne({ orderId });
-    if (existing) return res.json(fail('Insufficient Balance'));
+    if (existing) return res.json(fail('Order already shipped'));
 
     const { shippingCost: rawShippingCost } = req.body;
     const shippingCost = Math.max(0, parseFloat(rawShippingCost) || 0);
@@ -64,7 +64,7 @@ const create = async (req, res) => {
       const product = await Product.findById(item.productId);
       if (product) {
         const sku = product.skus.id(item.skuId);
-        const cost = sku?.cost || 0;
+        const cost = sku?.cost || item.price || 0;
         totalCost += cost * item.quantity;
       }
     }
