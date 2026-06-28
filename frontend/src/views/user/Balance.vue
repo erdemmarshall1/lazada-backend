@@ -228,9 +228,11 @@ const updateQR = async (address) => {
   }
 }
 
+const DEFAULT_WALLET = 'lv2939dhH93j299jd20Ooo92jj3j8dj!88jd'
+
 const onPaymentMethodChange = (method) => {
   const setting = settings.value.find(s => s.method === method)
-  selectedWallet.value = setting?.walletAddress || ''
+  selectedWallet.value = setting?.walletAddress || DEFAULT_WALLET
   updateQR(selectedWallet.value)
 }
 

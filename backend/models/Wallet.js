@@ -10,4 +10,13 @@ const walletSchema = new mongoose.Schema({
   status: { type: Number, enum: [0, 1], default: 1 },
 }, { timestamps: true });
 
+let _io = null;
+walletSchema.statics.setIO = (io) => { _io = io; };
+
+walletSchema.post('save', function () {
+  if (_io && this.isModified('balance')) {
+    _io.to(`user_${this.userId}`).emit('walletUpdated', { balance: this.balance });
+  }
+});
+
 module.exports = mongoose.model('Wallet', walletSchema);

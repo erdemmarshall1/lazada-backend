@@ -1,6 +1,7 @@
 <template>
   <div class="v_app">
     <div class="v_main_layout">
+      <PwaInstallBanner mode="popup" />
       <MainLayoutHeader />
       <MainLayoutNav />
       <router-view v-slot="{ Component }">
@@ -23,6 +24,7 @@ import { get, qe } from '@/api/request'
 import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
+import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
 
 const store = useAppStore()
 let walletTimer = null

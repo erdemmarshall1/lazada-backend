@@ -37,7 +37,7 @@
       </el-table-column>
       <el-table-column label="Actions" width="200" fixed="right">
         <template #default="{row}">
-          <el-button size="small" @click="openTrackingDialog(row)">Update</el-button>
+          <el-button v-if="store.isAdmin" size="small" @click="openTrackingDialog(row)">Update</el-button>
           <el-button size="small" type="primary" @click="previewTracking(row)">Track</el-button>
         </template>
       </el-table-column>
@@ -99,6 +99,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { get, post, qe } from '@/api/request'
+import { useAppStore } from '@/stores/app'
 
 const shipments = ref([])
 const loading = ref(false)
@@ -107,6 +108,7 @@ const pageSize = ref(20)
 const currentPage = ref(1)
 const filterStatus = ref('')
 const stats = ref(null)
+const store = useAppStore()
 const statusLabels = { 0:'Pending Pickup', 1:'Picked Up', 2:'In Transit', 3:'Out for Delivery', 4:'Delivered', 5:'Delivery Failed', 6:'Returned' }
 const carrierMap = { sf:'SF Express', yto:'YTO Express', zto:'ZTO Express', sto:'STO Express', yd:'Yunda Express', ems:'EMS', ups:'UPS', fedex:'FedEx', dhl:'DHL', tnt:'TNT' }
 

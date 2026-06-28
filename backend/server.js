@@ -107,6 +107,9 @@ const startServer = (dbConnected) => {
   const io = require('./sockets/chat')(server);
   app.set('io', io);
 
+  const Wallet = require('./models/Wallet');
+  Wallet.setIO(io);
+
   if (dbConnected) {
     const escrowService = require('./services/escrowService');
     escrowService.start();

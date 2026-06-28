@@ -186,10 +186,8 @@ const updateTracking = async (req, res) => {
     const shipping = await Shipping.findById(shippingId);
     if (!shipping) return res.json(fail('Shipping record not found'));
 
-    const shop = await Shop.findOne({ userId: req.user._id });
-    const isSeller = shop && shipping.shopId.toString() === shop._id.toString();
     const isAdmin = req.user.role === 'admin';
-    if (!isSeller && !isAdmin) return res.json(fail('Unauthorized'));
+    if (!isAdmin) return res.json(fail('Admin access required'));
 
     shipping.statusHistory.push({
       status: newStatus,

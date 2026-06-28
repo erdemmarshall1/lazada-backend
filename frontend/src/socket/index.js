@@ -100,6 +100,13 @@ export const connectSocket = () => {
     }
   })
 
+  socket.on('walletUpdated', (data) => {
+    const store = useAppStore()
+    if (store.token) {
+      store.setWalletBalance(data.balance)
+    }
+  })
+
   socket.on('disconnect', () => {
   })
 
