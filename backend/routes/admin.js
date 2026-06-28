@@ -530,7 +530,7 @@ router.put('/email-settings', adminAuth, async (req, res) => {
   }
 });
 
-// ---- TEMPORARY: Finalize product images from product_photos folder ----
+// ---- TEMPORARY: Fix ALL product images ----
 router.post('/finalize-product-images', adminAuth, async (req, res) => {
   try {
     const { v4: uuidv4 } = require('uuid');
@@ -538,8 +538,8 @@ router.post('/finalize-product-images', adminAuth, async (req, res) => {
     const path = require('path');
     const Product = require('../models/Product');
 
-    const PHOTOS_DIR = path.join(__dirname, '..', 'uploads', 'product_photos');
     const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+    const PHOTOS_DIR = path.join(UPLOADS_DIR, 'product_photos');
 
     function normalize(s) {
       return s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -572,20 +572,37 @@ router.post('/finalize-product-images', adminAuth, async (req, res) => {
       return score + brandBonus;
     }
 
+    function fileExists(p) {
+      try { fs.accessSync(p); return true } catch { return false }
+    }
+
     let photoFiles = [];
-    try {
-      photoFiles = fs.readdirSync(PHOTOS_DIR).filter(f => /\.(webp|png|jpg|jpeg|avif|jfif|gif)$/i.test(f));
-    } catch (e) {
-      return res.json(fail('product_photos directory not found'));
+    try { photoFiles = fs.readdirSync(PHOTOS_DIR).filter(f => /\.(webp|png|jpg|jpeg|avif|jfif|gif)$/i.test(f)); } catch {}
+
+    const genericFiles = [];
+    for (let i = 0; i < 100; i++) {
+      const p = path.join(UPLOADS_DIR, `product_${i}.png`);
+      if (fileExists(p)) genericFiles.push(`product_${i}.png`);
     }
 
     const products = await Product.find({});
     const updated = [];
     let updatedCount = 0;
+    let genericIndex = 0;
 
     for (const product of products) {
+      const currentImages = (product.images || []).filter(i => i);
+      const anyValid = currentImages.some(img => {
+        if (img.startsWith('/uploads/')) {
+          const f = path.join(UPLOADS_DIR, img.replace('/uploads/', ''));
+          return fileExists(f);
+        }
+        return img.startsWith('http://') || img.startsWith('https://');
+      });
+      if (anyValid) continue;
+
       let bestMatch = null;
-      let bestScore = 0.3;
+      let bestScore = 0;
 
       for (const photoFile of photoFiles) {
         const photoName = path.parse(photoFile).name;
@@ -596,28 +613,35 @@ router.post('/finalize-product-images', adminAuth, async (req, res) => {
         }
       }
 
-      if (bestMatch) {
-        const ext = path.extname(bestMatch);
-        const newFilename = uuidv4() + ext;
-        const srcPath = path.join(PHOTOS_DIR, bestMatch);
-        const dstPath = path.join(UPLOADS_DIR, newFilename);
+      let srcPath = null;
+      let newFilename = null;
 
+      if (bestMatch && bestScore >= 0.3) {
+        const ext = path.extname(bestMatch);
+        newFilename = uuidv4() + ext;
+        srcPath = path.join(PHOTOS_DIR, bestMatch);
+      } else if (genericFiles.length > 0) {
+        const gf = genericFiles[genericIndex % genericFiles.length];
+        genericIndex++;
+        newFilename = uuidv4() + '.png';
+        srcPath = path.join(UPLOADS_DIR, gf);
+      }
+
+      if (srcPath && newFilename) {
+        const dstPath = path.join(UPLOADS_DIR, newFilename);
         try {
           fs.copyFileSync(srcPath, dstPath);
-          const newImages = ['/uploads/' + newFilename];
-          product.images = newImages;
+          product.images = ['/uploads/' + newFilename];
           await product.save();
           updatedCount++;
           updated.push({
             productId: product._id,
             name: product.name.substring(0, 60),
             image: '/uploads/' + newFilename,
-            matchFile: bestMatch,
-            score: bestScore,
+            matchFile: bestMatch || genericFiles[(genericIndex - 1) % genericFiles.length],
+            score: bestScore || 0,
           });
-        } catch (e) {
-          // skip
-        }
+        } catch (e) {}
       }
     }
 
@@ -625,7 +649,7 @@ router.post('/finalize-product-images', adminAuth, async (req, res) => {
       total: products.length,
       updated: updatedCount,
       details: updated,
-    }, `Updated ${updatedCount} of ${products.length} products`));
+    }, `Fixed ${updatedCount} of ${products.length} products`));
   } catch (error) {
     res.json(fail(error.message));
   }
