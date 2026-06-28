@@ -56,7 +56,7 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-dianpu', label: 'My Store', path: '/mystore' },
         { icon: 'iconfont icon-dianpufill', label: 'Products', path: '/storegoodcontrol' },
         { icon: 'iconfont icon-dingdan', label: 'Store Orders', path: '/storeordercontrol' },
-        { icon: 'iconfont icon-wuliu', label: 'Logistics', path: '/sellerlogistics' },
+        { icon: 'iconfont icon-wuliu', label: 'Logistics', path: '/sellerlogistics', hidden: !store.isAdmin },
         { icon: 'iconfont icon-shenqing', label: 'Apply Store', path: '/applystore', hidden: store.isSeller },
         { icon: 'iconfont icon-shoucang', label: 'Followed Stores', path: '/myfollowshop' },
         { icon: 'iconfont icon-ziyuanxhdpi', label: 'Wholesale', path: '/sourcegoods' },

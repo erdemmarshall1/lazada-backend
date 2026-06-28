@@ -7,9 +7,10 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seed/seeder.js",
-"seed:payment": "node seed/seedPaymentSettings.js"
+    "seed:payment": "node seed/seedPaymentSettings.js"
   },
   "dependencies": {
+    "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

@@ -158,7 +158,7 @@
           Manage Orders
           <span v-if="store.newOrderCount > 0" class="notif-badge-sm">{{ store.newOrderCount }}</span>
         </el-button>
-        <el-button type="success" @click="$router.push('/sellerlogistics')">Logistics Center</el-button>
+        <el-button v-if="store.isAdmin" type="success" @click="$router.push('/sellerlogistics')">Logistics Center</el-button>
         <el-button @click="$router.push('/applystore')">Update Store Info</el-button>
       </div>
       <div class="charts-row" style="margin-top:16px" v-if="shippingStats">

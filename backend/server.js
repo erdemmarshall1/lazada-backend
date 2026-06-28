@@ -86,6 +86,7 @@ app.use('/home/userOrder/coupon', require('./routes/coupon'));
 app.use('/home/payment', require('./routes/payment'));
 app.use('/home/payment-settings', require('./routes/paymentSettings'));
 app.use('/home/image', require('./routes/imageProxy'));
+app.use('/home/admin', require('./routes/backup'));
 
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
