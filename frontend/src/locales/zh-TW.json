@@ -1,0 +1,19 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "登錄",
+    "registerText": "註冊",
+    "myorderText": "我的訂單",
+    "gouwucheText": "購物車",
+    "shouyeText": "首頁",
+    "mymessageText": "我的消息",
+    "dianpuxiaoxiText": "店鋪消息",
+    "zhanneiXinText": "站內信",
+    "searchTipsText": "搜索商品...",
+    "guanjianziText": "請輸入關鍵詞",
+    "soushangpingText": "搜商品",
+    "soudianpuText": "搜店鋪"
+  },
+  "gongyong": { "wodexiaoxiText": "我的消息", "shoudaoxiaoxiText": "收到的消息", "dianpuxiaoxiTipsText": "店鋪消息提示" },
+  "nolist": { "nolist": "暫無數據" },
+  "jsLanguage": { "copySuccessText": "複製成功" }
+}

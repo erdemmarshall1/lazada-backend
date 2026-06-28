@@ -1,0 +1,27 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "登录",
+    "registerText": "注册",
+    "myorderText": "我的订单",
+    "gouwucheText": "购物车",
+    "shouyeText": "首页",
+    "mymessageText": "我的消息",
+    "dianpuxiaoxiText": "店铺消息",
+    "zhanneiXinText": "站内信",
+    "searchTipsText": "搜索商品...",
+    "guanjianziText": "请输入关键词",
+    "soushangpingText": "搜商品",
+    "soudianpuText": "搜店铺"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "我的消息",
+    "shoudaoxiaoxiText": "收到的消息",
+    "dianpuxiaoxiTipsText": "店铺消息提示"
+  },
+  "nolist": {
+    "nolist": "暂无数据"
+  },
+  "jsLanguage": {
+    "copySuccessText": "复制成功"
+  }
+}

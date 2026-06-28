@@ -1,0 +1,14 @@
+{
+  "name": "Shopify Wholesale",
+  "short_name": "Shopify WS",
+  "description": "Wholesale e-commerce platform powered by Shopify",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

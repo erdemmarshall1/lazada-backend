@@ -1,0 +1,44 @@
+# Local Netlify folder
+.netlify
+
+# Node
+node_modules/
+
+# Backup folders
+Full Backup/
+Lazada_Full_Backup_*/
+backup-site/
+live-site/
+
+# Zip files
+*.zip
+
+# Logs
+*.log
+image_migration_log.json
+revert_payload*.json
+all_products_names.txt
+
+# Products folder (images copied to backend/uploads/product_photos/)
+Products/
+
+# Other root files
+revert_cdn_updates.js
+Lazada_Website_Analysis.md
+Lazada.html
+Lazada_Credentials.pdf
+*.jfif
+BTC QR Code.jfif
+Wallet QR Code.jfif
+*.md
+fix.txt
+modify.txt
+fixing plus.txt
+unique_products.txt
+products_list.txt
+products_paired.txt
+products.txt
+extracted_products.json
+layout.png
+logo.svg
+favicon.png

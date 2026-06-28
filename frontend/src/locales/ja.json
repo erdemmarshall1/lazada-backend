@@ -1,0 +1,19 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "ログイン",
+    "registerText": "登録",
+    "myorderText": "注文",
+    "gouwucheText": "カート",
+    "shouyeText": "ホーム",
+    "mymessageText": "メッセージ",
+    "dianpuxiaoxiText": "ショップ通知",
+    "zhanneiXinText": "内部メッセージ",
+    "searchTipsText": "商品を検索...",
+    "guanjianziText": "キーワード",
+    "soushangpingText": "商品",
+    "soudianpuText": "ショップ"
+  },
+  "gongyong": { "wodexiaoxiText": "メッセージ", "shoudaoxiaoxiText": "受信", "dianpuxiaoxiTipsText": "ショップヒント" },
+  "nolist": { "nolist": "データなし" },
+  "jsLanguage": { "copySuccessText": "コピーしました" }
+}

@@ -1,0 +1,19 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Connexion",
+    "registerText": "Inscription",
+    "myorderText": "Mes commandes",
+    "gouwucheText": "Panier",
+    "shouyeText": "Accueil",
+    "mymessageText": "Messages",
+    "dianpuxiaoxiText": "Messages boutique",
+    "zhanneiXinText": "Messages internes",
+    "searchTipsText": "Rechercher...",
+    "guanjianziText": "Mots-clés",
+    "soushangpingText": "Produits",
+    "soudianpuText": "Boutiques"
+  },
+  "gongyong": { "wodexiaoxiText": "Mes messages", "shoudaoxiaoxiText": "Reçus", "dianpuxiaoxiTipsText": "Astuces boutique" },
+  "nolist": { "nolist": "Aucune donnée" },
+  "jsLanguage": { "copySuccessText": "Copié" }
+}

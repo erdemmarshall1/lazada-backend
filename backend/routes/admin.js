@@ -1,0 +1,634 @@
+const express = require('express');
+const router = express.Router();
+const { adminAuth } = require('../middleware/auth');
+const walletController = require('../controllers/walletController');
+const User = require('../models/User');
+const Shop = require('../models/Shop');
+const Product = require('../models/Product');
+const Transaction = require('../models/Transaction');
+const { success, fail, paginate } = require('../utils/response');
+
+// ---- Pending transactions ----
+router.get('/pending-recharges', adminAuth, walletController.adminGetPendingRecharges);
+router.get('/pending-withdraws', adminAuth, walletController.adminGetPendingWithdraws);
+router.post('/approve-transaction', adminAuth, walletController.adminApproveTransaction);
+router.post('/reject-transaction', adminAuth, walletController.adminRejectTransaction);
+
+// ---- Users ----
+router.get('/users', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      User.find().select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      User.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Shops ----
+router.get('/shops', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps, status } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const query = {};
+    if (status !== undefined && status !== '') query.status = Number(status);
+    const [list, total] = await Promise.all([
+      Shop.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Shop.countDocuments(query),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/approve-shop', adminAuth, async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndUpdate(req.body.id, { status: 1 }, { new: true });
+    if (!shop) return res.json(fail('Shop not found'));
+    await User.findByIdAndUpdate(shop.userId, { role: 'seller' });
+    res.json(success(shop, 'Shop approved'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/reject-shop', adminAuth, async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndUpdate(req.body.id, { status: 2 }, { new: true });
+    if (!shop) return res.json(fail('Shop not found'));
+    res.json(success(shop, 'Shop rejected'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Products ----
+router.get('/products', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      Product.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Product.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Transactions (all) ----
+router.get('/transactions', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      Transaction.find().populate('userId', 'username email').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Transaction.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Platform wallet ----
+router.get('/platform-wallet', adminAuth, async (req, res) => {
+  try {
+    const PlatformWallet = require('../models/PlatformWallet');
+    let pw = await PlatformWallet.findOne();
+    if (!pw) pw = await PlatformWallet.create({ balance: 0, totalRevenue: 0 });
+    res.json(success(pw));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Fix product images (download CDN → local, update DB) ----
+router.post('/fix-images', adminAuth, async (req, res) => {
+  const https = require('https');
+  const http = require('http');
+  const fs = require('fs');
+  const path = require('path');
+  const Product = require('../models/Product');
+
+  const UPLOADS = path.join(__dirname, '..', 'uploads', 'product_images');
+  if (!fs.existsSync(UPLOADS)) fs.mkdirSync(UPLOADS, { recursive: true });
+
+  const downloadImage = (url, dest) => new Promise((resolve, reject) => {
+    const mod = url.startsWith('https') ? https : http;
+    mod.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 20000 }, (resp) => {
+      if (resp.statusCode !== 200) { reject(new Error(`HTTP ${resp.statusCode}`)); return; }
+      const ext = path.extname(new URL(url).pathname).split('?')[0].toLowerCase() || '.jpg';
+      const fp = `${dest}${['.jpg','.jpeg','.png','.gif','.webp','.svg'].includes(ext) ? ext : '.jpg'}`;
+      const file = fs.createWriteStream(fp);
+      resp.pipe(file);
+      file.on('finish', () => { file.close(); resolve(fp); });
+    }).on('error', reject).on('timeout', function () { this.destroy(); reject(new Error('timeout')); });
+  });
+
+  try {
+    const products = await Product.find({});
+    let fixed = 0, skipped = 0, failed = 0;
+
+    for (const product of products) {
+      const img = product.images?.[0];
+      if (!img || img.startsWith('/uploads/') || img.startsWith('/')) { skipped++; continue; }
+      try {
+        const fp = await downloadImage(img, path.join(UPLOADS, product._id.toString()));
+        const localPath = '/uploads/product_images/' + product._id.toString() + path.extname(fp);
+        product.images = [localPath];
+        await product.save();
+        fixed++;
+      } catch (err) {
+        failed++;
+      }
+    }
+
+    res.json(success({ total: products.length, fixed, skipped, failed }, 'Image fix complete'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Batch-update product images (from scraper script output) ----
+router.post('/batch-update-images', adminAuth, async (req, res) => {
+  try {
+    const { updates } = req.body;
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return res.json(fail('updates must be a non-empty array of { productId, images }'));
+    }
+    let ok = 0, failCount = 0;
+    for (const u of updates) {
+      if (!u.productId || !Array.isArray(u.images)) { failCount++; continue; }
+      const r = await Product.findByIdAndUpdate(
+        u.productId,
+        { $set: { images: u.images } },
+        { new: false }
+      );
+      if (r) ok++; else failCount++;
+    }
+    res.json(success({ total: updates.length, ok, fail: failCount }, `Updated ${ok} products`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Set profit percentage on all wholesale products ----
+router.post('/set-profit-percentage', adminAuth, async (req, res) => {
+  try {
+    const { percentage = 20 } = req.body;
+    const result = await Product.updateMany(
+      { profitPercentage: { $exists: false } },
+      { $set: { profitPercentage: Number(percentage) } }
+    );
+    res.json(success({ modified: result.modifiedCount }, `Profit percentage set to ${percentage}%`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Delete product (admin) ----
+router.post('/delete-product', adminAuth, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.json(fail('productId required'));
+    const r = await Product.findByIdAndDelete(productId);
+    if (!r) return res.json(fail('Product not found'));
+    res.json(success(null, 'Product deleted'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Toggle product status (admin bypasses shop ownership check) ----
+router.post('/toggle-product-status', adminAuth, async (req, res) => {
+  try {
+    const { productId, status } = req.body;
+    if (!productId || status === undefined) return res.json(fail('productId and status required'));
+    const product = await Product.findByIdAndUpdate(productId, { status }, { new: true });
+    if (!product) return res.json(fail('Product not found'));
+    res.json(success(product, status === 1 ? 'Product activated' : 'Product deactivated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Add product (admin creates wholesale product) ----
+router.post('/add-product', adminAuth, async (req, res) => {
+  try {
+    const { name, description, images, categoryId, shopId, skus } = req.body;
+    if (!name) return res.json(fail('Product name is required'));
+    if (!categoryId) return res.json(fail('Category is required'));
+    let targetShopId = shopId;
+    if (!targetShopId) {
+      const shop = await Shop.findOne({ status: 1 }).sort({ createdAt: 1 });
+      if (!shop) return res.json(fail('No approved shop found. Create a shop first.'));
+      targetShopId = shop._id;
+    }
+    const productSkus = skus && skus.length > 0 ? skus : [{ price: 0, stock: 100, attrs: [] }];
+    const prices = productSkus.map(s => s.price);
+    const product = await Product.create({
+      name,
+      description: description || '',
+      images: images || [],
+      categoryId,
+      shopId: targetShopId,
+      skus: productSkus,
+      minPrice: Math.min(...prices),
+      maxPrice: Math.max(...prices),
+      originalPrice: Math.max(...prices),
+      status: 1,
+    });
+    await Shop.findByIdAndUpdate(targetShopId, { $inc: { productCount: 1 } });
+    res.json(success(product, 'Product created'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Update product (admin bypasses shop ownership check) ----
+router.post('/update-product', adminAuth, async (req, res) => {
+  try {
+    const { id, ...data } = req.body;
+    if (!id) return res.json(fail('id required'));
+    if (data.skus && data.skus.length > 0) {
+      const prices = data.skus.map(s => s.price);
+      data.minPrice = Math.min(...prices);
+      data.maxPrice = Math.max(...prices);
+    }
+    const product = await Product.findByIdAndUpdate(id, data, { new: true });
+    if (!product) return res.json(fail('Product not found'));
+    res.json(success(product, 'Product updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Update banners (admin) ----
+router.post('/update-banners', adminAuth, async (req, res) => {
+  try {
+    const Banner = require('../models/Banner');
+    const { banners } = req.body;
+    if (!Array.isArray(banners)) return res.json(fail('banners must be an array'));
+    let ok = 0, failCount = 0;
+    for (const b of banners) {
+      if (!b._id) { failCount++; continue; }
+      const update = {};
+      if (b.image !== undefined) update.image = b.image;
+      if (b.title !== undefined) update.title = b.title;
+      if (b.link !== undefined) update.link = b.link;
+      const r = await Banner.findByIdAndUpdate(b._id, { $set: update }, { new: false });
+      if (r) ok++; else failCount++;
+    }
+    res.json(success({ total: banners.length, ok, fail: failCount }, `Updated ${ok} banners`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Bulk import products (admin) ----
+router.post('/bulk-import-products', adminAuth, async (req, res) => {
+  try {
+    const Shop = require('../models/Shop');
+    let { products, shopId } = req.body;
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.json(fail('products must be a non-empty array'));
+    }
+    if (!shopId) {
+      const shop = await Shop.findOne({ status: 1 }).sort({ createdAt: 1 });
+      if (!shop) return res.json(fail('No approved shop found. Provide a shopId.'));
+      shopId = shop._id;
+    }
+    let created = 0, failed = 0;
+    const batch = [];
+    for (const p of products) {
+      if (!p.name || !p.categoryId) { failed++; continue; }
+      const prices = (p.skus || []).map(s => s.price);
+      batch.push({
+        name: p.name,
+        description: p.description || '',
+        images: p.images || [],
+        categoryId: p.categoryId,
+        shopId,
+        skus: p.skus || [{ price: p.price || 0, stock: p.stock || 100, attrs: [] }],
+        minPrice: prices.length > 0 ? Math.min(...prices) : (p.price || 0),
+        maxPrice: prices.length > 0 ? Math.max(...prices) : (p.price || 0),
+        originalPrice: p.originalPrice || 0,
+        salesCount: p.salesCount || 0,
+        reviewCount: p.reviewCount || 0,
+        rating: p.rating || 5,
+        tags: p.tags || [],
+        status: 1,
+        isHot: !!p.isHot,
+        isRecommended: !!p.isRecommended,
+      });
+    }
+    if (batch.length > 0) {
+      const inserted = await Product.insertMany(batch);
+      created = inserted.length;
+      await Shop.findByIdAndUpdate(shopId, { $inc: { productCount: created } });
+    }
+    res.json(success({ total: products.length, created, failed }, `Imported ${created} products`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Category management ----
+const Category = require('../models/Category');
+
+router.get('/categories', adminAuth, async (req, res) => {
+  try {
+    const list = await Category.find().sort({ sort: 1 });
+    res.json(success(list));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/add-electronics-subcategories', adminAuth, async (req, res) => {
+  try {
+    const Category = require('../models/Category');
+    const electronics = await Category.findOne({ name: 'Electronics', level: 1 });
+    if (!electronics) return res.json(fail('Electronics category not found'));
+    const existing = await Category.find({ parentId: electronics._id });
+    const existingNames = existing.map(c => c.name);
+    const subCats = ['Speakers', 'Apple Watch', 'Bluetooth Speakers', 'Television']
+      .filter(name => !existingNames.includes(name))
+      .map((name, i) => ({
+        name, parentId: electronics._id, level: 2,
+        sort: existing.length + i + 1, status: 1,
+      }));
+    if (subCats.length > 0) {
+      await Category.insertMany(subCats);
+      res.json(success(subCats, `Added ${subCats.length} sub-categories under Electronics`));
+    } else {
+      res.json(success([], 'All sub-categories already exist'));
+    }
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/add-category', adminAuth, async (req, res) => {
+  try {
+    const { name, parentId, level, icon, image, sort } = req.body;
+    if (!name) return res.json(fail('Category name is required'));
+    const cat = await Category.create({
+      name,
+      parentId: parentId || null,
+      level: level || (parentId ? 2 : 1),
+      icon: icon || '',
+      image: image || '',
+      sort: sort || 0,
+      status: 1,
+    });
+    res.json(success(cat, 'Category created'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Invitation Codes ----
+const InvitationCode = require('../models/InvitationCode');
+
+router.get('/invitation-codes', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      InvitationCode.find().populate('usedBy', 'name').populate('createdBy', 'username').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      InvitationCode.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/invitation-codes/generate', adminAuth, async (req, res) => {
+  try {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const doc = await InvitationCode.create({ code, createdBy: req.user._id });
+    res.json(success(doc, 'Invitation code generated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.patch('/invitation-codes/:id/deactivate', adminAuth, async (req, res) => {
+  try {
+    const doc = await InvitationCode.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    if (!doc) return res.json(fail('Code not found'));
+    res.json(success(doc, 'Code deactivated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Payment Settings ----
+const PaymentSetting = require('../models/PaymentSetting');
+
+router.get('/payment-settings', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      PaymentSetting.find().sort({ sort: 1, createdAt: -1 }).skip(skip).limit(limit),
+      PaymentSetting.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/payment-settings', adminAuth, async (req, res) => {
+  try {
+    const { method, label, walletAddress, isActive, sort } = req.body;
+    if (!method || !label) return res.json(fail('Method and label are required'));
+    const existing = await PaymentSetting.findOne({ method });
+    if (existing) return res.json(fail('Payment method already exists'));
+    const doc = await PaymentSetting.create({ method, label, walletAddress, isActive, sort });
+    res.json(success(doc, 'Payment setting created'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/payment-settings/:id', adminAuth, async (req, res) => {
+  try {
+    const { method, label, walletAddress, isActive, sort } = req.body;
+    const update = {};
+    if (method !== undefined) update.method = method;
+    if (label !== undefined) update.label = label;
+    if (walletAddress !== undefined) update.walletAddress = walletAddress;
+    if (isActive !== undefined) update.isActive = isActive;
+    if (sort !== undefined) update.sort = sort;
+    const doc = await PaymentSetting.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!doc) return res.json(fail('Payment setting not found'));
+    res.json(success(doc, 'Payment setting updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.delete('/payment-settings/:id', adminAuth, async (req, res) => {
+  try {
+    const doc = await PaymentSetting.findByIdAndDelete(req.params.id);
+    if (!doc) return res.json(fail('Payment setting not found'));
+    res.json(success(null, 'Payment setting deleted'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Email Settings ----
+const EmailSetting = require('../models/EmailSetting');
+const emailService = require('../services/emailService');
+
+router.get('/email-settings', adminAuth, async (req, res) => {
+  try {
+    let settings = await EmailSetting.findOne();
+    if (!settings) {
+      settings = await EmailSetting.create({});
+    }
+    res.json(success(settings));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/email-settings', adminAuth, async (req, res) => {
+  try {
+    const allowed = ['host','port','user','pass','fromName','fromEmail','sendOrderConfirmation','sendPaymentConfirmation','sendShippingUpdate','sendRefundNotification'];
+    const update = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) update[key] = req.body[key];
+    }
+    let settings = await EmailSetting.findOne();
+    if (!settings) {
+      settings = await EmailSetting.create(update);
+    } else {
+      Object.assign(settings, update);
+      await settings.save();
+    }
+    emailService.clearTransporterCache();
+    res.json(success(settings, 'Email settings updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- TEMPORARY: Finalize product images from product_photos folder ----
+router.post('/finalize-product-images', adminAuth, async (req, res) => {
+  try {
+    const { v4: uuidv4 } = require('uuid');
+    const fs = require('fs');
+    const path = require('path');
+    const Product = require('../models/Product');
+
+    const PHOTOS_DIR = path.join(__dirname, '..', 'uploads', 'product_photos');
+    const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+
+    function normalize(s) {
+      return s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    const stopWords = new Set([
+      'the','and','for','with','new','from','this','that','have','not',
+      'are','was','but','all','can','has','its','our','you','your',
+      'size','color','inch','xxx','xxl','xl','xs','s','m','l',
+      'black','white','red','blue','green','gold','silver','pink',
+      'style','type','high','quality','best','hot','sale','new',
+      'design','fashion','brand','genuine','original','premium',
+      'leather','fabric','cotton','polyester','nylon','wool',
+      'women','men','kids','girl','boy','adult',
+      '1','2','3','4','5','free','shipping',
+    ]);
+
+    function getKeywords(s) {
+      return normalize(s).split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+    }
+
+    function matchScore(productName, imageName) {
+      const pWords = getKeywords(productName);
+      const iWords = getKeywords(imageName);
+      if (pWords.length === 0 || iWords.length === 0) return 0;
+      const common = pWords.filter(w => iWords.includes(w));
+      if (common.length === 0) return 0;
+      const score = common.length / Math.max(pWords.length, iWords.length);
+      const brandBonus = iWords.includes(pWords[0]) ? 0.3 : 0;
+      return score + brandBonus;
+    }
+
+    let photoFiles = [];
+    try {
+      photoFiles = fs.readdirSync(PHOTOS_DIR).filter(f => /\.(webp|png|jpg|jpeg|avif|jfif|gif)$/i.test(f));
+    } catch (e) {
+      return res.json(fail('product_photos directory not found'));
+    }
+
+    const products = await Product.find({});
+    const updated = [];
+    let updatedCount = 0;
+
+    for (const product of products) {
+      let bestMatch = null;
+      let bestScore = 0.3;
+
+      for (const photoFile of photoFiles) {
+        const photoName = path.parse(photoFile).name;
+        const score = matchScore(product.name, photoName);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = photoFile;
+        }
+      }
+
+      if (bestMatch) {
+        const ext = path.extname(bestMatch);
+        const newFilename = uuidv4() + ext;
+        const srcPath = path.join(PHOTOS_DIR, bestMatch);
+        const dstPath = path.join(UPLOADS_DIR, newFilename);
+
+        try {
+          fs.copyFileSync(srcPath, dstPath);
+          const newImages = ['/uploads/' + newFilename];
+          product.images = newImages;
+          await product.save();
+          updatedCount++;
+          updated.push({
+            productId: product._id,
+            name: product.name.substring(0, 60),
+            image: '/uploads/' + newFilename,
+            matchFile: bestMatch,
+            score: bestScore,
+          });
+        } catch (e) {
+          // skip
+        }
+      }
+    }
+
+    res.json(success({
+      total: products.length,
+      updated: updatedCount,
+      details: updated,
+    }, `Updated ${updatedCount} of ${products.length} products`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+module.exports = router;

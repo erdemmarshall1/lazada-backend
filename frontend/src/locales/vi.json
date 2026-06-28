@@ -1,0 +1,19 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Đăng nhập",
+    "registerText": "Đăng ký",
+    "myorderText": "Đơn hàng",
+    "gouwucheText": "Giỏ hàng",
+    "shouyeText": "Trang chủ",
+    "mymessageText": "Tin nhắn",
+    "dianpuxiaoxiText": "Tin cửa hàng",
+    "zhanneiXinText": "Nội bộ",
+    "searchTipsText": "Tìm kiếm...",
+    "guanjianziText": "Nhập từ khóa",
+    "soushangpingText": "Sản phẩm",
+    "soudianpuText": "Cửa hàng"
+  },
+  "gongyong": { "wodexiaoxiText": "Tin nhắn", "shoudaoxiaoxiText": "Đã nhận", "dianpuxiaoxiTipsText": "Tin cửa hàng" },
+  "nolist": { "nolist": "Không có dữ liệu" },
+  "jsLanguage": { "copySuccessText": "Đã sao chép" }
+}

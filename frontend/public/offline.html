@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline - Shopify Wholesale</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      background: #121212;
+      color: #fff;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 24px;
+    }
+    h2 { font-size: 24px; margin-bottom: 8px; color: #fff; }
+    p { color: #aaa; margin-bottom: 24px; font-size: 14px; line-height: 1.5; }
+    button {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 6px;
+      background: #95BF47;
+      color: #121212;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    button:hover { background: #7fa33a; }
+  </style>
+</head>
+<body>
+  <img class="logo" src="/img/logo.svg" alt="Shopify Wholesale">
+  <h2>You are offline</h2>
+  <p>Please check your internet connection<br>and try again.</p>
+  <button onclick="location.reload()">Retry</button>
+</body>
+</html>
