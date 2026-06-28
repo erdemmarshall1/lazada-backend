@@ -655,4 +655,76 @@ router.post('/finalize-product-images', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Remap all product images to generic product_X.png files that exist on disk ----
+router.post('/fix-product-images-generic', adminAuth, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const Product = require('../models/Product');
+
+    const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+
+    // Discover which generic product_X.png files actually exist
+    const genericFiles = [];
+    for (let i = 0; ; i++) {
+      const p = path.join(UPLOADS_DIR, `product_${i}.png`);
+      try { fs.accessSync(p); genericFiles.push(`product_${i}.png`); }
+      catch { break; }
+    }
+
+    if (genericFiles.length === 0) {
+      return res.json(fail('No generic product images found'));
+    }
+
+    const products = await Product.find({
+      images: { $exists: true, $ne: [] },
+      $or: [
+        { 'images.0': { $regex: /^\/uploads\/[0-9a-f-]+\.(png|jpg|jpeg|webp)$/ } },
+      ]
+    });
+
+    const updated = [];
+    let updatedCount = 0;
+    let genericIndex = 0;
+
+    for (const product of products) {
+      const oldImage = product.images?.[0];
+      if (!oldImage) continue;
+
+      // Check if this is a UUID-based local path
+      const match = oldImage.match(/^\/uploads\/([0-9a-f-]+)\.(png|jpg|jpeg|webp)$/);
+      if (!match) continue;
+
+      // Check if the referenced file actually exists
+      const filePath = path.join(UPLOADS_DIR, match[1] + '.' + match[2]);
+      try {
+        fs.accessSync(filePath);
+        continue; // file exists, skip
+      } catch {}
+
+      // Replace with a generic product image
+      const gf = genericFiles[genericIndex % genericFiles.length];
+      genericIndex++;
+      product.images = ['/uploads/' + gf];
+      await product.save();
+      updatedCount++;
+      updated.push({
+        productId: product._id,
+        name: product.name.substring(0, 60),
+        oldImage,
+        newImage: '/uploads/' + gf,
+      });
+    }
+
+    res.json(success({
+      total: products.length,
+      updated: updatedCount,
+      genericFilesAvailable: genericFiles.length,
+      details: updated,
+    }, `Fixed ${updatedCount} of ${products.length} products with missing images`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 module.exports = router;
