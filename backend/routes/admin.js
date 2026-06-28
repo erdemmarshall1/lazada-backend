@@ -727,4 +727,46 @@ router.post('/fix-product-images-generic', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Batch update product images from pre-computed mappings ----
+router.post('/batch-update-images', adminAuth, async (req, res) => {
+  try {
+    const Product = require('../models/Product');
+    const { mappings } = req.body || {};
+    if (!mappings || !Array.isArray(mappings) || mappings.length === 0) {
+      return res.json(fail('mappings array required'));
+    }
+
+    const results = [];
+    let updated = 0;
+    let errors = 0;
+
+    for (const item of mappings) {
+      try {
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          results.push({ productId: item.productId, status: 'not_found' });
+          errors++;
+          continue;
+        }
+        product.images = [item.newImage];
+        await product.save();
+        results.push({ productId: item.productId, status: 'ok', name: product.name.substring(0, 50), newImage: item.newImage });
+        updated++;
+      } catch (e) {
+        results.push({ productId: item.productId, status: 'error', error: e.message });
+        errors++;
+      }
+    }
+
+    res.json(success({
+      total: mappings.length,
+      updated,
+      errors,
+      results,
+    }, `Updated ${updated} of ${mappings.length} product images`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 module.exports = router;
