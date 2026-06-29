@@ -116,7 +116,10 @@ router.get('/platform-wallet/history', adminAuth, async (req, res) => {
     const { page: p, pageSize: ps } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const [list, total] = await Promise.all([
-      PlatformTransaction.find().populate('performedBy', 'username email').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      PlatformTransaction.find()
+        .populate('performedBy', 'username email')
+        .populate('recipientId', 'username email')
+        .sort({ createdAt: -1 }).skip(skip).limit(limit),
       PlatformTransaction.countDocuments(),
     ]);
     res.json(success({ list, total, page, pageSize }));
@@ -129,24 +132,43 @@ router.post('/platform-wallet/credit', adminAuth, async (req, res) => {
   try {
     const PlatformWallet = require('../models/PlatformWallet');
     const PlatformTransaction = require('../models/PlatformTransaction');
-    const { amount, description } = req.body;
+    const Wallet = require('../models/Wallet');
+    const Transaction = require('../models/Transaction');
+    const User = require('../models/User');
+    const { userId, amount, description } = req.body;
+    if (!userId) return res.json(fail('Seller userId is required'));
     const num = Number(amount);
     if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    const seller = await User.findById(userId);
+    if (!seller) return res.json(fail('Seller not found'));
     let pw = await PlatformWallet.findOne();
     if (!pw) pw = await PlatformWallet.create({ balance: 0, totalRevenue: 0 });
-    const balanceBefore = pw.balance;
-    const escrowBefore = pw.escrowBalance;
-    pw.balance += num;
-    pw.totalRevenue += num;
+    if (pw.balance < num) return res.json(fail('Insufficient platform balance'));
+    let sellerWallet = await Wallet.findOne({ userId });
+    if (!sellerWallet) sellerWallet = await Wallet.create({ userId, balance: 0 });
+    const pwBalanceBefore = pw.balance;
+    const pwEscrowBefore = pw.escrowBalance;
+    const sellerBalanceBefore = sellerWallet.balance;
+    pw.balance -= num;
     await pw.save();
+    sellerWallet.balance += num;
+    sellerWallet.totalEarned = (sellerWallet.totalEarned || 0) + num;
+    await sellerWallet.save();
     await PlatformTransaction.create({
       type: 'credit', amount: num,
-      balanceBefore, balanceAfter: pw.balance,
-      escrowBefore, escrowAfter: pw.escrowBalance,
-      description: description || 'Admin platform wallet credit',
-      performedBy: req.user._id,
+      balanceBefore: pwBalanceBefore, balanceAfter: pw.balance,
+      escrowBefore: pwEscrowBefore, escrowAfter: pw.escrowBalance,
+      description: description || 'Platform credit to seller',
+      performedBy: req.user._id, recipientId: userId,
     });
-    res.json(success(pw, `Credited $${num} to platform wallet`));
+    await Transaction.create({
+      userId, type: 'admin', amount: num,
+      balanceBefore: sellerBalanceBefore,
+      balanceAfter: sellerWallet.balance,
+      status: 1,
+      description: description ? `Platform credit: ${description}` : 'Platform credit to seller',
+    });
+    res.json(success({ platform: pw, seller: sellerWallet }, `Credited $${num} from platform to ${seller.username}`));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -156,24 +178,43 @@ router.post('/platform-wallet/debit', adminAuth, async (req, res) => {
   try {
     const PlatformWallet = require('../models/PlatformWallet');
     const PlatformTransaction = require('../models/PlatformTransaction');
-    const { amount, description } = req.body;
+    const Wallet = require('../models/Wallet');
+    const Transaction = require('../models/Transaction');
+    const User = require('../models/User');
+    const { userId, amount, description } = req.body;
+    if (!userId) return res.json(fail('Seller userId is required'));
     const num = Number(amount);
     if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    const seller = await User.findById(userId);
+    if (!seller) return res.json(fail('Seller not found'));
     let pw = await PlatformWallet.findOne();
-    if (!pw) return res.json(fail('Platform wallet not found'));
-    if (pw.balance < num) return res.json(fail('Insufficient platform balance'));
-    const balanceBefore = pw.balance;
-    const escrowBefore = pw.escrowBalance;
-    pw.balance -= num;
+    if (!pw) pw = await PlatformWallet.create({ balance: 0, totalRevenue: 0 });
+    let sellerWallet = await Wallet.findOne({ userId });
+    if (!sellerWallet) return res.json(fail('Seller has no wallet'));
+    if (sellerWallet.balance < num) return res.json(fail('Insufficient seller balance'));
+    const pwBalanceBefore = pw.balance;
+    const pwEscrowBefore = pw.escrowBalance;
+    const sellerBalanceBefore = sellerWallet.balance;
+    pw.balance += num;
     await pw.save();
+    sellerWallet.balance -= num;
+    sellerWallet.totalSpent = (sellerWallet.totalSpent || 0) + num;
+    await sellerWallet.save();
     await PlatformTransaction.create({
       type: 'debit', amount: num,
-      balanceBefore, balanceAfter: pw.balance,
-      escrowBefore, escrowAfter: pw.escrowBalance,
-      description: description || 'Admin platform wallet debit',
-      performedBy: req.user._id,
+      balanceBefore: pwBalanceBefore, balanceAfter: pw.balance,
+      escrowBefore: pwEscrowBefore, escrowAfter: pw.escrowBalance,
+      description: description || 'Platform debit from seller',
+      performedBy: req.user._id, recipientId: userId,
     });
-    res.json(success(pw, `Debited $${num} from platform wallet`));
+    await Transaction.create({
+      userId, type: 'admin', amount: -num,
+      balanceBefore: sellerBalanceBefore,
+      balanceAfter: sellerWallet.balance,
+      status: 1,
+      description: description ? `Platform debit: ${description}` : 'Platform debit from seller',
+    });
+    res.json(success({ platform: pw, seller: sellerWallet }, `Debited $${num} from ${seller.username} to platform`));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -842,9 +883,10 @@ router.post('/batch-update-images', adminAuth, async (req, res) => {
 // ---- Balance Management (admin credit/debit) ----
 router.get('/balance/users', adminAuth, async (req, res) => {
   try {
-    const { keyword, page: p, pageSize: ps } = req.query;
+    const { keyword, role, page: p, pageSize: ps } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const query = {};
+    if (role) query.role = role;
     if (keyword) {
       const re = new RegExp(keyword, 'i');
       query.$or = [{ username: re }, { email: re }];

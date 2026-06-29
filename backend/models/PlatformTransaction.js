@@ -9,6 +9,7 @@ const platformTransactionSchema = new mongoose.Schema({
   escrowAfter: { type: Number, default: 0 },
   description: { type: String, default: '' },
   performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  recipientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('PlatformTransaction', platformTransactionSchema);
