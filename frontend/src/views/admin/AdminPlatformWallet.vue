@@ -65,8 +65,11 @@
             <el-form-item label="Amount (USD)">
               <el-input-number v-model="creditAmount" :min="0.01" :max="maxCredit" :precision="2" :step="10" style="width:100%" />
             </el-form-item>
-            <el-form-item label="Description / Reason">
-              <el-input v-model="creditDescription" type="textarea" :rows="2" placeholder="Reason for crediting this seller..." />
+            <el-form-item label="Title">
+              <el-input v-model="creditTitle" placeholder="e.g. Bonus, Commission, Promotion..." />
+            </el-form-item>
+            <el-form-item label="Description">
+              <el-input v-model="creditDescription" type="textarea" :rows="2" placeholder="Additional details for this credit..." />
             </el-form-item>
             <el-button type="success" :loading="crediting" @click="doCredit" :disabled="creditAmount <= 0 || creditAmount > maxCredit">Transfer ${{ creditAmount }} to Seller</el-button>
           </el-form>
@@ -79,8 +82,11 @@
             <el-form-item label="Amount (USD)">
               <el-input-number v-model="debitAmount" :min="0.01" :max="maxDebitSeller" :precision="2" :step="10" style="width:100%" />
             </el-form-item>
-            <el-form-item label="Description / Reason">
-              <el-input v-model="debitDescription" type="textarea" :rows="2" placeholder="Reason for debiting this seller..." />
+            <el-form-item label="Title">
+              <el-input v-model="debitTitle" placeholder="e.g. Fee, Adjustment, Penalty..." />
+            </el-form-item>
+            <el-form-item label="Description">
+              <el-input v-model="debitDescription" type="textarea" :rows="2" placeholder="Additional details for this debit..." />
             </el-form-item>
             <el-button type="danger" :loading="debiting" @click="doDebit" :disabled="debitAmount <= 0 || debitAmount > maxDebitSeller">Transfer ${{ debitAmount }} from Seller</el-button>
           </el-form>
@@ -116,6 +122,9 @@
           </el-table-column>
           <el-table-column label="Recipient / Source">
             <template #default="{row}">{{ row.recipientId?.username || row.recipientId?.email || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="Title" min-width="140">
+            <template #default="{row}">{{ row.title || '-' }}</template>
           </el-table-column>
           <el-table-column label="Platform Balance">
             <template #default="{row}">${{ row.balanceAfter?.toFixed(2) }}</template>
@@ -155,11 +164,13 @@ const selectedSeller = ref(null)
 
 // Credit form
 const creditAmount = ref(100)
+const creditTitle = ref('')
 const creditDescription = ref('')
 const crediting = ref(false)
 
 // Debit form
 const debitAmount = ref(50)
+const debitTitle = ref('')
 const debitDescription = ref('')
 const debiting = ref(false)
 
@@ -210,14 +221,17 @@ const doCredit = async () => {
   const res = await qe(post('/home/admin/platform-wallet/credit', {
     userId: selectedSeller.value._id,
     amount: creditAmount.value,
+    title: creditTitle.value,
     description: creditDescription.value,
   }))
   crediting.value = false
   if (res) {
     ElMessage.success(res.msg || 'Credit successful')
     selectedSeller.value.balance = (selectedSeller.value.balance || 0) + Number(creditAmount.value)
-    lastActionMsg.value = `${new Date().toLocaleString()} — Credited $${creditAmount.value} to ${selectedSeller.value.username} (${creditDescription.value || 'no description'})`
+    const titleTag = creditTitle.value ? `[${creditTitle.value}] ` : ''
+    lastActionMsg.value = `${new Date().toLocaleString()} — ${titleTag}Credited $${creditAmount.value} to ${selectedSeller.value.username}`
     creditAmount.value = 100
+    creditTitle.value = ''
     creditDescription.value = ''
     fetchPlatformWallet()
     fetchHistory()
@@ -234,14 +248,17 @@ const doDebit = async () => {
   const res = await qe(post('/home/admin/platform-wallet/debit', {
     userId: selectedSeller.value._id,
     amount: debitAmount.value,
+    title: debitTitle.value,
     description: debitDescription.value,
   }))
   debiting.value = false
   if (res) {
     ElMessage.success(res.msg || 'Debit successful')
     selectedSeller.value.balance = (selectedSeller.value.balance || 0) - Number(debitAmount.value)
-    lastActionMsg.value = `${new Date().toLocaleString()} — Debited $${debitAmount.value} from ${selectedSeller.value.username} (${debitDescription.value || 'no description'})`
+    const titleTag = debitTitle.value ? `[${debitTitle.value}] ` : ''
+    lastActionMsg.value = `${new Date().toLocaleString()} — ${titleTag}Debited $${debitAmount.value} from ${selectedSeller.value.username}`
     debitAmount.value = 50
+    debitTitle.value = ''
     debitDescription.value = ''
     fetchPlatformWallet()
     fetchHistory()

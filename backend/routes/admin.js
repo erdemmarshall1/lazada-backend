@@ -135,7 +135,7 @@ router.post('/platform-wallet/credit', adminAuth, async (req, res) => {
     const Wallet = require('../models/Wallet');
     const Transaction = require('../models/Transaction');
     const User = require('../models/User');
-    const { userId, amount, description } = req.body;
+    const { userId, amount, title, description } = req.body;
     if (!userId) return res.json(fail('Seller userId is required'));
     const num = Number(amount);
     if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
@@ -154,11 +154,14 @@ router.post('/platform-wallet/credit', adminAuth, async (req, res) => {
     sellerWallet.balance += num;
     sellerWallet.totalEarned = (sellerWallet.totalEarned || 0) + num;
     await sellerWallet.save();
+    const txTitle = (title || '').trim();
+    const txDesc = description || '';
+    const combinedDesc = txTitle ? (txDesc ? `${txTitle}: ${txDesc}` : txTitle) : (txDesc || 'Platform credit to seller');
     await PlatformTransaction.create({
-      type: 'credit', amount: num,
+      type: 'credit', amount: num, title: txTitle,
       balanceBefore: pwBalanceBefore, balanceAfter: pw.balance,
       escrowBefore: pwEscrowBefore, escrowAfter: pw.escrowBalance,
-      description: description || 'Platform credit to seller',
+      description: combinedDesc,
       performedBy: req.user._id, recipientId: userId,
     });
     await Transaction.create({
@@ -166,9 +169,9 @@ router.post('/platform-wallet/credit', adminAuth, async (req, res) => {
       balanceBefore: sellerBalanceBefore,
       balanceAfter: sellerWallet.balance,
       status: 1,
-      description: description ? `Platform credit: ${description}` : 'Platform credit to seller',
+      description: combinedDesc,
     });
-    res.json(success({ platform: pw, seller: sellerWallet }, `Credited $${num} from platform to ${seller.username}`));
+    res.json(success({ platform: pw, seller: sellerWallet }, `Credited $${num} to ${seller.username}`));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -181,7 +184,7 @@ router.post('/platform-wallet/debit', adminAuth, async (req, res) => {
     const Wallet = require('../models/Wallet');
     const Transaction = require('../models/Transaction');
     const User = require('../models/User');
-    const { userId, amount, description } = req.body;
+    const { userId, amount, title, description } = req.body;
     if (!userId) return res.json(fail('Seller userId is required'));
     const num = Number(amount);
     if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
@@ -200,11 +203,14 @@ router.post('/platform-wallet/debit', adminAuth, async (req, res) => {
     sellerWallet.balance -= num;
     sellerWallet.totalSpent = (sellerWallet.totalSpent || 0) + num;
     await sellerWallet.save();
+    const txTitle = (title || '').trim();
+    const txDesc = description || '';
+    const combinedDesc = txTitle ? (txDesc ? `${txTitle}: ${txDesc}` : txTitle) : (txDesc || 'Platform debit from seller');
     await PlatformTransaction.create({
-      type: 'debit', amount: num,
+      type: 'debit', amount: num, title: txTitle,
       balanceBefore: pwBalanceBefore, balanceAfter: pw.balance,
       escrowBefore: pwEscrowBefore, escrowAfter: pw.escrowBalance,
-      description: description || 'Platform debit from seller',
+      description: combinedDesc,
       performedBy: req.user._id, recipientId: userId,
     });
     await Transaction.create({
@@ -212,9 +218,9 @@ router.post('/platform-wallet/debit', adminAuth, async (req, res) => {
       balanceBefore: sellerBalanceBefore,
       balanceAfter: sellerWallet.balance,
       status: 1,
-      description: description ? `Platform debit: ${description}` : 'Platform debit from seller',
+      description: combinedDesc,
     });
-    res.json(success({ platform: pw, seller: sellerWallet }, `Debited $${num} from ${seller.username} to platform`));
+    res.json(success({ platform: pw, seller: sellerWallet }, `Debited $${num} from ${seller.username}`));
   } catch (error) {
     res.json(fail(error.message));
   }
