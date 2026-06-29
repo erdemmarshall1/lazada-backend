@@ -66,6 +66,8 @@ const routes = [
           { path: '/admin-invitation-codes', name: 'admin-invitation-codes', component: () => import('@/views/admin/AdminInvitationCodes.vue'), meta: { title: 'Invitation Codes', requiresAuth: true } },
           { path: '/admin-payment-settings', name: 'admin-payment-settings', component: () => import('@/views/admin/AdminPaymentSettings.vue'), meta: { title: 'Payment Settings', requiresAuth: true } },
           { path: '/admin-email-settings', name: 'admin-email-settings', component: () => import('@/views/admin/AdminEmailSettings.vue'), meta: { title: 'Email Settings', requiresAuth: true } },
+          { path: '/admin-balance', name: 'admin-balance', component: () => import('@/views/admin/AdminBalanceManagement.vue'), meta: { title: 'Balance Management', requiresAuth: true } },
+          { path: '/admin-platform-wallet', name: 'admin-platform-wallet', component: () => import('@/views/admin/AdminPlatformWallet.vue'), meta: { title: 'Platform Wallet', requiresAuth: true } },
         ],
       },
     ],

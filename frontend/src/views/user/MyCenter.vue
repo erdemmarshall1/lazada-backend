@@ -82,6 +82,8 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-anquan', label: 'Invitation Codes', path: '/admin-invitation-codes' },
         { icon: 'iconfont icon-shezhi', label: 'Payment Settings', path: '/admin-payment-settings' },
         { icon: 'iconfont icon-email', label: 'Email Settings', path: '/admin-email-settings' },
+        { icon: 'iconfont icon-qianbao', label: 'Balance Mgmt', path: '/admin-balance' },
+        { icon: 'iconfont icon-yue', label: 'Platform Wallet', path: '/admin-platform-wallet' },
       ]
     })
   }

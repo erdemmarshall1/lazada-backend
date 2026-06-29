@@ -109,6 +109,76 @@ router.get('/platform-wallet', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Platform wallet management (credit / debit / history) ----
+router.get('/platform-wallet/history', adminAuth, async (req, res) => {
+  try {
+    const PlatformTransaction = require('../models/PlatformTransaction');
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      PlatformTransaction.find().populate('performedBy', 'username email').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      PlatformTransaction.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/platform-wallet/credit', adminAuth, async (req, res) => {
+  try {
+    const PlatformWallet = require('../models/PlatformWallet');
+    const PlatformTransaction = require('../models/PlatformTransaction');
+    const { amount, description } = req.body;
+    const num = Number(amount);
+    if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    let pw = await PlatformWallet.findOne();
+    if (!pw) pw = await PlatformWallet.create({ balance: 0, totalRevenue: 0 });
+    const balanceBefore = pw.balance;
+    const escrowBefore = pw.escrowBalance;
+    pw.balance += num;
+    pw.totalRevenue += num;
+    await pw.save();
+    await PlatformTransaction.create({
+      type: 'credit', amount: num,
+      balanceBefore, balanceAfter: pw.balance,
+      escrowBefore, escrowAfter: pw.escrowBalance,
+      description: description || 'Admin platform wallet credit',
+      performedBy: req.user._id,
+    });
+    res.json(success(pw, `Credited $${num} to platform wallet`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/platform-wallet/debit', adminAuth, async (req, res) => {
+  try {
+    const PlatformWallet = require('../models/PlatformWallet');
+    const PlatformTransaction = require('../models/PlatformTransaction');
+    const { amount, description } = req.body;
+    const num = Number(amount);
+    if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    let pw = await PlatformWallet.findOne();
+    if (!pw) return res.json(fail('Platform wallet not found'));
+    if (pw.balance < num) return res.json(fail('Insufficient platform balance'));
+    const balanceBefore = pw.balance;
+    const escrowBefore = pw.escrowBalance;
+    pw.balance -= num;
+    await pw.save();
+    await PlatformTransaction.create({
+      type: 'debit', amount: num,
+      balanceBefore, balanceAfter: pw.balance,
+      escrowBefore, escrowAfter: pw.escrowBalance,
+      description: description || 'Admin platform wallet debit',
+      performedBy: req.user._id,
+    });
+    res.json(success(pw, `Debited $${num} from platform wallet`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Fix product images (download CDN → local, update DB) ----
 router.post('/fix-images', adminAuth, async (req, res) => {
   const https = require('https');
@@ -764,6 +834,111 @@ router.post('/batch-update-images', adminAuth, async (req, res) => {
       errors,
       results,
     }, `Updated ${updated} of ${mappings.length} product images`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Balance Management (admin credit/debit) ----
+router.get('/balance/users', adminAuth, async (req, res) => {
+  try {
+    const { keyword, page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const query = {};
+    if (keyword) {
+      const re = new RegExp(keyword, 'i');
+      query.$or = [{ username: re }, { email: re }];
+    }
+    const [users, total] = await Promise.all([
+      User.find(query).select('username email role status').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      User.countDocuments(query),
+    ]);
+    const wallets = await Wallet.find({ userId: { $in: users.map(u => u._id) } });
+    const walletMap = {};
+    for (const w of wallets) walletMap[w.userId.toString()] = w;
+    const list = users.map(u => ({
+      _id: u._id,
+      username: u.username,
+      email: u.email,
+      role: u.role,
+      status: u.status,
+      balance: walletMap[u._id.toString()]?.balance || 0,
+    }));
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/balance/credit', adminAuth, async (req, res) => {
+  try {
+    const { userId, amount, description } = req.body;
+    if (!userId) return res.json(fail('userId is required'));
+    const num = Number(amount);
+    if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    const user = await User.findById(userId);
+    if (!user) return res.json(fail('User not found'));
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) wallet = await Wallet.create({ userId });
+    const tx = await Transaction.create({
+      userId, type: 'admin', amount: num,
+      balanceBefore: wallet.balance,
+      balanceAfter: wallet.balance + num,
+      status: 1,
+      description: description ? `Credit: ${description}` : 'Admin credit',
+    });
+    wallet.balance += num;
+    wallet.totalEarned += num;
+    await wallet.save();
+    tx.balanceAfter = wallet.balance;
+    await tx.save();
+    res.json(success({ wallet, transaction: tx }, `Credited $${num} to ${user.username}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/balance/debit', adminAuth, async (req, res) => {
+  try {
+    const { userId, amount, description } = req.body;
+    if (!userId) return res.json(fail('userId is required'));
+    const num = Number(amount);
+    if (!num || num <= 0) return res.json(fail('Amount must be a positive number'));
+    const user = await User.findById(userId);
+    if (!user) return res.json(fail('User not found'));
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) return res.json(fail('User has no wallet'));
+    const debitAmount = num;
+    if (wallet.balance < debitAmount) return res.json(fail('Insufficient balance'));
+    const tx = await Transaction.create({
+      userId, type: 'admin', amount: -debitAmount,
+      balanceBefore: wallet.balance,
+      balanceAfter: wallet.balance - debitAmount,
+      status: 1,
+      description: description ? `Debit: ${description}` : 'Admin debit',
+    });
+    wallet.balance -= debitAmount;
+    wallet.totalSpent = (wallet.totalSpent || 0) + debitAmount;
+    await wallet.save();
+    tx.balanceAfter = wallet.balance;
+    await tx.save();
+    res.json(success({ wallet, transaction: tx }, `Debited $${debitAmount} from ${user.username}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.get('/balance/history', adminAuth, async (req, res) => {
+  try {
+    const { userId, page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const query = { type: 'admin' };
+    if (userId) query.userId = userId;
+    const [list, total] = await Promise.all([
+      Transaction.find(query).populate('userId', 'username email').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Transaction.countDocuments(query),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }
