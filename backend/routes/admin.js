@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Shop = require('../models/Shop');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
+const Wallet = require('../models/Wallet');
 const { success, fail, paginate } = require('../utils/response');
 
 // ---- Pending transactions ----
