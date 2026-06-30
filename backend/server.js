@@ -16,10 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 // Stripe webhook needs raw body — mount before JSON middleware
 app.use('/home/payment/webhook', express.raw({ type: 'application/json' }), require('./routes/payment'));
 
-// Serve uploads directory as static files (express.static handles normal requests)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Additional content-type detection for files with mismatched extensions
+// Content-type detection from magic bytes (runs first so wrong extensions get correct MIME)
 app.use('/uploads', (req, res, next) => {
   const filePath = path.join(__dirname, 'uploads', req.path);
   fs.stat(filePath, (err, stat) => {
@@ -39,6 +36,9 @@ app.use('/uploads', (req, res, next) => {
     stream.on('error', next);
   });
 });
+
+// Static file serving (fallback for files with correct extensions)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Conditionally serve frontend static files if the dist directory exists
 const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
