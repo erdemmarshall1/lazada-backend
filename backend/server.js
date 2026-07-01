@@ -29,6 +29,7 @@ app.use('/uploads', (req, res, next) => {
                    : (chunk[0] === 0x52 && chunk[1] === 0x49) ? 'image/webp'
                    : 'application/octet-stream';
         res.setHeader('Content-Type', type);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         res.write(chunk);
         stream.pipe(res);
       });
