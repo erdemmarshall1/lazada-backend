@@ -3,3 +3,4 @@ node_modules/
 uploads/*
 !uploads/.gitkeep
 !uploads/product_photos/
+!uploads/product_*.png
