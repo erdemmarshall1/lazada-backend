@@ -10,13 +10,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['font/*.ttf', 'font/*.woff', 'font/*.woff2', 'font/*.png', 'img/*.svg', 'img/*.png'],
       manifest: {
-        name: 'Shopify Wholesale',
-        short_name: 'Shopify WS',
-        description: 'Wholesale e-commerce platform powered by Shopify',
+        name: 'THE OUTNET WHOLESALE',
+        short_name: 'OUTNET WS',
+        description: 'Wholesale luxury fashion marketplace',
         start_url: '/',
         display: 'standalone',
-        background_color: '#121212',
-        theme_color: '#121212',
+        background_color: '#ffffff',
+        theme_color: '#000000',
         orientation: 'portrait-primary',
         icons: [
           { src: '/favicon.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
@@ -33,7 +33,7 @@ export default defineConfig({
             urlPattern: /\/main\/|\/home\/|\/api\//,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'shopify-wholesale-api',
+              cacheName: 'theoutnet-wholesale-api',
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
               networkTimeoutSeconds: 10,
             },
@@ -42,7 +42,7 @@ export default defineConfig({
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'shopify-wholesale-images',
+              cacheName: 'theoutnet-wholesale-images',
               expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
