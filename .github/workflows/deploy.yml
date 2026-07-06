@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install Netlify CLI
         run: npm i -g netlify-cli
 
