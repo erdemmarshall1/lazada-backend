@@ -5,6 +5,10 @@ uploads/*
 !uploads/old/
 !uploads/payment_qr/
 !uploads/product_images/
+!uploads/banners/
+!uploads/category/
+!uploads/merchant/
+!uploads/merchant_products/
 !uploads/product_*.png
 !uploads/*.jpg
 !uploads/*.jpeg

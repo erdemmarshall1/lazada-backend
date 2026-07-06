@@ -54,6 +54,22 @@ exports.getGoodsList = async (req, res) => {
 
 const DEFAULT_STORE_LOGO = 'https://cdn.pixabay.com/photo/2016/03/27/19/32/online-store-1284033_1280.png'
 
+exports.getCreditMerchantList = async (req, res) => {
+  try {
+    const list = [
+      { mer_id: 2807, mer_name: 'VELORA', mer_avatar: '/uploads/merchant/VELORA.webp', product_img: '/uploads/merchant_products/merchant_prod_1.jpg', follow_count: 2398, credit: 100, good_rate: '100.00' },
+      { mer_id: 2809, mer_name: 'SERAVYN', mer_avatar: '/uploads/merchant/SERAVYN.webp', product_img: '/uploads/merchant_products/merchant_prod_2.jpg', follow_count: 18350, credit: 100, good_rate: '100.00' },
+      { mer_id: 2813, mer_name: 'MAISON VELLE', mer_avatar: '/uploads/merchant/MAISON_VELLE.webp', product_img: '/uploads/merchant_products/merchant_prod_3.jpg', follow_count: 9258, credit: 100, good_rate: '100.00' },
+      { mer_id: 2814, mer_name: 'NORVIA', mer_avatar: '/uploads/merchant/NORVIA.webp', product_img: '/uploads/merchant_products/merchant_prod_4.jpg', follow_count: 7605, credit: 100, good_rate: '100.00' },
+      { mer_id: 2820, mer_name: 'SAVVY DEALS', mer_avatar: '/uploads/merchant/SAVVY_DEALS.webp', product_img: '/uploads/merchant_products/merchant_prod_5.jpg', follow_count: 0, credit: 100, good_rate: '100.00' },
+      { mer_id: 2830, mer_name: 'Zion Store', mer_avatar: '/uploads/merchant/Zion_Store.webp', product_img: '/uploads/merchant_products/merchant_prod_6.jpg', follow_count: 0, credit: 100, good_rate: '100.00' },
+    ];
+    res.json(success(list));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
 exports.getMyShopInfo = async (req, res) => {
   try {
     const shop = await Shop.findOne({ userId: req.user._id });
