@@ -22,6 +22,11 @@ all_products_names.txt
 # Products folder (images copied to backend/uploads/product_photos/)
 Products/
 
+# Environment files
+.env
+backend/.env
+frontend/.env
+
 # Other root files
 revert_cdn_updates.js
 Lazada_Website_Analysis.md
