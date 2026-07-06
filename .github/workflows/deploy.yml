@@ -1,0 +1,45 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --project 66e4d9c5-13db-43c6-b89e-1f15a466d7e4 --service lazada-backend --environment production --ci --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Netlify CLI
+        run: npm i -g netlify-cli
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://supportive-delight-production-b90c.up.railway.app
+          VITE_SOCKET_URL: https://supportive-delight-production-b90c.up.railway.app
+
+      - name: Deploy to Netlify
+        run: netlify deploy --prod --dir=dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
