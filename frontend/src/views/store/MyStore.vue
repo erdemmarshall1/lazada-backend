@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:12px">
       <h3>My Store Dashboard</h3>
@@ -32,7 +32,7 @@
       </div>
     </div>
     <div v-else>
-      <div class="store-info-card g-flex-align-center" style="gap:20px;padding:20px;border:1px solid var(--g-border);border-radius:8px;margin-top:16px">
+      <div class="shop-details-card" style="border:1px solid var(--g-border);border-radius:8px;padding:20px;margin-top:16px;background:linear-gradient(135deg,#faf8f4,#fff)"><h4 style="font-size:14px;letter-spacing:1.5px;margin-bottom:16px;color:#000">SHOP DETAILS</h4><div class="shop-details-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Store Name</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#000;margin-top:4px">{{ shop.name }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Shop Level</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#b8922a;margin-top:4px">{{ shopLevel }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Account Balance</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#52c41a;margin-top:4px">${{ store.walletBalance.toFixed(2) }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Store Rating</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#fa8c16;margin-top:4px">5.0 <span style="font-size:12px;color:#999">/ 5.0</span></span></div></div></div><div class="store-info-card g-flex-align-center" style="gap:20px;padding:20px;border:1px solid var(--g-border);border-radius:8px;margin-top:16px">
         <img :src="$imgUrl(shop.logo)" style="width:80px;height:80px;border-radius:8px;object-fit:cover" @error="$imgFallback" />
         <div style="flex:1">
           <h4>{{ shop.name }}</h4>
@@ -350,3 +350,5 @@ onBeforeUnmount(() => {
   .stat-value { font-size: 22px; }
 }
 </style>
+
+

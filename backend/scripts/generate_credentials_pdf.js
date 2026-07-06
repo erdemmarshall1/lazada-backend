@@ -7,7 +7,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
-const OUTPUT = path.join(__dirname, '..', '..', 'Lazada_Credentials.pdf');
+const OUTPUT = path.join(__dirname, '..', '..', 'The Outnet_Credentials.pdf');
 
 const doc = new PDFDocument({ margin: 50, size: 'A4' });
 const stream = fs.createWriteStream(OUTPUT);
@@ -48,7 +48,7 @@ const addDivider = () => {
 
 // ====== TITLE PAGE ======
 doc.fontSize(28).fillColor(COLORS.primary).font('Helvetica-Bold');
-doc.text('Lazada Clone - Shopify Wholesale', { align: 'center' });
+doc.text('The Outnet Clone - Shopify Wholesale', { align: 'center' });
 doc.moveDown(0.3);
 doc.fontSize(14).fillColor(COLORS.secondary).font('Helvetica');
 doc.text('Project Credentials & Setup Guide', { align: 'center' });
@@ -67,7 +67,7 @@ doc.moveDown(0.5);
 
 // ====== SECTION 2: API ENDPOINTS ======
 addHeader('2. API Endpoints', 'h2');
-addField('Backend URL', 'https://lazada-backend-production-3b57.up.railway.app');
+addField('Backend URL', 'https://the-outnet-backend-production-3b57.up.railway.app');
 addField('Frontend URL', 'https://shopifywholesale.netlify.app');
 addField('Admin Login', 'POST /main/sendMsg/login');
 addField('Category List', 'GET /main/goodsCategory/getList');
@@ -92,7 +92,7 @@ addBody('The production database is managed by Railway and is not directly acces
 addDivider();
 addHeader('4. External Services', 'h2');
 addField('Pixabay API Key', '56424266-3980f360793db6c0a5beba10e');
-addField('Deployment (Backend)', 'Railway - lazada-backend');
+addField('Deployment (Backend)', 'Railway - the-outnet-backend');
 addField('Deployment (Frontend)', 'Netlify - shopifywholesale');
 addField('JWT Secret', 'shopify_wholesale_jwt_secret_2026');
 

@@ -3,11 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 
-const API = 'https://lazada-backend-production-3b57.up.railway.app';
+const API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const PRODUCTS_DIR = path.join(__dirname, '..', '..', 'Products');
 const CDN_JSON = path.join(__dirname, '..', '..', 'cdn_urls.json');
 const PWI_JSON = path.join(__dirname, '..', '..', 'products_with_images.json');
-const BACKUP_DIR = path.join(__dirname, '..', 'Lazada_Full_Backup_2026-06-26', 'uploads');
+const BACKUP_DIR = path.join(__dirname, '..', 'The Outnet_Full_Backup_2026-06-26', 'uploads');
 const LOG_FILE = path.join(__dirname, '..', '..', 'image_migration_log.json');
 
 const ADMIN_USER = 'admin_wholesale';

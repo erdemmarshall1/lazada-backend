@@ -3,12 +3,12 @@ const path = require('path');
 const { execSync } = require('child_process');
 const https = require('https');
 
-const API = 'https://lazada-backend-production-3b57.up.railway.app';
+const API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const USERNAME = 'admin_wholesale';
 const PASSWORD = 'Admin@MQQYYI6G';
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const BACKUP_DIR = path.join(ROOT, `Lazada_Full_Backup_${new Date().toISOString().slice(0,10)}`);
+const BACKUP_DIR = path.join(ROOT, `The Outnet_Full_Backup_${new Date().toISOString().slice(0,10)}`);
 
 const getJSON = (url, token) => new Promise((resolve, reject) => {
   const u = new URL(url);
@@ -212,7 +212,7 @@ async function main() {
   console.log('  backup_manifest.json written');
 
   // 11. Write restore instructions
-  const readme = `# Lazada Full Website Backup
+  const readme = `# The Outnet Full Website Backup
 Generated: ${new Date().toISOString()}
 
 ## Restore Instructions

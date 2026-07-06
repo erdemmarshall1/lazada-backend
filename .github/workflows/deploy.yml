@@ -20,7 +20,7 @@ jobs:
         run: |
           railway login --token "$RAILWAY_TOKEN"
           railway link --project d231e509-7f7d-4883-b714-5ac238ec879b --environment production --yes 2>/dev/null || true
-          railway up --service lazada-backend --ci --detach
+          railway up --service the-outnet-backend --ci --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -38,8 +38,8 @@ jobs:
       - name: Build frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://lazada-backend-production-3b57.up.railway.app
-          VITE_SOCKET_URL: https://lazada-backend-production-3b57.up.railway.app
+          VITE_API_BASE_URL: https://the-outnet-backend-production-3b57.up.railway.app
+          VITE_SOCKET_URL: https://the-outnet-backend-production-3b57.up.railway.app
 
       - name: Deploy to Netlify
         run: npx netlify-cli deploy --prod --dir=dist

@@ -124,7 +124,7 @@ const rules = {
   receipt: [{ required: true, message: 'Please upload a payment receipt', trigger: 'change' }],
 }
 
-const getToken = () => localStorage.getItem('lazada_token') || ''
+const getToken = () => localStorage.getItem('theoutnet_token') || ''
 const uploadUrl = `${API_BASE}/home/upload/file`
 const uploadHeaders = computed(() => ({ token: getToken() }))
 

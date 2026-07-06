@@ -14,7 +14,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const API = 'https://lazada-backend-production-3b57.up.railway.app';
+const API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const USERNAME = 'admin_wholesale';
 const MAP_FILE = path.join(__dirname, '..', 'product_image_updates.json');
 

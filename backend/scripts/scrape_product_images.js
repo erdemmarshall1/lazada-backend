@@ -18,7 +18,7 @@ const path = require('path');
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PIXABAY_KEY = '56424266-3980f360793db6c0a5beba10e';
-const RAILWAY_API = 'https://lazada-backend-production-3b57.up.railway.app';
+const RAILWAY_API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const PIXABAY_API = 'https://pixabay.com/api';
 const OUTPUT_FILE = path.join(__dirname, '..', 'product_image_updates.json');
 const PER_PAGE = 100;               // products per request from Railway

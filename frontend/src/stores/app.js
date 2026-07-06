@@ -36,10 +36,10 @@ const safeParseJSON = (value, fallback = {}) => {
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    token: safeStorageGet('lazada_token', ''),
-    userInfo: safeParseJSON(safeStorageGet('lazada_user'), {}),
+    token: safeStorageGet('theoutnet_token', ''),
+    userInfo: safeParseJSON(safeStorageGet('theoutnet_user'), {}),
     carNum: 0,
-    lang: safeStorageGet('lazada_lang', 'en'),
+    lang: safeStorageGet('theoutnet_lang', 'en'),
     langList: [],
     langObj: {},
     loadedLanguages: [],
@@ -65,15 +65,15 @@ export const useAppStore = defineStore('app', {
   actions: {
     setToken(token) {
       this.token = token || ''
-      safeStorageSet('lazada_token', this.token)
+      safeStorageSet('theoutnet_token', this.token)
     },
     setUserInfo(info) {
       this.userInfo = info || {}
-      safeStorageSet('lazada_user', JSON.stringify(this.userInfo))
+      safeStorageSet('theoutnet_user', JSON.stringify(this.userInfo))
     },
     setLanguage(lang) {
       this.lang = lang || 'en'
-      safeStorageSet('lazada_lang', this.lang)
+      safeStorageSet('theoutnet_lang', this.lang)
     },
     setWalletBalance(balance) {
       this.walletBalance = balance
@@ -90,8 +90,8 @@ export const useAppStore = defineStore('app', {
       this.newOrderCount = 0
       this.refundRequestCount = 0
       this.walletBalance = 0
-      safeStorageRemove('lazada_token')
-      safeStorageRemove('lazada_user')
+      safeStorageRemove('theoutnet_token')
+      safeStorageRemove('theoutnet_user')
       disconnectSocket()
     },
     addAudio(src) {

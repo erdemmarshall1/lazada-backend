@@ -3,7 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE = 'https://lazada-backend-production-3b57.up.railway.app';
+const API_BASE = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const OUTPUT_DIR = path.join(__dirname, '..', 'uploads', 'product_images');
 
 if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });

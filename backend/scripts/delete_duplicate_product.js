@@ -6,7 +6,7 @@
  */
 const https = require('https');
 
-const API = 'https://lazada-backend-production-3b57.up.railway.app';
+const API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const USERNAME = 'admin_wholesale';
 const PASSWORD = 'Admin@MQQYYI6G';
 

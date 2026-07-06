@@ -27,7 +27,7 @@ const safeStorageGet = (key, fallback = '') => {
   }
 }
 
-const savedLang = safeStorageGet('lazada_lang')
+const savedLang = safeStorageGet('theoutnet_lang')
 const browserLang = typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'en'
 const defaultLang = savedLang || (messages[browserLang] ? browserLang : 'en')
 

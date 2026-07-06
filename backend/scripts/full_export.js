@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const SOURCE_API = 'https://lazada-backend-production-3b57.up.railway.app';
+const SOURCE_API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const PRODUCTS_JSON = path.join(PROJECT_ROOT, 'products_with_images.json');
 const EXTRACTED_JSON = path.join(PROJECT_ROOT, 'extracted_products.json');

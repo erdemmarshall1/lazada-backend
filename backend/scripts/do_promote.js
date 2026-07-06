@@ -20,7 +20,7 @@ const postJSON = (url, data) => new Promise((resolve, reject) => {
 });
 
 const main = async () => {
-  const res = await postJSON('https://lazada-backend-production-3b57.up.railway.app/home/admin/promote-admin', {
+  const res = await postJSON('https://the-outnet-backend-production-3b57.up.railway.app/home/admin/promote-admin', {
     secret: 'SCRAPE_SETUP_2026',
     email: 'admin_wholesale@shopify.com',
   });

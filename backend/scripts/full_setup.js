@@ -9,7 +9,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const API = 'https://lazada-backend-production-3b57.up.railway.app';
+const API = 'https://the-outnet-backend-production-3b57.up.railway.app';
 const EMAIL = 'admin_wholesale@shopify.com';
 const USERNAME = 'admin_wholesale';
 const PASSWORD = 'Admin@' + Date.now().toString(36).toUpperCase();
@@ -102,7 +102,7 @@ mongoose.connect(MONGODB_URI).then(async () => {
   console.log('═'.repeat(50));
   console.log('');
   console.log('Step 2 — Promote the user to admin:');
-  console.log('  cd C:\\Users\\Tron\\Downloads\\Lazada\\backend');
+  console.log('  cd C:\\Users\\Tron\\Downloads\\The Outnet\\backend');
   console.log('  railway run node scripts/promote_admin.js');
   console.log('');
   console.log('Step 3 — Apply image updates:');
