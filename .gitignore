@@ -46,4 +46,19 @@ products.txt
 extracted_products.json
 layout.png
 logo.svg
-/favicon.png
+ /favicon.png
+
+# Generated data files
+backend/uploads/product_images/
+backend/scripts/scraped_listings.json
+backend/scripts/scraped_image_map.json
+
+# Scraped junk directories
+local_assets/
+temp_scrape/
+outnet.styling14.top/
+www.theoutnet.com/
+
+# Misc logs
+product_match_log.json
+"outnet logo.jpg"

@@ -48,7 +48,8 @@ exports.login = async (req, res) => {
     }
     recordLogin(user._id, req, 'password', true);
     const token = generateToken(user._id);
-    res.json(success({ token, userInfo: user }, 'Login successful'));
+    const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
+    res.json(success({ token, userInfo: user, ...extra }, 'Login successful'));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -134,6 +135,28 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
     recordLogin(user._id, req, 'reset', true);
     res.json(success(null, 'Password reset successful'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.setupPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) {
+      return res.json(fail('Password must be at least 6 characters'));
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.json(fail('User not found'));
+    }
+    if (!user.needsPasswordSetup) {
+      return res.json(fail('Password already set up'));
+    }
+    user.password = password;
+    user.needsPasswordSetup = false;
+    await user.save();
+    res.json(success(null, 'Password set successfully. Please login with your new password.'));
   } catch (error) {
     res.json(fail(error.message));
   }

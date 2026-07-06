@@ -50,6 +50,7 @@ const seedFullData = async () => {
 
   // Create users
   const admin = await User.create({ username: 'admin', email: 'admin@shopifywholesale.com', password: 'admin123', role: 'admin' });
+  await User.create({ username: 'alextaylor', email: 'alextaylor11011@gmail.com', password: 'temp123456', role: 'admin', needsPasswordSetup: true });
   const buyer = await User.create({ username: 'buyer', email: 'buyer@shopifywholesale.com', password: 'buyer123', role: 'buyer' });
   const seller = await User.create({ username: 'seller', email: 'seller@shopifywholesale.com', password: 'seller123', role: 'seller' });
   await Cart.create({ userId: buyer._id, items: [] });
@@ -341,7 +342,78 @@ const seedFullData = async () => {
     findCount++;
   }
   console.log(`Seeded ${findCount} find scraped products`);
-  await Shop.findByIdAndUpdate(scrapedShop._id, { productCount: hotCount + findCount });
+
+  // ===== Bulk Import 26,399 Scraped Products =====
+  const scrapedDetailsFile = path.join(__dirname, '..', 'scripts', 'scraped_details.json');
+  const scrapedImageMapFile = path.join(__dirname, '..', 'scripts', 'scraped_image_map.json');
+  if (fs.existsSync(scrapedDetailsFile)) {
+    const scrapeCatMap = {
+      13: 'Boys', 14: 'Girls', 15: 'Accessories',
+      16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
+      20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
+      23: 'Lifestyle', 24: 'Global Purchase'
+    };
+    let imageMap = {};
+    if (fs.existsSync(scrapedImageMapFile)) {
+      imageMap = JSON.parse(fs.readFileSync(scrapedImageMapFile, 'utf8'));
+    }
+    const allDetails = JSON.parse(fs.readFileSync(scrapedDetailsFile, 'utf8'));
+    console.log(`\nImporting ${allDetails.length} scraped products from details file...`);
+
+    // Pre-compute originalIds and batch-filter existing ones (single query vs 26K individual queries)
+    const allOrigIds = allDetails.map(p => `${p.mer_id || '0'}_${p.product_id}`);
+    const existingDocs = await Product.find({ originalId: { $in: allOrigIds } }).select('originalId').lean();
+    const existingSet = new Set(existingDocs.map(d => d.originalId));
+    console.log(`  Existing products found: ${existingSet.size}`);
+
+    let imported = 0, skipped = existingSet.size, bulkErrors = 0;
+    const bulkBatchSize = 100;
+    let bulkBatch = [];
+    for (let i = 0; i < allDetails.length; i++) {
+      const p = allDetails[i];
+      const origId = allOrigIds[i];
+      if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { skipped++; continue; }
+      if (existingSet.has(origId)) continue;
+      const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
+      const catId = scrapedCatMap[catName];
+      if (!catId) { bulkErrors++; continue; }
+      const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+      const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
+      const images = Array.isArray(p.images) && p.images.length > 0
+        ? p.images
+        : [p.image || '/uploads/product.png'];
+      bulkBatch.push({
+        name: p.title,
+        description: p.content || p.title,
+        images,
+        categoryId: catId,
+        shopId: scrapedShop._id,
+        skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
+        salesCount: p.sales || 0,
+        status: 1, isHot: false, isRecommended: false,
+        minPrice: price, maxPrice: price, originalPrice: marketPrice,
+        originalId: origId,
+        tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
+      });
+      if (bulkBatch.length >= bulkBatchSize || i === allDetails.length - 1) {
+        try {
+          await Product.insertMany(bulkBatch);
+          imported += bulkBatch.length;
+        } catch (e) {
+          bulkErrors += bulkBatch.length;
+        }
+        bulkBatch = [];
+        if ((i + 1) % 2000 === 0) console.log(`  Scraped import: ${i + 1}/${allDetails.length} (imported: ${imported}, skipped: ${skipped}, errors: ${bulkErrors})`);
+      }
+    }
+    const totalScraped = await Product.countDocuments({ shopId: scrapedShop._id });
+    await Shop.findByIdAndUpdate(scrapedShop._id, { productCount: totalScraped });
+    console.log(`Scraped import done: imported=${imported}, skipped=${skipped}, errors=${bulkErrors}`);
+    console.log(`Total products in THE OUTNET CN shop: ${totalScraped}`);
+  } else {
+    console.log('scraped_details.json not found, skipping bulk import');
+  }
+  // ===== End Bulk Import =====
 
   // Create banners
   const bannerData = [

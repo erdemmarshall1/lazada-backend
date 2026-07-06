@@ -3,6 +3,7 @@
     <div class="v_main_layout">
       <PwaInstallBanner mode="popup" />
       <MainLayoutHeader />
+      <MainLayoutNav />
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -21,6 +22,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { get, qe } from '@/api/request'
 import MainLayoutHeader from './MainLayoutHeader.vue'
+import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
 

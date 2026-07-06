@@ -11,6 +11,7 @@ const routes = [
       { path: 'login', name: 'login', component: () => import('@/views/auth/Login.vue'), meta: { title: 'Login' } },
       { path: 'register', name: 'register', component: () => import('@/views/auth/Register.vue'), meta: { title: 'Register' } },
       { path: 'forgetpwd', name: 'forgetpwd', component: () => import('@/views/auth/ForgetPwd.vue'), meta: { title: 'Forgot Password' } },
+      { path: 'setup-password', name: 'setup-password', component: () => import('@/views/auth/SetupPassword.vue'), meta: { title: 'Setup Password' } },
       { path: 'gooddetail', name: 'gooddetail', component: () => import('@/views/product/GoodDetail.vue'), meta: { title: 'Product Detail' } },
       { path: 'car', name: 'car', component: () => import('@/views/cart/Car.vue'), meta: { title: 'Cart' } },
       { path: 'tuijianlist', name: 'tuijianlist', component: () => import('@/views/product/TuiJianList.vue'), meta: { title: 'Recommended' } },
@@ -99,6 +100,11 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some(r => r.meta.requiresAuth) && !store.isLogin) {
     next({ name: 'login', query: { redirect: to.fullPath } })
+    return
+  }
+
+  if (store.isLogin && store.userInfo?.needsPasswordSetup && to.name !== 'setup-password' && to.name !== 'login') {
+    next({ name: 'setup-password' })
     return
   }
 

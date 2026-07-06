@@ -3,13 +3,18 @@
     <div class="ton-footer-inner">
       <div class="ton-footer-grid">
         <div class="ton-footer-col">
-          <h4 class="ton-footer-title">THE OUTNET</h4>
+          <h4 class="ton-footer-title">ABOUT THE OUTNET</h4>
           <ul>
             <li><a href="javascript:void(0)" @click="$router.push('/rule')">About Us</a></li>
-            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Careers</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Join Us</a></li>
             <li><a href="javascript:void(0)" @click="$router.push('/rule')">Contact Us</a></li>
-            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Press</a></li>
-            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Affiliates</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Exchange and Cooperation</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Merchant Agreement</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Supplier Cooperation</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Precision Operation</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Strategic Management</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">Course Driven</a></li>
+            <li><a href="javascript:void(0)" @click="$router.push('/rule')">FAQ</a></li>
           </ul>
         </div>
         <div class="ton-footer-col">
@@ -48,7 +53,7 @@
             </a>
           </div>
           <div class="ton-footer-newsletter">
-            <h4 class="ton-footer-title">STAY IN THE LOOP</h4>
+            <h4 class="ton-footer-title">DOWNLOAD THE APP</h4>
             <p>Get early access to new arrivals and member-only offers.</p>
             <div class="ton-newsletter-form">
               <input type="email" placeholder="Email address" />

@@ -33,6 +33,7 @@ const productSchema = new mongoose.Schema({
   flashSaleEnd: { type: Date },
   flashSaleStock: { type: Number, default: 0 },
   profitPercentage: { type: Number, default: 20, min: 0, max: 1000 },
+  originalId: { type: String, default: '' },
 }, { timestamps: true });
 
 productSchema.index({ name: 'text', description: 'text' });

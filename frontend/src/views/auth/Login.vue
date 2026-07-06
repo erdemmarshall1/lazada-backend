@@ -116,6 +116,13 @@ const handleLogin = async () => {
         store.setUserInfo(userInfo)
       }
       connectSocket()
+
+      if (responseBody.needsPasswordSetup || userInfo?.needsPasswordSetup) {
+        ElMessage.info('Please set up your password first')
+        await router.replace('/setup-password')
+        return
+      }
+
       ElMessage.success(message)
 
       const redirectPath = getRedirectPath()

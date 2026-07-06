@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, minlength: 6 },
   avatar: { type: String, default: '' },
   role: { type: String, enum: ['buyer', 'seller', 'admin'], default: 'buyer' },
+  needsPasswordSetup: { type: Boolean, default: false },
   status: { type: Number, enum: [0, 1], default: 1 },
   type: { type: Number, default: 0 },
   fundPassword: { type: String, default: '' },
