@@ -6,11 +6,16 @@
         <el-form-item label="Username / Email" prop="username">
           <el-input v-model="form.username" placeholder="Enter username or email" size="large" />
         </el-form-item>
-        <el-form-item label="Password" prop="password">
+        <el-form-item label="Password" prop="password" v-if="!twoFactorRequired">
           <el-input v-model="form.password" type="password" show-password placeholder="Enter password" size="large" />
         </el-form-item>
+        <el-form-item label="Authentication Code" prop="twoFactorCode" v-if="twoFactorRequired">
+          <el-input v-model="form.twoFactorCode" placeholder="Enter 6-digit code" size="large" maxlength="6" />
+        </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleLogin">Login</el-button>
+          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleLogin">
+            {{ twoFactorRequired ? 'Verify' : 'Login' }}
+          </el-button>
         </el-form-item>
       </el-form>
       <div class="login-links g-flex-align-center g-flex-justify-between">
@@ -35,10 +40,14 @@ const store = useAppStore()
 const formRef = ref(null)
 const loading = ref(false)
 
-const form = reactive({ username: '', password: '' })
+const twoFactorRequired = ref(false)
+const tempToken = ref('')
+
+const form = reactive({ username: '', password: '', twoFactorCode: '' })
 const rules = {
   username: [{ required: true, message: 'Please enter username or email', trigger: 'blur' }],
   password: [{ required: true, message: 'Please enter password', trigger: 'blur' }],
+  twoFactorCode: [{ required: true, message: 'Please enter authentication code', trigger: 'blur' }],
 }
 
 const getRedirectPath = () => {
@@ -60,7 +69,36 @@ const handleLogin = async () => {
 
   loading.value = true
   try {
-    const res = await post('/main/user/login', form)
+    if (twoFactorRequired.value) {
+      const res = await post('/main/user/login/2fa', { tempToken: tempToken.value, code: form.twoFactorCode })
+      const payload = res?.data || res
+      const token = payload?.token || res?.token
+      const userInfo = payload?.userInfo || payload?.user || res?.userInfo || res?.user
+      const message = payload?.msg || res?.msg || 'Login successful'
+
+      if (token) {
+        store.setToken(token)
+        if (userInfo) store.setUserInfo(userInfo)
+        connectSocket()
+        ElMessage.success(message)
+        const redirectPath = getRedirectPath()
+        try { await router.replace(redirectPath) }
+        catch { window.location.hash = `#${redirectPath}` }
+      } else {
+        ElMessage.error(message)
+      }
+      return
+    }
+
+    const res = await post('/main/user/login', { username: form.username, password: form.password })
+
+    if (res?.twoFactorRequired && res?.tempToken) {
+      twoFactorRequired.value = true
+      tempToken.value = res.tempToken
+      form.password = ''
+      ElMessage.info('Please enter your two-factor authentication code')
+      return
+    }
 
     const responseBody = res?.data && (res.data.token || res.data.userInfo || res.data.user)
       ? res.data

@@ -1,5 +1,6 @@
 <template>
   <router-view />
+  <SwUpdateBanner />
   <audio ref="audioPlay" class="c_audio_play" :src="audioSrc" controls style="display:none"></audio>
   <el-backtop :right="24" :bottom="48" />
 </template>
@@ -8,6 +9,7 @@
 import { ref, watch, onErrorCaptured } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
+import SwUpdateBanner from '@/components/SwUpdateBanner.vue'
 
 const store = useAppStore()
 const audioPlay = ref(null)

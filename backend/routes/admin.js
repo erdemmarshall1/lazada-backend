@@ -8,6 +8,7 @@ const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
 const { success, fail, paginate } = require('../utils/response');
+const themeController = require('../controllers/themeController');
 
 // ---- Pending transactions ----
 router.get('/pending-recharges', adminAuth, walletController.adminGetPendingRecharges);
@@ -992,5 +993,8 @@ router.get('/balance/history', adminAuth, async (req, res) => {
     res.json(fail(error.message));
   }
 });
+
+router.get('/settings/theme', adminAuth, themeController.getTheme);
+router.post('/settings/theme', adminAuth, themeController.updateTheme);
 
 module.exports = router;

@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 
 router.post('/login', authController.login);
+router.post('/login/2fa', authController.login2fa);
 router.post('/reg', authController.register);
 router.post('/forgot', authController.forgotPassword);
 router.get('/sendMsg/getEmailCode', authController.sendEmailCode);

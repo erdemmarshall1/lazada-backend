@@ -1,193 +1,230 @@
+/**
+ * fix_banner_images.js
+ *
+ * Replaces ALL banner images with Pixabay images that directly match
+ * each banner title. Tries multiple search queries per banner and
+ * picks the best match. Uploads to Railway as local files.
+ *
+ * Run: node scripts/fix_banner_images.js
+ */
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const API = 'https://supportive-delight-production-b90c.up.railway.app';
 const PIXABAY_KEY = '56424266-3980f360793db6c0a5beba10e';
-const USERNAME = 'admin_wholesale';
-const PASSWORD = 'Admin@MQQYYI6G';
+const TMP_DIR = path.join(__dirname, '..', '..', 'tmp_banners');
+if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
 
-const getJSON = (url, token) => new Promise((resolve, reject) => {
-  const u = new URL(url);
-  const opts = {
-    hostname: u.hostname, port: u.port || 443, path: u.pathname + u.search, method: 'GET',
-    headers: { 'User-Agent': 'script/1.0', token: token || '', Authorization: token ? `Bearer ${token}` : '', 'x-access-token': token || '' },
-    timeout: 30000,
-  };
-  const req = https.request(opts, (res) => {
-    let d = '';
-    res.on('data', (c) => d += c);
-    res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error(d.slice(0, 200))); } });
-  });
-  req.on('error', reject);
-  req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
-  req.end();
-});
+let TOKEN = '';
 
-const postJSON = (url, data, token) => new Promise((resolve, reject) => {
-  const u = new URL(url);
-  const body = JSON.stringify(data);
-  const opts = {
-    hostname: u.hostname, port: u.port || 443, path: u.pathname, method: 'POST',
-    headers: {
-      'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body),
-      'User-Agent': 'script/1.0', token: token || '', Authorization: token ? `Bearer ${token}` : '', 'x-access-token': token || '',
-    },
-    timeout: 30000,
-  };
-  const req = https.request(opts, (res) => {
-    let d = '';
-    res.on('data', (c) => d += c);
-    res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error(d.slice(0, 200))); } });
-  });
-  req.on('error', reject);
-  req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
-  req.write(body);
-  req.end();
-});
-
-const checkImageAlive = (url) => new Promise((resolve) => {
-  if (!url || !url.startsWith('http')) { resolve(false); return; }
-  const proxyUrl = API + '/home/image/proxy?url=' + encodeURIComponent(url);
-  const u = new URL(proxyUrl);
-  const opts = {
-    hostname: u.hostname, port: 443, path: u.pathname + u.search, method: 'GET',
-    headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 15000,
-  };
-  const chunks = [];
-  const req = https.request(opts, (res) => {
-    res.on('data', (c) => { chunks.push(c); });
-    res.on('end', () => {
-      const buf = Buffer.concat(chunks);
-      const firstByte = buf[0];
-      const isImage = firstByte === 0x89 || firstByte === 0xFF || firstByte === 0x47 || firstByte === 0x52;
-      resolve(isImage);
+function req(url, opts) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    opts = opts || {};
+    const opt = {
+      hostname: u.hostname, port: u.port || (u.protocol === 'https:' ? 443 : 80),
+      path: u.pathname + u.search,
+      method: opts.method || 'GET',
+      headers: { 'User-Agent': 'fix-banners/1.0', ...(opts.headers || {}) },
+      timeout: 30000,
+    };
+    const r = https.request(opt, (res) => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, data: Buffer.concat(chunks), text: Buffer.concat(chunks).toString('utf8') }));
     });
+    r.on('error', reject);
+    r.on('timeout', () => { r.destroy(); reject(new Error('timeout')); });
+    if (opts.body) r.write(typeof opts.body === 'string' ? opts.body : opts.body);
+    r.end();
   });
-  req.on('error', () => resolve(false));
-  req.on('timeout', () => { req.destroy(); resolve(false); });
-  req.end();
-});
+}
 
-const pixabaySearch = (query) => new Promise((resolve, reject) => {
+function getJSON(url, token) {
+  const headers = {};
+  if (token) { headers.token = token; }
+  return req(url, { headers }).then(r => { try { return JSON.parse(r.text); } catch { return null; } });
+}
+
+function postJSON(url, data, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) { headers.token = token; }
+  return req(url, { method: 'POST', headers, body: JSON.stringify(data) }).then(r => {
+    try { return JSON.parse(r.text); } catch { return { error: r.text.slice(0, 200) }; }
+  });
+}
+
+async function login() {
+  const r = await postJSON(API + '/main/user/login', { username: 'admin', password: 'admin123' });
+  if (r.code === 0 && r.data?.token) { TOKEN = r.data.token; console.log('  Login OK'); }
+  else throw new Error('Login failed: ' + JSON.stringify(r).slice(0, 200));
+}
+
+// Pixabay search — returns first image URL or null
+function pixabaySearch(query) {
   const encoded = encodeURIComponent(query);
-  const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encoded}&image_type=photo&orientation=horizontal&safesearch=true&per_page=5&category=`;
-  const u = new URL(url);
-  const opts = {
-    hostname: u.hostname, port: 443, path: u.pathname + u.search, method: 'GET',
-    headers: { 'User-Agent': 'script/1.0' }, timeout: 15000,
-  };
-  const req = https.request(opts, (res) => {
-    let d = '';
-    res.on('data', (c) => d += c);
-    res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error(d.slice(0, 200))); } });
+  const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encoded}&image_type=photo&orientation=horizontal&safesearch=true&per_page=5&order=popular&min_width=600&min_height=400`;
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const opt = {
+      hostname: u.hostname, port: 443, path: u.pathname + u.search, method: 'GET',
+      headers: { 'User-Agent': 'fix-banners/1.0' }, timeout: 15000,
+    };
+    const r = https.request(opt, (res) => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d);
+          if (j.totalHits > 0 && j.hits?.length > 0) {
+            resolve(j.hits[0].webformatURL || j.hits[0].largeImageURL || null);
+          } else resolve(null);
+        } catch { resolve(null); }
+      });
+    });
+    r.on('error', () => resolve(null));
+    r.on('timeout', () => { r.destroy(); resolve(null); });
+    r.end();
   });
-  req.on('error', reject);
-  req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
-  req.end();
-});
+}
 
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function download(url) { return req(url).then(r => r.data); }
 
-const improveQuery = (title) => {
-  const t = title.toLowerCase();
-  if (t.includes('summer') || t.includes('sale')) return 'summer beach sale fashion shopping';
-  if (t.includes('fashion') || t.includes('new arrival')) return 'fashion model clothing style 2026';
-  if (t.includes('electron') || t.includes('tech') || t.includes('gadget')) return 'electronics technology gadgets devices';
-  if (t.includes('beauty') || t.includes('skincare') || t.includes('cosmetic')) return 'beauty skincare cosmetics makeup';
-  if (t.includes('sport') || t.includes('outdoor') || t.includes('fitness')) return 'sports outdoors fitness adventure';
-  return t.replace(/[^a-zA-Z0-9 ]/g, '').trim();
-};
+async function uploadToRailway(filePath) {
+  const fileName = path.basename(filePath);
+  const fileData = fs.readFileSync(filePath);
+  const boundary = '----' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  const ext = path.extname(filePath).toLowerCase();
+  const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' }[ext] || 'image/jpeg';
+  const header = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: ${mime}\r\n\r\n`;
+  const footer = `\r\n--${boundary}--\r\n`;
+  const body = Buffer.concat([Buffer.from(header, 'utf8'), fileData, Buffer.from(footer, 'utf8')]);
 
-const main = async () => {
-  console.log('Logging in as admin...');
-  const loginRes = await postJSON(`${API}/main/sendMsg/login`, { username: USERNAME, password: PASSWORD });
-  if (loginRes.code !== 0) { console.error('Login failed:', loginRes.msg); process.exit(1); }
-  const token = loginRes.data?.token || loginRes.token;
-  console.log('Login OK\n');
+  const r = await req(API + '/home/upload/file', {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, token: TOKEN },
+    body,
+  });
 
-  console.log('Fetching current banners...');
-  const bannerRes = await getJSON(`${API}/main/banner/getList`, token);
-  const banners = bannerRes.data || bannerRes.list || [];
-  console.log(`Found ${banners.length} banners\n`);
+  try {
+    const j = JSON.parse(r.text);
+    if (j.code === 0 || j.code === 200) return j.data?.url || j.data?.path || '/uploads/' + fileName;
+    throw new Error('Upload failed: ' + (j.msg || r.text.slice(0, 100)));
+  } catch (e) {
+    throw new Error('Upload error: ' + e.message);
+  }
+}
 
-  if (banners.length === 0) { console.log('No banners to process.'); return; }
+async function main() {
+  console.log('=== Fix Banner Images (title-matched) ===\n');
 
-  const updates = [];
+  // 1. Login
+  console.log('1. Logging in...');
+  await login();
+
+  // 2. Fetch banners
+  console.log('2. Fetching current banners...');
+  const r = await getJSON(API + '/main/banner/getList', TOKEN);
+  const banners = r?.data || [];
+  if (!banners.length) { console.error('  No banners found'); process.exit(1); }
+  console.log('  Found ' + banners.length + ' banners');
+
+  // 3. Per-banner search queries (title-specific, multiple attempts)
+  const bannerSearches = [
+    {
+      title: 'Summer Sale - Up to 70% Off',
+      queries: ['shopping sale discount', 'summer sale promotion', 'shopping bag sale'],
+    },
+    {
+      title: 'New Arrivals Fashion 2026',
+      queries: ['fashion clothing style', 'clothing collection fashion', 'fashion model new collection'],
+    },
+    {
+      title: 'Electronics Mega Deals',
+      queries: ['electronics gadgets technology', 'smartphone laptop tech', 'electronics devices shopping'],
+    },
+    {
+      title: 'Beauty & Skincare Special',
+      queries: ['beauty skincare products', 'cosmetics makeup skincare', 'beauty products collection'],
+    },
+    {
+      title: 'Sports & Outdoors Collection',
+      queries: ['sports equipment fitness', 'outdoor sports exercise', 'fitness gym sports gear'],
+    },
+  ];
+
+  console.log('\n3. Searching Pixabay and updating banners...');
+  let updated = 0;
+  let errors = 0;
+
   for (let i = 0; i < banners.length; i++) {
-    const b = banners[i];
-    console.log(`[${i + 1}/${banners.length}] "${b.title}"`);
+    const banner = banners[i];
+    const searches = (bannerSearches[i] || bannerSearches[0]);
+    console.log('\n  [' + (i + 1) + '/' + banners.length + '] ' + searches.title);
 
-    console.log(`  Checking current image...`);
-    const alive = await checkImageAlive(b.image);
-    if (alive) {
-      console.log(`  OK - image already works, skipping`);
+    let pixabayUrl = null;
+    for (const query of searches.queries) {
+      console.log('     Trying: ' + query);
+      pixabayUrl = await pixabaySearch(query);
+      if (pixabayUrl) {
+        console.log('     Found: ' + pixabayUrl);
+        break;
+      }
+    }
+
+    if (!pixabayUrl) {
+      console.log('     No Pixabay result for any query');
+      errors++;
       continue;
     }
-    console.log(`  DEAD - needs replacement`);
 
-    const query = improveQuery(b.title);
-    console.log(`  Searching Pixabay: "${query}"`);
-    let pbRes;
     try {
-      pbRes = await pixabaySearch(query);
+      // Download
+      const ext = path.extname(new URL(pixabayUrl).pathname) || '.jpg';
+      const tmpPath = path.join(TMP_DIR, 'banner_' + i + ext);
+      const data = await download(pixabayUrl);
+      if (data.length === 0) { console.log('     Download empty'); errors++; continue; }
+      fs.writeFileSync(tmpPath, data);
+      console.log('     Downloaded: ' + (data.length / 1024).toFixed(0) + ' KB');
+
+      // Upload
+      const uploadedPath = await uploadToRailway(tmpPath);
+      console.log('     Uploaded: ' + uploadedPath);
+
+      // Update banner record
+      const upResult = await postJSON(API + '/home/admin/update-banners', {
+        banners: [{ _id: banner._id, image: uploadedPath }],
+      }, TOKEN);
+      if (upResult.code === 0) {
+        console.log('     Banner updated OK');
+        updated++;
+      } else {
+        console.log('     Update failed: ' + JSON.stringify(upResult).slice(0, 100));
+        errors++;
+      }
+
+      try { fs.unlinkSync(tmpPath); } catch {}
     } catch (e) {
-      console.error(`  Search failed: ${e.message}`);
-      await sleep(1000);
-      continue;
+      console.log('     ERROR: ' + e.message);
+      errors++;
     }
+  }
 
-    if (pbRes.totalHits > 0 && pbRes.hits.length > 0) {
-      let found = false;
-      for (const hit of pbRes.hits) {
-        const img = hit.webformatURL;
-        const ok = await checkImageAlive(img);
-        if (ok) {
-          console.log(`  Found fresh image: ${img.slice(0, 70)}`);
-          updates.push({ _id: b._id, title: b.title, image: img, link: b.link });
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        console.log(`  All results dead, using first result anyway`);
-        updates.push({ _id: b._id, title: b.title, image: pbRes.hits[0].webformatURL, link: b.link });
-      }
-    } else {
-      console.log(`  No Pixabay results for "${query}", trying simpler query...`);
-      const simpleTitle = b.title.replace(/[-\d]/g, '').replace(/&\s*\w+;/g, '').trim();
-      try {
-        pbRes = await pixabaySearch(simpleTitle || 'shop banner');
-        if (pbRes.totalHits > 0 && pbRes.hits.length > 0) {
-          const img = pbRes.hits[0].webformatURL;
-          console.log(`  Found (fallback): ${img.slice(0, 70)}`);
-          updates.push({ _id: b._id, title: b.title, image: img, link: b.link });
-        } else {
-          console.log(`  No results even with fallback`);
-        }
-      } catch (e) {
-        console.error(`  Fallback failed: ${e.message}`);
-      }
+  // 4. Results
+  console.log('\n=== Results ===');
+  console.log('Updated: ' + updated + '/' + banners.length);
+  console.log('Errors: ' + errors);
+
+  // 5. Verify
+  console.log('\n4. Verifying...');
+  const v = await getJSON(API + '/main/banner/getList', TOKEN);
+  if (v?.data) {
+    for (const b of v.data) {
+      const isLocal = b.image?.startsWith('/uploads/');
+      console.log('  ' + (b.title || '').substring(0, 35).padEnd(38) + ' | ' + (isLocal ? 'LOCAL' : 'REMOTE').padEnd(8) + ' | ' + (b.image || '').slice(-25));
     }
-    await sleep(800);
   }
+}
 
-  if (updates.length === 0) {
-    console.log('\nAll banners already OK. Nothing to update.');
-    return;
-  }
-
-  console.log(`\nUpdating ${updates.length} banners...`);
-  const updateRes = await postJSON(`${API}/home/admin/update-banners`, { banners: updates }, token);
-  console.log('Update result:', JSON.stringify(updateRes, null, 2));
-
-  console.log('\nVerifying updates...');
-  let verified = 0;
-  for (const u of updates) {
-    const ok = await checkImageAlive(u.image);
-    console.log(`  ${ok ? 'OK' : 'FAIL'} | ${(u.title || '').slice(0, 40)}`);
-    if (ok) verified++;
-    await sleep(500);
-  }
-  console.log(`\nDone. ${verified}/${updates.length} verified alive.`);
-};
-
-main().catch(err => { console.error('FATAL:', err); process.exit(1); });
+main().catch(e => { console.error('Fatal:', e); process.exit(1); });

@@ -90,6 +90,9 @@ app.use('/home/payment-settings', require('./routes/paymentSettings'));
 app.use('/home/image', require('./routes/imageProxy'));
 app.use('/home/admin', require('./routes/backup'));
 
+const themeController = require('./controllers/themeController');
+app.get('/home/settings/theme', themeController.getTheme);
+
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];

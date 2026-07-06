@@ -12,12 +12,16 @@ export default defineConfig({
       manifest: {
         name: 'THE OUTNET WHOLESALE',
         short_name: 'OUTNET WS',
-        description: 'Wholesale luxury fashion marketplace',
+        description: 'Wholesale luxury fashion marketplace — premium designer brands at wholesale prices',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#000000',
         orientation: 'portrait-primary',
+        categories: ['shopping', 'fashion', 'lifestyle'],
+        screenshots: [
+          { src: '/screenshots/home.png', sizes: '1280x720', type: 'image/png', form_factor: 'wide' },
+        ],
         icons: [
           { src: '/favicon.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
           { src: '/favicon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
@@ -25,9 +29,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ttf,woff,woff2,png,svg,ico}'],
-        navigateFallback: '/',
-        navigateFallbackAllowlist: [/^\/$/],
-        navigateFallbackDenylist: [/\/main\//, /\/home\//, /\/api\//],
+        navigateFallback: '/offline.html',
+        navigateFallbackAllowlist: [/^\/[^.]*$/],
+        navigateFallbackDenylist: [/\/main\//, /\/home\//, /\/api\//, /\/uploads\//],
         runtimeCaching: [
           {
             urlPattern: /\/main\/|\/home\/|\/api\//,

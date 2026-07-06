@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
   status: { type: Number, enum: [0, 1], default: 1 },
   type: { type: Number, default: 0 },
   fundPassword: { type: String, default: '' },
+  twoFactorEnabled: { type: Boolean, default: false },
+  twoFactorSecret: { type: String, default: '' },
+  twoFactorMethod: { type: String, enum: ['app', 'email', 'sms'], default: 'app' },
+  backupCodes: [{ type: String }],
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

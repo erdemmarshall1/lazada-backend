@@ -192,10 +192,12 @@ const fetchPlatformWallet = async () => {
 }
 
 const searchSellers = async () => {
-  const res = await qe(get(`/home/admin/balance/users?role=seller&keyword=${encodeURIComponent(keyword.value || '')}&page=${sellerPage.value}&pageSize=${sellerPageSize.value}`))
+  const res = await qe(get(`/home/admin/balance/users?keyword=${encodeURIComponent(keyword.value || '')}&page=${sellerPage.value}&pageSize=${sellerPageSize.value}`))
   if (res) {
     sellers.value = res.data?.list || []
     sellerTotal.value = res.data?.total || 0
+  } else {
+    ElMessage.warning('Failed to fetch users')
   }
 }
 
@@ -278,6 +280,7 @@ const fetchHistory = async () => {
 onMounted(() => {
   fetchPlatformWallet()
   fetchHistory()
+  searchSellers()
 })
 </script>
 

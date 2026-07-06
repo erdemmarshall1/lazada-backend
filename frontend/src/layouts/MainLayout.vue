@@ -3,7 +3,6 @@
     <div class="v_main_layout">
       <PwaInstallBanner mode="popup" />
       <MainLayoutHeader />
-      <MainLayoutNav />
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -23,7 +22,6 @@ import { useAppStore } from '@/stores/app'
 import { get, qe } from '@/api/request'
 import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
-import MainLayoutNav from './MainLayoutNav.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
 
 const store = useAppStore()
@@ -41,6 +39,34 @@ const loadWallet = async () => {
   }
 }
 
+const applyTheme = (theme) => {
+  if (!theme) return
+  const root = document.documentElement
+  const map = {
+    primaryColor: '--g-main_color',
+    backgroundColor: '--g-bg',
+    textColor: '--g-text',
+    accentColor: '--g-accent',
+    borderColor: '--g-border',
+    fontFamily: '--g-font-family',
+    customCSS: null,
+  }
+  Object.entries(map).forEach(([key, cssVar]) => {
+    if (cssVar && theme[key]) {
+      root.style.setProperty(cssVar, theme[key])
+    }
+  })
+  if (theme.customCSS) {
+    let styleEl = document.getElementById('theme-custom-css')
+    if (!styleEl) {
+      styleEl = document.createElement('style')
+      styleEl.id = 'theme-custom-css'
+      document.head.appendChild(styleEl)
+    }
+    styleEl.textContent = theme.customCSS
+  }
+}
+
 onMounted(async () => {
   const res = await qe(get('/main/index/init'))
   if (res && res.data) {
@@ -49,6 +75,10 @@ onMounted(async () => {
     store.system = res.data.system || {}
     store.webLogo = res.data.webLogo || {}
     store.kefu = res.data.kefu || ''
+  }
+  const themeRes = await qe(get('/home/settings/theme'))
+  if (themeRes?.data) {
+    applyTheme(themeRes.data)
   }
   if (store.token) {
     const userRes = await qe(get('/home/user/getInfo'))

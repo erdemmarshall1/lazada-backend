@@ -1,11 +1,16 @@
 const Banner = require('../models/Banner');
 const Category = require('../models/Category');
+const SystemSettings = require('../models/SystemSettings');
 const { success, fail } = require('../utils/response');
 
 exports.init = async (req, res) => {
   try {
     const banners = await Banner.find({ status: 1, position: 'home' }).sort({ sort: 1 });
     const categories = await Category.find({ status: 1, level: 1 }).sort({ sort: 1 });
+    let themeSettings = await SystemSettings.findOne();
+    if (!themeSettings) {
+      themeSettings = await SystemSettings.create({});
+    }
     res.json(success({
       langList: [
         { code: 'zh-CN', name: '简体中文' },
@@ -20,10 +25,11 @@ exports.init = async (req, res) => {
       banners,
       categories,
       system: {
-        WebTitle: 'Shopify Wholesale',
+        WebTitle: themeSettings.siteName || 'THE OUTNET WHOLESALE',
         Lang: 'en',
       },
-      webLogo: { logo: '' },
+      webLogo: { logo: themeSettings.logoUrl || '' },
+      themeSettings,
       kefu: '',
     }));
   } catch (error) {

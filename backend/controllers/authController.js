@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const speakeasy = require('speakeasy');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Wallet = require('../models/Wallet');
@@ -28,8 +30,54 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.json(fail('Invalid password'));
     }
+    if (user.twoFactorEnabled) {
+      const tempToken = jwt.sign({ id: user._id, twoFactorPending: true }, JWT_SECRET, { expiresIn: '5m' });
+      return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
+    }
     const token = generateToken(user._id);
     res.json(success({ token, userInfo: user }, 'Login successful'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.login2fa = async (req, res) => {
+  try {
+    const { tempToken, token: twoFactorCode } = req.body;
+    if (!tempToken || !twoFactorCode) {
+      return res.json(fail('Temporary token and 2FA code required'));
+    }
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, JWT_SECRET);
+    } catch (e) {
+      return res.json(fail('Temporary token expired or invalid'));
+    }
+    if (!decoded.twoFactorPending) {
+      return res.json(fail('Invalid token'));
+    }
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.json(fail('User not found'));
+    }
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: twoFactorCode,
+      window: 2,
+    });
+    if (verified) {
+      const token = generateToken(user._id);
+      return res.json(success({ token, userInfo: user }, 'Login successful'));
+    }
+    const isBackup = user.backupCodes.find(c => bcrypt.compareSync(twoFactorCode, c));
+    if (isBackup) {
+      user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
+      await user.save();
+      const token = generateToken(user._id);
+      return res.json(success({ token, userInfo: user }, 'Login successful (backup code used)'));
+    }
+    res.json(fail('Invalid 2FA code'));
   } catch (error) {
     res.json(fail(error.message));
   }
