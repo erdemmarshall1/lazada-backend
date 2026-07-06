@@ -16,8 +16,10 @@ jobs:
       - name: Install Railway CLI
         run: npm i -g @railway/cli
 
-      - name: Deploy to Railway
-        run: railway up --project 66e4d9c5-13db-43c6-b89e-1f15a466d7e4 --service lazada-backend --environment production --ci --detach
+      - name: Link and Deploy to Railway
+        run: |
+          railway link --project 66e4d9c5-13db-43c6-b89e-1f15a466d7e4 --yes 2>/dev/null || true
+          railway up --service lazada-backend --environment production --ci --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
