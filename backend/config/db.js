@@ -7,6 +7,7 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(uri);
     console.log(`MongoDB connected: ${conn.connection.host}`);
+    try { await seedFullData(); } catch (e) { console.error('Seed error:', e.message); }
     return true;
   } catch (error) {
     console.error(`MongoDB connection error: ${error.message}`);
@@ -42,9 +43,17 @@ const seedFullData = async () => {
   const Cart = require('../models/Cart');
   const Wallet = require('../models/Wallet');
 
+  const scrapedShop = await Shop.findOne({ name: 'THE OUTNET CN' });
+  const scrapedCount = scrapedShop ? await Product.countDocuments({ shopId: scrapedShop._id }) : 0;
   const existingProducts = await Product.countDocuments();
-  if (existingProducts > 0) {
-    console.log(`Database already has ${existingProducts} products, skipping seed`);
+  if (scrapedCount > 0) {
+    console.log(`Already have ${scrapedCount} scraped products (${existingProducts} total), skipping seed`);
+    return;
+  }
+  if (existingProducts > 0 && !scrapedShop) {
+    console.log(`Database has ${existingProducts} products but no THE OUTNET CN shop, running scraped import only`);
+    await seedScrapedProducts();
+    console.log('Scraped import complete');
     return;
   }
 
@@ -234,29 +243,69 @@ const seedFullData = async () => {
   await Shop.findByIdAndUpdate(shops[0]._id, { productCount: seeded });
   console.log(`Seeded ${seeded} products`);
 
-  // ===== Scraped Products =====
+  await seedScrapedProducts();
+
+  // ===== End Bulk Import =====
+
+  // Create banners
+  const bannerData = [
+    { title: 'Banner 1', image: '/uploads/banners/banner_1.jpg', link: '/', position: 'home', status: 1, sort: 1 },
+    { title: 'Banner 2', image: '/uploads/banners/banner_2.jpg', link: '/', position: 'home', status: 1, sort: 2 },
+    { title: 'Banner 3', image: '/uploads/banners/banner_3.jpg', link: '/', position: 'home', status: 1, sort: 3 },
+    { title: 'Banner 4', image: '/uploads/banners/banner_4.jpg', link: '/', position: 'home', status: 1, sort: 4 },
+  ];
+  for (const b of bannerData) {
+    await Banner.create(b);
+  }
+  console.log(`Seeded ${bannerData.length} banners`);
+};
+
+const seedScrapedProducts = async () => {
+  const Product = require('../models/Product');
+  const Category = require('../models/Category');
+  const Shop = require('../models/Shop');
+  const User = require('../models/User');
+  const Cart = require('../models/Cart');
+  const Wallet = require('../models/Wallet');
+
+  // Find or create scraped categories
+  const scrapedCatsData = [
+    { name: 'Lifestyle' }, { name: 'Men Shoes' }, { name: 'Women Shoes' },
+    { name: 'Accessories' }, { name: 'Men Clothing' }, { name: 'Women Bags' },
+    { name: 'Men Bags' }, { name: 'Women Clothing' }, { name: 'Girls' },
+    { name: 'Boys' }, { name: 'Global Purchase' },
+  ];
+  const scrapedCatMap = {};
+  for (const cd of scrapedCatsData) {
+    let cat = await Category.findOne({ name: cd.name });
+    if (!cat) cat = await Category.create({ name: cd.name, level: 1, status: 1, sort: 99 });
+    scrapedCatMap[cd.name] = cat._id;
+  }
+
+  // Find or create THE OUTNET CN shop
   let scrapedShop = await Shop.findOne({ name: 'THE OUTNET CN' });
   if (!scrapedShop) {
-    const outnetUser = await User.create({
-      username: 'outnet', email: 'outnet@shopifywholesale.com',
-      password: 'seller123', role: 'seller',
-    });
-    await Cart.create({ userId: outnetUser._id, items: [] });
-    await Wallet.create({ userId: outnetUser._id, balance: 100000 });
+    let outnetUser = await User.findOne({ username: 'outnet' });
+    if (!outnetUser) {
+      outnetUser = await User.create({
+        username: 'outnet', email: 'outnet@shopifywholesale.com',
+        password: 'seller123', role: 'seller',
+      });
+      await Cart.create({ userId: outnetUser._id, items: [] });
+      await Wallet.create({ userId: outnetUser._id, balance: 100000 });
+    }
     scrapedShop = await Shop.create({
       userId: outnetUser._id,
       name: 'THE OUTNET CN',
       description: 'Luxury fashion at wholesale prices',
-      status: 1,
-      rating: 4.5,
-      salesCount: 50000,
+      status: 1, rating: 4.5, salesCount: 50000,
     });
     console.log('Created shop: THE OUTNET CN');
   }
 
   const parsePrice = (str) => parseFloat(str.replace(/,/g, ''));
 
-  // Hot scraped products (Women Bags)
+  // Hot scraped products
   const hotProductsData = [
     { title: 'Prada Arqué Zipped Shoulder Bag', price: '3,933.81', sales: 16214, image: '/uploads/product_images/hot_1.jpg' },
     { title: 'Furla 1927 Twist-Lock Mini Tote Bag', price: '280.09', sales: 21585, image: '/uploads/product_images/hot_2.jpg' },
@@ -281,22 +330,17 @@ const seedFullData = async () => {
   let hotCount = 0;
   for (const p of hotProductsData) {
     const existing = await Product.findOne({ name: p.title });
-    if (existing) { console.log(`  [SKIP] ${p.title}`); continue; }
+    if (existing) continue;
     const price = parsePrice(p.price);
     await Product.create({
-      name: p.title,
-      description: p.title,
-      images: [p.image],
-      categoryId: womenBagsId,
-      shopId: scrapedShop._id,
+      name: p.title, description: p.title, images: [p.image],
+      categoryId: womenBagsId, shopId: scrapedShop._id,
       skus: [{ price, originalPrice: Math.round(price * 1.3 * 100) / 100, stock: 999 }],
-      salesCount: p.sales,
-      isHot: true,
-      status: 1,
+      salesCount: p.sales, isHot: true, status: 1,
     });
     hotCount++;
   }
-  console.log(`Seeded ${hotCount} hot scraped products`);
+  if (hotCount) console.log(`Seeded ${hotCount} hot scraped products`);
 
   // Find scraped products
   const findProductsData = [
@@ -324,26 +368,21 @@ const seedFullData = async () => {
   let findCount = 0;
   for (const p of findProductsData) {
     const existing = await Product.findOne({ name: p.title });
-    if (existing) { console.log(`  [SKIP] ${p.title}`); continue; }
+    if (existing) continue;
     const catId = scrapedCatMap[p.cat];
-    if (!catId) { console.log(`  [SKIP] No category "${p.cat}" for ${p.title}`); continue; }
+    if (!catId) continue;
     const price = parsePrice(p.price);
     await Product.create({
-      name: p.title,
-      description: p.title,
-      images: [p.image],
-      categoryId: catId,
-      shopId: scrapedShop._id,
+      name: p.title, description: p.title, images: [p.image],
+      categoryId: catId, shopId: scrapedShop._id,
       skus: [{ price, originalPrice: Math.round(price * 1.3 * 100) / 100, stock: 999 }],
-      salesCount: p.sales,
-      isRecommended: true,
-      status: 1,
+      salesCount: p.sales, isRecommended: true, status: 1,
     });
     findCount++;
   }
-  console.log(`Seeded ${findCount} find scraped products`);
+  if (findCount) console.log(`Seeded ${findCount} find scraped products`);
 
-  // ===== Bulk Import 26,399 Scraped Products =====
+  // Bulk Import 26,399 Scraped Products
   const scrapedDetailsFile = path.join(__dirname, '..', 'scripts', 'scraped_details.json');
   const scrapedImageMapFile = path.join(__dirname, '..', 'scripts', 'scraped_image_map.json');
   if (fs.existsSync(scrapedDetailsFile)) {
@@ -351,7 +390,7 @@ const seedFullData = async () => {
       13: 'Boys', 14: 'Girls', 15: 'Accessories',
       16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
       20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
-      23: 'Lifestyle', 24: 'Global Purchase'
+      23: 'Lifestyle', 24: 'Global Purchase',
     };
     let imageMap = {};
     if (fs.existsSync(scrapedImageMapFile)) {
@@ -360,7 +399,6 @@ const seedFullData = async () => {
     const allDetails = JSON.parse(fs.readFileSync(scrapedDetailsFile, 'utf8'));
     console.log(`\nImporting ${allDetails.length} scraped products from details file...`);
 
-    // Pre-compute originalIds and batch-filter existing ones (single query vs 26K individual queries)
     const allOrigIds = allDetails.map(p => `${p.mer_id || '0'}_${p.product_id}`);
     const existingDocs = await Product.find({ originalId: { $in: allOrigIds } }).select('originalId').lean();
     const existingSet = new Set(existingDocs.map(d => d.originalId));
@@ -379,18 +417,12 @@ const seedFullData = async () => {
       if (!catId) { bulkErrors++; continue; }
       const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
       const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
-      const images = Array.isArray(p.images) && p.images.length > 0
-        ? p.images
-        : [p.image || '/uploads/product.png'];
+      const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
       bulkBatch.push({
-        name: p.title,
-        description: p.content || p.title,
-        images,
-        categoryId: catId,
-        shopId: scrapedShop._id,
+        name: p.title, description: p.content || p.title, images,
+        categoryId: catId, shopId: scrapedShop._id,
         skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
-        salesCount: p.sales || 0,
-        status: 1, isHot: false, isRecommended: false,
+        salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
         minPrice: price, maxPrice: price, originalPrice: marketPrice,
         originalId: origId,
         tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
@@ -413,19 +445,6 @@ const seedFullData = async () => {
   } else {
     console.log('scraped_details.json not found, skipping bulk import');
   }
-  // ===== End Bulk Import =====
-
-  // Create banners
-  const bannerData = [
-    { title: 'Banner 1', image: '/uploads/banners/banner_1.jpg', link: '/', position: 'home', status: 1, sort: 1 },
-    { title: 'Banner 2', image: '/uploads/banners/banner_2.jpg', link: '/', position: 'home', status: 1, sort: 2 },
-    { title: 'Banner 3', image: '/uploads/banners/banner_3.jpg', link: '/', position: 'home', status: 1, sort: 3 },
-    { title: 'Banner 4', image: '/uploads/banners/banner_4.jpg', link: '/', position: 'home', status: 1, sort: 4 },
-  ];
-  for (const b of bannerData) {
-    await Banner.create(b);
-  }
-  console.log(`Seeded ${bannerData.length} banners`);
 };
 
 module.exports = connectDB;
