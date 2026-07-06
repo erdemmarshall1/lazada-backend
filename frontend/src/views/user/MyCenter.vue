@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="mycenter-view">
     <div class="mycenter-container g-flex">
       <div class="mycenter-sidebar">
@@ -54,7 +54,7 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-qianbao', label: 'Balance', path: '/balance' },
         { icon: 'iconfont icon-yinhangka_huaban', label: 'Bank Cards', path: '/bankcardlist' },
         { icon: 'iconfont icon-yue', label: 'Wallet', path: '/walletlist' },
-        { icon: 'iconfont icon-tixianjilu', label: 'Recharge', path: '/rechargehistory' },
+        { icon: 'iconfont icon-tixianjilu', label: 'Deposit', path: '/rechargehistory' },
         { icon: 'iconfont icon-cashouthistory', label: 'Withdrawals', path: '/cashouthistory' },
       ]
     },
@@ -122,3 +122,4 @@ const menuSections = computed(() => {
   .menu-section { margin-bottom: 8px; }
 }
 </style>
+

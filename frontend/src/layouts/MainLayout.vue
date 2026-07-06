@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="v_app">
     <div class="v_main_layout">
       <PwaInstallBanner mode="popup" />
@@ -10,7 +10,7 @@
         </transition>
       </router-view>
       <MainLayoutFooter />
-      <div class="kefu" v-if="store.kefu" @click="openKefu">
+      <LiveChatWidget /><div class="kefu" v-if="store.kefu" @click="openKefu">
         <i class="iconfont icon-kefu"></i>
       </div>
     </div>
@@ -25,6 +25,7 @@ import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
+import LiveChatWidget from '@/components/LiveChatWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null
@@ -108,3 +109,4 @@ onUnmounted(() => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
+

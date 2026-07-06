@@ -1,61 +1,57 @@
-<template>
-  <div v-if="config.enabled" :class="['live-chat-widget', config.widgetPosition || 'bottom-right']">
-    <div v-if="!open" class="lc-bubble" @click="openPanel">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      <span v-if="unreadCount > 0" class="lc-badge">{{ unreadCount }}</span>
+﻿<template>
+  <div class="live-chat-widget">
+    <!-- Floating button -->
+    <div class="lcw-button" @click="open = !open" :class="{ pulse: !open }">
+      <svg v-if="!open" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+      <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
     </div>
 
-    <transition name="lc-slide">
-      <div v-if="open" class="lc-panel" ref="panelRef">
-        <div class="lc-header" :style="{ background: config.widgetColor }">
-          <span>{{ config.widgetTitle || 'Live Chat' }}</span>
-          <button class="lc-close" @click="closePanel">&times;</button>
+    <!-- Chat panel -->
+    <transition name="lcw-slide">
+      <div v-if="open" class="lcw-panel">
+        <div class="lcw-header">
+          <h4>Need help?</h4>
+          <p>Our support team is ready to assist you</p>
         </div>
-
-        <div class="lc-body" ref="bodyRef">
-          <template v-if="!store.isLogin">
-            <div class="lc-login-prompt">
-              <p>Please log in to use live chat.</p>
-              <button class="lc-btn" @click="goLogin">Log In</button>
+        <div class="lcw-body">
+          <!-- WhatsApp -->
+          <a :href="whatsappUrl" target="_blank" rel="noopener" class="lcw-option lcw-whatsapp" @click="trackClick('whatsapp')">
+            <div class="lcw-option-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </div>
-          </template>
-
-          <template v-else-if="loading">
-            <div class="lc-loading">Loading...</div>
-          </template>
-
-          <template v-else>
-            <div class="lc-greeting" v-if="messages.length === 0">
-              <div class="lc-agent-avatar">
-                <svg viewBox="0 0 24 24" width="40" height="40" fill="var(--g-main_color)">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-              </div>
-              <p class="lc-greeting-text">{{ config.autoGreeting }}</p>
-              <p v-if="agentsOnline > 0" class="lc-status online">{{ agentsOnline }} agent(s) online</p>
-              <p v-else class="lc-status offline">{{ config.offlineMessage }}</p>
+            <div class="lcw-option-text">
+              <strong>WhatsApp</strong>
+              <span>Chat with us on WhatsApp</span>
             </div>
+            <span class="lcw-option-arrow">&rarr;</span>
+          </a>
 
-            <div class="lc-messages" v-if="messages.length > 0">
-              <div v-for="msg in messages" :key="msg._id" :class="['lc-msg', msg.fromUserId === userId ? 'lc-msg-user' : 'lc-msg-agent']">
-                <div class="lc-msg-content">{{ msg.content }}</div>
-                <div class="lc-msg-time">{{ formatTime(msg.createdAt) }}</div>
-              </div>
+          <!-- Telegram -->
+          <a :href="telegramUrl" target="_blank" rel="noopener" class="lcw-option lcw-telegram" @click="trackClick('telegram')">
+            <div class="lcw-option-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#0088cc"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
             </div>
+            <div class="lcw-option-text">
+              <strong>Telegram</strong>
+              <span>Message us on Telegram</span>
+            </div>
+            <span class="lcw-option-arrow">&rarr;</span>
+          </a>
 
-            <div v-if="agentTyping" class="lc-typing">Agent is typing...</div>
-          </template>
+          <!-- In-App Chat (if logged in) -->
+          <div v-if="store.isLogin" class="lcw-option lcw-inapp" @click="openInAppChat">
+            <div class="lcw-option-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--g-main_color)"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+            </div>
+            <div class="lcw-option-text">
+              <strong>In-App Chat</strong>
+              <span>Send us a message</span>
+            </div>
+            <span class="lcw-option-arrow">&rarr;</span>
+          </div>
         </div>
-
-        <div class="lc-footer" v-if="store.isLogin">
-          <input v-model="inputText" class="lc-input" placeholder="Type a message..." @keyup.enter="sendMsg" :disabled="sending" />
-          <button class="lc-send-btn" :style="{ background: config.widgetColor }" @click="sendMsg" :disabled="sending || !inputText.trim()">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-          </button>
+        <div class="lcw-footer">
+          <p>Typically replies within 1 hour</p>
         </div>
       </div>
     </transition>
@@ -63,184 +59,181 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useAppStore } from '@/stores/app'
-import { get, $http } from '@/api/request'
-import { getSocket } from '@/socket'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAppStore } from '@/stores/app'
 
-const store = useAppStore()
-const router = useRouter()
-const userId = computed(() => store.userInfo?._id)
 const open = ref(false)
-const loading = ref(false)
-const sending = ref(false)
-const inputText = ref('')
-const messages = ref([])
-const config = reactive({ enabled: false, widgetTitle: 'Live Chat', widgetColor: '#165dff', widgetPosition: 'bottom-right', autoGreeting: '', offlineMessage: '' })
-const agentsOnline = ref(0)
-const agentTyping = ref(false)
-const unreadCount = ref(0)
-const panelRef = ref(null)
-const bodyRef = ref(null)
+const router = useRouter()
+const store = useAppStore()
 
-const scrollBottom = async () => {
-  await nextTick()
-  if (bodyRef.value) bodyRef.value.scrollTop = bodyRef.value.scrollHeight
+const PHONE_NUMBER = '14155238886' // WhatsApp number
+const TELEGRAM_USERNAME = 'theoutnet_support' // Telegram username
+
+const whatsappUrl = computed(() => `https://wa.me/${PHONE_NUMBER}?text=Hello%20THE%20OUTNET%20support%2C%20I%20need%20help`)
+const telegramUrl = computed(() => `https://t.me/${TELEGRAM_USERNAME}`)
+
+const trackClick = (channel) => {
+  console.log(`Live chat clicked: ${channel}`)
 }
 
-const formatTime = (t) => {
-  if (!t) return ''
-  const d = new Date(t)
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-}
-
-const openPanel = async () => {
-  open.value = true
-  unreadCount.value = 0
-  if (!store.isLogin) return
-  loading.value = true
-  try {
-    const res = await get('/home/userKefu/getKefuHistory')
-    if (res?.code === 0 && Array.isArray(res.data)) {
-      messages.value = res.data
-    }
-  } catch (e) {}
-  loading.value = false
-  await scrollBottom()
-}
-
-const closePanel = () => {
+const openInAppChat = () => {
   open.value = false
-}
-
-const sendMsg = async () => {
-  const text = inputText.value.trim()
-  if (!text || sending.value || !store.isLogin) return
-  sending.value = true
-  inputText.value = ''
-  const tempId = 'temp_' + Date.now()
-  messages.value.push({ _id: tempId, content: text, fromUserId: userId.value, createdAt: new Date().toISOString() })
-  await scrollBottom()
-  try {
-    const res = await $http.post('/home/userKefu/sendKefuMsg', { content: text })
-    if (res?.code === 0 && res?.data) {
-      const idx = messages.value.findIndex(m => m._id === tempId)
-      if (idx !== -1) messages.value[idx] = res.data
-    }
-  } catch (e) {}
-  sending.value = false
-}
-
-const goLogin = () => {
-  closePanel()
-  router.push({ name: 'login' })
-}
-
-const loadConfig = async () => {
-  try {
-    const res = await get('/home/userKefu/live-chat-config')
-    if (res?.code === 0 && res?.data) {
-      config.enabled = res.data.enabled
-      config.widgetTitle = res.data.widgetTitle || 'Live Chat'
-      config.widgetColor = res.data.widgetColor || '#165dff'
-      config.widgetPosition = res.data.widgetPosition || 'bottom-right'
-      config.autoGreeting = res.data.autoGreeting || ''
-      config.offlineMessage = res.data.offlineMessage || ''
-    }
-  } catch (e) {}
-}
-
-const handleAgentReply = (msg) => {
-  if (!open.value) {
-    unreadCount.value++
-    return
-  }
-  const exists = messages.value.some(m => m._id === msg._id)
-  if (!exists) {
-    messages.value.push(msg)
-    scrollBottom()
-  }
-  agentTyping.value = false
-}
-
-const handleKefuMessage = (msg) => {
-  if (msg.fromUserId?._id === userId.value) {
-    const exists = messages.value.some(m => m._id === msg._id)
-    if (!exists) {
-      messages.value.push(msg)
-      scrollBottom()
-    }
-  }
-}
-
-const handleAgentTyping = () => {
-  agentTyping.value = true
-  setTimeout(() => { agentTyping.value = false }, 3000)
-}
-
-onMounted(loadConfig)
-
-onUnmounted(() => {})
-
-const socket = getSocket()
-if (socket) {
-  socket.on('agentReply', handleAgentReply)
-  socket.on('kefuMessage', handleKefuMessage)
-  socket.on('agentTyping', handleAgentTyping)
+  router.push('/chattostorelist')
 }
 </script>
 
 <style scoped>
-.live-chat-widget { position: fixed; z-index: 9999; font-family: inherit; }
-.live-chat-widget.bottom-right { right: 20px; bottom: 20px; }
-.live-chat-widget.bottom-left { left: 20px; bottom: 20px; }
+.live-chat-widget {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-.lc-bubble { width: 56px; height: 56px; border-radius: 50%; background: var(--g-main_color); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: transform 0.2s; position: relative; }
-.lc-bubble:hover { transform: scale(1.1); }
-.lc-badge { position: absolute; top: -4px; right: -4px; background: #f56c6c; color: #fff; border-radius: 50%; min-width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+.lcw-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--g-main_color), #ff8c38);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+  margin-left: auto;
+}
 
-.lc-panel { position: fixed; bottom: 20px; right: 20px; width: 340px; height: 480px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); display: flex; flex-direction: column; overflow: hidden; }
-.live-chat-widget.bottom-left .lc-panel { right: auto; left: 20px; }
+.lcw-button:hover {
+  transform: scale(1.1);
+}
 
-.lc-header { padding: 14px 16px; color: #fff; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
-.lc-close { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+.lcw-button.pulse {
+  animation: lcw-pulse 2s infinite;
+}
 
-.lc-body { flex: 1; overflow-y: auto; padding: 16px; }
+@keyframes lcw-pulse {
+  0% { box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  50% { box-shadow: 0 4px 30px rgba(255, 140, 56, 0.4); }
+  100% { box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+}
 
-.lc-login-prompt { text-align: center; padding: 60px 20px; }
-.lc-login-prompt p { color: #999; margin-bottom: 16px; }
-.lc-btn { padding: 8px 24px; border: none; border-radius: 6px; background: var(--g-main_color); color: #fff; cursor: pointer; font-size: 14px; }
-.lc-loading { text-align: center; padding: 60px 20px; color: #999; }
+.lcw-panel {
+  position: absolute;
+  bottom: 68px;
+  right: 0;
+  width: 340px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
 
-.lc-greeting { text-align: center; padding: 30px 16px; }
-.lc-agent-avatar { margin-bottom: 12px; }
-.lc-greeting-text { color: #333; font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
-.lc-status { font-size: 12px; }
-.lc-status.online { color: #67c23a; }
-.lc-status.offline { color: #e6a23c; }
+.lcw-header {
+  background: linear-gradient(135deg, var(--g-main_color), #ff8c38);
+  color: #fff;
+  padding: 24px 20px 20px;
+}
 
-.lc-messages { display: flex; flex-direction: column; gap: 8px; }
-.lc-msg { max-width: 80%; }
-.lc-msg-agent { align-self: flex-start; }
-.lc-msg-user { align-self: flex-end; }
-.lc-msg-content { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; word-break: break-word; }
-.lc-msg-agent .lc-msg-content { background: #f0f0f0; color: #333; border-bottom-left-radius: 4px; }
-.lc-msg-user .lc-msg-content { background: var(--g-main_color); color: #fff; border-bottom-right-radius: 4px; }
-.lc-msg-time { font-size: 11px; color: #bbb; margin-top: 2px; padding: 0 4px; }
+.lcw-header h4 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
 
-.lc-typing { padding: 8px 16px; font-size: 12px; color: #999; font-style: italic; }
+.lcw-header p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
 
-.lc-footer { display: flex; padding: 10px 12px; border-top: 1px solid #eee; gap: 8px; background: #fafafa; }
-.lc-input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 14px; outline: none; }
-.lc-input:focus { border-color: var(--g-main_color); }
-.lc-send-btn { width: 36px; height: 36px; border: none; border-radius: 50%; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.lc-send-btn:disabled { opacity: 0.5; cursor: default; }
+.lcw-body {
+  padding: 12px;
+}
 
-.lc-slide-enter-active, .lc-slide-leave-active { transition: all 0.3s ease; }
-.lc-slide-enter-from, .lc-slide-leave-to { opacity: 0; transform: translateY(20px) scale(0.95); }
+.lcw-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 4px;
+}
 
-@media (max-width: 480px) {
-  .lc-panel { width: 100vw; height: 100vh; bottom: 0 !important; right: 0 !important; left: 0 !important; border-radius: 0; }
+.lcw-option:hover {
+  background: #f5f5f5;
+}
+
+.lcw-option-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.lcw-option-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lcw-option-text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lcw-option-text span {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.lcw-option-arrow {
+  font-size: 20px;
+  color: #ccc;
+}
+
+.lcw-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.lcw-footer p {
+  margin: 0;
+  font-size: 11px;
+  color: #bbb;
+}
+
+.lcw-slide-enter-active, .lcw-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.lcw-slide-enter-from, .lcw-slide-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@media (max-width: 768px) {
+  .live-chat-widget {
+    bottom: 80px;
+    right: 12px;
+  }
+  .lcw-panel {
+    width: 300px;
+    right: 0;
+  }
 }
 </style>
+

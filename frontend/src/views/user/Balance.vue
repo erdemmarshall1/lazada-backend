@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <h3>Balance</h3>
     <div class="balance-card g-flex-center">
@@ -6,17 +6,17 @@
       <div class="balance-label">Available Balance</div>
     </div>
     <div class="balance-actions g-flex" style="gap:12px;margin-top:16px">
-      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showRecharge = true">Recharge</el-button>
+      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDeposit = true">Deposit</el-button>
       <el-button @click="showWithdraw = true">Withdraw</el-button>
     </div>
 
-    <el-dialog v-model="showRecharge" title="Recharge" width="520px">
+    <el-dialog v-model="showDeposit" title="Deposit" width="520px">
       <el-form ref="formRef" :model="formData" :rules="rules" label-position="top">
-        <el-form-item label="Amount" prop="rechargeAmount">
-          <el-input-number v-model="formData.rechargeAmount" :min="1" :max="100000" style="width:100%" />
+        <el-form-item label="Amount" prop="depositAmount">
+          <el-input-number v-model="formData.depositAmount" :min="1" :max="100000" style="width:100%" />
         </el-form-item>
-        <el-form-item label="Payment Method" prop="rechargePaymentMethod">
-          <el-select v-model="formData.rechargePaymentMethod" placeholder="Select payment method" style="width:100%" @change="onPaymentMethodChange">
+        <el-form-item label="Payment Method" prop="depositPaymentMethod">
+          <el-select v-model="formData.depositPaymentMethod" placeholder="Select payment method" style="width:100%" @change="onPaymentMethodChange">
             <el-option v-for="m in paymentMethods" :key="m.value" :label="m.label" :value="m.value" />
           </el-select>
         </el-form-item>
@@ -49,8 +49,8 @@
         </div>
       </el-form>
       <template #footer>
-        <el-button @click="showRecharge = false">Cancel</el-button>
-        <el-button type="primary" :loading="submitting" @click="doRecharge">Confirm</el-button>
+        <el-button @click="showDeposit = false">Cancel</el-button>
+        <el-button type="primary" :loading="submitting" @click="doDeposit">Confirm</el-button>
       </template>
     </el-dialog>
 
@@ -95,7 +95,7 @@ import QRCode from 'qrcode'
 import TransactionPasswordDialog from '@/components/TransactionPasswordDialog.vue'
 
 const balance = ref(0)
-const showRecharge = ref(false)
+const showDeposit = ref(false)
 const showWithdraw = ref(false)
 const withdrawAmount = ref(100)
 const withdrawPaymentMethod = ref('')
@@ -113,14 +113,14 @@ const selectedWallet = ref('')
 const route = useRoute()
 
 const formData = reactive({
-  rechargeAmount: 100,
-  rechargePaymentMethod: '',
+  depositAmount: 100,
+  depositPaymentMethod: '',
   receipt: '',
 })
 
 const rules = {
-  rechargeAmount: [{ required: true, message: 'Amount is required', trigger: 'blur' }],
-  rechargePaymentMethod: [{ required: true, message: 'Payment method is required', trigger: 'change' }],
+  depositAmount: [{ required: true, message: 'Amount is required', trigger: 'blur' }],
+  depositPaymentMethod: [{ required: true, message: 'Payment method is required', trigger: 'change' }],
   receipt: [{ required: true, message: 'Please upload a payment receipt', trigger: 'change' }],
 }
 
@@ -165,26 +165,26 @@ const onUploadError = () => {
   ElMessage.error('Upload failed')
 }
 
-const doRecharge = async () => {
+const doDeposit = async () => {
   if (!formRef.value) return
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   submitting.value = true
   await qe(post('/home/userRecharge/add', {
-    amount: formData.rechargeAmount,
-    paymentMethod: formData.rechargePaymentMethod,
+    amount: formData.depositAmount,
+    paymentMethod: formData.depositPaymentMethod,
     receipt: receiptUrl.value,
   }))
   submitting.value = false
-  showRecharge.value = false
+  showDeposit.value = false
   receiptUrl.value = ''
   receiptFileList.value = []
-  formData.rechargeAmount = 100
-  formData.rechargePaymentMethod = ''
+  formData.depositAmount = 100
+  formData.depositPaymentMethod = ''
   formData.receipt = ''
   selectedWallet.value = ''
   qrDataUrl.value = ''
-  ElMessage.success('Recharge submitted for admin review')
+  ElMessage.success('Deposit submitted for admin review')
   await loadBalance()
 }
 
@@ -246,9 +246,9 @@ const loadSettings = async () => {
 onMounted(async () => {
   await loadSettings()
   await loadBalance()
-  if (route.query.recharge === 'true') {
+  if (route.query.Deposit === 'true') {
     await nextTick()
-    showRecharge.value = true
+    showDeposit.value = true
   }
 })
 </script>
@@ -264,3 +264,6 @@ onMounted(async () => {
   .balance-card { padding: 20px; }
 }
 </style>
+
+
+

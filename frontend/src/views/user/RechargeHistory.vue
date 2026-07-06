@@ -1,5 +1,5 @@
-<template>
-  <div><h3>Recharge History</h3><div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">No records</span></div><div v-for="item in list" :key="item._id" class="record-item">${{ item.amount }} - {{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '—' }}</div></div>
+﻿<template>
+  <div><h3>Deposit History</h3><div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">No records</span></div><div v-for="item in list" :key="item._id" class="record-item">${{ item.amount }} - {{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'â€”' }}</div></div>
 </template>
 
 <script setup>
@@ -11,3 +11,4 @@ onMounted(async () => { const res = await get('/home/userRecharge/getList', { pa
 <style scoped>.record-item { padding: 12px; border-bottom: 1px solid var(--g-border); font-size: 14px; }
 @media (max-width: 768px) { .record-item { padding: 10px; font-size: 13px; } }
 </style>
+

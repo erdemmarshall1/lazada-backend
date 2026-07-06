@@ -1,11 +1,12 @@
-<template>
+﻿<template>
   <div class="ton-header">
     <div class="ton-header-top">
       <div class="ton-header-top-inner">
         <div class="ton-header-top-left">
           <a href="javascript:void(0)" @click="$router.push('/ordertracking')">Track Your Order</a>
           <a href="javascript:void(0)" @click="$router.push('/myorder')">Create A Return</a>
-          <a href="javascript:void(0)" @click="$router.push('/rule')">Customer Care</a>
+          <a href="javascript:void(0)" @click="$router.push('/contact-us')">Customer Care</a>
+          <a href="javascript:void(0)" @click="$router.push('/download-app')">Download the App</a>
         </div>
         <div class="ton-header-top-right">
           <template v-if="!store.isLogin">
@@ -20,9 +21,14 @@
             </span>
             <span class="ton-header-logout" @click="handleLogout">Logout</span>
           </template>
-          <span class="ton-header-lang" @click="$router.push('/locales')">
-            {{ currentLangName }}
-          </span>
+          <el-dropdown trigger="click" class="ton-header-lang-dropdown" @command="handleLangChange">
+            <span class="ton-header-lang">
+              {{ currentLangName }} <i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
       </div>
     </div>
@@ -42,13 +48,13 @@
           <a href="/searchgoods">Accessories</a>
         </nav>
         <div class="ton-header-actions">
-          <button class="ton-header-icon" @click="$router.push('/searchgoods')">
+          <button class="ton-header-icon" @click="$router.push('/searchgoods')" aria-label="Search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </button>
-          <button class="ton-header-icon" @click="$router.push('/myaccount')">
+          <button class="ton-header-icon" @click="$router.push('/myaccount')" aria-label="Account">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
           </button>
-          <button class="ton-header-icon" @click="$router.push('/car')">
+          <button class="ton-header-icon" @click="$router.push('/car')" aria-label="Cart">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span class="ton-header-cart-count" v-if="store.carNum > 0">{{ store.carNum }}</span>
           </button>
@@ -56,6 +62,7 @@
       </div>
     </div>
 
+    <!-- Mobile Drawer -->
     <div class="ton-mobile-drawer-overlay" :class="{ open: mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
     <div class="ton-mobile-drawer" :class="{ open: mobileMenuOpen }">
       <div class="ton-drawer-header">
@@ -67,47 +74,72 @@
         <input v-model="keyword" type="text" placeholder="Search..." @keyup.enter="searchMobile" />
       </div>
       <div class="ton-drawer-items">
-        <div class="ton-drawer-item" @click="goMobile('/main')">Home</div>
-        <div class="ton-drawer-item" @click="goMobile('/tuijianlist')">Recommended</div>
-        <div class="ton-drawer-item" @click="goMobile('/remenglist')">Popular</div>
-        <div class="ton-drawer-item" @click="goMobile('/myorder')">My Orders</div>
-        <div class="ton-drawer-item" @click="goMobile('/car')">Cart ({{ store.carNum }})</div>
-        <div class="ton-drawer-item" @click="goMobile('/myaccount')">My Account</div>
+        <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false">Home</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Just In</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Designers</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Clothing</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Shoes</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Bags</div>
+        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Accessories</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item" v-if="store.isLogin" @click="handleLogoutMobile">Logout</div>
+        <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false">About THE OUTNET</div>
+        <div class="ton-drawer-item" @click="$router.push('/contact-us'); mobileMenuOpen = false">Customer Care</div>
+        <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false">FAQ</div>
+        <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false">Download the App</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { get, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
+import i18n from '@/locales'
 
 const router = useRouter()
 const store = useAppStore()
-const keyword = ref('')
 const mobileMenuOpen = ref(false)
+const keyword = ref('')
 
-const langNames = { 'en': 'English', 'zh-CN': '简体中文', 'de': 'Deutsch', 'fr': 'Français', 'ja': '日本語', 'es': 'español', 'vi': 'Tiếng Việt' }
-const currentLangName = computed(() => langNames[store.lang] || 'English')
+const currentLangName = computed(() => {
+  const lang = store.langList?.find(l => l.code === store.lang)
+  return lang?.name || 'English'
+})
 
-const goMobile = (path) => { mobileMenuOpen.value = false; router.push(path) }
-const searchMobile = () => {
-  if (keyword.value.trim()) { mobileMenuOpen.value = false; router.push('/searchgoods?keyword=' + encodeURIComponent(keyword.value.trim())) }
+const handleLangChange = (code) => {
+  store.setLanguage(code)
+  i18n.global.locale.value = code
+  window.location.reload()
 }
-const handleLogout = () => { store.logout(); router.push('/login'); ElMessage.success('Logged out') }
-const handleLogoutMobile = () => { mobileMenuOpen.value = false; store.logout(); router.push('/login'); ElMessage.success('Logged out') }
+
+const searchMobile = () => {
+  if (keyword.value.trim()) {
+    router.push({ path: '/searchgoods', query: { keyword: keyword.value } })
+    mobileMenuOpen.value = false
+  }
+}
+
+const handleLogout = async () => {
+  await qe(get('/home/login/logout'))
+  store.clearLoginInfo()
+  ElMessage.success('Logged out')
+  router.push('/main')
+}
+
+watch(() => store.currLang, () => {
+  window.location.reload()
+})
 </script>
 
 <style scoped>
-.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; }
+.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .ton-header-top { background: #faf8f4; border-bottom: 1px solid #e8e6e2; }
 .ton-header-top-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 20px; }
 .ton-header-top-left { display: flex; align-items: center; gap: 20px; }
-.ton-header-top-left a { font-size: 11px; color: #555; letter-spacing: 0.3px; }
+.ton-header-top-left a { font-size: 11px; color: #555; letter-spacing: 0.3px; text-decoration: none; cursor: pointer; }
 .ton-header-top-left a:hover { color: #000; text-decoration: underline; }
 .ton-header-top-right { display: flex; align-items: center; gap: 16px; }
 .ton-header-top-right a, .ton-header-top-right span { font-size: 11px; color: #555; cursor: pointer; }
@@ -117,18 +149,19 @@ const handleLogoutMobile = () => { mobileMenuOpen.value = false; store.logout();
 .ton-header-user .iconfont { font-size: 14px; }
 .ton-header-wallet { color: #b8922a !important; font-weight: 600; }
 .ton-header-logout { color: #c0392b !important; }
-.ton-header-lang { cursor: pointer; padding: 0 8px; border-left: 1px solid #e8e6e2; }
+.ton-header-lang { cursor: pointer; padding: 0 8px; border-left: 1px solid #e8e6e2; display: flex; align-items: center; gap: 4px; }
+.ton-header-lang-dropdown { cursor: pointer; }
 
 .ton-header-main { background: #ffffff; border-bottom: 1px solid #e8e6e2; }
 .ton-header-main-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; padding: 0 20px; }
 .ton-hamburger { display: none; font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; margin-right: 16px; color: #000; }
-.ton-logo { font-size: 20px; font-weight: 700; letter-spacing: 3px; cursor: pointer; white-space: nowrap; margin-right: 40px; }
+.ton-logo { font-size: 22px; font-weight: 300; letter-spacing: 4px; cursor: pointer; white-space: nowrap; margin-right: 40px; color: #000; text-transform: uppercase; }
 .ton-nav { display: flex; align-items: center; gap: 28px; flex: 1; }
-.ton-nav a { font-size: 12px; letter-spacing: 1px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; }
-.ton-nav a:hover { opacity: 0.6; }
-.ton-header-actions { display: flex; align-items: center; gap: 12px; }
+.ton-nav a { font-size: 12px; letter-spacing: 1.2px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 400; }
+.ton-nav a:hover { opacity: 0.5; }
+.ton-header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .ton-header-icon { position: relative; background: none; border: none; cursor: pointer; padding: 6px; color: #000; display: flex; align-items: center; }
-.ton-header-icon:hover { opacity: 0.6; }
+.ton-header-icon:hover { opacity: 0.5; }
 .ton-header-cart-count { position: absolute; top: 0; right: 0; background: #000; color: #fff; font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 
 .ton-mobile-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998; display: none; }
@@ -138,7 +171,7 @@ const handleLogoutMobile = () => { mobileMenuOpen.value = false; store.logout();
 .ton-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #e8e6e2; font-weight: 600; font-size: 14px; }
 .ton-drawer-header button { font-size: 24px; background: none; border: none; cursor: pointer; }
 .ton-drawer-search { padding: 12px 16px; border-bottom: 1px solid #e8e6e2; }
-.ton-drawer-search input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #e8e6e2; font-size: 14px; }
+.ton-drawer-search input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #e8e6e2; font-size: 14px; outline: none; box-sizing: border-box; }
 .ton-drawer-items { padding: 4px 0; }
 .ton-drawer-item { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #000; }
 .ton-drawer-item:hover { background: #f4f2ee; }

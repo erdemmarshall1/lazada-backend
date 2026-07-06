@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+﻿import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
 const routes = [
@@ -27,6 +27,17 @@ const routes = [
       { path: 'sourcegoodsdetail', name: 'sourcegoodsdetail', component: () => import('@/views/wholesale/SourceGoodsDetail.vue'), meta: { title: 'Wholesale' } },
       { path: 'rule', name: 'rule', component: () => import('@/views/other/Rule.vue'), meta: { title: 'Terms' } },
       { path: 'miaoshalist', name: 'miaoshalist', component: () => import('@/views/product/MiaoShaList.vue'), meta: { title: 'Flash Sale' } },
+      { path: 'about-us', name: 'about-us', component: () => import('@/views/info/AboutUs.vue'), meta: { title: 'About Us' } },
+      { path: 'join-us', name: 'join-us', component: () => import('@/views/info/JoinUs.vue'), meta: { title: 'Join Us' } },
+      { path: 'contact-us', name: 'contact-us', component: () => import('@/views/info/ContactUs.vue'), meta: { title: 'Contact Us' } },
+      { path: 'exchange-cooperation', name: 'exchange-cooperation', component: () => import('@/views/info/ExchangeCooperation.vue'), meta: { title: 'Exchange and Cooperation' } },
+      { path: 'merchant-agreement', name: 'merchant-agreement', component: () => import('@/views/info/MerchantAgreement.vue'), meta: { title: 'Merchant Agreement' } },
+      { path: 'supplier-cooperation', name: 'supplier-cooperation', component: () => import('@/views/info/SupplierCooperation.vue'), meta: { title: 'Supplier Cooperation' } },
+      { path: 'precision-operation', name: 'precision-operation', component: () => import('@/views/info/PrecisionOperation.vue'), meta: { title: 'Precision Operation' } },
+      { path: 'strategic-management', name: 'strategic-management', component: () => import('@/views/info/StrategicManagement.vue'), meta: { title: 'Strategic Management' } },
+      { path: 'course-driven', name: 'course-driven', component: () => import('@/views/info/CourseDriven.vue'), meta: { title: 'Course Driven' } },
+      { path: 'faq', name: 'faq', component: () => import('@/views/info/FaqPage.vue'), meta: { title: 'FAQ' } },
+      { path: 'download-app', name: 'download-app', component: () => import('@/views/info/DownloadApp.vue'), meta: { title: 'Download the App' } },
       {
         path: 'mycenter',
         component: () => import('@/views/user/MyCenter.vue'),
@@ -47,14 +58,12 @@ const routes = [
           { path: '/myfollowshop', name: 'myfollowshop', component: () => import('@/views/store/MyFollowShop.vue'), meta: { title: 'Followed Stores', requiresAuth: true } },
           { path: '/seehistory', name: 'seehistory', component: () => import('@/views/user/SeeHistory.vue'), meta: { title: 'History', requiresAuth: true } },
           { path: '/mywishlist', name: 'mywishlist', component: () => import('@/views/user/MyWishlist.vue'), meta: { title: 'Wishlist', requiresAuth: true } },
-          { path: '/sourcegoods', name: 'sourcegoods', component: () => import('@/views/wholesale/SourceGoods.vue'), meta: { title: 'Wholesale', requiresAuth: true } },
-          { path: '/ordertracking', name: 'ordertracking', component: () => import('@/views/logistics/OrderTracking.vue'), meta: { title: 'Order Tracking', requiresAuth: true } },
-          { path: '/storegoodcontrol', name: 'storegoodcontrol', component: () => import('@/views/store/StoreGoodControl.vue'), meta: { title: 'Products', requiresAuth: true } },
-          { path: '/storeordercontrol', name: 'storeordercontrol', component: () => import('@/views/store/StoreOrderControl.vue'), meta: { title: 'Orders', requiresAuth: true } },
-          { path: '/sellerlogistics', name: 'sellerlogistics', component: () => import('@/views/logistics/SellerLogistics.vue'), meta: { title: 'Logistics', requiresAuth: true } },
-          { path: '/chattostorelist', name: 'chattostorelist', component: () => import('@/views/chat/ChatToStoreList.vue'), meta: { title: 'Messages', requiresAuth: true } },
-          { path: '/chattostore', name: 'chattostore', component: () => import('@/views/chat/ChatToStore.vue'), meta: { title: 'Chat', requiresAuth: true } },
-          { path: '/chattouserlist', name: 'chattouserlist', component: () => import('@/views/chat/ChatToUserList.vue'), meta: { title: 'Customer Messages', requiresAuth: true } },
+          { path: '/sourcegoods', name: 'sourcegoods', component: () => import('@/views/wholesale/SourceGoods.vue'), meta: { title: 'Source Goods', requiresAuth: true } },
+          { path: '/ordertracking', name: 'ordertracking', component: () => import('@/views/logistics/OrderTracking.vue'), meta: { title: 'Track Order', requiresAuth: true } },
+          { path: '/seller-logistics', name: 'seller-logistics', component: () => import('@/views/logistics/SellerLogistics.vue'), meta: { title: 'Seller Logistics', requiresAuth: true } },
+          { path: '/chattostore', name: 'chattostore', component: () => import('@/views/chat/ChatToStore.vue'), meta: { title: 'Chat Store', requiresAuth: true } },
+          { path: '/chattostorelist', name: 'chattostorelist', component: () => import('@/views/chat/ChatToStoreList.vue'), meta: { title: 'Chats', requiresAuth: true } },
+          { path: '/chattouserlist', name: 'chattouserlist', component: () => import('@/views/chat/ChatToUserList.vue'), meta: { title: 'User Chats', requiresAuth: true } },
           { path: '/chattouser', name: 'chattouser', component: () => import('@/views/chat/ChatToUser.vue'), meta: { title: 'Chat', requiresAuth: true } },
           { path: '/mystore', name: 'mystore', component: () => import('@/views/store/MyStore.vue'), meta: { title: 'My Store', requiresAuth: true } },
           { path: '/internalmsg', name: 'internalmsg', component: () => import('@/views/message/InternalMsg.vue'), meta: { title: 'Messages', requiresAuth: true } },
