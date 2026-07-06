@@ -93,6 +93,20 @@ app.use('/home/admin', require('./routes/backup'));
 const themeController = require('./controllers/themeController');
 app.get('/home/settings/theme', themeController.getTheme);
 
+// Reimport trigger (protected by REIMPORT_SECRET)
+app.get('/api/reimport', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  res.json({ message: 'Reimport started' });
+  try {
+    const reimport = require('./scripts/reimport_clean');
+    await reimport();
+  } catch (e) {
+    console.error('Reimport error:', e.message);
+  }
+});
+
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];
