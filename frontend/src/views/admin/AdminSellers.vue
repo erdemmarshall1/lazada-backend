@@ -4,6 +4,7 @@
     <div class="g-responsive-table">
     <el-table :data="shops" v-loading="loading" style="width:100%">
       <el-table-column prop="_id" label="ID" width="200" />
+      <el-table-column prop="storeNumber" label="Store #" width="100" />
       <el-table-column prop="name" label="Store Name" />
       <el-table-column prop="fullName" label="Owner" />
       <el-table-column prop="email" label="Email" />

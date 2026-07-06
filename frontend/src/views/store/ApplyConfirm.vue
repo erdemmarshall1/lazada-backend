@@ -24,6 +24,10 @@
       <div class="summary-card">
         <h4>Application Details</h4>
         <div class="summary-grid">
+          <div class="summary-item" v-if="shop.status === 1">
+            <span class="summary-label">Store #</span>
+            <span class="summary-value">{{ shop.storeNumber }}</span>
+          </div>
           <div class="summary-item">
             <span class="summary-label">Store Name</span>
             <span class="summary-value">{{ shop.name }}</span>

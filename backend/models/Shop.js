@@ -15,6 +15,7 @@ const shopSchema = new mongoose.Schema({
   utilityBill: { type: String, default: '' },
   idNumber: { type: String, default: '' },
   invitationCode: { type: String, default: '' },
+  storeNumber: { type: String, unique: true, sparse: true },
   status: { type: Number, enum: [0, 1, 2], default: 0 },
   rating: { type: Number, default: 5, min: 0, max: 5 },
   salesCount: { type: Number, default: 0 },

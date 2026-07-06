@@ -51,7 +51,14 @@ router.get('/shops', adminAuth, async (req, res) => {
 
 router.post('/approve-shop', adminAuth, async (req, res) => {
   try {
-    const shop = await Shop.findByIdAndUpdate(req.body.id, { status: 1 }, { new: true });
+    // Get the next store number by counting approved shops
+    const approvedCount = await Shop.countDocuments({ status: 1 });
+    const storeNumber = `S${String(approvedCount + 1).padStart(5, '0')}`;
+    
+    const shop = await Shop.findByIdAndUpdate(req.body.id, { 
+      status: 1, 
+      storeNumber 
+    }, { new: true });
     if (!shop) return res.json(fail('Shop not found'));
     await User.findByIdAndUpdate(shop.userId, { role: 'seller' });
     res.json(success(shop, 'Shop approved'));

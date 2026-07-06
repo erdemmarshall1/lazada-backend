@@ -46,6 +46,7 @@ async function addStores() {
       userId: user._id, name: def.name, description: def.desc,
       logo: def.logo, status: 1, rating: def.rating,
       salesCount: def.sales, productCount: 0, followerCount: def.followers,
+      storeNumber: `S${String(i + 2).padStart(5, '0')}`,
     })
     console.log(`  CREATED: "${def.name}" (user: ${username})`)
     created++

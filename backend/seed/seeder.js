@@ -47,7 +47,9 @@ const seed = async () => {
     const shop = await Shop.create({
       userId: seller._id, name: 'Global Fashion Store',
       description: 'Best fashion products from around the world',
-      logo: `${LOGO_PREFIX}/globalstore/200/200`, status: 1, rating: 4.5, salesCount: 1523, productCount: 0, followerCount: 845,
+      logo: `${LOGO_PREFIX}/globalstore/200/200`, status: 1, rating: 4.5, 
+      salesCount: 1523, productCount: 0, followerCount: 845,
+      storeNumber: 'S00001',
     });
 
     const storeDefs = [
@@ -72,6 +74,7 @@ const seed = async () => {
         userId: user._id, name: def.name, description: def.desc,
         logo: def.logo, status: 1, rating: def.rating,
         salesCount: def.sales, productCount: 0, followerCount: def.followers,
+        storeNumber: `S${String(i + 2).padStart(5, '0')}`,
       })
       createdStores.push(s)
     }
