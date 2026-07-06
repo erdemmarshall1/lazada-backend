@@ -4,8 +4,19 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Wallet = require('../models/Wallet');
+const LoginHistory = require('../models/LoginHistory');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/app');
 const { success, fail } = require('../utils/response');
+
+const recordLogin = (userId, req, method = 'password', success = true) => {
+  LoginHistory.create({
+    userId,
+    ip: req.ip || req.connection?.remoteAddress || '',
+    userAgent: req.headers?.['user-agent'] || '',
+    method,
+    success,
+  }).catch(() => {});
+};
 
 const generateToken = (id) => {
   return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
@@ -31,9 +42,11 @@ exports.login = async (req, res) => {
       return res.json(fail('Invalid password'));
     }
     if (user.twoFactorEnabled) {
+      recordLogin(user._id, req, 'password', true);
       const tempToken = jwt.sign({ id: user._id, twoFactorPending: true }, JWT_SECRET, { expiresIn: '5m' });
       return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
     }
+    recordLogin(user._id, req, 'password', true);
     const token = generateToken(user._id);
     res.json(success({ token, userInfo: user }, 'Login successful'));
   } catch (error) {
@@ -67,6 +80,7 @@ exports.login2fa = async (req, res) => {
       window: 2,
     });
     if (verified) {
+      recordLogin(user._id, req, '2fa', true);
       const token = generateToken(user._id);
       return res.json(success({ token, userInfo: user }, 'Login successful'));
     }
@@ -74,9 +88,11 @@ exports.login2fa = async (req, res) => {
     if (isBackup) {
       user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
       await user.save();
+      recordLogin(user._id, req, 'backup_code', true);
       const token = generateToken(user._id);
       return res.json(success({ token, userInfo: user }, 'Login successful (backup code used)'));
     }
+    recordLogin(user._id, req, '2fa', false);
     res.json(fail('Invalid 2FA code'));
   } catch (error) {
     res.json(fail(error.message));
@@ -96,6 +112,7 @@ exports.register = async (req, res) => {
     const user = await User.create({ username, email, password, phone });
     await Cart.create({ userId: user._id, items: [] });
     await Wallet.create({ userId: user._id });
+    recordLogin(user._id, req, 'register', true);
     const token = generateToken(user._id);
     res.json(success({ token, userInfo: user }, 'Registration successful'));
   } catch (error) {
@@ -115,6 +132,7 @@ exports.forgotPassword = async (req, res) => {
     }
     user.password = password;
     await user.save();
+    recordLogin(user._id, req, 'reset', true);
     res.json(success(null, 'Password reset successful'));
   } catch (error) {
     res.json(fail(error.message));

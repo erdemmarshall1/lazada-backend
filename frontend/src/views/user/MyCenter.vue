@@ -33,8 +33,13 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-dingwei', label: 'Addresses', path: '/addresslist' },
         { icon: 'iconfont icon-yanjing', label: 'Browsing History', path: '/seehistory' },
         { icon: 'iconfont icon-shoucang', label: 'Wishlist', path: '/mywishlist' },
-        { icon: 'iconfont icon-mima', label: 'Change Password', path: '/changepassword' },
+      ]
+    },
+    {
+      title: 'Privacy & Security', items: [
+        { icon: 'iconfont icon-mima', label: 'Privacy Settings', path: '/privacysettings' },
         { icon: 'iconfont icon-anquan', label: 'Two-Factor Auth', path: '/2fa' },
+        { icon: 'iconfont icon-mima', label: 'Change Password', path: '/changepassword' },
       ]
     },
     {
@@ -87,6 +92,7 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-qianbao', label: 'Balance Mgmt', path: '/admin-balance' },
         { icon: 'iconfont icon-yue', label: 'Platform Wallet', path: '/admin-platform-wallet' },
         { icon: 'iconfont icon-zhuti', label: 'Theme Settings', path: '/admin-theme-settings' },
+        { icon: 'iconfont icon-anquan', label: 'User Privacy', path: '/admin-user-privacy/' + (store.userInfo?._id || '') },
       ]
     })
   }

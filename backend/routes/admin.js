@@ -9,6 +9,7 @@ const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
 const { success, fail, paginate } = require('../utils/response');
 const themeController = require('../controllers/themeController');
+const privacyController = require('../controllers/privacyController');
 
 // ---- Pending transactions ----
 router.get('/pending-recharges', adminAuth, walletController.adminGetPendingRecharges);
@@ -458,6 +459,11 @@ router.post('/bulk-import-products', adminAuth, async (req, res) => {
     res.json(fail(error.message));
   }
 });
+
+// ---- User Privacy & Audit (admin) ----
+router.get('/users/:id/privacy', adminAuth, privacyController.adminGetUserPrivacy);
+router.post('/users/:id/toggle-status', adminAuth, privacyController.adminToggleUserStatus);
+router.get('/audit-log', adminAuth, privacyController.adminGetAuditLog);
 
 // ---- Category management ----
 const Category = require('../models/Category');

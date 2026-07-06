@@ -9,6 +9,11 @@
       <el-table-column prop="phone" label="Phone" />
       <el-table-column prop="role" label="Role" />
       <el-table-column label="Registered"><template #default="{row}">{{ new Date(row.createdAt).toLocaleDateString() }}</template></el-table-column>
+      <el-table-column label="Actions" width="120">
+        <template #default="{row}">
+          <el-button size="small" @click="$router.push('/admin-user-privacy/' + row._id)">Privacy</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     </div>
     <div class="pagination-wrap" v-if="total > 0">

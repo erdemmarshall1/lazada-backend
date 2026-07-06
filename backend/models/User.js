@@ -15,6 +15,20 @@ const userSchema = new mongoose.Schema({
   twoFactorSecret: { type: String, default: '' },
   twoFactorMethod: { type: String, enum: ['app', 'email', 'sms'], default: 'app' },
   backupCodes: [{ type: String }],
+  tokenVersion: { type: String, default: '' },
+  privacySettings: {
+    emailNotifications: {
+      orderUpdates: { type: Boolean, default: true },
+      promotions: { type: Boolean, default: true },
+      shipping: { type: Boolean, default: true },
+      payments: { type: Boolean, default: true },
+    },
+    profileVisibility: { type: String, enum: ['private', 'public', 'members_only'], default: 'private' },
+    showEmail: { type: Boolean, default: false },
+    showPhone: { type: Boolean, default: false },
+    loginAlerts: { type: Boolean, default: true },
+    cookieConsent: { type: String, default: null },
+  },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
@@ -41,6 +55,8 @@ userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
   delete obj.fundPassword;
+  delete obj.backupCodes;
+  delete obj.twoFactorSecret;
   return obj;
 };
 
