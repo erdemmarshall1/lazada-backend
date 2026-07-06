@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seed/seeder.js",
-    "seed:payment": "node seed/seedPaymentSettings.js"
+    "seed:payment": "node seed/seedPaymentSettings.js",
+    "reimport": "node scripts/reimport_clean.js"
   },
   "dependencies": {
     "archiver": "^7.0.1",
