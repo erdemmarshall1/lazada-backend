@@ -93,6 +93,8 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-yue', label: 'Platform Wallet', path: '/admin-platform-wallet' },
         { icon: 'iconfont icon-zhuti', label: 'Theme Settings', path: '/admin-theme-settings' },
         { icon: 'iconfont icon-anquan', label: 'User Privacy', path: '/admin-user-privacy/' + (store.userInfo?._id || '') },
+        { icon: 'iconfont icon-dashboard', label: 'Super Admin', path: '/superadmin-dashboard' },
+        { icon: 'iconfont icon-tupian', label: 'Banners', path: '/admin-banners' },
       ]
     })
   }

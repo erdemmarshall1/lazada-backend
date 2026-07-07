@@ -7,9 +7,11 @@ const Shop = require('../models/Shop');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
+const Banner = require('../models/Banner');
 const { success, fail, paginate } = require('../utils/response');
 const themeController = require('../controllers/themeController');
 const privacyController = require('../controllers/privacyController');
+const upload = require('../middleware/upload');
 
 // ---- Pending transactions ----
 router.get('/pending-recharges', adminAuth, walletController.adminGetPendingRecharges);
@@ -1009,5 +1011,62 @@ router.get('/balance/history', adminAuth, async (req, res) => {
 
 router.get('/settings/theme', adminAuth, themeController.getTheme);
 router.post('/settings/theme', adminAuth, themeController.updateTheme);
+
+router.get('/banners', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const [list, total] = await Promise.all([
+      Banner.find().sort({ sort: 1, createdAt: -1 }).skip(skip).limit(limit),
+      Banner.countDocuments(),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/banners/add', adminAuth, upload.single('file'), async (req, res) => {
+  try {
+    const { title, link, sort, position } = req.body;
+    let image = req.body.image || '';
+    if (req.file) image = '/uploads/' + req.file.filename;
+    if (!image) return res.json(fail('Image is required'));
+    const banner = await Banner.create({ title, image, link, sort: Number(sort) || 0, position: position || 'home', status: 1 });
+    res.json(success(banner));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/banners/update/:id', adminAuth, upload.single('file'), async (req, res) => {
+  try {
+    const update = {};
+    if (req.body.title !== undefined) update.title = req.body.title;
+    if (req.body.link !== undefined) update.link = req.body.link;
+    if (req.body.sort !== undefined) update.sort = Number(req.body.sort);
+    if (req.body.position !== undefined) update.position = req.body.position;
+    if (req.body.status !== undefined) update.status = Number(req.body.status);
+    if (req.file) update.image = '/uploads/' + req.file.filename;
+    else if (req.body.image) update.image = req.body.image;
+    const banner = await Banner.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!banner) return res.json(fail('Banner not found'));
+    res.json(success(banner));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/banners/delete/:id', adminAuth, async (req, res) => {
+  try {
+    const banner = await Banner.findByIdAndDelete(req.params.id);
+    if (!banner) return res.json(fail('Banner not found'));
+    res.json(success(null, 'Banner deleted'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/users/:id/set-role', adminAuth, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!['buyer', 'seller', 'admin'].includes(role)) return res.json(fail('Invalid role'));
+    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+    if (!user) return res.json(fail('User not found'));
+    res.json(success(user));
+  } catch (error) { res.json(fail(error.message)); }
+});
 
 module.exports = router;

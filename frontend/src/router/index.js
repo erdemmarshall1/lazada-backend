@@ -81,6 +81,8 @@ const routes = [
           { path: '/changepassword', name: 'changepassword', component: () => import('@/views/user/ChangePassword.vue'), meta: { title: 'Change Password', requiresAuth: true } },
           { path: '/2fa', name: 'twofactor', component: () => import('@/views/user/TwoFactorAuth.vue'), meta: { title: 'Two-Factor Auth', requiresAuth: true } },
           { path: '/admin-theme-settings', name: 'admin-theme-settings', component: () => import('@/views/admin/AdminThemeSettings.vue'), meta: { title: 'Theme Settings', requiresAuth: true } },
+          { path: '/superadmin-dashboard', name: 'superadmin-dashboard', component: () => import('@/views/admin/SuperAdminDashboard.vue'), meta: { title: 'Super Admin', requiresAuth: true } },
+          { path: '/admin-banners', name: 'admin-banners', component: () => import('@/views/admin/AdminBanners.vue'), meta: { title: 'Banners', requiresAuth: true } },
           { path: '/privacysettings', name: 'privacysettings', component: () => import('@/views/user/PrivacySettings.vue'), meta: { title: 'Privacy & Security', requiresAuth: true } },
           { path: '/admin-user-privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true } },
         ],
