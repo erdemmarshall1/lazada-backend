@@ -19,25 +19,45 @@
         </div>
       </div>
       <div v-if="list.length === 0" class="c-no-list"><span class="c-no-list-text">No products</span></div>
+      <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+        <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+      </div>
     </div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { get } from '@/api/request'
 import QuickViewDialog from '@/components/QuickViewDialog.vue'
 
 const list = ref([])
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(40)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
 
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
 
-onMounted(async () => {
-  const res = await get('/main/goods/getSearchList', { isRecommended: true, pageSize: 50 })
-  if (res?.data) list.value = res.data.list || []
+const onPageChange = (p) => {
+  page.value = p
+  loadData()
+}
+
+const loadData = async () => {
+  const res = await get('/main/goods/getSearchList', { isRecommended: true, pageSize: pageSize.value, page: page.value })
+  if (res?.data) {
+    list.value = res.data.list || []
+    total.value = res.data.total || 0
+  }
+}
+
+onMounted(() => {
+  loadData()
 })
 </script>
 
@@ -57,6 +77,7 @@ onMounted(async () => {
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }
 .price-original { font-size: 12px; color: #999; text-decoration: line-through; margin-left: 6px; }
 .product-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 4px; }
+.pagination-wrap { margin-top: 24px; }
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }

@@ -22,6 +22,9 @@
               </div>
             </div>
           </div>
+          <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+            <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+          </div>
         </div>
       </div>
     </div>
@@ -40,8 +43,13 @@ const router = useRouter()
 const categories = ref([])
 const selectedCat = ref('')
 const products = ref([])
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(20)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
+
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
 
@@ -52,6 +60,7 @@ const subCategories = computed(() => {
 
 const selectCat = (id) => {
   selectedCat.value = id
+  page.value = 1
   loadProducts(id)
 }
 
@@ -59,9 +68,17 @@ const searchSub = (id) => {
   router.push(`/searchgoods?categoryId=${id}`)
 }
 
+const onPageChange = (p) => {
+  page.value = p
+  loadProducts(selectedCat.value)
+}
+
 const loadProducts = async (catId) => {
-  const res = await get('/main/goods/getSearchList', { categoryId: catId, pageSize: 20 })
-  if (res?.data) products.value = res.data.list || []
+  const res = await get('/main/goods/getSearchList', { categoryId: catId, pageSize: pageSize.value, page: page.value })
+  if (res?.data) {
+    products.value = res.data.list || []
+    total.value = res.data.total || 0
+  }
 }
 
 onMounted(async () => {
@@ -103,6 +120,7 @@ onMounted(async () => {
 .product-info { padding: 8px; }
 .product-name { font-size: 13px; margin-bottom: 6px; }
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }
+.pagination-wrap { margin-top: 24px; }
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }

@@ -3,7 +3,7 @@
     <div class="list-container">
       <h2 class="list-title">🔥 Hot Products</h2>
       <div class="product-grid">
-        <div class="product-card" v-for="item in list" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
+        <div class="product-card" v-for="item in pagedList" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
             <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
@@ -16,21 +16,32 @@
         </div>
       </div>
       <div v-if="list.length === 0" class="c-no-list"><span class="c-no-list-text">No products</span></div>
+      <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+        <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+      </div>
     </div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { get } from '@/api/request'
 import QuickViewDialog from '@/components/QuickViewDialog.vue'
 
 const list = ref([])
+const page = ref(1)
+const pageSize = ref(24)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
 
+const total = computed(() => list.value.length)
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+const pagedList = computed(() => list.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
+
+const onPageChange = (p) => { page.value = p }
 
 onMounted(async () => {
   const res = await get('/main/goods/getHotList')
@@ -53,6 +64,7 @@ onMounted(async () => {
 .product-name { font-size: 13px; margin-bottom: 6px; }
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }
 .product-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 4px; }
+.pagination-wrap { margin-top: 24px; }
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }

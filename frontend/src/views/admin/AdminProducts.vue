@@ -2,18 +2,38 @@
   <div class="admin-products">
     <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:16px">
       <h2 style="margin:0">Products</h2>
-      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd">+ Add Product</el-button>
+      <div class="g-flex-align-center" style="gap:8px">
+        <el-select v-model="imageFilter" placeholder="Image Source" size="small" style="width:140px" @change="page=1;fetch()">
+          <el-option label="All Products" value="" />
+          <el-option label="Remote CDN Images" value="remote" />
+          <el-option label="Local Uploaded" value="local" />
+          <el-option label="No Images" value="none" />
+        </el-select>
+        <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd">+ Add Product</el-button>
+      </div>
     </div>
     <div class="g-responsive-table">
-    <el-table :data="products" v-loading="loading" style="width:100%">
+    <el-table :data="filteredProducts" v-loading="loading" style="width:100%">
       <el-table-column label="Image" width="80">
-        <template #default="{row}"><img :src="$imgUrl(row.images?.[0] || row.image || row.img)" style="width:50px;height:50px;object-fit:cover;border-radius:4px" loading="lazy" @error="$imgFallback" /></template>
+        <template #default="{row}">
+          <div style="position:relative">
+            <img :src="$imgUrl(row.images?.[0] || row.image || row.img)" style="width:50px;height:50px;object-fit:cover;border-radius:4px" loading="lazy" @error="handleImgError($event,row)" />
+            <el-tag v-if="row._imgStatus === 'broken'" size="small" type="danger" effect="dark" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px;line-height:16px;height:16px">!</el-tag>
+          </div>
+        </template>
       </el-table-column>
       <el-table-column prop="name" label="Name" min-width="200" />
       <el-table-column label="Price" width="100">
         <template #default="{row}">${{ row.minPrice || row.price }}</template>
       </el-table-column>
       <el-table-column prop="salesCount" label="Sales" width="80" />
+      <el-table-column label="Images" width="80" align="center">
+        <template #default="{row}">
+          <el-tag v-if="isRemoteImage(row)" size="small" type="warning">CDN</el-tag>
+          <el-tag v-else-if="row.images?.length" size="small" type="success">Local</el-tag>
+          <el-tag v-else size="small" type="danger">None</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="Status" width="100">
         <template #default="{row}">{{ row.status === 1 ? 'Active' : 'Inactive' }}</template>
       </el-table-column>
@@ -92,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { get, post, qe, uploadFile } from '@/api/request'
 
@@ -106,8 +126,33 @@ const shops = ref([])
 const showEdit = ref(false)
 const saving = ref(false)
 const editItem = ref(null)
+const imageFilter = ref('')
 const editForm = ref({
   name: '', brand: '', description: '', categoryId: '', price: 0, stock: 100, images: [], shopId: '',
+})
+
+const isRemoteImage = (row) => {
+  const src = row.images?.[0] || row.image || row.img
+  return src && (src.includes('popularity1.shop') || src.includes('s3.amazonaws.com') || src.startsWith('http'))
+}
+
+const handleImgError = (e, row) => {
+  row._imgStatus = 'broken'
+}
+
+const handleImgLoad = (e, row) => {
+  row._imgStatus = 'ok'
+}
+
+const filteredProducts = computed(() => {
+  if (!imageFilter.value) return products.value
+  return products.value.filter(p => {
+    const src = p.images?.[0] || p.image || p.img
+    if (imageFilter.value === 'remote') return src && (src.includes('popularity1.shop') || src.includes('s3.amazonaws.com'))
+    if (imageFilter.value === 'local') return src && !src.includes('popularity1.shop') && !src.includes('s3.amazonaws.com')
+    if (imageFilter.value === 'none') return !src
+    return true
+  })
 })
 
 const fetch = async () => {

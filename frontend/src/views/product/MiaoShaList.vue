@@ -18,28 +18,49 @@
           </div>
         </div>
       </div>
-      <div v-if="list.length === 0" class="c-no-list"><span class="c-no-list-text">No flash sales</span></div>
+      <div v-if="list.length === 0 && !loading" class="c-no-list"><span class="c-no-list-text">No flash sales</span></div>
+      <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+        <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+      </div>
     </div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { get } from '@/api/request'
 import QuickViewDialog from '@/components/QuickViewDialog.vue'
 
 const list = ref([])
 const loading = ref(true)
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(20)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
 
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
 
-onMounted(async () => {
-  const res = await get('/main/goods/getSearchList', { pageSize: 20 })
-  list.value = (res?.data?.list || res?.data || []).slice(0, 20)
+const onPageChange = (p) => {
+  page.value = p
+  loadData()
+}
+
+const loadData = async () => {
+  loading.value = true
+  const res = await get('/main/goods/getSearchList', { pageSize: pageSize.value, page: page.value })
+  if (res?.data) {
+    list.value = res.data.list || []
+    total.value = res.data.total || 0
+  }
   loading.value = false
+}
+
+onMounted(() => {
+  loadData()
 })
 </script>
 
@@ -59,6 +80,7 @@ onMounted(async () => {
 .product-name { font-size: 13px; margin-bottom: 6px; }
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-danger); }
 .price-original { font-size: 12px; color: #999; text-decoration: line-through; margin-left: 6px; }
+.pagination-wrap { margin-top: 24px; }
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }

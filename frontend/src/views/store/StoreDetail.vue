@@ -23,6 +23,9 @@
           </div>
         </div>
       </div>
+      <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+        <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+      </div>
     </div>
     <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">Store not found</span></div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
@@ -30,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { ElMessage } from 'element-plus'
@@ -43,10 +46,20 @@ const shop = ref(null)
 const products = ref([])
 const isFollowed = ref(false)
 const loading = ref(true)
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(20)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
 
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
+
+const onPageChange = (p) => {
+  page.value = p
+  loadProducts()
+}
 
 const toggleFollow = async () => {
   if (!store.isLogin) return ElMessage.warning('Please login first')
@@ -54,18 +67,25 @@ const toggleFollow = async () => {
   isFollowed.value = !isFollowed.value
 }
 
+const loadProducts = async () => {
+  const prodRes = await get('/main/userShop/getGoodsList', { shopId: route.query.id, pageSize: pageSize.value, page: page.value })
+  if (prodRes?.data) {
+    products.value = prodRes.data.list || []
+    total.value = prodRes.data.total || 0
+  }
+}
+
 onMounted(async () => {
-  const [shopRes, prodRes, followRes] = await Promise.all([
+  const [shopRes, followRes] = await Promise.all([
     get('/main/userShop/getInfo', { id: route.query.id }),
-    get('/main/userShop/getGoodsList', { shopId: route.query.id }),
     store.isLogin ? get('/home/userCollect/getShopList', { pageSize: 99 }) : Promise.resolve(null),
   ])
   if (shopRes?.data) shop.value = shopRes.data
-  if (prodRes?.data) products.value = prodRes.data.list || []
   if (followRes?.data) {
     const followed = followRes.data.list || followRes.data || []
     isFollowed.value = followed.some(s => s._id === route.query.id)
   }
+  await loadProducts()
   loading.value = false
 })
 </script>
@@ -89,6 +109,7 @@ onMounted(async () => {
 .product-card:hover .qv-overlay { opacity: 1; }
 .product-info { padding: 8px; }
 .product-price .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }
+.pagination-wrap { margin-top: 24px; }
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }

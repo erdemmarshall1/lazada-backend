@@ -26,13 +26,16 @@
         </div>
       </div>
       <div v-else class="c-no-list"><span class="c-no-list-text">No products found</span></div>
+      <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
+        <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
+      </div>
     </div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { get } from '@/api/request'
 import QuickViewDialog from '@/components/QuickViewDialog.vue'
@@ -41,22 +44,35 @@ const route = useRoute()
 const keyword = ref('')
 const sortBy = ref('')
 const products = ref([])
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(40)
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
 
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
 
+const onPageChange = (p) => {
+  page.value = p
+  doSearch()
+}
+
 const doSearch = async () => {
-  const params = { pageSize: 40 }
+  const params = { pageSize: pageSize.value, page: page.value }
   if (keyword.value) params.keyword = keyword.value
   if (sortBy.value) {
     const [sort, order] = sortBy.value.split('_')
     params.sort = sort
-    params.order = order
+    if (order) params.order = order
   }
   if (route.query.categoryId) params.categoryId = route.query.categoryId
   const res = await get('/main/goods/getSearchList', params)
-  if (res?.data) products.value = res.data.list || []
+  if (res?.data) {
+    products.value = res.data.list || []
+    total.value = res.data.total || 0
+  }
 }
 
 onMounted(() => {
@@ -80,6 +96,7 @@ onMounted(() => {
 .product-name { font-size: 13px; margin-bottom: 6px; }
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }
 .product-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 4px; }
+.pagination-wrap { margin-top: 24px; }
 
 @media (max-width: 768px) {
   .search-filters .el-input { width: 100% !important; }

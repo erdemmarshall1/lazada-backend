@@ -17,7 +17,8 @@
         <div class="mc-menu">
           <div class="mc-menu-item" v-for="cat in categories" :key="cat.category_id || cat._id" @click="goCategory(cat)">
             <div class="mc-menu-icon">
-              <img class="icon" :src="catIconUrl(cat.pic || cat.icon)" alt="" @error="onIconError" />
+              <span class="cat-emoji" v-if="!(cat.pic || cat.icon)">{{ getCategoryIcon(cat.name) }}</span>
+              <img class="icon" v-else :src="catIconUrl(cat.pic || cat.icon)" alt="" @error="onIconError" />
             </div>
             <span class="mc-menu-text">{{ cat.name }}</span>
           </div>
@@ -43,7 +44,8 @@
           <div class="home-quick">
             <div class="home-quick-links">
               <div class="quick-link-item" v-for="(cat, idx) in categories.slice(0, 10)" :key="idx" @click="goCategory(cat)">
-                <img class="quick-link-img" :src="catIconUrl(cat.pic || cat.icon)" :alt="cat.name" @error="onIconError" />
+                <span class="quick-link-emoji" v-if="!(cat.pic || cat.icon)">{{ getCategoryIcon(cat.name) }}</span>
+                <img class="quick-link-img" v-else :src="catIconUrl(cat.pic || cat.icon)" :alt="cat.name" @error="onIconError" />
                 <div class="quick-link-text">{{ cat.name }}</div>
               </div>
             </div>
@@ -144,6 +146,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import { get } from '@/api/request'
+import { getCategoryIcon, CATEGORY_FALLBACK as EMOJI_FALLBACK } from '@/utils/categoryIcons'
 
 const router = useRouter()
 
@@ -159,7 +162,6 @@ const findProducts = ref([])
 const merchants = ref([])
 const affiches = ref([])
 
-const CATEGORY_FALLBACK = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23808089"%3E%3Cpath d="M4 4h16v16H4z" opacity=".3"/%3E%3C/svg%3E'
 const IMG_FALLBACK = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"%3E%3Crect fill="%23f4f2ee" width="100" height="100"/%3E%3Ctext x="50" y="55" text-anchor="middle" fill="%23999" font-size="12"%3ENo Image%3C/text%3E%3C/svg%3E'
 
 const imgUrl = (url) => {
@@ -179,14 +181,25 @@ const formatPrice = (price) => {
 }
 
 const catIconUrl = (pic) => {
-  if (!pic) return CATEGORY_FALLBACK
+  if (!pic) return ''
   if (pic.startsWith('http://') || pic.startsWith('https://')) return pic
   const base = import.meta.env.VITE_API_BASE_URL || ''
   if (pic.startsWith('/uploads/')) return base + pic
   return pic
 }
 
-const onIconError = (e) => { e.target.src = CATEGORY_FALLBACK }
+const onIconError = (e) => {
+  e.target.style.display = 'none'
+  const parent = e.target.closest('.mc-menu-icon, .quick-link-item')
+  if (parent && !parent.querySelector('.cat-emoji')) {
+    const emoji = document.createElement('span')
+    emoji.className = 'cat-emoji'
+    const catName = parent.closest('[data-cat-name]')?.getAttribute('data-cat-name') || ''
+    emoji.textContent = getCategoryIcon(catName)
+    parent.insertBefore(emoji, e.target.nextSibling)
+  }
+}
+
 const onImgError = (e) => { e.target.src = IMG_FALLBACK }
 
 const goCategory = (cat) => {
@@ -343,6 +356,11 @@ onMounted(async () => {
   object-fit: contain;
 }
 
+.mc-menu-icon .cat-emoji {
+  font-size: 24px;
+  line-height: 32px;
+}
+
 .mc-menu-text {
   margin-left: 6px;
   color: #808089;
@@ -410,6 +428,14 @@ onMounted(async () => {
   height: 40px;
   object-fit: cover;
   border-radius: 35%;
+}
+
+.quick-link-item .quick-link-emoji {
+  display: block;
+  margin: 0 auto;
+  font-size: 28px;
+  line-height: 40px;
+  text-align: center;
 }
 
 .quick-link-item .quick-link-text {
