@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Zaloguj się",
+    "registerText": "Zarejestruj się",
+    "myorderText": "Moje zamówienia",
+    "gouwucheText": "Koszyk",
+    "shouyeText": "Strona główna",
+    "mymessageText": "Moje wiadomości",
+    "dianpuxiaoxiText": "Aktualności sklepu",
+    "zhanneiXinText": "Wiadomość strony",
+    "searchTipsText": "Szukaj produktów...",
+    "guanjianziText": "Wpisz słowa kluczowe",
+    "soushangpingText": "Produkty",
+    "soudianpuText": "Sklepy",
+    "languageLabel": "Język"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "Moje wiadomości",
+    "shoudaoxiaoxiText": "Otrzymane wiadomości",
+    "dianpuxiaoxiTipsText": "Wskazówki dotyczące wiadomości sklepu"
+  },
+  "nolist": {
+    "nolist": "Brak danych"
+  },
+  "jsLanguage": {
+    "copySuccessText": "Skopiowano pomyślnie"
+  }
+}

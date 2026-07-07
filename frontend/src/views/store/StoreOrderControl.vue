@@ -263,13 +263,13 @@ const submitShip = async () => {
           `You need <strong>$${res.data.required.toFixed(2)}</strong> to ship this order (wholesale cost + shipping).<br><br>Your current balance is <strong>$${res.data.balance.toFixed(2)}</strong>.<br>Shortfall: <strong>$${res.data.shortfall.toFixed(2)}</strong>.<br><br>Please top up your balance first, then try shipping again.`,
           'Insufficient Balance',
           {
-            confirmButtonText: 'Recharge Now',
+            confirmButtonText: 'Deposit Now',
             cancelButtonText: 'Cancel',
             type: 'warning',
             dangerouslyUseHTMLString: true,
           }
         ).then(() => {
-          router.push('/balance?recharge=true')
+          router.push('/balance?deposit=true')
         }).catch(() => {})
       } else {
         ElMessage.error(res.msg || 'Failed to ship order')

@@ -1,11 +1,20 @@
 <template>
   <div class="tracking-view">
     <div class="tracking-container">
+      <div v-if="!shipping && !loading && !error" class="tracking-search-card">
+        <h2>{{ store.isLogin ? 'Track Your Order' : 'Track Your Order' }}</h2>
+        <p class="tracking-search-desc">Enter your order number to track your shipment.</p>
+        <div class="tracking-search-input g-flex" style="gap:8px;max-width:500px;margin:16px auto 0">
+          <el-input v-model="orderNoInput" placeholder="Enter order number" size="large" @keyup.enter="doTrack" />
+          <el-button type="primary" size="large" :loading="loading" @click="doTrack">Track</el-button>
+        </div>
+      </div>
+
       <div v-if="loading" v-loading="loading" style="min-height:300px" />
       <div v-else-if="shipping" class="tracking-card">
         <div class="tracking-head">
           <h2>Order Tracking</h2>
-          <div class="order-ref">Order: {{ shipping.orderId?.orderNo || '—' }}</div>
+          <div class="order-ref">Order: {{ shipping.orderNo || shipping.orderId?.orderNo || '—' }}</div>
         </div>
 
         <div class="tracking-summary">
@@ -49,13 +58,20 @@
               <p v-if="evt.description" class="evt-desc">{{ evt.description }}</p>
             </el-timeline-item>
           </el-timeline>
-          <div v-if="shipping.statusHistory?.length === 0" style="text-align:center;color:#999;padding:40px">
+          <div v-if="!shipping.statusHistory?.length" style="text-align:center;color:#999;padding:40px">
             No tracking events yet
+          </div>
+
+          <div v-if="store.isLogin" style="margin-top:20px;text-align:center">
+            <el-button @click="resetSearch">Track Another Order</el-button>
           </div>
         </div>
       </div>
-      <div v-else class="c-no-list">
-        <span class="c-no-list-text">{{ error || 'Tracking information not found' }}</span>
+      <div v-else-if="!loading && error" class="c-no-list">
+        <span class="c-no-list-text">{{ error }}</span>
+        <div style="margin-top:16px">
+          <el-button @click="resetSearch">Try Again</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -64,13 +80,16 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAppStore } from '@/stores/app'
 import { get } from '@/api/request'
 import { getSocket } from '@/socket'
 
 const route = useRoute()
+const store = useAppStore()
 const shipping = ref(null)
-const loading = ref(true)
+const loading = ref(false)
 const error = ref('')
+const orderNoInput = ref('')
 
 const carrierMap = { sf:'SF Express', yto:'YTO Express', zto:'ZTO Express', sto:'STO Express', yd:'Yunda Express', ems:'EMS', ups:'UPS', fedex:'FedEx', dhl:'DHL', tnt:'TNT' }
 const carrierName = (id) => carrierMap[id] || id || '—'
@@ -90,26 +109,50 @@ const reversedHistory = computed(() => {
   return [...shipping.value.statusHistory].reverse()
 })
 
-onMounted(async () => {
-  const orderId = route.query.orderId
-  if (!orderId) { error.value = 'No order ID provided'; loading.value = false; return }
-  const res = await get('/home/shipping/getInfo', { orderId })
+const resetSearch = () => {
+  shipping.value = null
+  error.value = ''
+  orderNoInput.value = ''
+}
+
+const doTrack = async () => {
+  const orderNo = orderNoInput.value.trim()
+  if (!orderNo) return
+  loading.value = true
+  error.value = ''
+  shipping.value = null
+  const res = await get('/home/shipping/public/track', { orderNo })
   if (res?.data) {
     shipping.value = res.data
   } else {
-    error.value = res?.msg || 'Tracking not available'
+    error.value = res?.msg || 'Tracking information not found'
   }
   loading.value = false
+}
 
-  const socket = getSocket()
-  if (socket && orderId) {
-    socket.on('trackingUpdated', (data) => {
-      if (data.orderId === orderId) {
-        get('/home/shipping/getInfo', { orderId }).then(r => {
-          if (r?.data) shipping.value = r.data
-        })
-      }
-    })
+onMounted(async () => {
+  const orderId = route.query.orderId
+  if (orderId && store.isLogin) {
+    loading.value = true
+    const res = await get('/home/shipping/getInfo', { orderId })
+    if (res?.data) {
+      shipping.value = res.data
+      orderNoInput.value = shipping.value.orderNo || ''
+    } else {
+      error.value = res?.msg || 'Tracking not available'
+    }
+    loading.value = false
+
+    const socket = getSocket()
+    if (socket && orderId) {
+      socket.on('trackingUpdated', (data) => {
+        if (data.orderId === orderId) {
+          get('/home/shipping/getInfo', { orderId }).then(r => {
+            if (r?.data) shipping.value = r.data
+          })
+        }
+      })
+    }
   }
 })
 </script>
@@ -117,7 +160,10 @@ onMounted(async () => {
 <style scoped>
 .tracking-view { flex: 1; background: var(--g-bg); padding: 20px 0; }
 .tracking-container { max-width: var(--g-main-width); margin: 0 auto; }
-.tracking-card { background: var(--g-white); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.tracking-card, .tracking-search-card { background: var(--g-white); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.tracking-search-card { text-align: center; padding: 60px 24px; }
+.tracking-search-card h2 { font-size: 24px; margin-bottom: 8px; }
+.tracking-search-desc { color: #999; font-size: 14px; }
 .tracking-head { margin-bottom: 20px; }
 .tracking-head h2 { font-size: 20px; margin-bottom: 4px; }
 .order-ref { color: #999; font-size: 13px; }

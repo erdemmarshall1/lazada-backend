@@ -7,6 +7,18 @@ import de from './de.json'
 import fr from './fr.json'
 import ja from './ja.json'
 import es from './es.json'
+import ko from './ko.json'
+import pt from './pt.json'
+import ru from './ru.json'
+import it from './it.json'
+import th from './th.json'
+import ar from './ar.json'
+import tr from './tr.json'
+import nl from './nl.json'
+import pl from './pl.json'
+import hi from './hi.json'
+import id from './id.json'
+import ms from './ms.json'
 
 const messages = {
   'en': en,
@@ -17,6 +29,18 @@ const messages = {
   'fr': fr,
   'ja': ja,
   'es': es,
+  'ko': ko,
+  'pt': pt,
+  'ru': ru,
+  'it': it,
+  'th': th,
+  'ar': ar,
+  'tr': tr,
+  'nl': nl,
+  'pl': pl,
+  'hi': hi,
+  'id': id,
+  'ms': ms,
 }
 
 const safeStorageGet = (key, fallback = '') => {

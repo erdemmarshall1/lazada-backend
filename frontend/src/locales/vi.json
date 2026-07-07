@@ -11,7 +11,8 @@
     "searchTipsText": "Tìm kiếm...",
     "guanjianziText": "Nhập từ khóa",
     "soushangpingText": "Sản phẩm",
-    "soudianpuText": "Cửa hàng"
+    "soudianpuText": "Cửa hàng",
+    "languageLabel": "Ngôn ngữ"
   },
   "gongyong": { "wodexiaoxiText": "Tin nhắn", "shoudaoxiaoxiText": "Đã nhận", "dianpuxiaoxiTipsText": "Tin cửa hàng" },
   "nolist": { "nolist": "Không có dữ liệu" },

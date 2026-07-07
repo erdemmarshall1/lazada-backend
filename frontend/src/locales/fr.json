@@ -11,7 +11,8 @@
     "searchTipsText": "Rechercher...",
     "guanjianziText": "Mots-clés",
     "soushangpingText": "Produits",
-    "soudianpuText": "Boutiques"
+    "soudianpuText": "Boutiques",
+    "languageLabel": "Langue"
   },
   "gongyong": { "wodexiaoxiText": "Mes messages", "shoudaoxiaoxiText": "Reçus", "dianpuxiaoxiTipsText": "Astuces boutique" },
   "nolist": { "nolist": "Aucune donnée" },

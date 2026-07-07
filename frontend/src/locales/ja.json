@@ -11,7 +11,8 @@
     "searchTipsText": "商品を検索...",
     "guanjianziText": "キーワード",
     "soushangpingText": "商品",
-    "soudianpuText": "ショップ"
+    "soudianpuText": "ショップ",
+    "languageLabel": "言語"
   },
   "gongyong": { "wodexiaoxiText": "メッセージ", "shoudaoxiaoxiText": "受信", "dianpuxiaoxiTipsText": "ショップヒント" },
   "nolist": { "nolist": "データなし" },

@@ -284,4 +284,35 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { create, getInfo, updateTracking, list, getCarriers, getStats, CARRIERS, TRACKING_STATUS };
+const publicTrack = async (req, res) => {
+  try {
+    const { orderNo } = req.query;
+    if (!orderNo) return res.json(fail('Order number is required'));
+
+    const order = await Order.findOne({ orderNo: orderNo.trim() });
+    if (!order) return res.json(fail('Order not found'));
+
+    const shipping = await Shipping.findOne({ orderId: order._id }).populate('orderId', 'orderNo status finalAmount');
+    if (!shipping) return res.json(fail('Tracking information not found for this order'));
+
+    return res.json(success({
+      orderNo: order.orderNo,
+      carrier: shipping.carrier,
+      trackingNo: shipping.trackingNo,
+      status: shipping.status,
+      statusLabel: TRACKING_STATUS[shipping.status] || 'Unknown',
+      estimatedDelivery: shipping.estimatedDelivery,
+      statusHistory: (shipping.statusHistory || []).map(h => ({
+        ...h,
+        statusLabel: TRACKING_STATUS[h.status] || 'Unknown',
+      })),
+      receiverName: shipping.receiverName,
+      receiverPhone: shipping.receiverPhone,
+      receiverAddress: shipping.receiverAddress,
+    }));
+  } catch (err) {
+    return res.json(fail(err.message));
+  }
+};
+
+module.exports = { create, getInfo, updateTracking, list, getCarriers, getStats, publicTrack, CARRIERS, TRACKING_STATUS };

@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Masuk",
+    "registerText": "Daftar",
+    "myorderText": "Pesanan Saya",
+    "gouwucheText": "Keranjang Belanja",
+    "shouyeText": "Halaman Depan",
+    "mymessageText": "Pesan Saya",
+    "dianpuxiaoxiText": "Berita Toko",
+    "zhanneiXinText": "Pesan Situs",
+    "searchTipsText": "Cari produk...",
+    "guanjianziText": "Masukkan kata kunci",
+    "soushangpingText": "Produk",
+    "soudianpuText": "Toko",
+    "languageLabel": "Bahasa"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "Pesan Saya",
+    "shoudaoxiaoxiText": "Pesan diterima",
+    "dianpuxiaoxiTipsText": "Tips pesan toko"
+  },
+  "nolist": {
+    "nolist": "Tidak ada data"
+  },
+  "jsLanguage": {
+    "copySuccessText": "Berhasil disalin"
+  }
+}

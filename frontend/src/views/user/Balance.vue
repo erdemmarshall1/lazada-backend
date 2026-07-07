@@ -246,7 +246,7 @@ const loadSettings = async () => {
 onMounted(async () => {
   await loadSettings()
   await loadBalance()
-  if (route.query.Deposit === 'true') {
+  if (route.query.deposit === 'true') {
     await nextTick()
     showDeposit.value = true
   }

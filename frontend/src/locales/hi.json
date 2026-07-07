@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "लॉग इन करें",
+    "registerText": "पंजीकरण करें",
+    "myorderText": "मेरे ऑर्डर",
+    "gouwucheText": "शॉपिंग कार्ट",
+    "shouyeText": "मुख्य पृष्ठ",
+    "mymessageText": "मेरे संदेश",
+    "dianpuxiaoxiText": "स्टोर समाचार",
+    "zhanneiXinText": "साइट संदेश",
+    "searchTipsText": "उत्पाद खोजें...",
+    "guanjianziText": "कीवर्ड दर्ज करें",
+    "soushangpingText": "उत्पाद",
+    "soudianpuText": "स्टोर",
+    "languageLabel": "भाषा"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "मेरे संदेश",
+    "shoudaoxiaoxiText": "प्राप्त संदेश",
+    "dianpuxiaoxiTipsText": "स्टोर संदेश टिप्स"
+  },
+  "nolist": {
+    "nolist": "कोई डेटा नहीं"
+  },
+  "jsLanguage": {
+    "copySuccessText": "कॉपी सफल"
+  }
+}

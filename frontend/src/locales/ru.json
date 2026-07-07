@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Войти",
+    "registerText": "Регистрация",
+    "myorderText": "Мои заказы",
+    "gouwucheText": "Корзина",
+    "shouyeText": "Главная",
+    "mymessageText": "Мои сообщения",
+    "dianpuxiaoxiText": "Новости магазина",
+    "zhanneiXinText": "Сообщение сайта",
+    "searchTipsText": "Поиск товаров...",
+    "guanjianziText": "Введите ключевые слова",
+    "soushangpingText": "Товары",
+    "soudianpuText": "Магазины",
+    "languageLabel": "Язык"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "Мои сообщения",
+    "shoudaoxiaoxiText": "Полученные сообщения",
+    "dianpuxiaoxiTipsText": "Подсказки сообщений магазина"
+  },
+  "nolist": {
+    "nolist": "Нет данных"
+  },
+  "jsLanguage": {
+    "copySuccessText": "Скопировано успешно"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "تسجيل الدخول",
+    "registerText": "التسجيل",
+    "myorderText": "طلباتي",
+    "gouwucheText": "سلة التسوق",
+    "shouyeText": "الصفحة الرئيسية",
+    "mymessageText": "رسائلي",
+    "dianpuxiaoxiText": "أخبار المتجر",
+    "zhanneiXinText": "رسالة الموقع",
+    "searchTipsText": "البحث عن منتجات...",
+    "guanjianziText": "أدخل الكلمات المفتاحية",
+    "soushangpingText": "المنتجات",
+    "soudianpuText": "المتاجر",
+    "languageLabel": "اللغة"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "رسائلي",
+    "shoudaoxiaoxiText": "الرسائل المستلمة",
+    "dianpuxiaoxiTipsText": "نصائح رسائل المتجر"
+  },
+  "nolist": {
+    "nolist": "لا توجد بيانات"
+  },
+  "jsLanguage": {
+    "copySuccessText": "تم النسخ بنجاح"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "เข้าสู่ระบบ",
+    "registerText": "ลงทะเบียน",
+    "myorderText": "คำสั่งซื้อของฉัน",
+    "gouwucheText": "ตะกร้าสินค้า",
+    "shouyeText": "หน้าแรก",
+    "mymessageText": "ข้อความของฉัน",
+    "dianpuxiaoxiText": "ข่าวร้านค้า",
+    "zhanneiXinText": "ข้อความเว็บไซต์",
+    "searchTipsText": "ค้นหาสินค้า...",
+    "guanjianziText": "ป้อนคำค้นหา",
+    "soushangpingText": "สินค้า",
+    "soudianpuText": "ร้านค้า",
+    "languageLabel": "ภาษา"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "ข้อความของฉัน",
+    "shoudaoxiaoxiText": "ข้อความที่ได้รับ",
+    "dianpuxiaoxiTipsText": "เคล็ดลับข้อความร้านค้า"
+  },
+  "nolist": {
+    "nolist": "ไม่มีข้อมูล"
+  },
+  "jsLanguage": {
+    "copySuccessText": "คัดลอกสำเร็จ"
+  }
+}

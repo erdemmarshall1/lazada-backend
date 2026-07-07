@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Giriş Yap",
+    "registerText": "Kayıt Ol",
+    "myorderText": "Siparişlerim",
+    "gouwucheText": "Alışveriş Sepeti",
+    "shouyeText": "Ana Sayfa",
+    "mymessageText": "Mesajlarım",
+    "dianpuxiaoxiText": "Mağaza Haberleri",
+    "zhanneiXinText": "Site Mesajı",
+    "searchTipsText": "Ürün ara...",
+    "guanjianziText": "Anahtar kelimeleri girin",
+    "soushangpingText": "Ürünler",
+    "soudianpuText": "Mağazalar",
+    "languageLabel": "Dil"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "Mesajlarım",
+    "shoudaoxiaoxiText": "Alınan mesajlar",
+    "dianpuxiaoxiTipsText": "Mağaza mesaj ipuçları"
+  },
+  "nolist": {
+    "nolist": "Veri yok"
+  },
+  "jsLanguage": {
+    "copySuccessText": "Başarıyla kopyalandı"
+  }
+}
