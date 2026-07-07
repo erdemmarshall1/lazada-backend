@@ -8,7 +8,7 @@
  * Usage:
  *   node scripts/scrape_product_images.js
  *
- * Pixabay API key is embedded below. Get yours free at https://pixabay.com/api/docs/
+ * Saves progress every 100 products. Re-run to resume from last checkpoint.
  */
 
 const https = require('https');
@@ -18,12 +18,14 @@ const path = require('path');
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PIXABAY_KEY = '56424266-3980f360793db6c0a5beba10e';
-const RAILWAY_API = 'https://the-outnet-backend-production-3b57.up.railway.app';
+const RAILWAY_API = 'https://lazada-backend-production-3b57.up.railway.app';
 const PIXABAY_API = 'https://pixabay.com/api';
 const OUTPUT_FILE = path.join(__dirname, '..', 'product_image_updates.json');
-const PER_PAGE = 100;               // products per request from Railway
-const DELAY_MS = 800;               // delay between Pixabay calls
+const CHECKPOINT_FILE = path.join(__dirname, '..', 'product_image_progress.json');
+const PER_PAGE = 100;
+const DELAY_MS = 500;
 const MAX_RETRIES = 2;
+const SAVE_EVERY = 100;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -88,15 +90,22 @@ const cleanProductName = (name) => {
     .slice(0, 100);
 };
 
+const saveCheckpoint = (updates, processedCount, totalCount) => {
+  const checkpoint = { updates, processedCount, totalCount, timestamp: new Date().toISOString() };
+  fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify(checkpoint, null, 2));
+  console.log(`  [CHECKPOINT] Saved ${updates.length} updates (${processedCount}/${totalCount} processed)`);
+};
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 const main = async () => {
   console.log('═'.repeat(50));
-  console.log('Product Image Scraper');
+  console.log('Product Image Scraper (with resume support)');
   console.log('═'.repeat(50));
   console.log(`Pixabay key: ${PIXABAY_KEY.slice(0,8)}...`);
   console.log(`Railway API: ${RAILWAY_API}`);
   console.log(`Output file: ${OUTPUT_FILE}`);
+  console.log(`Checkpoint file: ${CHECKPOINT_FILE}`);
   console.log('');
 
   // Step 1: Fetch all products from Railway
@@ -115,22 +124,50 @@ const main = async () => {
     process.exit(0);
   }
 
-  // Step 2: Search Pixabay for each product
-  console.log('\nStep 2: Searching Pixabay for product images...');
-  const updates = [];
-  let found = 0;
+  // Only process products that need images (no images or remote CDN images)
+  const needsImages = products.filter(p => {
+    const img = p.images?.[0] || p.image || p.img
+    if (!img) return true
+    if (typeof img === 'string' && (img.includes('popularity1.shop') || img.includes('s3.amazonaws.com') || img.startsWith('http'))) return true
+    return false
+  })
+  console.log(`  Products needing images: ${needsImages.length} / ${products.length} total`)
+  console.log(`  Skipping ${products.length - needsImages.length} products that already have local images`)
+
+  // Step 2: Load checkpoint if exists
+  let updates = [];
+  let startIndex = 0;
+  if (fs.existsSync(CHECKPOINT_FILE)) {
+    try {
+      const cp = JSON.parse(fs.readFileSync(CHECKPOINT_FILE, 'utf8'));
+      if (cp.totalCount === needsImages.length) {
+        updates = cp.updates || [];
+        startIndex = cp.processedCount || 0;
+        console.log(`  Resuming from product ${startIndex + 1}/${needsImages.length} (${updates.length} already found)`);
+      } else {
+        console.log(`  Total count changed (${cp.totalCount} -> ${needsImages.length}), starting fresh`);
+        if (fs.existsSync(CHECKPOINT_FILE)) fs.unlinkSync(CHECKPOINT_FILE);
+      }
+    } catch (e) {
+      console.log(`  Corrupted checkpoint, starting fresh`);
+    }
+  }
+
+  // Step 3: Search Pixabay for each product
+  console.log('\nStep 3: Searching Pixabay for product images...');
+  let found = updates.length;
   let skipped = 0;
 
-  for (let i = 0; i < products.length; i++) {
-    const p = products[i];
+  for (let i = startIndex; i < needsImages.length; i++) {
+    const p = needsImages[i];
     const name = cleanProductName(p.name || '');
     if (!name) {
-      console.log(`  [${i + 1}/${products.length}] SKIP — no name (id: ${p._id})`);
+      console.log(`  [${i + 1}/${needsImages.length}] SKIP — no name (id: ${p._id})`);
       skipped++;
       continue;
     }
 
-    process.stdout.write(`  [${i + 1}/${products.length}] "${name.slice(0, 40)}..." → `);
+    process.stdout.write(`  [${i + 1}/${needsImages.length}] "${name.slice(0, 40)}..." → `);
 
     const imgUrl = await searchPixabay(name);
 
@@ -167,13 +204,17 @@ const main = async () => {
       }
     }
 
-    if (i < products.length - 1) await sleep(DELAY_MS);
+    if ((i + 1) % SAVE_EVERY === 0) {
+      saveCheckpoint(updates, i + 1, needsImages.length);
+    }
+
+    if (i < needsImages.length - 1) await sleep(DELAY_MS);
   }
 
-  // Step 3: Write output file
-  console.log('\nStep 3: Writing output file...');
+  // Step 4: Write output file
+  console.log('\nStep 4: Writing output file...');
   const result = {
-    total: products.length,
+    total: needsImages.length,
     found,
     skipped,
     generatedAt: new Date().toISOString(),
@@ -182,29 +223,30 @@ const main = async () => {
   };
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(result, null, 2));
   console.log(`  Written to: ${OUTPUT_FILE}`);
-  console.log(`  Products: ${products.length} total, ${found} matched, ${skipped} skipped`);
+  console.log(`  Products: ${needsImages.length} needed images, ${found} matched, ${skipped} skipped`);
   console.log('');
+
+  // Clean up checkpoint
+  if (fs.existsSync(CHECKPOINT_FILE)) fs.unlinkSync(CHECKPOINT_FILE);
 
   // Print summary
   console.log('═'.repeat(50));
   console.log('SUMMARY');
   console.log('═'.repeat(50));
   console.log(`Total products on Railway: ${products.length}`);
+  console.log(`Products needing images:   ${needsImages.length}`);
   console.log(`Images found via Pixabay:  ${found}`);
   console.log(`No match / skipped:        ${skipped}`);
   console.log('');
   console.log('Next steps:');
   console.log(`  1. Review ${OUTPUT_FILE} if desired`);
-  console.log('  2. POST the file content to the admin endpoint:');
-  console.log('     POST /home/admin/batch-update-images');
-  console.log('     (requires admin auth token)');
+  console.log(`  2. Run: node scripts/apply_image_updates.js admin123`);
   console.log('');
 
   if (found === 0) {
     console.log('WARNING: No images were found! Possible causes:');
     console.log('  - Pixabay API key may be invalid');
     console.log('  - Railway API may not be returning product names');
-    console.log('  - Check the first few product names above');
   }
 };
 
