@@ -4,7 +4,7 @@ const path = require('path');
 const HOST = 'lazada-backend-production-3b57.up.railway.app';
 const PRODUCTS_DIR = path.join(__dirname, '..', '..', 'Products');
 
-const request = (method, path, body, token, filePath) => new Promise((resolve, reject) => {
+const request = (method, urlPath, body, token, filePath) => new Promise((resolve, reject) => {
   if (filePath) {
     // Multipart upload
     const boundary = '----' + Date.now();
@@ -20,7 +20,7 @@ const request = (method, path, body, token, filePath) => new Promise((resolve, r
     const payload = Buffer.concat([header, fileData, footer]);
 
     const opts = {
-      hostname: HOST, port: 443, path, method,
+      hostname: HOST, port: 443, path: urlPath, method,
       headers: {
         'Content-Type': 'multipart/form-data; boundary=' + boundary,
         'Content-Length': payload.length,
@@ -37,7 +37,7 @@ const request = (method, path, body, token, filePath) => new Promise((resolve, r
   } else {
     const data = body ? JSON.stringify(body) : '';
     const opts = {
-      hostname: HOST, port: 443, path, method,
+      hostname: HOST, port: 443, path: urlPath, method,
       headers: { 'Content-Type': 'application/json' },
       timeout: 15000,
     };

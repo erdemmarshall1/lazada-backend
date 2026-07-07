@@ -1,5 +1,5 @@
 node_modules
-uploads
+# uploads — needed at runtime for multer file storage
 .git
 *.log
 .env.local
