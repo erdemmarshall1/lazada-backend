@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { JWT_SECRET, JWT_REFRESH_SECRET } = require('../config/app');
+const { hasPermission, ROLES } = require('../config/roles');
 
 const auth = async (req, res, next) => {
   let token = null;
@@ -41,9 +42,33 @@ const verifyRefreshToken = (token) => {
   }
 };
 
+const requireRole = (...roles) => {
+  return (req, res, next) => {
+    auth(req, res, () => {
+      if (req.user && roles.includes(req.user.role)) {
+        next();
+      } else {
+        return res.json({ code: -2, msg: 'Access denied. Insufficient role.' });
+      }
+    });
+  };
+};
+
+const requirePermission = (permission) => {
+  return (req, res, next) => {
+    auth(req, res, () => {
+      if (req.user && hasPermission(req.user, permission)) {
+        next();
+      } else {
+        return res.json({ code: -2, msg: 'Access denied. Permission required.' });
+      }
+    });
+  };
+};
+
 const adminAuth = (req, res, next) => {
   auth(req, res, () => {
-    if (req.user && req.user.role === 'admin') {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'super_admin')) {
       next();
     } else {
       return res.json({ code: -2, msg: 'Admin access required' });
@@ -53,7 +78,7 @@ const adminAuth = (req, res, next) => {
 
 const sellerAuth = (req, res, next) => {
   auth(req, res, () => {
-    if (req.user && (req.user.role === 'seller' || req.user.role === 'admin')) {
+    if (req.user && (req.user.role === 'seller' || req.user.role === 'admin' || req.user.role === 'super_admin')) {
       next();
     } else {
       return res.json({ code: -2, msg: 'Seller access required' });
@@ -61,4 +86,14 @@ const sellerAuth = (req, res, next) => {
   });
 };
 
-module.exports = { auth, adminAuth, sellerAuth, verifyRefreshToken };
+const superAdminAuth = (req, res, next) => {
+  auth(req, res, () => {
+    if (req.user && req.user.role === 'super_admin') {
+      next();
+    } else {
+      return res.json({ code: -2, msg: 'Super admin access required' });
+    }
+  });
+};
+
+module.exports = { auth, adminAuth, sellerAuth, superAdminAuth, requireRole, requirePermission, verifyRefreshToken };

@@ -59,6 +59,7 @@ const seedFullData = async () => {
 
   // Create users
   const admin = await User.create({ username: 'admin', email: 'admin@shopifywholesale.com', password: 'admin123', role: 'admin' });
+  await User.create({ username: 'superadmin', email: 'superadmin@shopifywholesale.com', password: 'superadmin123', role: 'super_admin' });
   await User.create({ username: 'alextaylor', email: 'alextaylor11011@gmail.com', password: 'temp123456', role: 'admin', needsPasswordSetup: true });
   const buyer = await User.create({ username: 'buyer', email: 'buyer@shopifywholesale.com', password: 'buyer123', role: 'buyer' });
   const seller = await User.create({ username: 'seller', email: 'seller@shopifywholesale.com', password: 'seller123', role: 'seller' });

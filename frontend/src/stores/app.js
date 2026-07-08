@@ -59,8 +59,9 @@ export const useAppStore = defineStore('app', {
 
   getters: {
     isLogin: (state) => !!state.token,
-    isSeller: (state) => state.userInfo?.role === 'seller' || state.userInfo?.role === 'admin',
-    isAdmin: (state) => state.userInfo?.role === 'admin',
+    isSeller: (state) => ['seller', 'admin', 'super_admin', 'manager', 'staff'].includes(state.userInfo?.role),
+    isAdmin: (state) => ['admin', 'super_admin'].includes(state.userInfo?.role),
+    isSuperAdmin: (state) => state.userInfo?.role === 'super_admin',
   },
 
   actions: {

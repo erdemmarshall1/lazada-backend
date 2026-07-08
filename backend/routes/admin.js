@@ -9,6 +9,7 @@ const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
 const Banner = require('../models/Banner');
 const { success, fail, paginate } = require('../utils/response');
+const { ROLES, PERMISSIONS, ROLE_PERMISSIONS, hasPermission } = require('../config/roles');
 const themeController = require('../controllers/themeController');
 const privacyController = require('../controllers/privacyController');
 const upload = require('../middleware/upload');
@@ -1075,11 +1076,56 @@ router.post('/banners/delete/:id', adminAuth, async (req, res) => {
 router.post('/users/:id/set-role', adminAuth, async (req, res) => {
   try {
     const { role } = req.body;
-    if (!['buyer', 'seller', 'admin'].includes(role)) return res.json(fail('Invalid role'));
-    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+    const validRoles = Object.values(ROLES);
+    if (!validRoles.includes(role)) return res.json(fail('Invalid role'));
+    if (req.params.id === req.user._id.toString() && role !== req.user.role) {
+      return res.json(fail('Cannot change your own role'));
+    }
+    const user = await User.findByIdAndUpdate(req.params.id, { role, permissions: [] }, { new: true }).select('-password');
     if (!user) return res.json(fail('User not found'));
     res.json(success(user));
   } catch (error) { res.json(fail(error.message)); }
+});
+
+router.get('/users/:id/permissions', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) return res.json(fail('User not found'));
+    const defaultPerms = ROLE_PERMISSIONS[user.role] || [];
+    const effectivePerms = user.permissions && user.permissions.length > 0 ? user.permissions : defaultPerms;
+    res.json(success({
+      role: user.role,
+      customPermissions: user.permissions || [],
+      effectivePermissions: effectivePerms,
+      isUsingDefaults: !user.permissions || user.permissions.length === 0,
+      allPermissions: Object.values(PERMISSIONS),
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/users/:id/permissions', adminAuth, async (req, res) => {
+  try {
+    const { permissions } = req.body;
+    if (!Array.isArray(permissions)) return res.json(fail('Permissions must be an array'));
+    const validPerms = Object.values(PERMISSIONS);
+    const invalid = permissions.filter(p => !validPerms.includes(p));
+    if (invalid.length > 0) return res.json(fail(`Invalid permissions: ${invalid.join(', ')}`));
+    if (req.params.id === req.user._id.toString()) {
+      return res.json(fail('Cannot modify your own permissions'));
+    }
+    const user = await User.findByIdAndUpdate(req.params.id, { permissions }, { new: true }).select('-password');
+    if (!user) return res.json(fail('User not found'));
+    res.json(success(user));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.get('/roles', adminAuth, async (req, res) => {
+  const roles = Object.entries(ROLE_PERMISSIONS).map(([role, perms]) => ({
+    role,
+    permissions: perms,
+    level: require('../config/roles').ROLE_HIERARCHY[role],
+  })).sort((a, b) => b.level - a.level);
+  res.json(success({ roles, allPermissions: Object.values(PERMISSIONS) }));
 });
 
 module.exports = router;

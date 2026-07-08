@@ -84,6 +84,7 @@ const routes = [
           { path: '/admin-theme-settings', name: 'admin-theme-settings', component: () => import('@/views/admin/AdminThemeSettings.vue'), meta: { title: 'Theme Settings', requiresAuth: true } },
           { path: '/superadmin-dashboard', name: 'superadmin-dashboard', component: () => import('@/views/admin/SuperAdminDashboard.vue'), meta: { title: 'Super Admin', requiresAuth: true } },
           { path: '/admin-banners', name: 'admin-banners', component: () => import('@/views/admin/AdminBanners.vue'), meta: { title: 'Banners', requiresAuth: true } },
+          { path: '/admin-roles', name: 'admin-roles', component: () => import('@/views/admin/AdminRoles.vue'), meta: { title: 'Roles & Permissions', requiresAuth: true } },
           { path: '/privacysettings', name: 'privacysettings', component: () => import('@/views/user/PrivacySettings.vue'), meta: { title: 'Privacy & Security', requiresAuth: true } },
           { path: '/admin-user-privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true } },
         ],
