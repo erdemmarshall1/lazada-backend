@@ -116,6 +116,8 @@
               <div class="home-footer-tips">On orders over $500</div>
             </div>
           </div>
+
+          <HomepageSectionsRenderer :sections="homepageSections" :product-map="sectionProductMap" :categories="categories" />
         </div>
       </div>
     </div>
@@ -132,6 +134,7 @@ import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import { get } from '@/api/request'
 import { getCategoryIcon, CATEGORY_FALLBACK as EMOJI_FALLBACK } from '@/utils/categoryIcons'
+import HomepageSectionsRenderer from '@/components/HomepageSectionsRenderer.vue'
 
 const router = useRouter()
 
@@ -145,6 +148,8 @@ const hotProducts = ref([])
 const recommendedProducts = ref([])
 const findProducts = ref([])
 const affiches = ref([])
+const homepageSections = ref([])
+const sectionProductMap = ref({})
 
 const imgUrl = (url) => {
   if (!url) return ''
@@ -215,6 +220,32 @@ onMounted(async () => {
   if (recRes?.data) recommendedProducts.value = recRes.data.list || []
   if (findRes?.data) findProducts.value = findRes.data.list || []
   if (affRes?.data) affiches.value = Array.isArray(affRes.data) ? affRes.data : []
+
+  const hsRes = await get('/home/cms/homepage-sections/active').catch(() => ({ data: null }))
+  if (hsRes?.code === 0 && hsRes?.data) {
+    homepageSections.value = hsRes.data
+    const productIds = []
+    hsRes.data.forEach(s => {
+      if ((s.type === 'product_grid' || s.type === 'featured') && s.config?.productIds) {
+        productIds.push(...s.config.productIds)
+      }
+    })
+    if (productIds.length > 0) {
+      const prodRes = await get('/main/goods/getSearchList', { ids: productIds.join(','), pageSize: productIds.length }).catch(() => ({ data: null }))
+      if (prodRes?.data?.list) {
+        const map = {}
+        prodRes.data.list.forEach(p => {
+          hsRes.data.forEach(s => {
+            if ((s.type === 'product_grid' || s.type === 'featured') && s.config?.productIds?.includes(p._id)) {
+              if (!map[s._id]) map[s._id] = []
+              map[s._id].push(p)
+            }
+          })
+        })
+        sectionProductMap.value = map
+      }
+    }
+  }
 })
 </script>
 

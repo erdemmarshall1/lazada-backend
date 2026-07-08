@@ -2,6 +2,7 @@ const Page = require('../models/Page');
 const Blog = require('../models/Blog');
 const Faq = require('../models/Faq');
 const Menu = require('../models/Menu');
+const HomepageSection = require('../models/HomepageSection');
 const { success, fail, paginate } = require('../utils/response');
 
 // ---- Pages ----
@@ -212,5 +213,61 @@ exports.deleteMenu = async (req, res) => {
     const menu = await Menu.findByIdAndDelete(req.params.id);
     if (!menu) return res.json(fail('Menu not found'));
     res.json(success(null, 'Menu deleted'));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+// ---- Homepage Sections ----
+exports.getHomepageSections = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = {};
+    if (status !== undefined) filter.status = parseInt(status);
+    const sections = await HomepageSection.find(filter).sort({ sort: 1, createdAt: -1 });
+    res.json(success(sections));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.getActiveHomepageSections = async (req, res) => {
+  try {
+    const sections = await HomepageSection.find({ status: 1 }).sort({ sort: 1 });
+    res.json(success(sections));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.createHomepageSection = async (req, res) => {
+  try {
+    const { name, type, title, subtitle, sort, config } = req.body;
+    if (!name || !type) return res.json(fail('Name and type are required'));
+    const validTypes = ['banner', 'product_grid', 'category_grid', 'featured', 'promo_bar', 'custom_html'];
+    if (!validTypes.includes(type)) return res.json(fail('Invalid section type'));
+    const section = await HomepageSection.create({ name, type, title, subtitle, sort, config });
+    res.json(success(section, 'Section created'));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.updateHomepageSection = async (req, res) => {
+  try {
+    const section = await HomepageSection.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!section) return res.json(fail('Section not found'));
+    res.json(success(section, 'Section updated'));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.deleteHomepageSection = async (req, res) => {
+  try {
+    const section = await HomepageSection.findByIdAndDelete(req.params.id);
+    if (!section) return res.json(fail('Section not found'));
+    res.json(success(null, 'Section deleted'));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.reorderHomepageSections = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) return res.json(fail('ids array required'));
+    for (let i = 0; i < ids.length; i++) {
+      await HomepageSection.findByIdAndUpdate(ids[i], { sort: i });
+    }
+    res.json(success(null, 'Sections reordered'));
   } catch (error) { res.json(fail(error.message)); }
 };

@@ -37,4 +37,14 @@ router.post('/admin/menus', adminAuth, cms.createMenu);
 router.put('/admin/menus/:id', adminAuth, cms.updateMenu);
 router.delete('/admin/menus/:id', adminAuth, cms.deleteMenu);
 
+// ---- Public: Homepage Sections ----
+router.get('/homepage-sections/active', cms.getActiveHomepageSections);
+
+// ---- Admin: Homepage Sections ----
+router.get('/admin/homepage-sections', adminAuth, cms.getHomepageSections);
+router.post('/admin/homepage-sections', adminAuth, cms.createHomepageSection);
+router.put('/admin/homepage-sections/:id', adminAuth, cms.updateHomepageSection);
+router.delete('/admin/homepage-sections/:id', adminAuth, cms.deleteHomepageSection);
+router.post('/admin/homepage-sections/reorder', adminAuth, cms.reorderHomepageSections);
+
 module.exports = router;
