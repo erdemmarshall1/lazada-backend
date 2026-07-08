@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const API = 'https://lazada-backend-production-3b57.up.railway.app';
-const PER_PAGE = 1000;
+const PER_PAGE = 100;
 const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22 viewBox=%220 0 400 400%22%3E%3Crect fill=%22%23f5f5f5%22 width=%22400%22 height=%22400%22/%3E%3Ctext x=%22200%22 y=%22200%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22 fill=%22%23999%22 font-family=%22sans-serif%22%3EProduct%20Unavailable%3C/text%3E%3C/svg%3E';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -76,7 +76,7 @@ async function main() {
     total = data?.data?.total || list.length;
     allProducts = allProducts.concat(list);
     console.log(`  Loaded ${allProducts.length}/${total}`);
-    if (list.length < PER_PAGE) break;
+    if (allProducts.length >= total || list.length === 0) break;
     page++;
     await sleep(200);
   }
