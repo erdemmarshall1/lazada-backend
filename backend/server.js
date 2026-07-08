@@ -116,6 +116,7 @@ app.use('/home/image', require('./routes/imageProxy'));
 app.use('/home/admin', require('./routes/backup'));
 app.use('/home/report', require('./routes/report'));
 app.use('/home/admin/settings', require('./routes/settings'));
+app.use('/home/session', require('./routes/session'));
 
 const themeController = require('./controllers/themeController');
 app.get('/home/settings/theme', themeController.getTheme);

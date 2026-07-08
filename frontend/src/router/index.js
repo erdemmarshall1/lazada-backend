@@ -93,6 +93,7 @@ const routes = [
           { path: '/admin-reports', name: 'admin-reports', component: () => import('@/views/admin/AdminReports.vue'), meta: { title: 'Reports', requiresAuth: true } },
           { path: '/admin-homepage-sections', name: 'admin-homepage-sections', component: () => import('@/views/admin/AdminHomepageSections.vue'), meta: { title: 'Homepage Sections', requiresAuth: true } },
           { path: '/admin-settings', name: 'admin-settings', component: () => import('@/views/admin/AdminSettings.vue'), meta: { title: 'Settings', requiresAuth: true } },
+          { path: '/admin-sessions-audit', name: 'admin-sessions-audit', component: () => import('@/views/admin/AdminSessionsAudit.vue'), meta: { title: 'Sessions & Audit', requiresAuth: true } },
           { path: '/privacysettings', name: 'privacysettings', component: () => import('@/views/user/PrivacySettings.vue'), meta: { title: 'Privacy & Security', requiresAuth: true } },
           { path: '/admin-user-privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true } },
         ],

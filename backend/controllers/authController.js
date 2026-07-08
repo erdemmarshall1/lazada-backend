@@ -10,6 +10,7 @@ const emailService = require('../services/emailService');
 const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
 const { success, fail } = require('../utils/response');
 const { verifyRefreshToken } = require('../middleware/auth');
+const { recordSessionActivity } = require('./sessionController');
 
 const recordLogin = (userId, req, method = 'password', success = true) => {
   LoginHistory.create({
@@ -82,6 +83,7 @@ exports.login = async (req, res) => {
     recordLogin(user._id, req, 'password', true);
     const tokens = issueTokens(user);
     const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
+    recordSessionActivity(user._id, req);
     res.json(success({ ...tokens, userInfo: user, ...extra }, 'Login successful'));
   } catch (error) {
     res.json(fail(error.message));
@@ -116,6 +118,7 @@ exports.login2fa = async (req, res) => {
     if (verified) {
       recordLogin(user._id, req, '2fa', true);
       const tokens = issueTokens(user);
+      recordSessionActivity(user._id, req);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful'));
     }
     const isBackup = user.backupCodes.find(c => bcrypt.compareSync(twoFactorCode, c));
@@ -124,6 +127,7 @@ exports.login2fa = async (req, res) => {
       await user.save();
       recordLogin(user._id, req, 'backup_code', true);
       const tokens = issueTokens(user);
+      recordSessionActivity(user._id, req);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful (backup code used)'));
     }
     recordLogin(user._id, req, '2fa', false);
@@ -250,6 +254,7 @@ exports.refreshToken = async (req, res) => {
       return res.json({ code: -1, msg: 'Refresh token revoked' });
     }
     const tokens = issueTokens(user);
+    recordSessionActivity(user._id, req);
     res.json(success({ ...tokens, userInfo: user }, 'Token refreshed'));
   } catch (error) {
     res.json(fail(error.message));
