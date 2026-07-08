@@ -15,12 +15,41 @@ const privacyController = require('../controllers/privacyController');
 const upload = require('../middleware/upload');
 
 // ---- Pending transactions ----
+/**
+ * @openapi
+ * /home/admin/pending-recharges:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get pending recharge requests
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Pending recharges list
+ */
 router.get('/pending-recharges', adminAuth, walletController.adminGetPendingRecharges);
 router.get('/pending-withdraws', adminAuth, walletController.adminGetPendingWithdraws);
 router.post('/approve-transaction', adminAuth, walletController.adminApproveTransaction);
 router.post('/reject-transaction', adminAuth, walletController.adminRejectTransaction);
 
 // ---- Users ----
+/**
+ * @openapi
+ * /home/admin/users:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get paginated users list
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Paginated users
+ */
 router.get('/users', adminAuth, async (req, res) => {
   try {
     const { page: p, pageSize: ps } = req.query;
@@ -52,11 +81,35 @@ router.get('/shops', adminAuth, async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /home/admin/approve-shop:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Approve a shop application, assign store number
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id]
+ *             properties:
+ *               id: { type: string, description: Shop ID }
+ *     responses:
+ *       200:
+ *         description: Shop approved with store number
+ */
 router.post('/approve-shop', adminAuth, async (req, res) => {
   try {
-    // Get the next store number by counting approved shops
-    const approvedCount = await Shop.countDocuments({ status: 1 });
-    const storeNumber = `S${String(approvedCount + 1).padStart(5, '0')}`;
+    const Counter = require('../models/Counter');
+    const counter = await Counter.findOneAndUpdate(
+      { name: 'storeNumber' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    const storeNumber = `S${String(counter.seq).padStart(5, '0')}`;
     
     const shop = await Shop.findByIdAndUpdate(req.body.id, { 
       status: 1, 
@@ -111,6 +164,17 @@ router.get('/transactions', adminAuth, async (req, res) => {
 });
 
 // ---- Platform wallet ----
+/**
+ * @openapi
+ * /home/admin/platform-wallet:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get platform wallet balances
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Platform wallet data
+ */
 router.get('/platform-wallet', adminAuth, async (req, res) => {
   try {
     const PlatformWallet = require('../models/PlatformWallet');

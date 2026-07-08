@@ -3,12 +3,49 @@ const router = express.Router();
 const cms = require('../controllers/cmsController');
 const { adminAuth } = require('../middleware/auth');
 
-// ---- Public routes ----
+/**
+ * @openapi
+ * /home/cms/page/{slug}:
+ *   get:
+ *     tags: [CMS]
+ *     summary: Get a published page by slug
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Page data
+ */
 router.get('/page/:slug', cms.getPageBySlug);
 router.get('/blog/:slug', cms.getBlogBySlug);
+
+/**
+ * @openapi
+ * /home/cms/faqs:
+ *   get:
+ *     tags: [CMS]
+ *     summary: Get all published FAQs
+ *     responses:
+ *       200:
+ *         description: FAQs list
+ */
 router.get('/faqs', cms.getFaqs);
 router.get('/menu/:key', cms.getMenuByKey);
 router.get('/blogs', cms.getBlogs);
+
+/**
+ * @openapi
+ * /home/cms/homepage-sections/active:
+ *   get:
+ *     tags: [CMS]
+ *     summary: Get active homepage sections
+ *     responses:
+ *       200:
+ *         description: Ordered list of active sections
+ */
+router.get('/homepage-sections/active', cms.getActiveHomepageSections);
 
 // ---- Admin: Pages ----
 router.get('/admin/pages', adminAuth, cms.getPages);
@@ -36,9 +73,6 @@ router.get('/admin/menus', adminAuth, cms.getMenus);
 router.post('/admin/menus', adminAuth, cms.createMenu);
 router.put('/admin/menus/:id', adminAuth, cms.updateMenu);
 router.delete('/admin/menus/:id', adminAuth, cms.deleteMenu);
-
-// ---- Public: Homepage Sections ----
-router.get('/homepage-sections/active', cms.getActiveHomepageSections);
 
 // ---- Admin: Homepage Sections ----
 router.get('/admin/homepage-sections', adminAuth, cms.getHomepageSections);

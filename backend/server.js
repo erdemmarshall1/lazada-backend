@@ -118,6 +118,11 @@ app.use('/home/report', require('./routes/report'));
 app.use('/home/admin/settings', require('./routes/settings'));
 app.use('/home/session', require('./routes/session'));
 
+// Swagger API docs
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+
 const themeController = require('./controllers/themeController');
 app.get('/home/settings/theme', themeController.getTheme);
 
