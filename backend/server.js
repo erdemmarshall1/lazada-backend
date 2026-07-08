@@ -95,6 +95,7 @@ app.use('/home/userWithdraw', require('./routes/withdraw'));
 app.use('/home/userCollect', require('./routes/favorite'));
 app.use('/home/auth', require('./routes/authRefresh'));
 app.use('/home/cms', require('./routes/cms'));
+app.use('/home/notification', require('./routes/notification'));
 app.use('/home/goodsReviews', require('./routes/review'));
 app.use('/home/goods', require('./routes/storeGoods'));
 app.use('/home/userGoods', require('./routes/userGoods'));
@@ -149,6 +150,7 @@ const startServer = (dbConnected) => {
   });
 
   const io = require('./sockets/chat')(server);
+  global.io = io;
   app.set('io', io);
 
   const Wallet = require('./models/Wallet');

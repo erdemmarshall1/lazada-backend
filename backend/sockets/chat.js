@@ -78,5 +78,9 @@ module.exports = (server) => {
     });
   });
 
+  io.sendNotification = (userId, notification) => {
+    io.to(`user_${userId}`).emit('notification', notification);
+  };
+
   return io;
 };

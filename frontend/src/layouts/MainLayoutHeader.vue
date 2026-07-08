@@ -66,6 +66,7 @@
           <button class="ton-header-icon" @click="$router.push('/myaccount')" aria-label="Account">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
           </button>
+          <NotificationBell v-if="store.isLogin" />
           <button class="ton-header-icon" @click="$router.push('/car')" aria-label="Cart">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span class="ton-header-cart-count" v-if="store.carNum > 0">{{ store.carNum }}</span>
@@ -119,6 +120,7 @@ import { useAppStore } from '@/stores/app'
 import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
 import i18n from '@/locales'
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
 const store = useAppStore()
