@@ -11,6 +11,18 @@ const service = axios.create({
   timeout: 30000,
 })
 
+let isRefreshing = false
+let refreshSubscribers = []
+
+const onRefreshed = (newToken, newRefreshToken) => {
+  refreshSubscribers.forEach(cb => cb(newToken, newRefreshToken))
+  refreshSubscribers = []
+}
+
+const addRefreshSubscriber = (cb) => {
+  refreshSubscribers.push(cb)
+}
+
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 const EXTERNAL_IMAGE_DOMAINS = [
@@ -66,6 +78,49 @@ service.interceptors.response.use(
 
     if (isAuthError) {
       const store = useAppStore()
+      const refreshToken = store.refreshToken || localStorage.getItem('theoutnet_refresh_token')
+      if (refreshToken && !data?.twoFactorRequired) {
+        if (!isRefreshing) {
+          isRefreshing = true
+          axios.post(`${API_BASE}/home/auth/refresh`, { refreshToken })
+            .then((res) => {
+              const refreshData = res?.data
+              if (refreshData?.code === 0 && refreshData?.data?.token) {
+                const store = useAppStore()
+                store.setToken(refreshData.data.token)
+                store.setRefreshToken(refreshData.data.refreshToken)
+                isRefreshing = false
+                onRefreshed(refreshData.data.token, refreshData.data.refreshToken)
+              } else {
+                isRefreshing = false
+                refreshSubscribers = []
+                store.logout()
+                if (router.currentRoute.value.fullPath !== '/login') {
+                  router.push('/login')
+                  ElMessage.error('Session expired, please login again')
+                }
+              }
+            })
+            .catch(() => {
+              isRefreshing = false
+              refreshSubscribers = []
+              const store = useAppStore()
+              store.logout()
+              if (router.currentRoute.value.fullPath !== '/login') {
+                router.push('/login')
+                ElMessage.error('Session expired, please login again')
+              }
+            })
+        }
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken) => {
+            response.config.headers.token = newToken
+            response.config.headers.Authorization = `Bearer ${newToken}`
+            response.config.headers['x-access-token'] = newToken
+            resolve(service(response.config))
+          })
+        })
+      }
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
@@ -88,6 +143,49 @@ service.interceptors.response.use(
 
     if (isAuthError) {
       const store = useAppStore()
+      const refreshToken = store.refreshToken || localStorage.getItem('theoutnet_refresh_token')
+      if (refreshToken) {
+        if (!isRefreshing) {
+          isRefreshing = true
+          axios.post(`${API_BASE}/home/auth/refresh`, { refreshToken })
+            .then((res) => {
+              const refreshData = res?.data
+              if (refreshData?.code === 0 && refreshData?.data?.token) {
+                const store = useAppStore()
+                store.setToken(refreshData.data.token)
+                store.setRefreshToken(refreshData.data.refreshToken)
+                isRefreshing = false
+                onRefreshed(refreshData.data.token, refreshData.data.refreshToken)
+              } else {
+                isRefreshing = false
+                refreshSubscribers = []
+                store.logout()
+                if (router.currentRoute.value.fullPath !== '/login') {
+                  router.push('/login')
+                  ElMessage.error('Session expired, please login again')
+                }
+              }
+            })
+            .catch(() => {
+              isRefreshing = false
+              refreshSubscribers = []
+              const store = useAppStore()
+              store.logout()
+              if (router.currentRoute.value.fullPath !== '/login') {
+                router.push('/login')
+                ElMessage.error('Session expired, please login again')
+              }
+            })
+        }
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken) => {
+            error.config.headers.token = newToken
+            error.config.headers.Authorization = `Bearer ${newToken}`
+            error.config.headers['x-access-token'] = newToken
+            resolve(service(error.config))
+          })
+        })
+      }
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')

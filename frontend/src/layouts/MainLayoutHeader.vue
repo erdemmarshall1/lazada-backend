@@ -116,7 +116,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { get, qe } from '@/api/request'
+import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
 import i18n from '@/locales'
 
@@ -149,8 +149,8 @@ const searchMobile = () => {
 }
 
 const handleLogout = async () => {
-  await qe(get('/home/login/logout'))
-  store.clearLoginInfo()
+  await post('/home/auth/logout').catch(() => {})
+  store.logout()
   ElMessage.success('Logged out')
   router.push('/main')
 }

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { JWT_SECRET } = require('../config/app');
+const { JWT_SECRET, JWT_REFRESH_SECRET } = require('../config/app');
 
 const auth = async (req, res, next) => {
   let token = null;
@@ -20,6 +20,9 @@ const auth = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.type === 'refresh') {
+      return res.json({ code: -1, msg: 'Invalid token type' });
+    }
     req.user = await User.findById(decoded.id).select('-password');
     if (!req.user) {
       return res.json({ code: -1, msg: 'User not found' });
@@ -27,6 +30,14 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     return res.json({ code: -1, msg: 'Token expired or invalid' });
+  }
+};
+
+const verifyRefreshToken = (token) => {
+  try {
+    return jwt.verify(token, JWT_REFRESH_SECRET);
+  } catch {
+    return null;
   }
 };
 
@@ -50,4 +61,4 @@ const sellerAuth = (req, res, next) => {
   });
 };
 
-module.exports = { auth, adminAuth, sellerAuth };
+module.exports = { auth, adminAuth, sellerAuth, verifyRefreshToken };

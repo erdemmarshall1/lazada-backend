@@ -73,11 +73,13 @@ const handleLogin = async () => {
       const res = await post('/main/user/login/2fa', { tempToken: tempToken.value, code: form.twoFactorCode })
       const payload = res?.data || res
       const token = payload?.token || res?.token
+      const refreshToken = payload?.refreshToken || res?.refreshToken
       const userInfo = payload?.userInfo || payload?.user || res?.userInfo || res?.user
       const message = payload?.msg || res?.msg || 'Login successful'
 
       if (token) {
         store.setToken(token)
+        if (refreshToken) store.setRefreshToken(refreshToken)
         if (userInfo) store.setUserInfo(userInfo)
         connectSocket()
         ElMessage.success(message)
@@ -107,14 +109,14 @@ const handleLogin = async () => {
       ? responseBody.data
       : responseBody
     const token = payload?.token || responseBody?.token || res?.token
+    const refreshToken = payload?.refreshToken || responseBody?.refreshToken || res?.refreshToken
     const userInfo = payload?.userInfo || payload?.user || responseBody?.userInfo || responseBody?.user || res?.userInfo || res?.user
     const message = payload?.msg || responseBody?.msg || res?.msg || 'Login successful'
 
     if (token) {
       store.setToken(token)
-      if (userInfo) {
-        store.setUserInfo(userInfo)
-      }
+      if (refreshToken) store.setRefreshToken(refreshToken)
+      if (userInfo) store.setUserInfo(userInfo)
       connectSocket()
 
       if (responseBody.needsPasswordSetup || userInfo?.needsPasswordSetup) {

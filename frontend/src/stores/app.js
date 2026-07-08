@@ -37,6 +37,7 @@ const safeParseJSON = (value, fallback = {}) => {
 export const useAppStore = defineStore('app', {
   state: () => ({
     token: safeStorageGet('theoutnet_token', ''),
+    refreshToken: safeStorageGet('theoutnet_refresh_token', ''),
     userInfo: safeParseJSON(safeStorageGet('theoutnet_user'), {}),
     carNum: 0,
     lang: safeStorageGet('theoutnet_lang', 'en'),
@@ -67,6 +68,10 @@ export const useAppStore = defineStore('app', {
       this.token = token || ''
       safeStorageSet('theoutnet_token', this.token)
     },
+    setRefreshToken(refreshToken) {
+      this.refreshToken = refreshToken || ''
+      safeStorageSet('theoutnet_refresh_token', this.refreshToken)
+    },
     setUserInfo(info) {
       this.userInfo = info || {}
       safeStorageSet('theoutnet_user', JSON.stringify(this.userInfo))
@@ -83,6 +88,7 @@ export const useAppStore = defineStore('app', {
     },
     logout() {
       this.token = ''
+      this.refreshToken = ''
       this.userInfo = {}
       this.carNum = 0
       this.userUnreadMsgNum = 0
@@ -91,6 +97,7 @@ export const useAppStore = defineStore('app', {
       this.refundRequestCount = 0
       this.walletBalance = 0
       safeStorageRemove('theoutnet_token')
+      safeStorageRemove('theoutnet_refresh_token')
       safeStorageRemove('theoutnet_user')
       disconnectSocket()
     },

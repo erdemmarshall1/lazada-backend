@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Wallet = require('../models/Wallet');
 const LoginHistory = require('../models/LoginHistory');
-const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/app');
+const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
 const { success, fail } = require('../utils/response');
+const { verifyRefreshToken } = require('../middleware/auth');
 
 const recordLogin = (userId, req, method = 'password', success = true) => {
   LoginHistory.create({
@@ -19,7 +21,18 @@ const recordLogin = (userId, req, method = 'password', success = true) => {
 };
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign({ id, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+const generateRefreshToken = (user) => {
+  const version = user.tokenVersion || '';
+  return jwt.sign({ id: user._id, type: 'refresh', version }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+};
+
+const issueTokens = (user) => {
+  const token = generateToken(user._id);
+  const refreshToken = generateRefreshToken(user);
+  return { token, refreshToken };
 };
 
 exports.login = async (req, res) => {
@@ -47,9 +60,9 @@ exports.login = async (req, res) => {
       return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
     }
     recordLogin(user._id, req, 'password', true);
-    const token = generateToken(user._id);
+    const tokens = issueTokens(user);
     const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
-    res.json(success({ token, userInfo: user, ...extra }, 'Login successful'));
+    res.json(success({ ...tokens, userInfo: user, ...extra }, 'Login successful'));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -82,16 +95,16 @@ exports.login2fa = async (req, res) => {
     });
     if (verified) {
       recordLogin(user._id, req, '2fa', true);
-      const token = generateToken(user._id);
-      return res.json(success({ token, userInfo: user }, 'Login successful'));
+      const tokens = issueTokens(user);
+      return res.json(success({ ...tokens, userInfo: user }, 'Login successful'));
     }
     const isBackup = user.backupCodes.find(c => bcrypt.compareSync(twoFactorCode, c));
     if (isBackup) {
       user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
       await user.save();
       recordLogin(user._id, req, 'backup_code', true);
-      const token = generateToken(user._id);
-      return res.json(success({ token, userInfo: user }, 'Login successful (backup code used)'));
+      const tokens = issueTokens(user);
+      return res.json(success({ ...tokens, userInfo: user }, 'Login successful (backup code used)'));
     }
     recordLogin(user._id, req, '2fa', false);
     res.json(fail('Invalid 2FA code'));
@@ -114,8 +127,8 @@ exports.register = async (req, res) => {
     await Cart.create({ userId: user._id, items: [] });
     await Wallet.create({ userId: user._id });
     recordLogin(user._id, req, 'register', true);
-    const token = generateToken(user._id);
-    res.json(success({ token, userInfo: user }, 'Registration successful'));
+    const tokens = issueTokens(user);
+    res.json(success({ ...tokens, userInfo: user }, 'Registration successful'));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -157,6 +170,43 @@ exports.setupPassword = async (req, res) => {
     user.needsPasswordSetup = false;
     await user.save();
     res.json(success(null, 'Password set successfully. Please login with your new password.'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.json(fail('Refresh token required'));
+    }
+    const decoded = verifyRefreshToken(refreshToken);
+    if (!decoded || decoded.type !== 'refresh') {
+      return res.json({ code: -1, msg: 'Invalid or expired refresh token' });
+    }
+    const user = await User.findById(decoded.id);
+    if (!user || user.status === 0) {
+      return res.json({ code: -1, msg: 'User not found or disabled' });
+    }
+    if (user.tokenVersion && decoded.version !== user.tokenVersion) {
+      return res.json({ code: -1, msg: 'Refresh token revoked' });
+    }
+    const tokens = issueTokens(user);
+    res.json(success({ ...tokens, userInfo: user }, 'Token refreshed'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
+    }
+    res.json(success(null, 'Logged out successfully'));
   } catch (error) {
     res.json(fail(error.message));
   }
