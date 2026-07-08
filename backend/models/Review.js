@@ -10,6 +10,7 @@ const reviewSchema = new mongoose.Schema({
   images: [{ type: String }],
   reply: { type: String, default: '' },
   replyTime: { type: Date },
+  status: { type: String, enum: ['pending', 'approved', 'rejected', 'spam'], default: 'approved' },
 }, { timestamps: true });
 
 reviewSchema.index({ productId: 1 });
