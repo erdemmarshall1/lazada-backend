@@ -12,6 +12,7 @@ const routes = [
       { path: 'register', name: 'register', component: () => import('@/views/auth/Register.vue'), meta: { title: 'Register' } },
       { path: 'forgetpwd', name: 'forgetpwd', component: () => import('@/views/auth/ForgetPwd.vue'), meta: { title: 'Forgot Password' } },
       { path: 'setup-password', name: 'setup-password', component: () => import('@/views/auth/SetupPassword.vue'), meta: { title: 'Setup Password' } },
+      { path: 'verify-email', name: 'verify-email', component: () => import('@/views/auth/VerifyEmail.vue'), meta: { title: 'Verify Email' } },
       { path: 'gooddetail', name: 'gooddetail', component: () => import('@/views/product/GoodDetail.vue'), meta: { title: 'Product Detail' } },
       { path: 'car', name: 'car', component: () => import('@/views/cart/Car.vue'), meta: { title: 'Cart' } },
       { path: 'tuijianlist', name: 'tuijianlist', component: () => import('@/views/product/TuiJianList.vue'), meta: { title: 'Recommended' } },

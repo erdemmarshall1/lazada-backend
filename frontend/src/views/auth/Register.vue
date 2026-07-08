@@ -35,7 +35,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { post, qe } from '@/api/request'
+import { post } from '@/api/request'
 import { useAppStore } from '@/stores/app'
 
 const router = useRouter()
@@ -64,18 +64,22 @@ const handleRegister = async () => {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
   loading.value = true
-  const res = await qe(post('/main/user/reg', {
+  const res = await post('/main/user/reg', {
     username: form.username,
     email: form.email,
     phone: form.phone,
     password: form.password,
-  }))
+  })
   loading.value = false
-  if (res?.data) {
-    ElMessage.success('Registration successful! Please login.')
-    router.push('/login')
-  } else if (!res) {
-    ElMessage.error('Registration failed. Please check your information and try again.')
+  const data = res?.data
+  if (res?.code === 0 && data?.token) {
+    store.setToken(data.token)
+    store.setRefreshToken(data.refreshToken)
+    store.setUserInfo(data.userInfo)
+    ElMessage.success('Registration successful! Check your email for verification code.')
+    router.push('/verify-email')
+  } else {
+    ElMessage.error(res?.msg || 'Registration failed')
   }
 }
 </script>

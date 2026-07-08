@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Wallet = require('../models/Wallet');
 const LoginHistory = require('../models/LoginHistory');
+const emailService = require('../services/emailService');
 const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
 const { success, fail } = require('../utils/response');
 const { verifyRefreshToken } = require('../middleware/auth');
@@ -27,6 +28,25 @@ const generateToken = (id) => {
 const generateRefreshToken = (user) => {
   const version = user.tokenVersion || '';
   return jwt.sign({ id: user._id, type: 'refresh', version }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+};
+
+const sendVerificationEmail = async (user) => {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  user.emailVerificationCode = code;
+  user.emailVerificationExpires = new Date(Date.now() + 30 * 60 * 1000);
+  await user.save();
+  await emailService.sendMail({
+    to: user.email,
+    subject: 'Verify your email - THE OUTNET',
+    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+<h2>Welcome to THE OUTNET</h2>
+<p>Hi ${user.username},</p>
+<p>Use the code below to verify your email address:</p>
+<div style="font-size:32px;letter-spacing:8px;font-weight:700;text-align:center;padding:20px;background:#f4f2ee;border-radius:8px;margin:20px 0">${code}</div>
+<p>This code expires in 30 minutes.</p>
+<p>If you didn't create an account, you can ignore this email.</p>
+</div>`,
+  });
 };
 
 const issueTokens = (user) => {
@@ -128,7 +148,8 @@ exports.register = async (req, res) => {
     await Wallet.create({ userId: user._id });
     recordLogin(user._id, req, 'register', true);
     const tokens = issueTokens(user);
-    res.json(success({ ...tokens, userInfo: user }, 'Registration successful'));
+    sendVerificationEmail(user).catch(() => {});
+    res.json(success({ ...tokens, userInfo: user, emailVerificationSent: true }, 'Registration successful'));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -213,7 +234,38 @@ exports.logout = async (req, res) => {
 };
 
 exports.sendEmailCode = async (req, res) => {
-  res.json(success(null, 'Code sent'));
+  try {
+    const { email } = req.query;
+    if (!email) return res.json(fail('Email required'));
+    const user = await User.findOne({ email });
+    if (!user) return res.json(fail('User not found'));
+    if (user.isEmailVerified) return res.json(success(null, 'Email already verified'));
+    await sendVerificationEmail(user);
+    res.json(success(null, 'Verification code sent to your email'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.json(fail('Verification code required'));
+    const user = await User.findById(req.user._id);
+    if (!user) return res.json(fail('User not found'));
+    if (user.isEmailVerified) return res.json(success(null, 'Email already verified'));
+    if (user.emailVerificationCode !== code) return res.json(fail('Invalid verification code'));
+    if (!user.emailVerificationExpires || user.emailVerificationExpires < new Date()) {
+      return res.json(fail('Verification code expired. Request a new one.'));
+    }
+    user.isEmailVerified = true;
+    user.emailVerificationCode = '';
+    user.emailVerificationExpires = null;
+    await user.save();
+    res.json(success({ isEmailVerified: true }, 'Email verified successfully'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
 };
 
 exports.sendMobileCode = async (req, res) => {

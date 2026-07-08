@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
   twoFactorMethod: { type: String, enum: ['app', 'email', 'sms'], default: 'app' },
   backupCodes: [{ type: String }],
   tokenVersion: { type: String, default: '' },
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationCode: { type: String, default: '' },
+  emailVerificationExpires: { type: Date, default: null },
   privacySettings: {
     emailNotifications: {
       orderUpdates: { type: Boolean, default: true },
