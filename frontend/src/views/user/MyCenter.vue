@@ -95,6 +95,13 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-anquan', label: 'User Privacy', path: '/admin-user-privacy/' + (store.userInfo?._id || '') },
         { icon: 'iconfont icon-dashboard', label: 'Super Admin', path: '/superadmin-dashboard' },
         { icon: 'iconfont icon-tupian', label: 'Banners', path: '/admin-banners' },
+        { icon: 'iconfont icon-anquan', label: 'Roles', path: '/admin-roles' },
+        { icon: 'iconfont icon-shangpin', label: 'CMS Pages', path: '/admin-cms-pages' },
+        { icon: 'iconfont icon-shangpin', label: 'CMS Blogs', path: '/admin-cms-blogs' },
+        { icon: 'iconfont icon-shangpin', label: 'CMS FAQs', path: '/admin-cms-faqs' },
+        { icon: 'iconfont icon-shangpin', label: 'CMS Menus', path: '/admin-cms-menus' },
+        { icon: 'iconfont icon-shangpin', label: 'Reviews', path: '/admin-reviews' },
+        { icon: 'iconfont icon-dashboard', label: 'Reports', path: '/admin-reports' },
       ]
     })
   }

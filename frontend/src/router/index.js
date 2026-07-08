@@ -90,6 +90,7 @@ const routes = [
           { path: '/admin-cms-faqs', name: 'admin-cms-faqs', component: () => import('@/views/admin/AdminFaqs.vue'), meta: { title: 'CMS FAQs', requiresAuth: true } },
           { path: '/admin-cms-menus', name: 'admin-cms-menus', component: () => import('@/views/admin/AdminMenus.vue'), meta: { title: 'CMS Menus', requiresAuth: true } },
           { path: '/admin-reviews', name: 'admin-reviews', component: () => import('@/views/admin/AdminReviews.vue'), meta: { title: 'Review Moderation', requiresAuth: true } },
+          { path: '/admin-reports', name: 'admin-reports', component: () => import('@/views/admin/AdminReports.vue'), meta: { title: 'Reports', requiresAuth: true } },
           { path: '/privacysettings', name: 'privacysettings', component: () => import('@/views/user/PrivacySettings.vue'), meta: { title: 'Privacy & Security', requiresAuth: true } },
           { path: '/admin-user-privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true } },
         ],

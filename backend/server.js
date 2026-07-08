@@ -114,6 +114,7 @@ app.use('/home/payment', require('./routes/payment'));
 app.use('/home/payment-settings', require('./routes/paymentSettings'));
 app.use('/home/image', require('./routes/imageProxy'));
 app.use('/home/admin', require('./routes/backup'));
+app.use('/home/report', require('./routes/report'));
 
 const themeController = require('./controllers/themeController');
 app.get('/home/settings/theme', themeController.getTheme);
