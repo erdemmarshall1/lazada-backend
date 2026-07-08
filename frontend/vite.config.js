@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: ['font/*.ttf', 'font/*.woff', 'font/*.woff2', 'font/*.png', 'img/*.svg', 'img/*.png'],
       manifest: {
         name: 'THE OUTNET WHOLESALE',
-        short_name: 'OUTNET WS',
+        short_name: 'THE OUTNET',
         description: 'Wholesale luxury fashion marketplace — premium designer brands at wholesale prices',
         start_url: '/',
         display: 'standalone',
@@ -23,8 +23,8 @@ export default defineConfig({
           { src: '/screenshots/home.png', sizes: '1280x720', type: 'image/png', form_factor: 'wide' },
         ],
         icons: [
-          { src: '/favicon.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-          { src: '/favicon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: '/img/outnet-logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/img/outnet-logo.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
         ],
       },
       workbox: {

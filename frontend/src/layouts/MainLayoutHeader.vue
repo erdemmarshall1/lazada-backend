@@ -7,7 +7,7 @@
             <span class="ton-header-lang ton-header-lang-labeled">
               <span class="ton-header-lang-prefix">{{ $t('mainLayoutHeader.languageLabel') }}:</span>
               <span class="ton-header-lang-current">{{ currentLangName }}</span>
-              <i class="el-icon-arrow-down el-icon--right"></i>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </span>
             <el-dropdown-menu>
               <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
@@ -21,7 +21,7 @@
         </div>
         <div class="ton-header-top-right">
           <template v-if="!store.isLogin">
-            <a href="/login" class="ton-header-signin">Sign In</a>
+            <a href="javascript:void(0)" class="ton-header-signin" @click="$router.push('/login')">Sign In</a>
           </template>
           <template v-else>
             <span class="ton-header-user" @click="$router.push('/myaccount')">
@@ -35,7 +35,7 @@
           <el-dropdown trigger="click" class="ton-header-lang-dropdown ton-header-lang-compact" @command="handleLangChange">
             <span class="ton-header-lang ton-header-lang-icon" :title="currentLangName" aria-label="Language">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <i class="el-icon-arrow-down el-icon--right"></i>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </span>
             <el-dropdown-menu>
               <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
@@ -49,15 +49,15 @@
       <div class="ton-header-main-inner">
         <button class="ton-hamburger" @click="mobileMenuOpen = !mobileMenuOpen">&#9776;</button>
         <div class="ton-logo" @click="$router.push('/main')">
-          THE OUTNET
+          <img src="/img/outnet-logo.png" alt="THE OUTNET" class="ton-logo-img" />
         </div>
         <nav class="ton-nav desktop-only">
-          <a href="/searchgoods">Just In</a>
-          <a href="/searchgoods">Designers</a>
-          <a href="/searchgoods">Clothing</a>
-          <a href="/searchgoods">Shoes</a>
-          <a href="/searchgoods">Bags</a>
-          <a href="/searchgoods">Accessories</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Just In</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Designers</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Clothing</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Shoes</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Bags</a>
+          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Accessories</a>
         </nav>
         <div class="ton-header-actions">
           <button class="ton-header-icon" @click="$router.push('/searchgoods')" aria-label="Search">
@@ -97,7 +97,7 @@
         <div class="ton-drawer-item ton-drawer-lang">
           <span class="ton-drawer-lang-label">{{ $t('mainLayoutHeader.languageLabel') }}:</span>
           <el-dropdown trigger="click" class="ton-drawer-lang-dropdown" @command="handleMobileLangChange">
-            <span class="ton-drawer-lang-current">{{ currentLangName }} <i class="el-icon-arrow-down el-icon--right"></i></span>
+            <span class="ton-drawer-lang-current">{{ currentLangName }} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
             <el-dropdown-menu>
               <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
             </el-dropdown-menu>
@@ -155,7 +155,7 @@ const handleLogout = async () => {
   router.push('/main')
 }
 
-watch(() => store.currLang, () => {
+watch(() => store.lang, () => {
   window.location.reload()
 })
 </script>
@@ -188,7 +188,8 @@ watch(() => store.currLang, () => {
 .ton-header-main { background: #ffffff; border-bottom: 1px solid #e8e6e2; }
 .ton-header-main-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; padding: 0 20px; }
 .ton-hamburger { display: none; font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; margin-right: 16px; color: #000; }
-.ton-logo { font-size: 22px; font-weight: 300; letter-spacing: 4px; cursor: pointer; white-space: nowrap; margin-right: 40px; color: #000; text-transform: uppercase; }
+.ton-logo { cursor: pointer; white-space: nowrap; margin-right: 40px; display: flex; align-items: center; }
+.ton-logo-img { height: 28px; width: auto; display: block; }
 .ton-nav { display: flex; align-items: center; gap: 28px; flex: 1; }
 .ton-nav a { font-size: 12px; letter-spacing: 1.2px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 400; }
 .ton-nav a:hover { opacity: 0.5; }

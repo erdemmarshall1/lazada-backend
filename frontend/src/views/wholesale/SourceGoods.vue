@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <h3>Wholesale Center</h3>
 
     <div class="filter-bar">
-      <el-input v-model="keyword" placeholder="Search products..." clearable style="width:240px" @keyup.enter="onSearch" @clear="onSearch" />
+      <el-input v-model="keyword" placeholder="Search products..." clearable style="width:240px" @keyup.enter="onSearch" @clear="onSearch" @input="onKeywordInput" />
       <el-select v-model="categoryId" placeholder="All Categories" clearable style="width:180px" @change="onSearch">
         <el-option v-for="cat in categories" :key="cat._id" :label="cat.name" :value="cat._id" />
       </el-select>
       <el-select v-model="sortBy" placeholder="Sort by" style="width:150px" @change="onSearch">
+        <el-option label="Relevance" value="relevance" />
         <el-option label="Newest" value="new" />
         <el-option label="Price: Low to High" value="price_asc" />
         <el-option label="Price: High to Low" value="price_desc" />
@@ -48,7 +49,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { get } from '@/api/request'
 import DistributionDialog from '@/components/DistributionDialog.vue'
@@ -70,6 +72,7 @@ const maxPrice = ref(null)
 const categories = ref([])
 const quickViewVisible = ref(false)
 const quickViewProductId = ref('')
+let debounceTimer = null
 
 const openQuickView = (id) => { quickViewProductId.value = id; quickViewVisible.value = true }
 
@@ -86,8 +89,22 @@ const onPageChange = (p) => {
 }
 
 const onSearch = () => {
+  if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null }
   page.value = 1
   loadData()
+}
+
+const onKeywordInput = () => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    if (keyword.value && keyword.value.length >= 2) {
+      page.value = 1
+      loadData()
+    } else if (!keyword.value) {
+      page.value = 1
+      loadData()
+    }
+  }, 300)
 }
 
 const loadData = async () => {
@@ -102,10 +119,14 @@ const loadData = async () => {
   }
   if (minPrice.value !== null && minPrice.value !== undefined) params.minPrice = minPrice.value
   if (maxPrice.value !== null && maxPrice.value !== undefined) params.maxPrice = maxPrice.value
-  const res = await get('/main/goods/getSearchList', params)
-  if (res?.data) {
-    list.value = res.data.list || []
-    total.value = res.data.total || 0
+  try {
+    const res = await get('/main/goods/getSearchList', params)
+    if (res?.data) {
+      list.value = res.data.list || []
+      total.value = res.data.total || 0
+    }
+  } catch (err) {
+    ElMessage.error('Failed to load products')
   }
   loading.value = false
 }
@@ -114,6 +135,10 @@ onMounted(async () => {
   const catRes = await get('/main/goodsCategory/getList')
   if (catRes?.data) categories.value = catRes.data
   loadData()
+})
+
+onBeforeUnmount(() => {
+  if (debounceTimer) clearTimeout(debounceTimer)
 })
 </script>
 

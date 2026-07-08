@@ -8,5 +8,6 @@ router.get('/getRandList', productController.getRandList);
 router.get('/getData', productController.getData);
 router.get('/getHotList', productController.getHotList);
 router.get('/getReviewsList', productController.getReviewsList);
+router.get('/getSuggestions', productController.getSuggestions);
 
 module.exports = router;

@@ -14,7 +14,7 @@ import { imgUrl as _imgUrl, API_BASE } from '@/api/request'
 const app = createApp(App)
 app.config.globalProperties.$imgUrl = _imgUrl
 
-const IMG_CDN = 'https://d3oobv9weovhej.cloudfront.net'
+const IMG_CDN = 'https://res.cloudinary.com/u7xxu5dq/image/upload'
 
 const getFilename = (url) => {
   try { const p = url.split('/'); return p[p.length - 1] || '' } catch { return '' }
@@ -28,6 +28,16 @@ app.config.globalProperties.$imgFallback = function (e) {
   if (!img || !img.dataset) return
   if (img.dataset.errored) return
   const src = img.src || ''
+
+  if (src.includes('res.cloudinary.com')) {
+    img.dataset.errored = '1'
+    img.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    img.style.objectFit = 'contain'
+    img.style.padding = '10%'
+    img.alt = 'Product Image'
+    return
+  }
+
   const path = src.startsWith(API_BASE) ? src.slice(API_BASE.length) : (src.startsWith('http') ? '' : src)
   const filename = getFilename(path || src)
   const tryUrl = (url, flag) => {
@@ -54,6 +64,7 @@ app.config.globalProperties.$imgFallback = function (e) {
   if (path && tryUrl(IMG_CDN + (path.startsWith('/') ? path : '/' + path), 'cdnTried')) return
   if (filename && !path.includes('/product_images/') && tryUrl(IMG_CDN + '/uploads/product_images/' + filename, 'productImagesTried')) return
   if (filename && tryUrl(IMG_CDN + '/' + filename, 'filenameTried')) return
+  if (filename && tryUrl(IMG_CDN + '/products/' + filename, 'productsTried')) return
   img.dataset.errored = '1'
   const fallbackUrl = API_BASE + '/home/image/placeholder?text=' + encodeURIComponent(filename || 'Product')
   if (fallbackUrl !== src) { img.src = fallbackUrl; return }

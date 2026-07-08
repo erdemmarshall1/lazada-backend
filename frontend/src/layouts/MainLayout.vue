@@ -68,6 +68,17 @@ const applyTheme = (theme) => {
     }
     styleEl.textContent = theme.customCSS
   }
+  if (theme.siteName) {
+    document.title = theme.siteName
+  }
+  if (theme.logoUrl) {
+    const logo = document.querySelector('.ton-logo-img')
+    if (logo) logo.src = theme.logoUrl
+  }
+  if (theme.faviconUrl) {
+    const link = document.getElementById('linkicon')
+    if (link) link.href = theme.faviconUrl
+  }
 }
 
 onMounted(async () => {

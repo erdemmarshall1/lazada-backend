@@ -36,7 +36,7 @@
               class="my-swipe"
             >
               <SwiperSlide v-for="(banner, idx) in banners" :key="idx">
-                <img class="swipe-img" :src="imgUrl(banner.image)" :alt="banner.title || 'Banner ' + (idx + 1)" @error="onImgError" />
+                <img class="swipe-img" :src="$imgUrl(banner.image)" :alt="banner.title || 'Banner ' + (idx + 1)" @error="$imgFallback" />
               </SwiperSlide>
             </Swiper>
           </div>
@@ -59,7 +59,7 @@
               </div>
               <div class="home-hots-content">
                 <div class="home-hots-item" v-for="item in hotProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="onImgError" />
+                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>
@@ -75,7 +75,7 @@
               </div>
               <div class="home-goods-content">
                 <div class="home-hots-item" v-for="item in recommendedProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="onImgError" />
+                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>
@@ -91,7 +91,7 @@
               </div>
               <div class="home-goods-content" style="grid-template-columns: repeat(4, 1fr); height: auto;">
                 <div class="home-hots-item" v-for="item in findProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="onImgError" />
+                  <img class="home-hots-img" :src="imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>
@@ -104,10 +104,10 @@
             <div class="home-shop-box">
               <div class="home-shop-item" v-for="(m, idx) in merchants" :key="idx">
                 <div class="home-shop-img-box">
-                  <img class="home-shop-img" :src="imgUrl(m.product_img)" alt="" @error="onImgError" />
+                  <img class="home-shop-img" :src="imgUrl(m.product_img)" alt="" @error="$imgFallback" />
                 </div>
                 <div class="home-shop-icon-box">
-                  <img class="home-shop-icon" :src="imgUrl(m.mer_avatar)" :alt="m.mer_name" @error="onImgError" />
+                  <img class="home-shop-icon" :src="imgUrl(m.mer_avatar)" :alt="m.mer_name" @error="$imgFallback" />
                 </div>
                 <div class="home-shop-text">{{ m.mer_name }}</div>
               </div>
@@ -116,7 +116,7 @@
 
           <div class="home-footer">
             <div class="home-footer-item">
-              <img class="home-footer-img" src="/assets/logo-icon-o8aSW2Vd.png" alt="logo" />
+              <img class="home-footer-img" src="/img/outnet-logo.png" alt="logo" />
               <div class="home-footer-title">THE OUTNET CN</div>
               <div class="home-footer-tips">Luxury fashion at wholesale prices</div>
             </div>
@@ -126,7 +126,7 @@
               <div class="home-footer-tips">Customer care available around the clock</div>
             </div>
             <div class="home-footer-item">
-              <img class="home-footer-img" src="/assets/logo-icon-o8aSW2Vd.png" alt="shipping" />
+              <img class="home-footer-img" src="/img/outnet-logo.png" alt="shipping" />
               <div class="home-footer-title">Free Shipping</div>
               <div class="home-footer-tips">On orders over $500</div>
             </div>
@@ -162,15 +162,8 @@ const findProducts = ref([])
 const merchants = ref([])
 const affiches = ref([])
 
-const IMG_FALLBACK = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"%3E%3Crect fill="%23f4f2ee" width="100" height="100"/%3E%3Ctext x="50" y="55" text-anchor="middle" fill="%23999" font-size="12"%3ENo Image%3C/text%3E%3C/svg%3E'
-
 const imgUrl = (url) => {
-  if (!url) return IMG_FALLBACK
-  if (url.startsWith('http://') || url.startsWith('https://')) return url
-  if (url.startsWith('/uploads/') || url.startsWith('/assets/')) {
-    const base = import.meta.env.VITE_API_BASE_URL || ''
-    return base + url
-  }
+  if (!url) return ''
   return url
 }
 
@@ -200,7 +193,13 @@ const onIconError = (e) => {
   }
 }
 
-const onImgError = (e) => { e.target.src = IMG_FALLBACK }
+const onImgError = (e) => {
+  const img = e.target
+  img.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  img.style.objectFit = 'contain'
+  img.style.padding = '10%'
+  img.alt = 'Product Image'
+}
 
 const goCategory = (cat) => {
   if (cat.category_id) {

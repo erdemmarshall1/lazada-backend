@@ -1,7 +1,7 @@
 const Favorite = require('../models/Favorite');
 const BrowseHistory = require('../models/BrowseHistory');
 const Shop = require('../models/Shop');
-const { success, fail, paginate } = require('../utils/response');
+const { success, fail, paginate, rewriteProductImages } = require('../utils/response');
 
 exports.shop = async (req, res) => {
   try {
@@ -56,6 +56,7 @@ exports.getProductList = async (req, res) => {
       Favorite.countDocuments({ userId: req.user._id, type: 'product' }),
     ]);
     const products = list.map(f => f.targetId).filter(Boolean);
+    products.forEach(rewriteProductImages);
     res.json(success({ list: products, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));

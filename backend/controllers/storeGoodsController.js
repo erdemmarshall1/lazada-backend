@@ -1,6 +1,6 @@
 const Product = require('../models/Product');
 const Shop = require('../models/Shop');
-const { success, fail, paginate } = require('../utils/response');
+const { success, fail, paginate, rewriteProductImages } = require('../utils/response');
 
 exports.getList = async (req, res) => {
   try {
@@ -13,6 +13,7 @@ exports.getList = async (req, res) => {
       Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Product.countDocuments(query),
     ]);
+    list.forEach(rewriteProductImages);
     res.json(success({ list, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
@@ -24,6 +25,7 @@ exports.getInfo = async (req, res) => {
     const shop = await Shop.findOne({ userId: req.user._id });
     const product = await Product.findOne({ _id: req.query.id, shopId: shop._id });
     if (!product) return res.json(fail('Product not found'));
+    rewriteProductImages(product);
     res.json(success(product));
   } catch (error) {
     res.json(fail(error.message));

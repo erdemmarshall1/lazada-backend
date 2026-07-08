@@ -1,7 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
-const { success, fail, paginate } = require('../utils/response');
+const { success, fail, paginate, rewriteProductImages } = require('../utils/response');
 
 exports.getInfo = async (req, res) => {
   try {
@@ -9,6 +9,7 @@ exports.getInfo = async (req, res) => {
     if (!product) return res.json(fail('Product not found'));
     product.salesCount += 1;
     await product.save();
+    rewriteProductImages(product);
     res.json(success(product));
   } catch (error) {
     res.json(fail(error.message));
@@ -25,8 +26,8 @@ exports.getSearchList = async (req, res) => {
     }
     if (keyword) {
       query.$or = [
-        { name: { $regex: keyword, $options: 'i' } },
-        { description: { $regex: keyword, $options: 'i' } },
+        { $text: { $search: keyword } },
+        { tags: { $regex: keyword, $options: 'i' } },
       ];
     }
     if (categoryId) {
@@ -47,11 +48,13 @@ exports.getSearchList = async (req, res) => {
     else if (sort === 'sales') sortObj = { salesCount: -1 };
     else if (sort === 'rating') sortObj = { rating: -1 };
     else if (sort === 'new') sortObj = { createdAt: -1 };
+    else if (sort === 'relevance') sortObj = { score: { $meta: 'textScore' } };
 
     const [list, total] = await Promise.all([
       Product.find(query).sort(sortObj).skip(skip).limit(limit).populate('shopId', 'name'),
       Product.countDocuments(query),
     ]);
+    list.forEach(rewriteProductImages);
     res.json(success({ list, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
@@ -63,6 +66,7 @@ exports.getRandList = async (req, res) => {
     const count = await Product.countDocuments({ status: 1 });
     const random = Math.max(1, Math.floor(Math.random() * count));
     const list = await Product.find({ status: 1 }).skip(random).limit(20).populate('shopId', 'name');
+    list.forEach(rewriteProductImages);
     res.json(success(list));
   } catch (error) {
     res.json(fail(error.message));
@@ -75,6 +79,7 @@ exports.getData = async (req, res) => {
     if (!ids) return res.json(fail('Ids required'));
     const idArr = ids.split(',');
     const products = await Product.find({ _id: { $in: idArr } });
+    products.forEach(rewriteProductImages);
     res.json(success(products));
   } catch (error) {
     res.json(fail(error.message));
@@ -85,6 +90,7 @@ exports.getHotList = async (req, res) => {
   try {
     const list = await Product.find({ status: 1, isHot: true })
       .sort({ salesCount: -1 }).limit(20).populate('shopId', 'name');
+    list.forEach(rewriteProductImages);
     res.json(success(list));
   } catch (error) {
     res.json(fail(error.message));
@@ -110,6 +116,21 @@ exports.getCategoryList = async (req, res) => {
   try {
     const list = await Category.find({ status: 1 }).sort({ sort: 1 });
     res.json(success(list));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.getSuggestions = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    if (!keyword || keyword.length < 2) return res.json(success([]));
+    const suggestions = await Product.find(
+      { $text: { $search: keyword }, status: 1 },
+      { score: { $meta: 'textScore' } }
+    ).sort({ score: { $meta: 'textScore' } }).limit(10).select('name minPrice images');
+    suggestions.forEach(rewriteProductImages);
+    res.json(success(suggestions));
   } catch (error) {
     res.json(fail(error.message));
   }
