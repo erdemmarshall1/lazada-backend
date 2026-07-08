@@ -903,6 +903,19 @@ router.post('/batch-update-images', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Get ordered product IDs (for cleanup of no-image products) ----
+router.post('/product-order-ids', adminAuth, async (req, res) => {
+  try {
+    const Order = require('../models/Order');
+    const orders = await Order.find({}, { items: 1 }).lean();
+    const productIds = [...new Set(orders.flatMap(o => o.items.map(i => i.productId?.toString())))]
+      .filter(Boolean);
+    res.json(success({ productIds }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Balance Management (admin credit/debit) ----
 router.get('/balance/users', adminAuth, async (req, res) => {
   try {
