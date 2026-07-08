@@ -103,6 +103,7 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-shangpin', label: 'Reviews', path: '/admin-reviews' },
         { icon: 'iconfont icon-dashboard', label: 'Reports', path: '/admin-reports' },
         { icon: 'iconfont icon-shangpin', label: 'Homepage Sections', path: '/admin-homepage-sections' },
+        { icon: 'iconfont icon-shezhi', label: 'Settings', path: '/admin-settings' },
       ]
     })
   }
