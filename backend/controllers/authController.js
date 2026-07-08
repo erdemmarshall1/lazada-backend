@@ -157,18 +157,54 @@ exports.register = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.json(fail('Email and new password required'));
+    const { email, code, password } = req.body;
+    if (!email || !code || !password) {
+      return res.json(fail('Email, reset code and new password required'));
     }
     const user = await User.findOne({ email });
     if (!user) {
       return res.json(fail('User not found'));
     }
+    if (user.resetPasswordCode !== code) {
+      return res.json(fail('Invalid reset code'));
+    }
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      return res.json(fail('Reset code expired. Request a new one.'));
+    }
     user.password = password;
+    user.resetPasswordCode = '';
+    user.resetPasswordExpires = null;
     await user.save();
     recordLogin(user._id, req, 'reset', true);
     res.json(success(null, 'Password reset successful'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.sendResetCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.json(fail('Email required'));
+    const user = await User.findOne({ email });
+    if (!user) return res.json(fail('User not found'));
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordCode = code;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
+    await emailService.sendMail({
+      to: user.email,
+      subject: 'Reset your password - THE OUTNET',
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+<h2>Password Reset</h2>
+<p>Hi ${user.username},</p>
+<p>Use the code below to reset your password:</p>
+<div style="font-size:32px;letter-spacing:8px;font-weight:700;text-align:center;padding:20px;background:#f4f2ee;border-radius:8px;margin:20px 0">${code}</div>
+<p>This code expires in 15 minutes.</p>
+<p>If you didn't request this, you can ignore this email.</p>
+</div>`,
+    });
+    res.json(success(null, 'Reset code sent to your email'));
   } catch (error) {
     res.json(fail(error.message));
   }

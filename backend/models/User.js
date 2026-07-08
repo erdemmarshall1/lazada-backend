@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
   isEmailVerified: { type: Boolean, default: false },
   emailVerificationCode: { type: String, default: '' },
   emailVerificationExpires: { type: Date, default: null },
+  resetPasswordCode: { type: String, default: '' },
+  resetPasswordExpires: { type: Date, default: null },
   privacySettings: {
     emailNotifications: {
       orderUpdates: { type: Boolean, default: true },
