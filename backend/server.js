@@ -94,6 +94,7 @@ app.use('/home/userRecharge', require('./routes/recharge'));
 app.use('/home/userWithdraw', require('./routes/withdraw'));
 app.use('/home/userCollect', require('./routes/favorite'));
 app.use('/home/auth', require('./routes/authRefresh'));
+app.use('/home/cms', require('./routes/cms'));
 app.use('/home/goodsReviews', require('./routes/review'));
 app.use('/home/goods', require('./routes/storeGoods'));
 app.use('/home/userGoods', require('./routes/userGoods'));

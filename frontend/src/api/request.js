@@ -204,6 +204,7 @@ export const $http = service
 export const get = (url, params) => service.get(url, { params })
 export const post = (url, data) => service.post(url, data)
 export const put = (url, data) => service.put(url, data)
+export const del = (url) => service.delete(url)
 
 export const qe = async (fn) => {
   try {
