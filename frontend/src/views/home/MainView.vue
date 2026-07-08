@@ -101,7 +101,7 @@
 
           <div class="home-footer">
             <div class="home-footer-item">
-              <img class="home-footer-img" src="/img/outnet-logo.png" alt="logo" />
+              <svg class="home-footer-img" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               <div class="home-footer-title">THE OUTNET CN</div>
               <div class="home-footer-tips">Luxury fashion at wholesale prices</div>
             </div>
@@ -111,7 +111,7 @@
               <div class="home-footer-tips">Customer care available around the clock</div>
             </div>
             <div class="home-footer-item">
-              <img class="home-footer-img" src="/img/outnet-logo.png" alt="shipping" />
+              <svg class="home-footer-img" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               <div class="home-footer-title">Free Shipping</div>
               <div class="home-footer-tips">On orders over $500</div>
             </div>

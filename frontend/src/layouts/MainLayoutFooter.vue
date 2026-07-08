@@ -3,7 +3,6 @@
     <div class="ton-footer-inner">
       <div class="ton-footer-grid">
         <div class="ton-footer-col">
-          <img src="/img/outnet-logo.png" alt="THE OUTNET" class="ton-footer-logo" />
           <h4 class="ton-footer-title">ABOUT THE OUTNET</h4>
           <ul>
             <li><a href="javascript:void(0)" @click="$router.push('/about-us')">About Us</a></li>
@@ -87,7 +86,6 @@ const year = new Date().getFullYear()
 .ton-footer { background: #faf8f4; border-top: 1px solid #e8e6e2; margin-top: auto; }
 .ton-footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 20px 20px; }
 .ton-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 32px; }
-.ton-footer-logo { height: 24px; margin-bottom: 16px; display: block; }
 .ton-footer-col h4 { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 16px; font-weight: 400; }
 .ton-footer-col ul { list-style: none; padding: 0; margin: 0; }
 .ton-footer-col ul li { margin-bottom: 8px; }
