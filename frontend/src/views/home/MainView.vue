@@ -99,21 +99,6 @@
             </div>
           </div>
 
-          <div class="home-shop" v-if="merchants.length">
-            <div class="home-shop-title">Credit Merchants</div>
-            <div class="home-shop-box">
-              <div class="home-shop-item" v-for="(m, idx) in merchants" :key="idx">
-                <div class="home-shop-img-box">
-                  <img class="home-shop-img" :src="imgUrl(m.product_img)" alt="" @error="$imgFallback" />
-                </div>
-                <div class="home-shop-icon-box">
-                  <img class="home-shop-icon" :src="imgUrl(m.mer_avatar)" :alt="m.mer_name" @error="$imgFallback" />
-                </div>
-                <div class="home-shop-text">{{ m.mer_name }}</div>
-              </div>
-            </div>
-          </div>
-
           <div class="home-footer">
             <div class="home-footer-item">
               <img class="home-footer-img" src="/img/outnet-logo.png" alt="logo" />
@@ -159,7 +144,6 @@ const banners = ref([])
 const hotProducts = ref([])
 const recommendedProducts = ref([])
 const findProducts = ref([])
-const merchants = ref([])
 const affiches = ref([])
 
 const imgUrl = (url) => {
@@ -216,13 +200,12 @@ const goDetail = (id) => {
 }
 
 onMounted(async () => {
-  const [catRes, banRes, hotRes, recRes, findRes, merchRes, affRes] = await Promise.all([
+  const [catRes, banRes, hotRes, recRes, findRes, affRes] = await Promise.all([
     get('/main/goodsCategory/getList').catch(() => ({ data: null })),
     get('/main/banner/getList').catch(() => ({ data: null })),
     get('/main/goods/getHotList').catch(() => ({ data: null })),
     get('/main/goods/getSearchList', { isRecommended: true, pageSize: 20 }).catch(() => ({ data: null })),
     get('/main/goods/getSearchList', { pageSize: 20 }).catch(() => ({ data: null })),
-    get('/main/userShop/getCreditMerchantList').catch(() => ({ data: null })),
     get('/main/msg/getAlertList').catch(() => ({ data: null })),
   ])
 
@@ -231,7 +214,6 @@ onMounted(async () => {
   if (hotRes?.data) hotProducts.value = Array.isArray(hotRes.data) ? hotRes.data : hotRes.data.list || []
   if (recRes?.data) recommendedProducts.value = recRes.data.list || []
   if (findRes?.data) findProducts.value = findRes.data.list || []
-  if (merchRes?.data) merchants.value = Array.isArray(merchRes.data) ? merchRes.data : merchRes.data.list || []
   if (affRes?.data) affiches.value = Array.isArray(affRes.data) ? affRes.data : []
 })
 </script>
@@ -552,85 +534,6 @@ onMounted(async () => {
   text-align: left;
 }
 
-.home-shop {
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  background-color: #fff;
-  border-radius: 8px;
-}
-
-.home-shop .home-shop-title {
-  margin-bottom: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 150%;
-  color: #27272a;
-}
-
-.home-shop .home-shop-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  min-height: 192px;
-}
-
-.home-shop .home-shop-box .home-shop-item {
-  flex-shrink: 0;
-  width: 150px;
-  margin-right: 8px;
-  padding-bottom: 12px;
-  text-align: center;
-  border: 1px solid rgba(0, 0, 0, .05);
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: .3s;
-}
-
-.home-shop .home-shop-box .home-shop-item:hover {
-  box-shadow: #0000001a 0 0 20px;
-}
-
-.home-shop .home-shop-box .home-shop-item .home-shop-img-box {
-  padding: 4px;
-  width: 100%;
-}
-
-.home-shop .home-shop-box .home-shop-item .home-shop-img-box .home-shop-img {
-  width: 100%;
-  height: 100px;
-  object-fit: contain;
-}
-
-.home-shop .home-shop-box .home-shop-item .home-shop-icon-box {
-  margin: 0 auto;
-  width: 90%;
-  height: 44px;
-  overflow: hidden;
-  border: .5px solid rgba(0, 0, 0, .09);
-  border-radius: 20px;
-}
-
-.home-shop .home-shop-box .home-shop-item .home-shop-icon-box .home-shop-icon {
-  margin: auto;
-  width: 70%;
-  max-height: 40px;
-  object-fit: contain;
-}
-
-.home-shop .home-shop-box .home-shop-item .home-shop-text {
-  padding: 10px 5px 0;
-  font-size: 14px;
-  color: #ee0a24;
-  font-weight: 700;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 .home-footer {
   display: grid;
