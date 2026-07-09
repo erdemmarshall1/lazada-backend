@@ -21,6 +21,9 @@
           <div class="summary-right">
             <el-button v-if="shop.status === 0" type="success" :loading="approving" @click="handleApprove" size="large">Approve</el-button>
             <el-button v-if="shop.status === 0" type="danger" :loading="rejecting" @click="handleReject" size="large">Reject</el-button>
+            <el-button v-if="shop.status === 1 && !shop.userId?.sellerId" type="warning" size="large" :loading="generating" @click="handleGenerateSellerId">
+              <i class="iconfont icon-anquan"></i> Generate Seller ID
+            </el-button>
             <el-button v-if="shop.userId?.sellerId" type="primary" size="large" @click="loginAsSeller">
               <i class="iconfont icon-dianpu"></i> Login to Seller Portal
             </el-button>
@@ -102,6 +105,7 @@ const shop = ref(null)
 const loading = ref(false)
 const approving = ref(false)
 const rejecting = ref(false)
+const generating = ref(false)
 const previewVisible = ref(false)
 const previewUrl = ref('')
 const previewTitle = ref('')
@@ -126,6 +130,13 @@ const handleReject = async () => {
   rejecting.value = true
   const res = await qe(post('/home/admin/reject-shop', { id: shop.value._id }))
   rejecting.value = false
+  if (res) { ElMessage.success(res.msg); fetchDetail() }
+}
+
+const handleGenerateSellerId = async () => {
+  generating.value = true
+  const res = await qe(post('/home/admin/generate-seller-id', { id: shop.value._id }))
+  generating.value = false
   if (res) { ElMessage.success(res.msg); fetchDetail() }
 }
 

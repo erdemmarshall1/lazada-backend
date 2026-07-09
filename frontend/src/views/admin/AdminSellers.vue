@@ -39,6 +39,7 @@
           <el-button type="primary" size="small" @click="$router.push('/admin-shop-detail/' + row._id)">View</el-button>
           <el-button type="success" size="small" @click="approve(row._id)" :disabled="row.status === 1">Approve</el-button>
           <el-button type="danger" size="small" @click="reject(row._id)" :disabled="row.status === 2">Reject</el-button>
+          <el-button v-if="row.status === 1 && !row.userId?.sellerId" type="warning" size="small" @click="generateSellerId(row)">Generate ID</el-button>
           <el-button v-if="row.status === 1 && row.userId?.sellerId" type="info" size="small" @click="loginAsSeller(row)">Login as Seller</el-button>
         </template>
       </el-table-column>
@@ -90,6 +91,10 @@ const migrateSellerIds = async () => {
     await ElMessageBox.confirm('Assign seller IDs to all approved sellers missing them?', 'Migrate Seller IDs', { confirmButtonText: 'Migrate', cancelButtonText: 'Cancel', type: 'warning' })
   } catch { return }
   const res = await qe(post('/home/admin/migrate-seller-ids'))
+  if (res) { ElMessage.success(res.msg); fetchShops() }
+}
+const generateSellerId = async (row) => {
+  const res = await qe(post('/home/admin/generate-seller-id', { id: row._id }))
   if (res) { ElMessage.success(res.msg); fetchShops() }
 }
 const loginAsSeller = async (row) => {
