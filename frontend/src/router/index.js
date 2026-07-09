@@ -173,6 +173,14 @@ const adminPathMap = {
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
 
+  if (to.query.temp_token) {
+    localStorage.setItem('seller_temp_token', to.query.temp_token)
+    store.setToken(to.query.temp_token)
+    const { temp_token, ...rest } = to.query
+    next({ path: to.path, query: rest })
+    return
+  }
+
   if (window.location.hostname.startsWith('admin') && (to.path === '/' || to.path === '/main')) {
     next('/admin/dashboard')
     return

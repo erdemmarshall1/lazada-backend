@@ -121,6 +121,7 @@ Cloudflare:
   API Token: (set as GitHub secret CLOUDFLARE_API_TOKEN)
 
 15. MyCenter.vue Mobile Sidebar Enhancement - replaced display: none/block toggle with fixed slide-in drawer (left: -240px to left: 0) + backdrop overlay for mobile (<768px). Body scroll locked while open. Matches AdminLayout and MainLayoutHeader drawer patterns.
+16. Seller ID Strict Assignment + Admin Application Dashboard - backend: POST /migrate-seller-ids (one-time migration), POST /login-as-seller/:userId (temp JWT for admin to access seller portal). Frontend: AdminSellers.vue — removed manual Generate ID button, added Docs badge (x/4), added Login as Seller button; AdminShopDetail.vue — redesigned as application dashboard with summary header, document gallery with hover preview + lightbox dialog, Approve/Reject, Login to Seller Portal opens /mystore in new tab with temp_token. Router guard consumes temp_token query param and sets store token. Request interceptor falls back to seller_temp_token localStorage key.
 
 === EXISTING DEPLOYMENTS ===
 

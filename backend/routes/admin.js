@@ -172,6 +172,46 @@ router.get('/shops/:id', adminAuth, async (req, res) => {
   }
 });
 
+router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
+  try {
+    const Counter = require('../models/Counter');
+    const approvedShops = await Shop.find({ status: 1 }).populate('userId', 'sellerId');
+    let migrated = 0;
+    for (const shop of approvedShops) {
+      if (!shop.userId || shop.userId.sellerId) continue;
+      const sellerCounter = await Counter.findOneAndUpdate(
+        { name: 'sellerId' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
+      await User.findByIdAndUpdate(shop.userId._id, { sellerId });
+      migrated++;
+    }
+    res.json(success({ migrated }, `Migrated ${migrated} seller(s)`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/app');
+
+router.post('/login-as-seller/:userId', adminAuth, async (req, res) => {
+  try {
+    const targetUser = await User.findById(req.params.userId).select('-password');
+    if (!targetUser) return res.json(fail('User not found'));
+    const token = jwt.sign(
+      { id: targetUser._id, role: targetUser.role },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    res.json(success({ token, sellerId: targetUser.sellerId, username: targetUser.username }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Products ----
 router.get('/products', adminAuth, async (req, res) => {
   try {

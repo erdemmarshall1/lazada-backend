@@ -59,7 +59,7 @@ export const imgUrl = (path) => {
 
 service.interceptors.request.use((config) => {
   const store = useAppStore()
-  const token = store.token || localStorage.getItem('theoutnet_token')
+  const token = store.token || localStorage.getItem('theoutnet_token') || localStorage.getItem('seller_temp_token')
   if (token) {
     config.headers.token = token
     config.headers.Authorization = `Bearer ${token}`
