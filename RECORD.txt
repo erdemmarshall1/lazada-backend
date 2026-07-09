@@ -120,10 +120,12 @@ Cloudinary:
 Cloudflare:
   API Token: (set as GitHub secret CLOUDFLARE_API_TOKEN)
 
+15. MyCenter.vue Mobile Sidebar Enhancement - replaced display: none/block toggle with fixed slide-in drawer (left: -240px to left: 0) + backdrop overlay for mobile (<768px). Body scroll locked while open. Matches AdminLayout and MainLayoutHeader drawer patterns.
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): via Netlify (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Preview): https://de4e6ee5.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://51b987aa.theoutnet-wholesale.pages.dev

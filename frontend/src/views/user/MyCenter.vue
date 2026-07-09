@@ -5,6 +5,7 @@
         <span v-if="!sidebarOpen">&#9776; Menu</span>
         <span v-else>&times; Close</span>
       </button>
+      <div class="sidebar-overlay" v-if="sidebarOpen" @click="sidebarOpen = false"></div>
       <div class="mycenter-sidebar" :class="{ open: sidebarOpen }">
         <div class="user-card g-flex-align-center" v-if="store.isLogin">
           <div class="user-avatar"><img :src="$imgUrl(store.userInfo.avatar)" @error="$imgFallback" /></div>
@@ -28,10 +29,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAppStore } from '@/stores/app'
 const store = useAppStore()
 const sidebarOpen = ref(false)
+
+watch(sidebarOpen, (val) => {
+  document.body.style.overflow = val ? 'hidden' : ''
+})
 const isAdmin = computed(() => store.userInfo?.role === 'admin')
 const collapsedSections = ref(new Set())
 const toggleSection = (title) => {
@@ -153,12 +158,14 @@ const menuSections = computed(() => {
 .menu-item .iconfont { font-size: 16px; }
 .mycenter-content { flex: 1; background: var(--g-white); border-radius: 8px; padding: 24px; min-height: 500px; }
 @media (max-width: 768px) {
-  .mycenter-container { flex-direction: column; position: relative; }
-  .mycenter-sidebar-toggle { display: flex; }
-  .mycenter-sidebar { width: 100%; display: none; }
-  .mycenter-sidebar.open { display: block; }
+  .mycenter-container { flex-direction: column; position: relative; min-height: calc(100vh - 200px); }
+  .mycenter-sidebar-toggle { display: flex; position: sticky; top: 0; z-index: 10; }
+  .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 98; }
+  .mycenter-sidebar { position: fixed; top: 0; left: -240px; width: 240px; height: 100%; z-index: 99; display: flex; flex-direction: column; background: var(--g-bg); max-height: 100vh; overflow-y: auto; transition: left 0.3s ease; padding: 12px 0; margin: 0; }
+  .mycenter-sidebar.open { left: 0; display: flex; }
   .mycenter-content { padding: 16px; min-height: auto; }
-  .menu-section { margin-bottom: 8px; }
+  .menu-section { margin-bottom: 8px; background: var(--g-white); border-radius: 8px; padding: 12px 0; }
+  .user-card { margin: 0 12px 12px; }
 }
 </style>
 
