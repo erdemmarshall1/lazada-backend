@@ -6,6 +6,9 @@
       <el-table-column prop="_id" label="ID" width="200" />
       <el-table-column prop="storeNumber" label="Store #" width="100" />
       <el-table-column prop="name" label="Store Name" />
+      <el-table-column label="Seller ID">
+        <template #default="{row}">{{ row.userId?.sellerId || '—' }}</template>
+      </el-table-column>
       <el-table-column prop="fullName" label="Owner" />
       <el-table-column prop="email" label="Email" />
       <el-table-column prop="phone" label="Phone" />
@@ -16,8 +19,9 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Action" width="200">
+      <el-table-column label="Action" width="280">
         <template #default="{row}">
+          <el-button type="primary" size="small" @click="$router.push('/admin-shop-detail/' + row._id)">View</el-button>
           <el-button type="success" size="small" @click="approve(row._id)" :disabled="row.status === 1">Approve</el-button>
           <el-button type="danger" size="small" @click="reject(row._id)" :disabled="row.status === 2">Reject</el-button>
         </template>

@@ -169,9 +169,32 @@ const refreshProdStats = async () => {
 }
 
 const runFixImages = async () => {
-  await ElMessageBox.confirm('This will attempt to fix missing product images. Continue?', 'Confirm', { type: 'warning' })
-  const res = await qe(post('/home/admin/fix-product-images-generic'))
-  if (res) await refreshProdStats()
+  await ElMessageBox.confirm('This will scan all products and fix missing images. Continue?', 'Confirm', { type: 'warning' })
+  ElMessage.info('Scanning products... this may take a moment')
+  const LABELS = ['Product', 'Item', 'Merchandise', 'Goods', 'Article', 'Commodity', 'Stock', 'Supply', 'Inventory', 'Piece']
+  const localPathRegex = /^\/uploads\/[0-9a-f-]+\.(png|jpg|jpeg|webp)$/
+  let fixed = 0, total = 0, page = 1, pageSize = 100, labelIdx = 0
+  do {
+    const res = await get(`/main/goods/getSearchList?page=${page}&pageSize=${pageSize}`)
+    const list = res?.data?.list || []
+    total = res?.data?.total || list.length
+    if (list.length === 0) break
+    for (const product of list) {
+      const img = product.images?.[0]
+      if (!img || !localPathRegex.test(img)) continue
+      const placeholderUrl = API_BASE + '/home/image/placeholder?text=' + encodeURIComponent(LABELS[labelIdx % LABELS.length])
+      labelIdx++
+      const upd = await qe(post('/home/admin/update-product', { id: product._id, images: [placeholderUrl] }))
+      if (upd) fixed++
+    }
+    page++
+  } while ((page - 1) * pageSize < total)
+  if (fixed > 0) {
+    ElMessage.success(`Fixed ${fixed} products with missing images`)
+    await refreshProdStats()
+  } else {
+    ElMessage.info('All products already have valid images — nothing to fix')
+  }
 }
 
 const saveSettings = async () => {

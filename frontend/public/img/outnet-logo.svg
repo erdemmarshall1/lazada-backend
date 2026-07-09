@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 100" width="500" height="100">
+  <style>
+    .logo-title { font: 400 48px 'TheOutnetWebXL', 'Inter', Helvetica, Arial, sans-serif; fill: #000; }
+    .logo-sub { font: 300 14px 'TheOutnetWebXL', 'Inter', Helvetica, Arial, sans-serif; fill: #666; letter-spacing: 8px; }
+  </style>
+  <text x="250" y="52" text-anchor="middle" class="logo-title">THE OUTNET</text>
+  <text x="250" y="78" text-anchor="middle" class="logo-sub">WHOLESALE</text>
+</svg>

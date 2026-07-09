@@ -31,6 +31,7 @@ const routes = [
       { path: 'about-us', name: 'about-us', component: () => import('@/views/info/AboutUs.vue'), meta: { title: 'About Us' } },
       { path: 'join-us', name: 'join-us', component: () => import('@/views/info/JoinUs.vue'), meta: { title: 'Join Us' } },
       { path: 'contact-us', name: 'contact-us', component: () => import('@/views/info/ContactUs.vue'), meta: { title: 'Contact Us' } },
+      { path: 'contact', name: 'contact-form', component: () => import('@/views/info/ContactForm.vue'), meta: { title: 'Contact Form' } },
       { path: 'exchange-cooperation', name: 'exchange-cooperation', component: () => import('@/views/info/ExchangeCooperation.vue'), meta: { title: 'Exchange and Cooperation' } },
       { path: 'merchant-agreement', name: 'merchant-agreement', component: () => import('@/views/info/MerchantAgreement.vue'), meta: { title: 'Merchant Agreement' } },
       { path: 'supplier-cooperation', name: 'supplier-cooperation', component: () => import('@/views/info/SupplierCooperation.vue'), meta: { title: 'Supplier Cooperation' } },
@@ -62,6 +63,7 @@ const routes = [
           { path: '/sourcegoods', name: 'sourcegoods', component: () => import('@/views/wholesale/SourceGoods.vue'), meta: { title: 'Source Goods', requiresAuth: true } },
           { path: '/ordertracking', name: 'ordertracking', component: () => import('@/views/logistics/OrderTracking.vue'), meta: { title: 'Track Order' } },
           { path: '/seller-logistics', name: 'seller-logistics', component: () => import('@/views/logistics/SellerLogistics.vue'), meta: { title: 'Seller Logistics', requiresAuth: true } },
+          { path: '/mysubmissions', name: 'mysubmissions', component: () => import('@/views/user/MySubmissions.vue'), meta: { title: 'My Inquiries', requiresAuth: true } },
           { path: '/chattostore', name: 'chattostore', component: () => import('@/views/chat/ChatToStore.vue'), meta: { title: 'Chat Store', requiresAuth: true } },
           { path: '/chattostorelist', name: 'chattostorelist', component: () => import('@/views/chat/ChatToStoreList.vue'), meta: { title: 'Chats', requiresAuth: true } },
           { path: '/chattouserlist', name: 'chattouserlist', component: () => import('@/views/chat/ChatToUserList.vue'), meta: { title: 'User Chats', requiresAuth: true } },
@@ -96,6 +98,10 @@ const routes = [
           { path: '/admin-sessions-audit', name: 'admin-sessions-audit', component: () => import('@/views/admin/AdminSessionsAudit.vue'), meta: { title: 'Sessions & Audit', requiresAuth: true } },
           { path: '/privacysettings', name: 'privacysettings', component: () => import('@/views/user/PrivacySettings.vue'), meta: { title: 'Privacy & Security', requiresAuth: true } },
           { path: '/admin-user-privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true } },
+          { path: '/admin-submissions', name: 'admin-submissions', component: () => import('@/views/admin/AdminSubmissions.vue'), meta: { title: 'Inquiries', requiresAuth: true } },
+          { path: '/admin-user-detail/:id', name: 'admin-user-detail', component: () => import('@/views/admin/AdminUserDetail.vue'), meta: { title: 'User Detail', requiresAuth: true } },
+          { path: '/admin-shop-detail/:id', name: 'admin-shop-detail', component: () => import('@/views/admin/AdminShopDetail.vue'), meta: { title: 'Shop Detail', requiresAuth: true } },
+          { path: '/admin-tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true } },
         ],
       },
     ],
@@ -111,6 +117,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
+
+  if (window.location.hostname.startsWith('admin') && (to.path === '/' || to.path === '/main')) {
+    next('/superadmin-dashboard')
+    return
+  }
 
   window.scrollTo(0, 0)
   document.title = to.meta.title || 'Shopify Wholesale'

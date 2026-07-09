@@ -33,6 +33,19 @@
         </el-form-item>
       </div>
 
+      <el-divider content-position="left">Notifications</el-divider>
+      <el-form-item label="Enable SMS">
+        <el-switch v-model="form.smsEnabled" />
+        <div style="font-size:12px;color:#999;margin-top:4px">Requires Twilio SMS_ACCOUNT_SID / SMS_AUTH_TOKEN / SMS_FROM in backend .env</div>
+      </el-form-item>
+      <el-form-item label="SMS From Number">
+        <el-input v-model="form.smsFrom" placeholder="+1234567890" />
+      </el-form-item>
+      <el-form-item label="Enable Web Push">
+        <el-switch v-model="form.pushEnabled" />
+        <div style="font-size:12px;color:#999;margin-top:4px">Requires VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY in backend .env</div>
+      </el-form-item>
+
       <el-divider content-position="left">Typography</el-divider>
       <el-form-item label="Font Family">
         <el-select v-model="form.fontFamily" style="width:100%">
@@ -83,9 +96,12 @@ const form = reactive({
   accentColor: '#b8922a',
   borderColor: '#e8e6e2',
   fontFamily: "'TheOutnetWebXL', 'Helvetica Neue', Arial, sans-serif",
-  logoUrl: '',
-  faviconUrl: '',
-  customCSS: '',
+    logoUrl: '',
+    faviconUrl: '',
+    customCSS: '',
+    smsEnabled: false,
+    smsFrom: '',
+    pushEnabled: false,
 })
 
 const previewStyle = computed(() => ({

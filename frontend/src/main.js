@@ -9,6 +9,7 @@ import './assets/styles/global.css'
 import './assets/styles/iconfont.css'
 import { useAppStore } from '@/stores/app'
 import { connectSocket, getSocket } from '@/socket'
+import { initPush } from '@/composables/usePush'
 import { imgUrl as _imgUrl, API_BASE } from '@/api/request'
 
 const app = createApp(App)
@@ -84,11 +85,16 @@ if (loading) loading.remove()
 const store = useAppStore()
 if (store.token) {
   connectSocket()
+  initPush()
 }
 router.afterEach(() => {
   const store = useAppStore()
   if (store.token && !getSocket()?.connected) {
     connectSocket()
+  }
+  if (store.token && 'serviceWorker' in navigator && !('__pushInited' in window)) {
+    window.__pushInited = true
+    initPush()
   }
 })
 

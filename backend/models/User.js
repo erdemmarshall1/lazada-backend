@@ -23,6 +23,15 @@ const userSchema = new mongoose.Schema({
   emailVerificationExpires: { type: Date, default: null },
   resetPasswordCode: { type: String, default: '' },
   resetPasswordExpires: { type: Date, default: null },
+  fullName: { type: String, trim: true, default: '' },
+  bio: { type: String, trim: true, maxlength: 500, default: '' },
+  dateOfBirth: { type: Date, default: null },
+  gender: { type: String, enum: ['male', 'female', 'other', 'prefer_not_to_say'], default: 'prefer_not_to_say' },
+  country: { type: String, trim: true, default: '' },
+  city: { type: String, trim: true, default: '' },
+  postalCode: { type: String, trim: true, default: '' },
+  lastLogin: { type: Date, default: null },
+  sellerId: { type: String, unique: true, sparse: true, default: '' },
   privacySettings: {
     emailNotifications: {
       orderUpdates: { type: Boolean, default: true },

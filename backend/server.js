@@ -117,6 +117,7 @@ app.use('/home/admin', require('./routes/backup'));
 app.use('/home/report', require('./routes/report'));
 app.use('/home/admin/settings', require('./routes/settings'));
 app.use('/home/session', require('./routes/session'));
+app.use('/home', require('./routes/submission'));
 
 // Swagger API docs
 const swaggerUi = require('swagger-ui-express');

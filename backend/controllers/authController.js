@@ -32,22 +32,8 @@ const generateRefreshToken = (user) => {
 };
 
 const sendVerificationEmail = async (user) => {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  user.emailVerificationCode = code;
-  user.emailVerificationExpires = new Date(Date.now() + 30 * 60 * 1000);
+  user.isEmailVerified = true;
   await user.save();
-  await emailService.sendMail({
-    to: user.email,
-    subject: 'Verify your email - THE OUTNET',
-    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-<h2>Welcome to THE OUTNET</h2>
-<p>Hi ${user.username},</p>
-<p>Use the code below to verify your email address:</p>
-<div style="font-size:32px;letter-spacing:8px;font-weight:700;text-align:center;padding:20px;background:#f4f2ee;border-radius:8px;margin:20px 0">${code}</div>
-<p>This code expires in 30 minutes.</p>
-<p>If you didn't create an account, you can ignore this email.</p>
-</div>`,
-  });
 };
 
 const issueTokens = (user) => {
@@ -275,38 +261,11 @@ exports.logout = async (req, res) => {
 };
 
 exports.sendEmailCode = async (req, res) => {
-  try {
-    const { email } = req.query;
-    if (!email) return res.json(fail('Email required'));
-    const user = await User.findOne({ email });
-    if (!user) return res.json(fail('User not found'));
-    if (user.isEmailVerified) return res.json(success(null, 'Email already verified'));
-    await sendVerificationEmail(user);
-    res.json(success(null, 'Verification code sent to your email'));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
+  res.json(success(null, 'Email verification is disabled'));
 };
 
 exports.verifyEmail = async (req, res) => {
-  try {
-    const { code } = req.body;
-    if (!code) return res.json(fail('Verification code required'));
-    const user = await User.findById(req.user._id);
-    if (!user) return res.json(fail('User not found'));
-    if (user.isEmailVerified) return res.json(success(null, 'Email already verified'));
-    if (user.emailVerificationCode !== code) return res.json(fail('Invalid verification code'));
-    if (!user.emailVerificationExpires || user.emailVerificationExpires < new Date()) {
-      return res.json(fail('Verification code expired. Request a new one.'));
-    }
-    user.isEmailVerified = true;
-    user.emailVerificationCode = '';
-    user.emailVerificationExpires = null;
-    await user.save();
-    res.json(success({ isEmailVerified: true }, 'Email verified successfully'));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
+  res.json(success({ isEmailVerified: true }, 'Email verification is disabled'));
 };
 
 exports.sendMobileCode = async (req, res) => {

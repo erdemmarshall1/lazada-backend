@@ -55,6 +55,27 @@ exports.createNotification = async (userId, type, title, message, data = {}, lin
     if (socketIo && typeof socketIo.sendNotification === 'function') {
       socketIo.sendNotification(userId, notification);
     }
+
+    // SMS (graceful — skipped when disabled / unconfigured / package missing)
+    try {
+      const User = require('../models/User');
+      const user = await User.findById(userId).select('phone').lean();
+      if (user && user.phone) {
+        const smsService = require('../services/smsService');
+        if (await smsService.isEnabled()) {
+          smsService.sendSMS({ to: user.phone, body: smsService.buildBody(title, message) }).catch(() => {});
+        }
+      }
+    } catch (smsErr) { console.error('SMS dispatch error:', smsErr.message); }
+
+    // Web Push (graceful — skipped when disabled / unconfigured / package missing)
+    try {
+      const pushService = require('../services/pushService');
+      if (await pushService.isEnabled()) {
+        pushService.sendToUser(userId, { title, message, link, data }).catch(() => {});
+      }
+    } catch (pushErr) { console.error('Push dispatch error:', pushErr.message); }
+
     return notification;
   } catch (e) {
     console.error('Failed to create notification:', e.message);

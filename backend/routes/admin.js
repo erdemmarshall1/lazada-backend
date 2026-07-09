@@ -8,6 +8,8 @@ const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
 const Banner = require('../models/Banner');
+const Order = require('../models/Order');
+const Submission = require('../models/Submission');
 const { success, fail, paginate } = require('../utils/response');
 const { ROLES, PERMISSIONS, ROLE_PERMISSIONS, hasPermission } = require('../config/roles');
 const themeController = require('../controllers/themeController');
@@ -72,7 +74,7 @@ router.get('/shops', adminAuth, async (req, res) => {
     const query = {};
     if (status !== undefined && status !== '') query.status = Number(status);
     const [list, total] = await Promise.all([
-      Shop.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Shop.find(query).populate('userId', 'sellerId username').sort({ createdAt: -1 }).skip(skip).limit(limit),
       Shop.countDocuments(query),
     ]);
     res.json(success({ list, total, page, pageSize }));
@@ -104,19 +106,26 @@ router.get('/shops', adminAuth, async (req, res) => {
 router.post('/approve-shop', adminAuth, async (req, res) => {
   try {
     const Counter = require('../models/Counter');
-    const counter = await Counter.findOneAndUpdate(
+    const storeCounter = await Counter.findOneAndUpdate(
       { name: 'storeNumber' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    const storeNumber = `S${String(counter.seq).padStart(5, '0')}`;
+    const storeNumber = `S${String(storeCounter.seq).padStart(5, '0')}`;
+    
+    const sellerCounter = await Counter.findOneAndUpdate(
+      { name: 'sellerId' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
     
     const shop = await Shop.findByIdAndUpdate(req.body.id, { 
       status: 1, 
       storeNumber 
     }, { new: true });
     if (!shop) return res.json(fail('Shop not found'));
-    await User.findByIdAndUpdate(shop.userId, { role: 'seller' });
+    await User.findByIdAndUpdate(shop.userId, { role: 'seller', sellerId });
     res.json(success(shop, 'Shop approved'));
   } catch (error) {
     res.json(fail(error.message));
@@ -128,6 +137,16 @@ router.post('/reject-shop', adminAuth, async (req, res) => {
     const shop = await Shop.findByIdAndUpdate(req.body.id, { status: 2 }, { new: true });
     if (!shop) return res.json(fail('Shop not found'));
     res.json(success(shop, 'Shop rejected'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.get('/shops/:id', adminAuth, async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id).populate('userId', 'username email role');
+    if (!shop) return res.json(fail('Shop not found'));
+    res.json(success(shop));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -1176,6 +1195,88 @@ router.get('/roles', adminAuth, async (req, res) => {
     level: require('../config/roles').ROLE_HIERARCHY[role],
   })).sort((a, b) => b.level - a.level);
   res.json(success({ roles, allPermissions: Object.values(PERMISSIONS) }));
+});
+
+// ---- Admin: full user detail ----
+router.get('/users/:id/detail', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password -fundPassword -backupCodes -twoFactorSecret');
+    if (!user) return res.json(fail('User not found'));
+    const [orderCount, submissionCount, wallet] = await Promise.all([
+      Order.countDocuments({ userId: req.params.id }),
+      Submission.countDocuments({ userId: req.params.id }),
+      Wallet.findOne({ userId: req.params.id }),
+    ]);
+    res.json(success({
+      ...user.toObject(),
+      orderCount,
+      submissionCount,
+      walletBalance: wallet?.balance || 0,
+    }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Admin: user orders ----
+router.get('/users/:id/orders', adminAuth, async (req, res) => {
+  try {
+    const { page = 1, pageSize = 20 } = req.query;
+    const { skip, limit } = paginate(page, pageSize);
+    const filter = { userId: req.params.id };
+    const [list, total] = await Promise.all([
+      Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.countDocuments(filter),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Admin: user submissions ----
+router.get('/users/:id/submissions', adminAuth, async (req, res) => {
+  try {
+    const { page = 1, pageSize = 20 } = req.query;
+    const { skip, limit } = paginate(page, pageSize);
+    const filter = { userId: req.params.id };
+    const [list, total] = await Promise.all([
+      Submission.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Submission.countDocuments(filter),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Tawk.to Chat Settings ----
+router.get('/tawkto-settings', adminAuth, async (req, res) => {
+  try {
+    const TawkToSetting = require('../models/TawkToSetting');
+    let settings = await TawkToSetting.findOne();
+    if (!settings) settings = await TawkToSetting.create({});
+    res.json(success(settings));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/tawkto-settings', adminAuth, async (req, res) => {
+  try {
+    const TawkToSetting = require('../models/TawkToSetting');
+    const { enabled, widgetId, widgetPosition, widgetColor } = req.body;
+    let settings = await TawkToSetting.findOne();
+    if (!settings) settings = new TawkToSetting();
+    if (enabled !== undefined) settings.enabled = enabled;
+    if (widgetId !== undefined) settings.widgetId = widgetId;
+    if (widgetPosition !== undefined) settings.widgetPosition = widgetPosition;
+    if (widgetColor !== undefined) settings.widgetColor = widgetColor;
+    await settings.save();
+    res.json(success(settings, 'Tawk.to settings saved'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
 });
 
 module.exports = router;

@@ -10,7 +10,8 @@
         </transition>
       </router-view>
       <MainLayoutFooter />
-      <LiveChatWidget /><div class="kefu" v-if="store.kefu" @click="openKefu">
+      <TawkToWidget />
+      <div class="kefu" v-if="store.kefu" @click="openKefu">
         <i class="iconfont icon-kefu"></i>
       </div>
     </div>
@@ -25,7 +26,7 @@ import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
-import LiveChatWidget from '@/components/LiveChatWidget.vue'
+import TawkToWidget from '@/components/TawkToWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null

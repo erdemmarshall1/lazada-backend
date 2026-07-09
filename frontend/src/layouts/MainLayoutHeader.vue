@@ -95,6 +95,12 @@
         <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Bags</div>
         <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Accessories</div>
         <div class="ton-drawer-divider"></div>
+        <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false">Bestsellers</div>
+        <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false">Recommended</div>
+        <div class="ton-drawer-item" @click="$router.push('/shopjie'); mobileMenuOpen = false">Shop Street</div>
+        <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false">Flash Deals</div>
+        <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false">Categories</div>
+        <div class="ton-drawer-divider"></div>
         <div class="ton-drawer-item ton-drawer-lang">
           <span class="ton-drawer-lang-label">{{ $t('mainLayoutHeader.languageLabel') }}:</span>
           <el-dropdown trigger="click" class="ton-drawer-lang-dropdown" @command="handleMobileLangChange">
@@ -160,6 +166,10 @@ const handleLogout = async () => {
 watch(() => store.lang, () => {
   window.location.reload()
 })
+
+watch(mobileMenuOpen, (val) => {
+  document.body.style.overflow = val ? 'hidden' : ''
+})
 </script>
 
 <style scoped>
@@ -191,9 +201,9 @@ watch(() => store.lang, () => {
 .ton-header-main-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; padding: 0 20px; }
 .ton-hamburger { display: none; font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; margin-right: 16px; color: #000; }
 .ton-logo { cursor: pointer; white-space: nowrap; margin-right: 40px; display: flex; align-items: center; }
-.ton-logo-img { height: 28px; width: auto; display: block; }
+.ton-logo-img { height: 36px; width: auto; display: block; }
 .ton-nav { display: flex; align-items: center; gap: 28px; flex: 1; }
-.ton-nav a { font-size: 12px; letter-spacing: 1.2px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 400; }
+.ton-nav a { font-size: 12px; letter-spacing: 1.5px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 700; }
 .ton-nav a:hover { opacity: 0.5; }
 .ton-header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .ton-header-icon { position: relative; background: none; border: none; cursor: pointer; padding: 6px; color: #000; display: flex; align-items: center; }

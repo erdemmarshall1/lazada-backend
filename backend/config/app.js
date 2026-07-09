@@ -15,4 +15,15 @@ module.exports = {
   EMAIL_USER: process.env.EMAIL_USER || '',
   EMAIL_PASS: process.env.EMAIL_PASS || '',
   EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@shopifywholesale.com',
+
+  // SMS (Twilio) - optional; notifications skip when unconfigured
+  SMS_PROVIDER: process.env.SMS_PROVIDER || 'twilio',
+  SMS_ACCOUNT_SID: process.env.SMS_ACCOUNT_SID || '',
+  SMS_AUTH_TOKEN: process.env.SMS_AUTH_TOKEN || '',
+  SMS_FROM: process.env.SMS_FROM || '',
+
+  // Web Push (VAPID) - optional; notifications skip when unconfigured
+  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || '',
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
+  PUSH_SUBJECT: process.env.PUSH_SUBJECT || 'mailto:noreply@shopifywholesale.com',
 };

@@ -1,7 +1,4 @@
-export const imgUrl = (url) => {
-  if (!url) return ''
-  return url
-}
+export { imgUrl } from '@/api/request'
 
 export const formatPrice = (price) => {
   if (price === undefined || price === null) return '0.00'

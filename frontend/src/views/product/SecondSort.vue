@@ -6,6 +6,11 @@
         <div class="sort-sidebar">
           <div class="sort-cat" v-for="cat in categories" :key="cat._id" :class="{ active: selectedCat === cat._id }" @click="selectCat(cat._id)">{{ cat.name }}</div>
         </div>
+        <div class="sort-sidebar-mobile">
+          <select v-model="selectedCat" @change="selectCat(selectedCat)">
+            <option v-for="cat in categories" :key="cat._id" :value="cat._id">{{ cat.name }}</option>
+          </select>
+        </div>
         <div class="sort-main">
           <div class="sub-cats g-flex-wrap" v-if="subCategories.length > 0">
             <div class="sub-cat" v-for="sub in subCategories" :key="sub._id" @click="searchSub(sub._id)">{{ sub.name }}</div>
@@ -103,6 +108,7 @@ onMounted(async () => {
 .sort-title { font-size: 20px; margin-bottom: 16px; }
 .sort-content { gap: 16px; }
 .sort-sidebar { width: 200px; background: var(--g-white); border-radius: 8px; padding: 8px 0; flex-shrink: 0; }
+.sort-sidebar-mobile { display: none; }
 .sort-cat { padding: 10px 20px; cursor: pointer; font-size: 14px; }
 .sort-cat:hover { color: var(--g-main_color); }
 .sort-cat.active { color: var(--g-main_color); font-weight: 600; background: #fff5e6; }
@@ -125,6 +131,9 @@ onMounted(async () => {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 768px) {
+  .sort-sidebar { display: none; }
+  .sort-sidebar-mobile { display: block; width: 100%; margin-bottom: 12px; }
+  .sort-sidebar-mobile select { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--g-border); border-radius: 6px; background: var(--g-white); }
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
 @media (max-width: 480px) {

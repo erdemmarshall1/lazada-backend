@@ -76,8 +76,8 @@ const handleRegister = async () => {
     store.setToken(data.token)
     store.setRefreshToken(data.refreshToken)
     store.setUserInfo(data.userInfo)
-    ElMessage.success('Registration successful! Check your email for verification code.')
-    router.push('/verify-email')
+    ElMessage.success('Registration successful!')
+    router.push('/myaccount')
   } else {
     ElMessage.error(res?.msg || 'Registration failed')
   }

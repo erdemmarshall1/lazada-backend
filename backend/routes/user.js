@@ -6,6 +6,7 @@ const twoFactorController = require('../controllers/twoFactorController');
 const privacyController = require('../controllers/privacyController');
 
 router.get('/getInfo', auth, userController.getInfo);
+router.get('/profile', auth, userController.getProfile);
 router.post('/edit', auth, userController.edit);
 router.post('/editEmail', auth, userController.editEmail);
 router.post('/editMobile', auth, userController.editMobile);

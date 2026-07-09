@@ -8,6 +8,10 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src/pwa',
+      filename: 'sw.js',
+      injectManifest: { injectionPoint: 'self.__WB_MANIFEST' },
       includeAssets: ['font/*.ttf', 'font/*.woff', 'font/*.woff2', 'font/*.png', 'img/*.svg', 'img/*.png'],
       manifest: {
         name: 'THE OUTNET WHOLESALE',
@@ -25,32 +29,12 @@ export default defineConfig({
         icons: [
           { src: '/img/outnet-logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: '/img/outnet-logo.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/img/outnet-logo.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: '/img/outnet-logo.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ttf,woff,woff2,png,svg,ico}'],
-        navigateFallback: '/offline.html',
-        navigateFallbackAllowlist: [/^\/[^.]*$/],
-        navigateFallbackDenylist: [/\/main\//, /\/home\//, /\/api\//, /\/uploads\//],
-        runtimeCaching: [
-          {
-            urlPattern: /\/main\/|\/home\/|\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'theoutnet-wholesale-api',
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'theoutnet-wholesale-images',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-        ],
       },
     }),
   ],

@@ -9,6 +9,9 @@ const systemSettingsSchema = new mongoose.Schema({
   borderColor: { type: String, default: '#e6e6e6' },
   fontFamily: { type: String, default: 'TheOutnetWebXL, Arial' },
   logoUrl: { type: String, default: '' },
+  smsEnabled: { type: Boolean, default: false },
+  smsFrom: { type: String, default: '' },
+  pushEnabled: { type: Boolean, default: false },
   faviconUrl: { type: String, default: '' },
   customCSS: { type: String, default: '' },
 }, { timestamps: true });

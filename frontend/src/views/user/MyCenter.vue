@@ -1,7 +1,11 @@
 ﻿<template>
   <div class="mycenter-view">
     <div class="mycenter-container g-flex">
-      <div class="mycenter-sidebar">
+      <button class="mycenter-sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+        <span v-if="!sidebarOpen">&#9776; Menu</span>
+        <span v-else>&times; Close</span>
+      </button>
+      <div class="mycenter-sidebar" :class="{ open: sidebarOpen }">
         <div class="user-card g-flex-align-center" v-if="store.isLogin">
           <div class="user-avatar"><img :src="$imgUrl(store.userInfo.avatar)" @error="$imgFallback" /></div>
           <div class="user-name">{{ store.userInfo.username }}</div>
@@ -21,9 +25,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 const store = useAppStore()
+const sidebarOpen = ref(false)
 const isAdmin = computed(() => store.userInfo?.role === 'admin')
 const menuSections = computed(() => {
   const sections = [
@@ -31,8 +36,9 @@ const menuSections = computed(() => {
       title: 'My Account', items: [
         { icon: 'iconfont icon-yonghu', label: 'My Account', path: '/myaccount' },
         { icon: 'iconfont icon-dingwei', label: 'Addresses', path: '/addresslist' },
-        { icon: 'iconfont icon-yanjing', label: 'Browsing History', path: '/seehistory' },
+{ icon: 'iconfont icon-yanjing', label: 'Browsing History', path: '/seehistory' },
         { icon: 'iconfont icon-shoucang', label: 'Wishlist', path: '/mywishlist' },
+        { icon: 'iconfont icon-xinxi', label: 'My Inquiries', path: '/mysubmissions' },
       ]
     },
     {
@@ -105,6 +111,8 @@ const menuSections = computed(() => {
         { icon: 'iconfont icon-shangpin', label: 'Homepage Sections', path: '/admin-homepage-sections' },
         { icon: 'iconfont icon-shezhi', label: 'Settings', path: '/admin-settings' },
         { icon: 'iconfont icon-anquan', label: 'Sessions & Audit', path: '/admin-sessions-audit' },
+        { icon: 'iconfont icon-xinxi', label: 'Inquiries', path: '/admin-submissions' },
+        { icon: 'iconfont icon-kefu', label: 'Tawk.to Chat', path: '/admin-tawkto-settings' },
       ]
     })
   }
@@ -116,6 +124,8 @@ const menuSections = computed(() => {
 .mycenter-view { flex: 1; background: var(--g-bg); padding: 20px 0; min-height: calc(100vh - 200px); }
 .mycenter-container { max-width: var(--g-main-width); margin: 0 auto; gap: 20px; }
 .mycenter-sidebar { width: 220px; flex-shrink: 0; }
+.mycenter-sidebar-toggle { display: none; align-items: center; gap: 8px; padding: 10px 16px; margin-bottom: 12px; background: var(--g-white); border: 1px solid var(--g-border); border-radius: 8px; font-size: 14px; cursor: pointer; color: #000; width: 100%; justify-content: center; }
+.mycenter-sidebar-toggle:hover { background: #f4f2ee; }
 .user-card { background: var(--g-white); border-radius: 8px; padding: 16px; gap: 12px; margin-bottom: 12px; }
 .user-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -128,8 +138,10 @@ const menuSections = computed(() => {
 .menu-item .iconfont { font-size: 16px; }
 .mycenter-content { flex: 1; background: var(--g-white); border-radius: 8px; padding: 24px; min-height: 500px; }
 @media (max-width: 768px) {
-  .mycenter-container { flex-direction: column; }
-  .mycenter-sidebar { width: 100%; }
+  .mycenter-container { flex-direction: column; position: relative; }
+  .mycenter-sidebar-toggle { display: flex; }
+  .mycenter-sidebar { width: 100%; display: none; }
+  .mycenter-sidebar.open { display: block; }
   .mycenter-content { padding: 16px; min-height: auto; }
   .menu-section { margin-bottom: 8px; }
 }

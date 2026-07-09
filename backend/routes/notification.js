@@ -87,4 +87,76 @@ router.put('/read-all', auth, notificationController.markAllRead);
  */
 router.delete('/:id', auth, notificationController.remove);
 
+/**
+ * @openapi
+ * /home/notification/vapid-public-key:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: Get VAPID public key for Web Push subscription
+ *     responses:
+ *       200:
+ *         description: VAPID public key (empty when push is disabled)
+ */
+router.get('/vapid-public-key', async (req, res) => {
+  try {
+    const pushService = require('../services/pushService');
+    const cfg = await pushService.getConfig();
+    res.json(require('../utils/response').success({ publicKey: cfg.publicKey || '', enabled: cfg.enabled }));
+  } catch (error) {
+    res.json(require('../utils/response').fail(error.message));
+  }
+});
+
+/**
+ * @openapi
+ * /home/notification/push/subscribe:
+ *   post:
+ *     tags: [Notifications]
+ *     summary: Save a Web Push subscription for the current user
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Subscription saved
+ */
+router.post('/push/subscribe', auth, async (req, res) => {
+  try {
+    const PushSubscription = require('../models/PushSubscription');
+    const sub = req.body && req.body.subscription;
+    if (!sub || !sub.endpoint) return res.json(require('../utils/response').fail('Invalid subscription'));
+    await PushSubscription.findOneAndUpdate(
+      { endpoint: sub.endpoint },
+      { user: req.user._id, endpoint: sub.endpoint, subscription: sub },
+      { upsert: true, new: true }
+    );
+    res.json(require('../utils/response').success(null, 'Subscribed to push notifications'));
+  } catch (error) {
+    res.json(require('../utils/response').fail(error.message));
+  }
+});
+
+/**
+ * @openapi
+ * /home/notification/push/unsubscribe:
+ *   post:
+ *     tags: [Notifications]
+ *     summary: Remove the current user's Web Push subscription
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Subscription removed
+ */
+router.post('/push/unsubscribe', auth, async (req, res) => {
+  try {
+    const PushSubscription = require('../models/PushSubscription');
+    const sub = req.body && req.body.subscription;
+    const filter = sub && sub.endpoint
+      ? { endpoint: sub.endpoint, user: req.user._id }
+      : { user: req.user._id };
+    await PushSubscription.deleteMany(filter);
+    res.json(require('../utils/response').success(null, 'Unsubscribed from push notifications'));
+  } catch (error) {
+    res.json(require('../utils/response').fail(error.message));
+  }
+});
+
 module.exports = router;

@@ -19,7 +19,7 @@
       <div class="hp-product-grid" v-if="section.type === 'product_grid' && sectionProducts(section._id).length">
         <div class="home-goods-content" style="grid-template-columns: repeat(5, 1fr);">
           <div class="home-hots-item" v-for="item in sectionProducts(section._id)" :key="item._id" @click="$router.push('/gooddetail?id=' + item._id)">
-            <img class="home-hots-img" :src="imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
+            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
             <div class="home-hots-text">{{ item.name }}</div>
             <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
           </div>
@@ -40,7 +40,7 @@
       <div class="hp-featured" v-if="section.type === 'featured' && sectionProducts(section._id).length">
         <div class="home-goods-content" style="grid-template-columns: repeat(5, 1fr);">
           <div class="home-hots-item" v-for="item in sectionProducts(section._id).slice(0, 10)" :key="item._id" @click="$router.push('/gooddetail?id=' + item._id)">
-            <img class="home-hots-img" :src="imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
+            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
             <div class="home-hots-text">{{ item.name }}</div>
             <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
           </div>
@@ -65,7 +65,7 @@
 import { computed } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay as SwiperAutoplay } from 'swiper'
-import { imgUrl, formatPrice } from '@/utils/format'
+import { formatPrice } from '@/utils/format'
 
 const props = defineProps({
   sections: { type: Array, default: () => [] },

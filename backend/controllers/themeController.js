@@ -23,6 +23,7 @@ exports.updateTheme = async (req, res) => {
     const allowed = [
       'siteName', 'primaryColor', 'backgroundColor', 'textColor',
       'accentColor', 'borderColor', 'fontFamily', 'logoUrl', 'faviconUrl', 'customCSS',
+      'smsEnabled', 'smsFrom', 'pushEnabled',
     ];
     const updates = {};
     for (const key of allowed) {
