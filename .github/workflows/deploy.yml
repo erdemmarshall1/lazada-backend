@@ -18,8 +18,8 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          railway link --project d231e509-7f7d-4883-b714-5ac238ec879b --environment production --yes 2>/dev/null || true
-          railway up --service the-outnet-backend --ci --detach
+          railway link --project d231e509-7f7d-4883-b714-5ac238ec879b --environment production 2>/dev/null || true
+          railway up --ci --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 

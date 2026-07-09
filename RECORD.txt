@@ -100,6 +100,16 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
      - Netlify Production: https://gleaming-yeot-b22423.netlify.app
      - Commits: 4746817, 3ccc73d
 
+14. Fix Railway Deploy + Generate Seller ID Route
+     - Railway backend was running stale code — `POST /home/admin/generate-seller-id` returned 404
+     - Root cause: GitHub Actions `RAILWAY_TOKEN` and `NETLIFY_AUTH_TOKEN` secrets expired
+     - Fixed: Redeployed Railway backend via local CLI (`railway up` — works without token since session cached)
+     - Fixed: deploy.yml — removed `--yes` flag (not supported in v5) and `railway login --token` (use env var instead)
+     - Fixed: .gitignore — added `uiux.html` and `uiux_files/` to prevent junk file commits
+     - Verified: `POST /home/admin/generate-seller-id` returns `SLD00001` successfully
+     - NOTE: GitHub secret `RAILWAY_TOKEN` and `NETLIFY_AUTH_TOKEN` need manual renewal from their dashboards
+     - Commits: 8cd9b81
+
 === CREDENTIALS ===
 
 Cloudinary:
