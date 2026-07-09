@@ -1,9 +1,13 @@
 <template>
   <div class="admin-cms">
-    <div class="admin-cms-header">
-      <h2>Blog Posts</h2>
-      <el-button type="primary" @click="openDialog()">New Post</el-button>
-    </div>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-shangpin"></i>
+        <h2>CMS Blogs</h2>
+      </div>
+      <div class="g-flex g-flex-justify-end" style="margin-bottom:16px">
+        <el-button type="primary" @click="openDialog()">New Post</el-button>
+      </div>
 
     <el-table :data="blogs" stripe v-loading="loading" style="width:100%">
       <el-table-column prop="title" label="Title" min-width="180" />
@@ -76,6 +80,7 @@
         <el-button type="primary" :loading="dialog.loading" @click="save">Save</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

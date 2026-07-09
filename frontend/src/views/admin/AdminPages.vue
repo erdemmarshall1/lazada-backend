@@ -1,9 +1,13 @@
 <template>
   <div class="admin-cms">
-    <div class="admin-cms-header">
-      <h2>CMS Pages</h2>
-      <el-button type="primary" @click="openDialog()">New Page</el-button>
-    </div>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-shangpin"></i>
+        <h2>CMS Pages</h2>
+      </div>
+      <div class="g-flex g-flex-justify-end" style="margin-bottom:16px">
+        <el-button type="primary" @click="openDialog()">New Page</el-button>
+      </div>
 
     <el-table :data="pages" stripe v-loading="loading" style="width:100%">
       <el-table-column prop="title" label="Title" min-width="160" />
@@ -73,6 +77,7 @@
         <el-button type="primary" :loading="dialog.loading" @click="save">Save</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

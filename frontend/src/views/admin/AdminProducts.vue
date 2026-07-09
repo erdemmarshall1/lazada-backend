@@ -1,17 +1,21 @@
 <template>
   <div class="admin-products">
-    <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:16px">
-      <h2 style="margin:0">Products</h2>
-      <div class="g-flex-align-center" style="gap:8px">
-        <el-select v-model="imageFilter" placeholder="Image Source" size="small" style="width:140px" @change="page=1;fetch()">
-          <el-option label="All Products" value="" />
-          <el-option label="Remote CDN Images" value="remote" />
-          <el-option label="Local Uploaded" value="local" />
-          <el-option label="No Images" value="none" />
-        </el-select>
-        <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd">+ Add Product</el-button>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-shangpin"></i>
+        <h2>Products</h2>
       </div>
-    </div>
+      <div class="g-flex-align-center g-flex-justify-end" style="margin-bottom:16px">
+        <div class="g-flex-align-center" style="gap:8px">
+          <el-select v-model="imageFilter" placeholder="Image Source" size="small" style="width:140px" @change="page=1;fetch()">
+            <el-option label="All Products" value="" />
+            <el-option label="Remote CDN Images" value="remote" />
+            <el-option label="Local Uploaded" value="local" />
+            <el-option label="No Images" value="none" />
+          </el-select>
+          <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd">+ Add Product</el-button>
+        </div>
+      </div>
     <div class="g-responsive-table">
     <el-table :data="filteredProducts" v-loading="loading" style="width:100%">
       <el-table-column label="Image" width="80">
@@ -108,6 +112,7 @@
         <el-button type="primary" :loading="saving" @click="saveProduct">{{ editItem ? 'Save Changes' : 'Add Product' }}</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

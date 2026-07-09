@@ -1,6 +1,10 @@
 <template>
   <div class="admin-invitation-codes">
-    <h2>Invitation Codes</h2>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-anquan"></i>
+        <h2>Invitation Codes</h2>
+      </div>
     <el-button type="primary" style="margin-bottom:16px" :loading="generating" @click="generateCode">+ Generate Code</el-button>
     <div class="g-responsive-table">
       <el-table :data="codes" v-loading="loading" style="width:100%">
@@ -32,6 +36,7 @@
           </template>
         </el-table-column>
       </el-table>
+    </div>
     </div>
   </div>
 </template>

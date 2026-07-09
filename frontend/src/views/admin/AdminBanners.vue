@@ -1,9 +1,13 @@
 <template>
   <div>
-    <div class="g-flex g-flex-justify-between g-flex-align-center" style="margin-bottom:16px">
-      <h3>Banner Management</h3>
-      <el-button type="primary" @click="showAdd = true">+ Add Banner</el-button>
-    </div>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-tupian"></i>
+        <h2>Banners</h2>
+      </div>
+      <div class="g-flex g-flex-justify-end" style="margin-bottom:16px">
+        <el-button type="primary" @click="showAdd = true">+ Add Banner</el-button>
+      </div>
 
     <el-table :data="banners" v-loading="loading" style="width:100%">
       <el-table-column label="Preview" width="180">
@@ -75,6 +79,7 @@
         <el-button type="primary" :loading="saving" @click="doEdit">Save</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

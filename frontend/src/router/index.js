@@ -102,6 +102,8 @@ const routes = [
           { path: '/admin-user-detail/:id', name: 'admin-user-detail', component: () => import('@/views/admin/AdminUserDetail.vue'), meta: { title: 'User Detail', requiresAuth: true } },
           { path: '/admin-shop-detail/:id', name: 'admin-shop-detail', component: () => import('@/views/admin/AdminShopDetail.vue'), meta: { title: 'Shop Detail', requiresAuth: true } },
           { path: '/admin-tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true } },
+          { path: '/admin-livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true } },
+          { path: '/admin-livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true } },
         ],
       },
     ],

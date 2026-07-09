@@ -1,6 +1,10 @@
 <template>
   <div class="admin-roles">
-    <h2>Role & Permission Management</h2>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-anquan"></i>
+        <h2>Roles &amp; Permissions</h2>
+      </div>
 
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Users" name="users">
@@ -76,6 +80,7 @@
         <el-button type="primary" :loading="permDialog.loading" @click="savePermissions">Save</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

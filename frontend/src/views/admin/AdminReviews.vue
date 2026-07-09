@@ -1,8 +1,11 @@
 <template>
   <div class="admin-reviews">
-    <div class="admin-cms-header">
-      <h2>Review Moderation</h2>
-      <div>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-xingxing"></i>
+        <h2>Reviews</h2>
+      </div>
+      <div class="g-flex g-flex-justify-end" style="margin-bottom:16px">
         <el-select v-model="filterStatus" style="width:140px;margin-right:8px" @change="loadData">
           <el-option label="All" value="" />
           <el-option label="Approved" value="approved" />
@@ -12,7 +15,6 @@
         </el-select>
         <el-button @click="loadData" type="primary">Refresh</el-button>
       </div>
-    </div>
 
     <el-table :data="reviews" stripe v-loading="loading" style="width:100%">
       <el-table-column label="User" width="120">
@@ -46,6 +48,7 @@
     </el-table>
     <div class="g-flex-center g-mgt-16" v-if="total > pageSize">
       <el-pagination layout="prev, pager, next" :total="total" :page-size="pageSize" v-model:current-page="page" @current-change="loadData" />
+    </div>
     </div>
   </div>
 </template>

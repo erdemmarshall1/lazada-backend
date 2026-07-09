@@ -1,6 +1,10 @@
 <template>
   <div class="admin-sellers">
-    <h2>Sellers / Shops</h2>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-dianpu"></i>
+        <h2>Sellers</h2>
+      </div>
     <div class="g-responsive-table">
     <el-table :data="shops" v-loading="loading" style="width:100%">
       <el-table-column prop="_id" label="ID" width="200" />
@@ -30,6 +34,7 @@
     </div>
     <div class="pagination-wrap" v-if="total > 0">
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" v-model:current-page="page" @current-change="fetchShops" />
+    </div>
     </div>
   </div>
 </template>

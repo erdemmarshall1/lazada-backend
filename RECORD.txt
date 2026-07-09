@@ -48,6 +48,16 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
    - Cloudinary config + product image scripts retained
    - Preview: https://de4e6ee5.theoutnet-wholesale.pages.dev
 
+7. Admin Dashboard Redesign (Infographic)
+   - AdminDashboard.vue: 6 colored metric cards with icons, Chart.js bar+line combo revenue chart with day/week/month toggle, category doughnut, recent orders + top products tables, pending approvals tabs
+   - global.css: added .page-card and .page-header utility classes
+   - 12 admin list views (Users, Sellers, Products, Transactions, Coupons, Banners, InvitationCodes, Reviews, Roles, Pages, Blogs, Faqs): wrapped in .page-card with .page-header (iconfont icon + title)
+   - MyCenter.vue sidebar: collapsible menu sections with chevron toggles; hover effects with left border accent; max-height + overflow-y: auto for scroll support; Live Chat Inbox/Settings links for admin
+   - router/index.js: added routes for /admin-livechat-inbox, /admin-livechat-settings, /storegoodcontrol, /storeordercontrol
+   - Build: npm run build passed (no errors)
+   - Cloudflare Pages preview: https://a7eb59c2.theoutnet-wholesale.pages.dev
+   - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git

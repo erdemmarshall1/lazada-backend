@@ -235,3 +235,10 @@ input, button, textarea { outline: none; border: none; font-family: inherit; }
   0% { background-position: 100% 50%; }
   to { background-position: 0 50%; }
 }
+
+/* Admin page card wrapper */
+.page-card { background: var(--g-white); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px; }
+.page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.page-header .iconfont { font-size: 22px; color: var(--g-main_color); }
+.page-header h2 { font-size: 20px; font-weight: 700; margin: 0; }
+.page-header .subtitle { font-size: 13px; color: var(--g-text-light); margin-left: auto; }

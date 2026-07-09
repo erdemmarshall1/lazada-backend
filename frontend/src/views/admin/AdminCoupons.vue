@@ -1,6 +1,10 @@
 <template>
   <div class="admin-coupons">
-    <h2>Coupon Management</h2>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-coupon"></i>
+        <h2>Coupons</h2>
+      </div>
     <el-button type="primary" style="margin-bottom:16px" @click="showCreate = true">+ Create Coupon</el-button>
     <div class="g-responsive-table">
       <el-table :data="coupons" v-loading="loading" style="width:100%">
@@ -75,6 +79,7 @@
         <el-button type="primary" :loading="creating" @click="createCoupon">Create</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 

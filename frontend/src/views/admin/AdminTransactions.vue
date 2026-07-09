@@ -1,6 +1,10 @@
 <template>
   <div class="admin-transactions">
-    <h2>All Transactions</h2>
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-jiaoyi"></i>
+        <h2>Transactions</h2>
+      </div>
     <div class="g-responsive-table">
     <el-table :data="list" v-loading="loading" style="width:100%">
       <el-table-column prop="_id" label="ID" width="200" />
@@ -20,6 +24,7 @@
     </div>
     <div class="pagination-wrap" v-if="total > 0">
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" v-model:current-page="page" @current-change="fetch" />
+    </div>
     </div>
   </div>
 </template>
