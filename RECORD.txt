@@ -1,0 +1,37 @@
+UPDATE & FIX RECORD
+Date: July 9, 2026
+
+=== CREDENTIALS ===
+
+Cloudinary:
+  Cloud Name: u7xxu5dq
+  API Key: 726627823236327
+  API Secret: qJmfLkCQ-wvbAhx6RQcf4MCVBUE
+
+Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
+         backend/controllers/shopController.js, frontend/src/main.js
+
+=== CHANGES ===
+
+1. Chat Widget
+   - Status: Already configured, Tawk.to widget active
+   - Component: frontend/src/components/TawkToWidget.vue in MainLayout.vue
+   - Admin panel manages widget ID, enabled/disabled
+
+2. Seller ID Assignment
+   - Status: No changes needed
+   - Auto-assigned (SLDxxxxx) on admin approval via Counter model
+   - backend/routes/admin.js route POST /approve-shop
+
+3. Deployment - Cloudflare Pages Added
+   - File: .github/workflows/deploy.yml
+   - Added Cloudflare Pages step alongside Netlify
+   - Deploys to: theoutnet-wholesale.pages.dev
+   - Requires GitHub secret: CLOUDFLARE_API_TOKEN
+
+=== EXISTING DEPLOYMENTS ===
+
+GitHub: https://github.com/erdemmarshall1/lazada-backend.git
+Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
+Frontend (Netlify): via Netlify (site ID in GitHub secrets)
+Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
