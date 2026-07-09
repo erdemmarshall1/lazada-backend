@@ -83,9 +83,22 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
     - Commit: 2c907c2
 
 11. Fix 404 on Generate Seller ID + Admin Auto-Redirect
-    - Frontend Login.vue (line 62): Added store.isAdmin check in getRedirectPath() — admin users auto-redirect to /admin/dashboard after login
-    - Backend: The 404 on generate-seller-id was caused by backend not being restarted — route IS properly mounted in server.js
-    - Deploy preview: https://c2fe6bed.theoutnet-wholesale.pages.dev
+     - Frontend Login.vue (line 62): Added store.isAdmin check in getRedirectPath() — admin users auto-redirect to /admin/dashboard after login
+     - Backend: The 404 on generate-seller-id was caused by backend not being restarted — route IS properly mounted in server.js
+     - Deploy preview: https://c2fe6bed.theoutnet-wholesale.pages.dev
+
+12. Add Missing Store Routes + Fix Seller-Logistics Path Mismatch
+     - Added /storeordercontrol and /storegoodcontrol routes in router/index.js under MainLayout (requiresAuth)
+     - Fixed /sellerlogistics → /seller-logistics in StoreOrderControl.vue (lines 5, 97) and MyStore.vue (line 161)
+     - Build passed: StoreOrderControl and StoreGoodControl chunks now included
+     - Commits: 072300c, d5b121b
+
+13. Seller Auto-Redirect to /mystore After Login
+     - Login.vue (line 64): Added `if (store.isSeller) return '/mystore'` — sellers now go to their store dashboard, regular users go to /myaccount
+     - Cloudflare Preview: https://preview.theoutnet-wholesale.pages.dev
+     - Cloudflare Production: https://main.theoutnet-wholesale.pages.dev
+     - Netlify Production: https://gleaming-yeot-b22423.netlify.app
+     - Commits: 4746817, 3ccc73d
 
 === CREDENTIALS ===
 
