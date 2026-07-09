@@ -58,6 +58,15 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
    - Cloudflare Pages preview: https://a7eb59c2.theoutnet-wholesale.pages.dev
    - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
 
+8. Full Admin Portal Redesign (Modern Dark Sidebar)
+   - Created AdminLayout.vue: dedicated admin layout with dark sidebar (#1a1a2e), 6 collapsible menu groups (Dashboard, Commerce, Finance, Content, Communication, System), top navbar with breadcrumbs/search/notifications/user dropdown, profile section at sidebar bottom, mobile responsive with hamburger + overlay
+   - router/index.js: added /admin/* route group with 28 child routes under AdminLayout, all admin views accessible at clean paths (/admin/dashboard, /admin/users, etc.)
+   - AdminDashboard.vue: rewritten as admin portal homepage with welcome banner (gradient #667eea->#764ba2), 6 metric cards, 2-column charts (bar+line + doughnut), quick access grid (6 cards: Sellers, Users, Products, Transactions, Reports, Settings), recent activity table
+   - global.css: added admin-specific CSS variables + utility classes (admin-metric-grid, admin-chart-row, admin-tables-row, admin-quick-grid, admin-welcome-banner, etc.)
+   - Build: npm run build passed (no errors)
+   - Cloudflare Pages preview: https://a212fd2e.theoutnet-wholesale.pages.dev
+   - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
