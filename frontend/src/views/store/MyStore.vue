@@ -1,8 +1,8 @@
 ﻿<template>
-  <div>
-    <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:12px">
+  <div class="seller-dashboard">
+    <div class="dashboard-header">
       <h3>My Store Dashboard</h3>
-      <div style="position:relative;display:inline-block">
+      <div class="dashboard-header-actions">
         <el-button size="small" type="primary" @click="goToOrders">
           Orders
           <span v-if="store.newOrderCount > 0" class="notif-badge">{{ store.newOrderCount }}</span>
@@ -11,16 +11,19 @@
     </div>
 
     <div v-if="store.newOrderCount > 0" class="new-order-alert">
-      <i class="iconfont icon-tixing" style="margin-right:8px"></i>
+      <i class="iconfont icon-tixing"></i>
       <span>You have <strong>{{ store.newOrderCount }}</strong> new order{{ store.newOrderCount > 1 ? 's' : '' }} waiting!</span>
-      <el-button size="small" type="primary" style="margin-left:auto" @click="goToOrders">View Orders</el-button>
-      <el-button size="small" @click="store.resetNewOrderCount()">Dismiss</el-button>
+      <div class="new-order-actions">
+        <el-button size="small" type="primary" @click="goToOrders">View Orders</el-button>
+        <el-button size="small" @click="store.resetNewOrderCount()">Dismiss</el-button>
+      </div>
     </div>
 
-    <div v-if="!shop" class="c-no-list">
-      <span class="c-no-list-text">You don't have a store yet</span>
-      <el-button type="primary" style="margin-top:16px" @click="$router.push('/applystore')">Apply Now</el-button>
+    <div v-if="!shop" class="empty-state">
+      <span class="empty-text">You don't have a store yet</span>
+      <el-button type="primary" @click="$router.push('/applystore')">Apply Now</el-button>
     </div>
+
     <div v-else-if="shop.status === 0" class="status-awaiting-review">
       <div class="status-icon-wrapper">
         <span class="status-icon-text">&#9203;</span>
@@ -31,14 +34,41 @@
         <el-button type="primary" @click="$router.push('/applyconfirm')">View Application Status</el-button>
       </div>
     </div>
+
     <div v-else>
-      <div class="shop-details-card" style="border:1px solid var(--g-border);border-radius:8px;padding:20px;margin-top:16px;background:linear-gradient(135deg,#faf8f4,#fff)"><h4 style="font-size:14px;letter-spacing:1.5px;margin-bottom:16px;color:#000">SHOP DETAILS</h4><div class="shop-details-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Store Name</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#000;margin-top:4px">{{ shop.name }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Store #</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#000;margin-top:4px">{{ shop.storeNumber || 'Pending' }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Shop Level</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#b8922a;margin-top:4px">{{ shopLevel }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Account Balance</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#52c41a;margin-top:4px">${{ store.walletBalance.toFixed(2) }}</span></div><div class="shop-detail-item"><span class="detail-label" style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px">Store Rating</span><span class="detail-value" style="font-size:16px;font-weight:600;color:#fa8c16;margin-top:4px">5.0 <span style="font-size:12px;color:#999">/ 5.0</span></span></div></div></div><div class="store-info-card g-flex-align-center" style="gap:20px;padding:20px;border:1px solid var(--g-border);border-radius:8px;margin-top:16px">
-        <img :src="$imgUrl(shop.logo)" style="width:80px;height:80px;border-radius:8px;object-fit:cover" @error="$imgFallback" />
-        <div style="flex:1">
-          <h4>{{ shop.name }}</h4>
-          <p style="color:#666;font-size:13px">{{ shop.description }}</p>
+      <div class="shop-details-card">
+        <h4 class="section-title">SHOP DETAILS</h4>
+        <div class="shop-details-grid">
+          <div class="shop-detail-item">
+            <span class="detail-label">Store Name</span>
+            <span class="detail-value">{{ shop.name }}</span>
+          </div>
+          <div class="shop-detail-item">
+            <span class="detail-label">Store #</span>
+            <span class="detail-value">{{ shop.storeNumber || 'Pending' }}</span>
+          </div>
+          <div class="shop-detail-item">
+            <span class="detail-label">Shop Level</span>
+            <span class="detail-value level-value">{{ shopLevel }}</span>
+          </div>
+          <div class="shop-detail-item">
+            <span class="detail-label">Account Balance</span>
+            <span class="detail-value balance-value">${{ store.walletBalance.toFixed(2) }}</span>
+          </div>
+          <div class="shop-detail-item">
+            <span class="detail-label">Store Rating</span>
+            <span class="detail-value rating-value">5.0 <span class="rating-total">/ 5.0</span></span>
+          </div>
         </div>
-        <div class="store-actions g-flex" style="gap:8px">
+      </div>
+
+      <div class="store-info-card">
+        <img :src="$imgUrl(shop.logo)" alt="store logo" class="store-logo" @error="$imgFallback" />
+        <div class="store-info-body">
+          <h4>{{ shop.name }}</h4>
+          <p class="store-desc">{{ shop.description }}</p>
+        </div>
+        <div class="store-info-actions">
           <el-button size="small" type="primary" @click="$router.push('/storegoodcontrol')">Products</el-button>
           <el-button size="small" @click="goToOrders">
             Orders
@@ -106,10 +136,11 @@
               <span class="bar-value">${{ item.value }}</span>
             </div>
           </div>
-          <div v-if="monthlyBars.length === 0" style="text-align:center;color:#999;padding:20px">No revenue data yet</div>
+          <div v-if="monthlyBars.length === 0" class="chart-empty">No revenue data yet</div>
         </div>
       </div>
-      <div class="charts-row" style="margin-top:16px" v-if="totalInfo">
+
+      <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
           <h4>Monthly Profits</h4>
           <div class="bar-chart">
@@ -121,7 +152,7 @@
               <span class="bar-value">${{ item.value }}</span>
             </div>
           </div>
-          <div v-if="monthlyProfitBars.length === 0" style="text-align:center;color:#999;padding:20px">No profit data yet</div>
+          <div v-if="monthlyProfitBars.length === 0" class="chart-empty">No profit data yet</div>
         </div>
         <div class="chart-box">
           <h4>Monthly Orders</h4>
@@ -134,10 +165,11 @@
               <span class="bar-value">{{ item.count }}</span>
             </div>
           </div>
-          <div v-if="monthlyOrderBars.length === 0" style="text-align:center;color:#999;padding:20px">No monthly order data yet</div>
+          <div v-if="monthlyOrderBars.length === 0" class="chart-empty">No monthly order data yet</div>
         </div>
       </div>
-      <div class="charts-row" style="margin-top:16px" v-if="totalInfo">
+
+      <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
           <h4>Credit Score</h4>
           <div class="credit-score-display">
@@ -152,16 +184,7 @@
         </div>
       </div>
 
-      <div class="quick-links" style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
-        <el-button @click="$router.push('/storegoodcontrol')">Manage Goods ({{ totalInfo?.productCount || 0 }})</el-button>
-        <el-button @click="goToOrders">
-          Manage Orders
-          <span v-if="store.newOrderCount > 0" class="notif-badge-sm">{{ store.newOrderCount }}</span>
-        </el-button>
-        <el-button v-if="store.isAdmin" type="success" @click="$router.push('/seller-logistics')">Logistics Center</el-button>
-        <el-button @click="$router.push('/applystore')">Update Store Info</el-button>
-      </div>
-      <div class="charts-row" style="margin-top:16px" v-if="totalInfo">
+      <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
           <h4>Shipping Status</h4>
           <div class="bar-chart">
@@ -177,8 +200,18 @@
         <div class="chart-box">
           <h4>Orders Over Time</h4>
           <SellerOrderChart :data="totalInfo?.monthlyOrders || []" />
-          <div v-if="!totalInfo?.monthlyOrders?.length" style="text-align:center;color:#999;padding:20px;font-size:13px">No order data yet</div>
+          <div v-if="!totalInfo?.monthlyOrders?.length" class="chart-empty">No order data yet</div>
         </div>
+      </div>
+
+      <div class="quick-links">
+        <el-button @click="$router.push('/storegoodcontrol')">Manage Goods ({{ totalInfo?.productCount || 0 }})</el-button>
+        <el-button @click="goToOrders">
+          Manage Orders
+          <span v-if="store.newOrderCount > 0" class="notif-badge-sm">{{ store.newOrderCount }}</span>
+        </el-button>
+        <el-button v-if="store.isAdmin" type="success" @click="$router.push('/seller-logistics')">Logistics Center</el-button>
+        <el-button @click="$router.push('/applystore')">Update Store Info</el-button>
       </div>
     </div>
   </div>
@@ -310,51 +343,541 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 20px 0; }
-.stat-card { background: var(--g-bg); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: transform 0.2s; border: 1px solid transparent; }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.stat-card.stat-highlight { border-color: #1890ff; }
-.stat-card.stat-warning { border-color: #fa8c16; }
-.stat-card.stat-profit { border-color: #52c41a; }
-.stat-profit .stat-value { color: #52c41a; }
-.stat-card.stat-daily { background: #e6f7ff; border-color: #91d5ff; }
-.stat-card.stat-daily .stat-value { color: #1890ff; }
-.stat-card.stat-revenue { background: #f0e6ff; border-color: #b37feb; }
-.stat-card.stat-revenue .stat-value { color: #722ed1; }
-.stat-value { font-size: 28px; font-weight: 700; color: var(--g-main_color); }
-.new-order-alert { display:flex; align-items:center; gap:8px; padding:12px 16px; background:#fff7e6; border:1px solid #ffd591; border-radius:8px; margin-bottom:12px; font-size:14px; color:#d46b08; }
-.new-order-alert strong { font-weight:700; }
-.notif-badge { position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 6px; background:#f56c6c; color:#fff; border-radius:10px; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-.notif-badge-sm { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:#f56c6c; color:#fff; border-radius:9px; font-size:11px; font-weight:700; margin-left:4px; }
-.stat-label { font-size: 13px; color: var(--g-text-light); margin-top: 4px; }
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-.chart-box { background: var(--g-white); border: 1px solid var(--g-border); border-radius: 8px; padding: 16px; }
-.chart-box h4 { font-size: 14px; margin-bottom: 12px; }
-.bar-chart { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.bar-label { width: 80px; flex-shrink: 0; text-align: right; color: #666; }
-.bar-track { flex: 1; height: 18px; background: var(--g-bg); border-radius: 4px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; min-width: 2px; }
-.bar-value { width: 60px; flex-shrink: 0; font-weight: 600; color: var(--g-text); }
-.credit-score-display { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0; }
-.score-circle { display: flex; align-items: baseline; gap: 2px; }
-.status-awaiting-review { text-align: center; padding: 60px 20px; }
-.status-awaiting-review .status-icon-wrapper { margin-bottom: 16px; }
-.status-awaiting-review .status-icon-text { font-size: 48px; }
-.status-awaiting-review h4 { font-size: 20px; margin: 0 0 8px 0; }
-.status-awaiting-review p { font-size: 14px; color: var(--g-text-light); margin: 0 0 24px 0; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-.score-number { font-size: 48px; font-weight: 700; color: var(--g-text); }
-.score-unit { font-size: 16px; color: #999; }
-.score-track { width: 100%; height: 20px; background: var(--g-bg); border-radius: 10px; overflow: hidden; }
-.score-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
-@media (max-width: 1200px) {
-  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+.seller-dashboard {
+  padding: 0;
 }
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dashboard-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.dashboard-header-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #f56c6c;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-badge-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #f56c6c;
+  color: #fff;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.new-order-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #d46b08;
+  flex-wrap: wrap;
+}
+
+.new-order-alert strong {
+  font-weight: 700;
+}
+
+.iconfont {
+  margin-right: 8px;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-text {
+  display: block;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.status-awaiting-review {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.status-awaiting-review .status-icon-wrapper {
+  margin-bottom: 16px;
+}
+
+.status-awaiting-review .status-icon-text {
+  font-size: 48px;
+}
+
+.status-awaiting-review h4 {
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+
+.status-awaiting-review p {
+  font-size: 14px;
+  color: var(--g-text-light);
+  margin: 0 0 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.shop-details-card {
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #faf8f4, #fff);
+}
+
+.section-title {
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  color: #000;
+}
+
+.shop-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detail-label {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.balance-value {
+  color: #52c41a;
+}
+
+.rating-value {
+  color: #fa8c16;
+}
+
+.rating-total {
+  font-size: 12px;
+  color: #999;
+}
+
+.store-info-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.store-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.store-info-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.store-info-body h4 {
+  margin: 0 0 4px;
+  word-break: break-word;
+}
+
+.store-desc {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+  word-break: break-word;
+}
+
+.store-info-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  background: var(--g-bg);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid transparent;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-card.stat-highlight {
+  border-color: #1890ff;
+}
+
+.stat-card.stat-warning {
+  border-color: #fa8c16;
+}
+
+.stat-card.stat-profit {
+  border-color: #52c41a;
+}
+
+.stat-profit .stat-value {
+  color: #52c41a;
+}
+
+.stat-card.stat-daily {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+}
+
+.stat-card.stat-daily .stat-value {
+  color: #1890ff;
+}
+
+.stat-card.stat-revenue {
+  background: #f0e6ff;
+  border-color: #b37feb;
+}
+
+.stat-card.stat-revenue .stat-value {
+  color: #722ed1;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--g-main_color);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--g-text-light);
+  margin-top: 4px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.chart-box {
+  background: var(--g-white);
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.chart-box h4 {
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bar-label {
+  width: 80px;
+  flex-shrink: 0;
+  text-align: right;
+  color: #666;
+}
+
+.bar-track {
+  flex: 1;
+  height: 18px;
+  background: var(--g-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+}
+
+.bar-value {
+  width: 60px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--g-text);
+}
+
+.chart-empty {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+.credit-score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.score-circle {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.score-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--g-text);
+}
+
+.score-unit {
+  font-size: 16px;
+  color: #999;
+}
+
+.score-track {
+  width: 100%;
+  height: 20px;
+  background: var(--g-bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.quick-links {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .shop-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .charts-row { grid-template-columns: 1fr; }
-  .stat-value { font-size: 22px; }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px 10px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .store-info-card {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .store-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .store-info-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .shop-details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .quick-links {
+    flex-direction: column;
+  }
+
+  .quick-links .el-button {
+    width: 100%;
+  }
+
+  .new-order-alert {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .new-order-alert .alert-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar-label {
+    width: 60px;
+    font-size: 12px;
+  }
+
+  .bar-value {
+    width: 50px;
+    font-size: 12px;
+  }
+
+  .status-awaiting-review {
+    padding: 40px 16px;
+  }
+
+  .section-title {
+    font-size: 13px;
+  }
+
+  .detail-value {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px 8px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .charts-row {
+    gap: 10px;
+  }
+
+  .chart-box {
+    padding: 12px;
+  }
+
+  .chart-box h4 {
+    font-size: 13px;
+  }
+
+  .store-info-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .shop-details-card {
+    padding: 14px;
+  }
+
+  .store-desc {
+    font-size: 12px;
+  }
 }
 </style>
-
-
