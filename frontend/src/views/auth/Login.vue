@@ -60,6 +60,7 @@ const getRedirectPath = () => {
     }
   }
 
+  if (store.isAdmin) return '/admin/dashboard'
   return '/myaccount'
 }
 

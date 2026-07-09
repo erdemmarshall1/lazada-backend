@@ -23,11 +23,12 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Action" width="280">
+      <el-table-column label="Action" width="360">
         <template #default="{row}">
           <el-button type="primary" size="small" @click="$router.push('/admin-shop-detail/' + row._id)">View</el-button>
           <el-button type="success" size="small" @click="approve(row._id)" :disabled="row.status === 1">Approve</el-button>
           <el-button type="danger" size="small" @click="reject(row._id)" :disabled="row.status === 2">Reject</el-button>
+          <el-button type="warning" size="small" @click="generateSellerId(row)" :disabled="row.status !== 1 || row.userId?.sellerId">Generate ID</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -62,6 +63,10 @@ const approve = async (id) => {
 }
 const reject = async (id) => {
   const res = await qe(post('/home/admin/reject-shop', { id }))
+  if (res) { ElMessage.success(res.msg); fetchShops() }
+}
+const generateSellerId = async (row) => {
+  const res = await qe(post('/home/admin/generate-seller-id', { id: row._id }))
   if (res) { ElMessage.success(res.msg); fetchShops() }
 }
 

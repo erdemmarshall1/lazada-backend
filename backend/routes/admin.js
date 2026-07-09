@@ -142,6 +142,26 @@ router.post('/reject-shop', adminAuth, async (req, res) => {
   }
 });
 
+router.post('/generate-seller-id', adminAuth, async (req, res) => {
+  try {
+    const Counter = require('../models/Counter');
+    const { id } = req.body;
+    if (!id) return res.json(fail('Shop id is required'));
+    const shop = await Shop.findById(id);
+    if (!shop) return res.json(fail('Shop not found'));
+    const sellerCounter = await Counter.findOneAndUpdate(
+      { name: 'sellerId' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
+    await User.findByIdAndUpdate(shop.userId, { sellerId });
+    res.json(success({ sellerId }, `Seller ID generated: ${sellerId}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 router.get('/shops/:id', adminAuth, async (req, res) => {
   try {
     const shop = await Shop.findById(req.params.id).populate('userId', 'username email role');

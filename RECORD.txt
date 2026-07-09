@@ -67,6 +67,36 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
    - Cloudflare Pages preview: https://a212fd2e.theoutnet-wholesale.pages.dev
    - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
 
+9. Fix Admin 404 Paths + Path Redirects
+   - Root cause: AdminDashboard.vue metricCards/quickLinks + welcome banner button used old /admin-xxx paths (didn't match /admin/xxx routes)
+   - Fixed: All /admin-xxx paths changed to /admin/xxx in metricCards, quickLinks, and welcome banner
+   - Fixed: router/index.js added adminPathMap redirect dict in beforeEach guard to redirect old /admin-* to /admin/*
+   - Fixed: admin hostname guard now points to /admin/dashboard
+   - Fixed: AdminLayout.vue user dropdown links updated
+   - Commit: 2c79f73
+
+10. Generate Seller ID Button + Backend Endpoint
+    - Backend: Added POST /home/admin/generate-seller-id endpoint (backend/routes/admin.js:145-163)
+      Takes { id } (shop ID), increments Counter for sellerId, generates SLD + zero-padded seq, updates user's sellerId field
+    - Frontend: Added yellow "Generate ID" button in AdminSellers.vue Action column (line 31)
+      - Visible when status === 1 (approved), disabled when sellerId already exists
+    - Commit: 2c907c2
+
+11. Fix 404 on Generate Seller ID + Admin Auto-Redirect
+    - Frontend Login.vue (line 62): Added store.isAdmin check in getRedirectPath() — admin users auto-redirect to /admin/dashboard after login
+    - Backend: The 404 on generate-seller-id was caused by backend not being restarted — route IS properly mounted in server.js
+    - Deploy preview: https://c2fe6bed.theoutnet-wholesale.pages.dev
+
+=== CREDENTIALS ===
+
+Cloudinary:
+  Cloud Name: u7xxu5dq
+  API Key: 726627823236327
+  API Secret: qJmfLkCQ-wvbAhx6RQcf4MCVBUE
+
+Cloudflare:
+  API Token: (set as GitHub secret CLOUDFLARE_API_TOKEN)
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
