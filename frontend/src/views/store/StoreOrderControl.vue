@@ -2,7 +2,7 @@
   <div>
     <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:12px">
       <h3>Store Order Management</h3>
-      <el-button size="small" @click="$router.push('/sellerlogistics')">Logistics Center</el-button>
+      <el-button size="small" @click="$router.push('/seller-logistics')">Logistics Center</el-button>
     </div>
 
     <div v-if="store.newOrderCount > 0" class="new-order-alert">
