@@ -8,6 +8,9 @@ Cloudinary:
   API Key: 726627823236327
   API Secret: qJmfLkCQ-wvbAhx6RQcf4MCVBUE
 
+Cloudflare:
+  API Token: (set as GitHub secret CLOUDFLARE_API_TOKEN)
+
 Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
          backend/controllers/shopController.js, frontend/src/main.js
 
@@ -30,11 +33,17 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
    - backend/.env.example -- Cloudinary credentials added
    - backend/server.js -- require('./config/cloudinary') added
 
-4. Deployment - Cloudflare Pages Added
+4. Product Image Fix
+   - backend/scripts/check_broken_images.js -- verified all 515 local images work
+   - backend/scripts/match_and_upload_products.js -- matched 42 Products/ folder images by title
+   - 42 products updated with Cloudinary URLs from Products folder (>= 80% confidence)
+   - 251 unmatched images remain in Products/ folder (cryptic filenames, no product match)
+
+5. Deployment - Cloudflare Pages Added
    - File: .github/workflows/deploy.yml
    - Added Cloudflare Pages step alongside Netlify
    - Deploys to: theoutnet-wholesale.pages.dev
-   - Requires GitHub secret: CLOUDFLARE_API_TOKEN
+   - CLOUDFLARE_API_TOKEN GitHub secret set from fix.txt
 
 === EXISTING DEPLOYMENTS ===
 
@@ -42,3 +51,4 @@ GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): via Netlify (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://29392808.theoutnet-wholesale.pages.dev
