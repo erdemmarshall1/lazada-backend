@@ -8,7 +8,7 @@
       </div>
       <div class="welcome-actions">
         <el-button type="primary" @click="quickGenerate" :loading="generating">+ Generate Code</el-button>
-        <el-button plain @click="$router.push('/admin-transactions')">All Transactions</el-button>
+        <el-button plain @click="$router.push('/admin/transactions')">All Transactions</el-button>
       </div>
     </div>
 
@@ -109,21 +109,21 @@ const today = computed(() => `${days[now.getDay()]}, ${months[now.getMonth()]} $
 const summaryText = ref('Loading dashboard...')
 
 const metricCards = ref([
-  { label: 'Users', value: 0, icon: 'iconfont icon-yonghu', color: 'var(--g-blue)', link: '/admin-users' },
-  { label: 'Shops', value: 0, icon: 'iconfont icon-dianpu', color: 'var(--g-green)', link: '/admin-sellers' },
-  { label: 'Products', value: 0, icon: 'iconfont icon-shangpin', color: 'var(--g-purple)', link: '/admin-products' },
-  { label: 'Transactions', value: 0, icon: 'iconfont icon-jiaoyi', color: 'var(--g-yellow)', link: '/admin-transactions' },
-  { label: 'Revenue', value: '$0.00', icon: 'iconfont icon-qianbao', color: 'var(--g-red)', link: '/admin-transactions' },
-  { label: 'Active Codes', value: 0, icon: 'iconfont icon-anquan', color: 'var(--g-info)', link: '/admin-invitation-codes' },
+  { label: 'Users', value: 0, icon: 'iconfont icon-yonghu', color: 'var(--g-blue)', link: '/admin/users' },
+  { label: 'Shops', value: 0, icon: 'iconfont icon-dianpu', color: 'var(--g-green)', link: '/admin/sellers' },
+  { label: 'Products', value: 0, icon: 'iconfont icon-shangpin', color: 'var(--g-purple)', link: '/admin/products' },
+  { label: 'Transactions', value: 0, icon: 'iconfont icon-jiaoyi', color: 'var(--g-yellow)', link: '/admin/transactions' },
+  { label: 'Revenue', value: '$0.00', icon: 'iconfont icon-qianbao', color: 'var(--g-red)', link: '/admin/transactions' },
+  { label: 'Active Codes', value: 0, icon: 'iconfont icon-anquan', color: 'var(--g-info)', link: '/admin/invitation-codes' },
 ])
 
 const quickLinks = [
-  { label: 'Sellers', icon: 'iconfont icon-dianpu', link: '/admin-sellers' },
-  { label: 'Users', icon: 'iconfont icon-yonghu', link: '/admin-users' },
-  { label: 'Products', icon: 'iconfont icon-shangpin', link: '/admin-products' },
-  { label: 'Transactions', icon: 'iconfont icon-jiaoyi', link: '/admin-transactions' },
-  { label: 'Reports', icon: 'iconfont icon-baobiao', link: '/admin-reports' },
-  { label: 'Settings', icon: 'iconfont icon-shezhi', link: '/admin-settings' },
+  { label: 'Sellers', icon: 'iconfont icon-dianpu', link: '/admin/sellers' },
+  { label: 'Users', icon: 'iconfont icon-yonghu', link: '/admin/users' },
+  { label: 'Products', icon: 'iconfont icon-shangpin', link: '/admin/products' },
+  { label: 'Transactions', icon: 'iconfont icon-jiaoyi', link: '/admin/transactions' },
+  { label: 'Reports', icon: 'iconfont icon-zhuzhuangtu', link: '/admin/reports' },
+  { label: 'Settings', icon: 'iconfont icon-shezhi', link: '/admin/settings' },
 ]
 
 const fetchStats = async () => {

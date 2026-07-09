@@ -153,11 +153,32 @@ const router = createRouter({
   routes,
 })
 
+const adminPathMap = {
+  '/admin-dashboard': '/admin/dashboard', '/admin-users': '/admin/users', '/admin-sellers': '/admin/sellers',
+  '/admin-products': '/admin/products', '/admin-transactions': '/admin/transactions', '/admin-coupons': '/admin/coupons',
+  '/admin-banners': '/admin/banners', '/admin-invitation-codes': '/admin/invitation-codes', '/admin-reviews': '/admin/reviews',
+  '/admin-roles': '/admin/roles', '/admin-cms-pages': '/admin/cms-pages', '/admin-cms-blogs': '/admin/cms-blogs',
+  '/admin-cms-faqs': '/admin/cms-faqs', '/admin-cms-menus': '/admin/cms-menus', '/admin-reports': '/admin/reports',
+  '/admin-payment-settings': '/admin/payment-settings', '/admin-email-settings': '/admin/email-settings',
+  '/admin-theme-settings': '/admin/theme-settings', '/admin-balance': '/admin/balance',
+  '/admin-platform-wallet': '/admin/platform-wallet', '/admin-sessions-audit': '/admin/sessions-audit',
+  '/admin-settings': '/admin/settings', '/admin-homepage-sections': '/admin/homepage-sections',
+  '/admin-submissions': '/admin/submissions', '/admin-tawkto-settings': '/admin/tawkto-settings',
+  '/admin-livechat-inbox': '/admin/livechat-inbox', '/admin-livechat-settings': '/admin/livechat-settings',
+  '/superadmin-dashboard': '/admin/superadmin-dashboard',
+}
+
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
 
   if (window.location.hostname.startsWith('admin') && (to.path === '/' || to.path === '/main')) {
-    next('/superadmin-dashboard')
+    next('/admin/dashboard')
+    return
+  }
+
+  const redirectPath = adminPathMap[to.path]
+  if (redirectPath) {
+    next(redirectPath)
     return
   }
 

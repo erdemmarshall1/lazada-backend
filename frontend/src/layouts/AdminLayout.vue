@@ -74,8 +74,8 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/myaccount')">My Profile</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/admin/settings')">System Settings</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/admin/dashboard')">Dashboard</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/admin/settings')">Settings</el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">Logout</el-dropdown-item>
               </el-dropdown-menu>
             </template>
