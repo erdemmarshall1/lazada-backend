@@ -13,6 +13,7 @@ const service = axios.create({
 
 let isRefreshing = false
 let refreshSubscribers = []
+let lastAuthErrorTime = 0
 
 const onRefreshed = (newToken, newRefreshToken) => {
   refreshSubscribers.forEach(cb => cb(newToken, newRefreshToken))
@@ -21,6 +22,14 @@ const onRefreshed = (newToken, newRefreshToken) => {
 
 const addRefreshSubscriber = (cb) => {
   refreshSubscribers.push(cb)
+}
+
+const showAuthErrorOnce = (msg) => {
+  const now = Date.now()
+  if (now - lastAuthErrorTime > 3000) {
+    lastAuthErrorTime = now
+    ElMessage.error(msg)
+  }
 }
 
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -97,7 +106,7 @@ service.interceptors.response.use(
                 store.logout()
                 if (router.currentRoute.value.fullPath !== '/login') {
                   router.push('/login')
-                  ElMessage.error('Session expired, please login again')
+                  showAuthErrorOnce('Session expired, please login again')
                 }
               }
             })
@@ -124,7 +133,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        ElMessage.error(msg || 'Session expired, please login again')
+        showAuthErrorOnce(msg || 'Session expired, please login again')
       }
       return Promise.reject(data)
     }
@@ -162,7 +171,7 @@ service.interceptors.response.use(
                 store.logout()
                 if (router.currentRoute.value.fullPath !== '/login') {
                   router.push('/login')
-                  ElMessage.error('Session expired, please login again')
+                  showAuthErrorOnce('Session expired, please login again')
                 }
               }
             })
@@ -189,7 +198,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        ElMessage.error(msg)
+        showAuthErrorOnce(msg)
       }
       return Promise.reject(error)
     }

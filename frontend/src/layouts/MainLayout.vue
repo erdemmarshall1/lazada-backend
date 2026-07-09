@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { get, qe } from '@/api/request'
 import MainLayoutHeader from './MainLayoutHeader.vue'
@@ -30,6 +30,19 @@ import TawkToWidget from '@/components/TawkToWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null
+
+const clearWalletTimer = () => {
+  if (walletTimer) {
+    clearInterval(walletTimer)
+    walletTimer = null
+  }
+}
+
+watch(() => store.token, (newToken) => {
+  if (!newToken) {
+    clearWalletTimer()
+  }
+})
 
 const openKefu = () => {
   window.open(store.kefu, '_blank')
@@ -106,10 +119,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (walletTimer) {
-    clearInterval(walletTimer)
-    walletTimer = null
-  }
+  clearWalletTimer()
 })
 </script>
 
