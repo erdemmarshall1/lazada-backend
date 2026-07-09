@@ -23,7 +23,14 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
    - Auto-assigned (SLDxxxxx) on admin approval via Counter model
    - backend/routes/admin.js route POST /approve-shop
 
-3. Deployment - Cloudflare Pages Added
+3. Cloudinary Config Centralized
+   - backend/config/cloudinary.js -- created (centralized initialization)
+   - backend/config/app.js -- CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET added
+   - backend/.env -- Cloudinary credentials added
+   - backend/.env.example -- Cloudinary credentials added
+   - backend/server.js -- require('./config/cloudinary') added
+
+4. Deployment - Cloudflare Pages Added
    - File: .github/workflows/deploy.yml
    - Added Cloudflare Pages step alongside Netlify
    - Deploys to: theoutnet-wholesale.pages.dev

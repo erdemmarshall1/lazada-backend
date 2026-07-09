@@ -26,4 +26,9 @@ module.exports = {
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || '',
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
   PUSH_SUBJECT: process.env.PUSH_SUBJECT || 'mailto:noreply@shopifywholesale.com',
+
+  // Cloudinary
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'u7xxu5dq',
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '726627823236327',
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
 };
