@@ -7,16 +7,16 @@
       </button>
       <div class="sidebar-overlay" v-if="sidebarOpen" @click="sidebarOpen = false"></div>
       <div class="mycenter-sidebar" :class="{ open: sidebarOpen }">
-        <div class="user-card g-flex-align-center" v-if="store.isLogin">
+        <div class="user-card g-flex-align-center glow-user-card" v-if="store.isLogin">
           <div class="user-avatar"><img :src="$imgUrl(store.userInfo.avatar)" @error="$imgFallback" /></div>
           <div class="user-name">{{ store.userInfo.username }}</div>
         </div>
-        <div class="menu-section" v-for="section in menuSections" :key="section.title">
-          <div class="menu-title" @click="toggleSection(section.title)">
+        <div class="menu-section glow-menu-section" v-for="section in menuSections" :key="section.title">
+          <div class="menu-title glow-menu-title" @click="toggleSection(section.title)">
             <span>{{ isCollapsed(section.title) ? '▶' : '▼' }}</span>
             {{ section.title }}
           </div>
-          <div class="menu-item" v-for="item in section.items.filter(i => !i.hidden)" :key="item.path" v-show="!isCollapsed(section.title)" :class="{ active: $route.path === item.path }" @click="$router.push(item.path)">
+          <div class="menu-item glow-menu-item" v-for="item in section.items.filter(i => !i.hidden)" :key="item.path" v-show="!isCollapsed(section.title)" :class="{ active: $route.path === item.path, 'glow-menu-item--active': $route.path === item.path }" @click="$router.push(item.path)">
             <i :class="item.icon"></i>{{ item.label }}
           </div>
         </div>
@@ -145,17 +145,21 @@ const menuSections = computed(() => {
 .mycenter-sidebar { width: 220px; flex-shrink: 0; max-height: calc(100vh - 250px); overflow-y: auto; }
 .mycenter-sidebar-toggle { display: none; align-items: center; gap: 8px; padding: 10px 16px; margin-bottom: 12px; background: var(--g-white); border: 1px solid var(--g-border); border-radius: 8px; font-size: 14px; cursor: pointer; color: #000; width: 100%; justify-content: center; }
 .mycenter-sidebar-toggle:hover { background: #f4f2ee; }
-.user-card { background: var(--g-white); border-radius: 8px; padding: 16px; gap: 12px; margin-bottom: 12px; }
-.user-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; }
+.glow-user-card { background: var(--g-white); border-radius: 12px; padding: 16px; gap: 12px; margin-bottom: 12px; position: relative; overflow: hidden; border: 1px solid rgba(74,144,226,0.08); box-shadow: 0 2px 12px rgba(74,144,226,0.06); }
+.glow-user-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #4a90e2, #764ba2); opacity: 0.6; }
+.user-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(74,144,226,0.2); }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .user-name { font-size: 16px; font-weight: 600; }
-.menu-section { background: var(--g-white); border-radius: 8px; padding: 12px 0; margin-bottom: 12px; }
-.menu-title { padding: 8px 16px; font-size: 12px; color: #999; text-transform: uppercase; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
-.menu-title:hover { color: #666; }
-.menu-item { padding: 10px 16px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border-left: 3px solid transparent; }
-.menu-item:hover { color: var(--g-main_color); padding-left: 20px; border-left: 3px solid var(--g-main_color); }
-.menu-item.active { color: var(--g-main_color); font-weight: 600; background: #fff5e6; border-left: 3px solid var(--g-main_color); }
-.menu-item .iconfont { font-size: 16px; }
+.glow-menu-section { background: var(--g-white); border-radius: 10px; padding: 10px 0; margin-bottom: 12px; position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 1px 4px rgba(0,0,0,0.03); transition: box-shadow 0.3s, border-color 0.3s; }
+.glow-menu-section:hover { box-shadow: 0 4px 16px rgba(74,144,226,0.08), 0 1px 4px rgba(0,0,0,0.03); border-color: rgba(74,144,226,0.1); }
+.glow-menu-title { padding: 8px 16px; font-size: 12px; color: #999; text-transform: uppercase; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.glow-menu-title:hover { color: #4a90e2; }
+.glow-menu-item { padding: 10px 16px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.25s; border-left: 3px solid transparent; position: relative; }
+.glow-menu-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(74,144,226,0.04) 0%, transparent 70%); pointer-events: none; }
+.glow-menu-item:hover { color: #4a90e2; padding-left: 20px; border-left-color: rgba(74,144,226,0.3); }
+.glow-menu-item:hover::before { opacity: 1; }
+.glow-menu-item--active { color: #4a90e2; font-weight: 600; background: rgba(74,144,226,0.05); border-left-color: #4a90e2; box-shadow: inset 3px 0 6px -3px rgba(74,144,226,0.2); }
+.glow-menu-item .iconfont { font-size: 16px; }
 .mycenter-content { flex: 1; background: var(--g-white); border-radius: 8px; padding: 24px; min-height: 500px; }
 @media (max-width: 768px) {
   .mycenter-container { flex-direction: column; position: relative; min-height: calc(100vh - 200px); }
@@ -164,8 +168,8 @@ const menuSections = computed(() => {
   .mycenter-sidebar { position: fixed; top: 0; left: -240px; width: 240px; height: 100%; z-index: 99; display: flex; flex-direction: column; background: var(--g-bg); max-height: 100vh; overflow-y: auto; transition: left 0.3s ease; padding: 12px 0; margin: 0; }
   .mycenter-sidebar.open { left: 0; display: flex; }
   .mycenter-content { padding: 16px; min-height: auto; }
-  .menu-section { margin-bottom: 8px; background: var(--g-white); border-radius: 8px; padding: 12px 0; }
-  .user-card { margin: 0 12px 12px; }
+  .glow-menu-section { margin-bottom: 8px; background: var(--g-white); border-radius: 8px; padding: 10px 0; }
+  .glow-user-card { margin: 0 12px 12px; }
 }
 </style>
 

@@ -12,7 +12,7 @@
       </div>
       <div class="sidebar-menu">
         <div v-for="group in menuGroups" :key="group.title" class="menu-group">
-          <div class="menu-group-title" @click="toggleGroup(group.title)">
+          <div class="menu-group-title admin-glow-section" @click="toggleGroup(group.title)">
             <i :class="group.icon"></i>
             <span v-show="!sidebarCollapsed">{{ group.title }}</span>
             <i v-show="!sidebarCollapsed" class="menu-arrow" :class="{ rotated: !isGroupCollapsed(group.title) }">&#9654;</i>
@@ -21,8 +21,8 @@
             <div
               v-for="item in group.items.filter(i => !i.adminOnly || store.isAdmin)"
               :key="item.path"
-              class="menu-item"
-              :class="{ active: isActive(item.path) }"
+              class="menu-item admin-glow-item"
+              :class="{ active: isActive(item.path), 'admin-glow-item--active': isActive(item.path) }"
               @click="navigate(item.path)"
               :title="sidebarCollapsed ? item.label : ''"
             >
@@ -32,8 +32,8 @@
           </div>
         </div>
       </div>
-      <div class="sidebar-footer" v-show="!sidebarCollapsed" v-if="store.isLogin">
-        <div class="user-info">
+      <div class="sidebar-footer admin-footer-glow" v-show="!sidebarCollapsed" v-if="store.isLogin">
+        <div class="user-info admin-user-card">
           <div class="user-avatar">{{ store.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
           <div class="user-details">
             <div class="user-name">{{ store.userInfo?.username || 'Admin' }}</div>
@@ -247,8 +247,18 @@ const menuGroups = computed(() => [
 .menu-item.active { color: #fff; background: rgba(102,126,234,0.12); border-left-color: #667eea; }
 .menu-item .iconfont { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
 .menu-item span { white-space: nowrap; overflow: hidden; }
+.admin-glow-item { position: relative; overflow: hidden; }
+.admin-glow-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(102,126,234,0.08) 0%, transparent 70%); pointer-events: none; }
+.admin-glow-item:hover::before { opacity: 1; }
+.admin-glow-item:hover { border-left-color: rgba(102,126,234,0.4); }
+.admin-glow-item--active { border-left-color: #667eea !important; box-shadow: 0 0 16px rgba(102,126,234,0.12), inset 3px 0 8px -3px rgba(102,126,234,0.2); }
+.admin-glow-section { position: relative; }
+.admin-glow-section:hover { color: #fff; }
 .sidebar-footer { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: auto; flex-shrink: 0; }
+.admin-footer-glow { position: relative; }
+.admin-footer-glow::before { content: ''; position: absolute; top: 0; left: 16px; right: 16px; height: 1px; background: linear-gradient(90deg, transparent, rgba(102,126,234,0.3), transparent); }
 .user-info { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
+.admin-user-card { padding: 4px; border-radius: 8px; }
 .user-avatar { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; }
 .user-details { overflow: hidden; }
 .user-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

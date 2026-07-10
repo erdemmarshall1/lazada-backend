@@ -38,10 +38,12 @@ const goNav = (path) => { router.push(path) }
 <style scoped>
 .ton-nav-bar { background: #faf8f4; border-bottom: 1px solid #e8e6e2; }
 .ton-nav-bar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 40px; padding: 0 20px; gap: 4px; }
-.ton-nav-bar-item { display: flex; align-items: center; gap: 4px; height: 100%; padding: 0 16px; font-size: 12px; letter-spacing: 0.5px; color: #555; cursor: pointer; transition: all 0.2s; white-space: nowrap; position: relative; }
+.ton-nav-bar-item { display: flex; align-items: center; gap: 4px; height: 100%; padding: 0 16px; font-size: 12px; letter-spacing: 0.5px; color: #555; cursor: pointer; transition: all 0.25s; white-space: nowrap; position: relative; overflow: hidden; }
+.ton-nav-bar-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.03) 0%, transparent 70%); pointer-events: none; }
 .ton-nav-bar-item:hover { color: #000; }
+.ton-nav-bar-item:hover::before { opacity: 1; }
 .ton-nav-bar-item.active { color: #000; font-weight: 600; }
-.ton-nav-bar-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 2px; background: #000; }
+.ton-nav-bar-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 2px; background: #000; box-shadow: 0 0 6px rgba(0,0,0,0.15); }
 .ton-nav-bar-item .iconfont { font-size: 14px; }
 @media (max-width: 1024px) {
   .ton-nav-bar-inner { overflow-x: auto; -webkit-overflow-scrolling: touch; }
