@@ -3,16 +3,6 @@
     <div class="ton-header-top">
       <div class="ton-header-top-inner">
         <div class="ton-header-top-left">
-          <el-dropdown trigger="click" class="ton-header-lang-dropdown ton-header-lang-top" @command="handleLangChange">
-            <span class="ton-header-lang ton-header-lang-labeled">
-              <span class="ton-header-lang-prefix">{{ $t('mainLayoutHeader.languageLabel') }}:</span>
-              <span class="ton-header-lang-current">{{ currentLangName }}</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-            <el-dropdown-menu>
-              <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
           <span class="ton-header-top-divider"></span>
           <a href="javascript:void(0)" @click="$router.push('/ordertracking')">Track Your Order</a>
           <a href="javascript:void(0)" @click="$router.push('/myorder')">Create A Return</a>
@@ -32,15 +22,7 @@
             </span>
             <span class="ton-header-logout" @click="handleLogout">Logout</span>
           </template>
-          <el-dropdown trigger="click" class="ton-header-lang-dropdown ton-header-lang-compact" @command="handleLangChange">
-            <span class="ton-header-lang ton-header-lang-icon" :title="currentLangName" aria-label="Language">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-            <el-dropdown-menu>
-              <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
+
         </div>
       </div>
     </div>
@@ -71,6 +53,16 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span class="ton-header-cart-count" v-if="store.carNum > 0">{{ store.carNum }}</span>
           </button>
+          <el-dropdown trigger="click" class="ton-header-lang-btn" @command="handleLangChange">
+            <button class="ton-header-icon" aria-label="Language">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
     </div>
@@ -101,15 +93,6 @@
         <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false">Flash Deals</div>
         <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false">Categories</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item ton-drawer-lang">
-          <span class="ton-drawer-lang-label">{{ $t('mainLayoutHeader.languageLabel') }}:</span>
-          <el-dropdown trigger="click" class="ton-drawer-lang-dropdown" @command="handleMobileLangChange">
-            <span class="ton-drawer-lang-current">{{ currentLangName }} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            <el-dropdown-menu>
-              <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
         <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false">About THE OUTNET</div>
         <div class="ton-drawer-item" @click="$router.push('/contact-us'); mobileMenuOpen = false">Customer Care</div>
         <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false">FAQ</div>
@@ -139,14 +122,10 @@ const currentLangName = computed(() => {
 })
 
 const handleLangChange = (code) => {
+  if (code === store.lang) return
   store.setLanguage(code)
   i18n.global.locale.value = code
   window.location.reload()
-}
-
-const handleMobileLangChange = (code) => {
-  mobileMenuOpen.value = false
-  handleLangChange(code)
 }
 
 const searchMobile = () => {
@@ -187,15 +166,8 @@ watch(mobileMenuOpen, (val) => {
 .ton-header-user .iconfont { font-size: 14px; }
 .ton-header-wallet { color: #b8922a !important; font-weight: 600; }
 .ton-header-logout { color: #c0392b !important; }
-.ton-header-lang { cursor: pointer; padding: 0 8px; border-left: 1px solid #e8e6e2; display: flex; align-items: center; gap: 4px; }
-.ton-header-lang-dropdown { cursor: pointer; }
-.ton-header-lang-top { margin-right: 4px; }
-.ton-header-lang-labeled { border-left: 1px solid #e8e6e2; padding-left: 10px; }
-.ton-header-lang-prefix { color: #888; font-size: 11px; letter-spacing: 0.3px; }
-.ton-header-lang-current { color: #000; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
 .ton-header-top-divider { width: 1px; height: 14px; background: #e8e6e2; margin: 0 4px; }
-.ton-header-lang-compact .ton-header-lang-icon { padding: 0 6px; gap: 2px; }
-.ton-header-lang-compact .ton-header-lang-icon svg { display: block; }
+.ton-header-lang-btn { cursor: pointer; display: flex; align-items: center; }
 
 .ton-header-main { background: #ffffff; border-bottom: 1px solid #e8e6e2; }
 .ton-header-main-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; padding: 0 20px; }
@@ -225,10 +197,6 @@ watch(mobileMenuOpen, (val) => {
 .ton-drawer-item:hover { background: rgba(74,144,226,0.04); border-left-color: rgba(74,144,226,0.3); padding-left: 19px; }
 .ton-drawer-item:hover::before { opacity: 1; }
 .ton-drawer-divider { height: 1px; background: #e8e6e2; margin: 4px 16px; }
-.ton-drawer-lang { display: flex; align-items: center; gap: 8px; }
-.ton-drawer-lang-label { color: #888; font-size: 13px; }
-.ton-drawer-lang-current { color: #000; font-size: 13px; font-weight: 600; cursor: pointer; }
-
 @media (max-width: 768px) {
   .ton-hamburger { display: flex; align-items: center; }
   .ton-nav { display: none; }

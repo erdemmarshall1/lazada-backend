@@ -19,8 +19,8 @@ export default defineConfig({
         description: 'Wholesale luxury fashion marketplace — premium designer brands at wholesale prices',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#000000',
+        background_color: '#121212',
+        theme_color: '#121212',
         orientation: 'portrait-primary',
         categories: ['shopping', 'fashion', 'lifestyle'],
         screenshots: [

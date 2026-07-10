@@ -3,8 +3,11 @@
    Plain Cache API only — no workbox imports required. */
 
 const CACHE = 'theoutnet-wholesale-v1';
+const RUNTIME_CACHE = 'theoutnet-wholesale-runtime-v1';
 const OFFLINE_URL = '/offline.html';
 const MANIFEST = self.__WB_MANIFEST || [];
+
+const PRODUCT_PATTERN = /\/(goods-detail|searchgoods|store-detail|main)\//;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -18,7 +21,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => k !== CACHE && k !== RUNTIME_CACHE)
+            .map((k) => caches.delete(k))
+        )
+      )
       .then(() => self.clients.claim())
   );
 });
@@ -28,22 +37,40 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
-  // Never cache live API / socket traffic.
   if (/(^\/(main|home|api|uploads)\/)|(\/socket\.io\/)/.test(url.pathname)) return;
 
-  // Navigation requests: network-first with offline fallback.
+  // Navigation requests: network-first with runtime cache + offline fallback.
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy));
           return res;
         })
         .catch(async () => {
           const cached = await caches.match(req);
-          return cached || caches.match(OFFLINE_URL);
+          if (cached) return cached;
+          const runtimeCached = await caches.match(req, { cacheName: RUNTIME_CACHE });
+          return runtimeCached || caches.match(OFFLINE_URL);
         })
+    );
+    return;
+  }
+
+  // Product / content pages: cache-first, refresh in background.
+  if (PRODUCT_PATTERN.test(url.pathname)) {
+    event.respondWith(
+      caches.match(req, { cacheName: RUNTIME_CACHE }).then((cached) => {
+        const fetchPromise = fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
     );
     return;
   }
@@ -62,6 +89,27 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// Periodic background sync for data refresh.
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'refresh-content') {
+    event.waitUntil(refreshContent());
+  }
+});
+
+const refreshContent = async () => {
+  const keys = await caches.keys();
+  const cache = await caches.open(RUNTIME_CACHE);
+  const requests = (await cache.keys()).filter((r) => PRODUCT_PATTERN.test(new URL(r.url).pathname));
+  await Promise.allSettled(
+    requests.map(async (req) => {
+      try {
+        const res = await fetch(req);
+        if (res && res.status === 200) cache.put(req, res.clone());
+      } catch { /* offline, skip */ }
+    })
+  );
+};
 
 // Web Push delivery.
 self.addEventListener('push', (event) => {

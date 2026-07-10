@@ -68,6 +68,16 @@
             <i class="iconfont icon-xiaoxi"></i>
             <span class="notif-badge" v-if="store.newOrderCount > 0">{{ store.newOrderCount }}</span>
           </div>
+          <el-dropdown trigger="click" class="topbar-lang-btn" @command="handleLangChange">
+            <div class="topbar-lang-trigger" :title="currentLangName" aria-label="Language">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <el-dropdown trigger="click">
             <div class="topbar-user">
               <span class="user-avatar-small">{{ store.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</span>
@@ -98,6 +108,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import i18n from '@/locales'
 
 const router = useRouter()
 const route = useRoute()
@@ -107,6 +118,18 @@ const sidebarCollapsed = ref(false)
 const mobileSidebarOpen = ref(false)
 const searchQuery = ref('')
 const collapsedGroups = ref(new Set())
+
+const currentLangName = computed(() => {
+  const lang = store.langList?.find(l => l.code === store.lang)
+  return lang?.name || 'English'
+})
+
+const handleLangChange = (code) => {
+  if (code === store.lang) return
+  store.setLanguage(code)
+  i18n.global.locale.value = code
+  window.location.reload()
+}
 
 const toggleGroup = (title) => {
   if (collapsedGroups.value.has(title)) {
@@ -291,6 +314,9 @@ onBeforeUnmount(() => {
 .notif-badge { position: absolute; top: -2px; right: -4px; background: #e74c3c; color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .topbar-user { cursor: pointer; }
 .user-avatar-small { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+.topbar-lang-btn { cursor: pointer; }
+.topbar-lang-trigger { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s, background 0.2s; }
+.topbar-lang-trigger:hover { color: #fff; background: rgba(255,255,255,0.06); }
 .admin-content { flex: 1; overflow-y: auto; }
 .content-wrapper { padding: 24px; max-width: 1440px; }
 @media (max-width: 1024px) {

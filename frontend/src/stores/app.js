@@ -34,6 +34,19 @@ const safeParseJSON = (value, fallback = {}) => {
   }
 }
 
+const DEFAULT_LANG_LIST = [
+  { code: 'en', name: 'English' }, { code: 'zh-CN', name: '简体中文' },
+  { code: 'zh-TW', name: '繁體中文' }, { code: 'vi', name: 'Tiếng Việt' },
+  { code: 'de', name: 'Deutsch' }, { code: 'fr', name: 'Français' },
+  { code: 'ja', name: '日本語' }, { code: 'es', name: 'Español' },
+  { code: 'ko', name: '한국어' }, { code: 'pt', name: 'Português' },
+  { code: 'ru', name: 'Русский' }, { code: 'it', name: 'Italiano' },
+  { code: 'th', name: 'ไทย' }, { code: 'ar', name: 'العربية' },
+  { code: 'tr', name: 'Türkçe' }, { code: 'nl', name: 'Nederlands' },
+  { code: 'pl', name: 'Polski' }, { code: 'hi', name: 'हिन्दी' },
+  { code: 'id', name: 'Bahasa Indonesia' }, { code: 'ms', name: 'Bahasa Melayu' },
+]
+
 export const useAppStore = defineStore('app', {
   state: () => ({
     token: safeStorageGet('theoutnet_token', ''),
@@ -41,7 +54,7 @@ export const useAppStore = defineStore('app', {
     userInfo: safeParseJSON(safeStorageGet('theoutnet_user'), {}),
     carNum: 0,
     lang: safeStorageGet('theoutnet_lang', 'en'),
-    langList: [],
+    langList: DEFAULT_LANG_LIST,
     langObj: {},
     loadedLanguages: [],
     system: {},
