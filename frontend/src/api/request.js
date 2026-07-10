@@ -133,7 +133,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        showAuthErrorOnce(msg || 'Session expired, please login again')
+        showAuthErrorOnce('Session expired, please login again')
       }
       return Promise.reject(data)
     }
@@ -198,7 +198,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        showAuthErrorOnce(msg)
+        showAuthErrorOnce('Session expired, please login again')
       }
       return Promise.reject(error)
     }

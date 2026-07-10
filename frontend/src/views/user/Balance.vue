@@ -27,14 +27,20 @@
             :headers="uploadHeaders"
             :on-success="onUploadSuccess"
             :on-error="onUploadError"
+            :on-remove="onUploadRemove"
             :before-upload="beforeUpload"
             :limit="1"
             :file-list="receiptFileList"
             accept="image/*,.pdf"
+            list-type="picture"
           >
-            <el-button size="small" type="primary">Click to Upload</el-button>
+            <el-button size="small" type="primary" v-if="!receiptUrl">Click to Upload</el-button>
             <template #tip><div style="font-size:12px;color:#999;margin-top:4px">JPG/PNG/PDF, max 10MB</div></template>
           </el-upload>
+          <div v-if="receiptUrl" class="receipt-preview">
+            <img :src="imgUrl(receiptUrl)" alt="Receipt" @click="previewReceipt" />
+            <span class="receipt-preview-label">Receipt uploaded</span>
+          </div>
         </el-form-item>
         <el-form-item v-if="selectedWallet" label="Wallet Address">
           <el-input :model-value="selectedWallet" readonly>
@@ -90,7 +96,7 @@
 import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { get, post, qe, API_BASE } from '@/api/request'
+import { get, post, qe, API_BASE, imgUrl } from '@/api/request'
 import QRCode from 'qrcode'
 import TransactionPasswordDialog from '@/components/TransactionPasswordDialog.vue'
 
@@ -146,23 +152,42 @@ const copyAddress = async () => {
 
 const beforeUpload = (file) => {
   const isImageOrPdf = file.type.startsWith('image/') || file.type === 'application/pdf'
-  if (!isImageOrPdf) { ElMessage.error('Only JPG/PNG/PDF allowed'); return false }
+  if (!isImageOrPdf) { ElMessage.error('Only JPG/PNG/PDF files are allowed'); return false }
   const isLt10M = file.size / 1024 / 1024 < 10
-  if (!isLt10M) { ElMessage.error('File must be less than 10MB'); return false }
+  if (!isLt10M) { ElMessage.error('File size must be less than 10MB'); return false }
   return true
 }
 
 const onUploadSuccess = (res) => {
   if (res.code === 0 && res.data?.url) {
     receiptUrl.value = res.data.url
-    ElMessage.success('Receipt uploaded')
+    formData.receipt = res.data.url
+    nextTick(() => formRef.value?.validateField('receipt'))
+    ElMessage.success('Receipt uploaded successfully')
   } else {
-    ElMessage.error(res.msg || 'Upload failed')
+    receiptFileList.value = []
+    ElMessage.error(res.msg || 'Upload failed — please try again')
   }
 }
 
-const onUploadError = () => {
-  ElMessage.error('Upload failed')
+const onUploadError = (err) => {
+  receiptFileList.value = []
+  receiptUrl.value = ''
+  formData.receipt = ''
+  ElMessage.error(err?.message?.includes('413') ? 'File too large for server' : 'Upload failed — please try again')
+}
+
+const onUploadRemove = () => {
+  receiptUrl.value = ''
+  formData.receipt = ''
+  receiptFileList.value = []
+  nextTick(() => formRef.value?.validateField('receipt'))
+}
+
+const previewReceipt = () => {
+  if (receiptUrl.value) {
+    window.open(imgUrl(receiptUrl.value), '_blank')
+  }
 }
 
 const doDeposit = async () => {
@@ -173,7 +198,7 @@ const doDeposit = async () => {
   await qe(post('/home/userRecharge/add', {
     amount: formData.depositAmount,
     paymentMethod: formData.depositPaymentMethod,
-    receipt: receiptUrl.value,
+    receipt: formData.receipt,
   }))
   submitting.value = false
   showDeposit.value = false
@@ -260,6 +285,9 @@ onMounted(async () => {
 .qr-section { text-align: center; margin-top: 16px; padding: 16px; border: 1px dashed var(--g-border); border-radius: 8px; }
 .qr-section img { width: 200px; height: 200px; }
 .qr-section p { font-size: 12px; color: var(--g-text-light); margin-top: 8px; }
+.receipt-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 8px 12px; background: var(--g-off-white); border-radius: 8px; cursor: pointer; }
+.receipt-preview img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid var(--g-border); }
+.receipt-preview .receipt-preview-label { font-size: 13px; color: var(--g-text); }
 @media (max-width: 768px) {
   .balance-card { padding: 20px; }
 }

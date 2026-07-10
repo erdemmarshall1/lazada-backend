@@ -209,11 +209,11 @@ router.beforeEach((to, from, next) => {
   window.scrollTo(0, 0)
   document.title = to.meta.title || 'Shopify Wholesale'
 
-  if (to.name === 'login' && store.isLogin) {
+  if (to.name === 'login' && store.isLogin && store.userInfo?.username) {
     next('/main')
     return
   }
-  if (to.name === 'admin-login' && store.isLogin) {
+  if (to.name === 'admin-login' && store.isLogin && store.userInfo?.username) {
     next('/admin/dashboard')
     return
   }
