@@ -77,38 +77,46 @@
         </div>
       </div>
 
-      <div class="stats-grid" v-if="totalInfo">
-        <div class="stat-card" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
-          <div class="stat-label">Total Revenue</div>
+      <div class="dash-metrics" v-if="totalInfo">
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#667eea;--card-glow:rgba(102,126,234,0.15)">
+          <div class="gc-icon" style="color:#667eea"><i class="iconfont icon-qianbao"></i></div>
+          <div class="gc-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
+          <div class="gc-label">Total Revenue</div>
         </div>
-        <div class="stat-card stat-profit" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
-          <div class="stat-label">Total Profit</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)">
+          <div class="gc-icon" style="color:#10b981"><i class="iconfont icon-qianbao"></i></div>
+          <div class="gc-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
+          <div class="gc-label">Total Profit</div>
         </div>
-        <div class="stat-card" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">{{ totalInfo.orderCount || 0 }}</div>
-          <div class="stat-label">Total Orders</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#2980b9;--card-glow:rgba(41,128,185,0.15)">
+          <div class="gc-icon" style="color:#2980b9"><i class="iconfont icon-dingdan"></i></div>
+          <div class="gc-value">{{ totalInfo.orderCount || 0 }}</div>
+          <div class="gc-label">Total Orders</div>
         </div>
-        <div class="stat-card stat-daily" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">{{ totalInfo.todayOrderCount || 0 }}</div>
-          <div class="stat-label">Today's Orders</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#f59e0b;--card-glow:rgba(245,158,11,0.15)">
+          <div class="gc-icon" style="color:#f59e0b"><i class="iconfont icon-wuliu"></i></div>
+          <div class="gc-value">{{ totalInfo.todayOrderCount || 0 }}</div>
+          <div class="gc-label">Today's Orders</div>
         </div>
-        <div class="stat-card stat-revenue" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
-          <div class="stat-label">Today's Revenue</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#8b5cf6;--card-glow:rgba(139,92,246,0.15)">
+          <div class="gc-icon" style="color:#8b5cf6"><i class="iconfont icon-qianbao"></i></div>
+          <div class="gc-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
+          <div class="gc-label">Today's Revenue</div>
         </div>
-        <div class="stat-card stat-highlight" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
-          <div class="stat-label">Pending Shipment</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#ec4899;--card-glow:rgba(236,72,153,0.15)">
+          <div class="gc-icon" style="color:#ec4899"><i class="iconfont icon-tixing"></i></div>
+          <div class="gc-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
+          <div class="gc-label">Pending Shipment</div>
         </div>
-        <div class="stat-card stat-warning" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">{{ totalInfo.refundRequestCount || 0 }}</div>
-          <div class="stat-label">Refund Requests</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#ef4444;--card-glow:rgba(239,68,68,0.15)">
+          <div class="gc-icon" style="color:#ef4444"><i class="iconfont icon-tixing"></i></div>
+          <div class="gc-value">{{ totalInfo.refundRequestCount || 0 }}</div>
+          <div class="gc-label">Refund Requests</div>
         </div>
-        <div class="stat-card stat-profit" @click="$router.push('/storeordercontrol')">
-          <div class="stat-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
-          <div class="stat-label">Today's Profit</div>
+        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)">
+          <div class="gc-icon" style="color:#10b981"><i class="iconfont icon-qianbao"></i></div>
+          <div class="gc-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
+          <div class="gc-label">Today's Profit</div>
         </div>
       </div>
 
@@ -464,11 +472,15 @@ onBeforeUnmount(() => {
 }
 
 .shop-details-card {
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  margin-top: 16px;
-  background: linear-gradient(135deg, #faf8f4, #fff);
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-left: 4px solid var(--g-main_color);
+  transition: box-shadow 0.3s;
+}
+.shop-details-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.06);
 }
 
 .section-title {
@@ -518,9 +530,14 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 20px;
   padding: 20px;
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
+  border-radius: 12px;
   margin-top: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-left: 4px solid var(--g-main_color);
+  transition: box-shadow 0.3s;
+}
+.store-info-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.06);
 }
 
 .store-logo {
@@ -554,74 +571,6 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin: 20px 0;
-}
-
-.stat-card {
-  background: var(--g-bg);
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid transparent;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.stat-card.stat-highlight {
-  border-color: #1890ff;
-}
-
-.stat-card.stat-warning {
-  border-color: #fa8c16;
-}
-
-.stat-card.stat-profit {
-  border-color: #52c41a;
-}
-
-.stat-profit .stat-value {
-  color: #52c41a;
-}
-
-.stat-card.stat-daily {
-  background: #e6f7ff;
-  border-color: #91d5ff;
-}
-
-.stat-card.stat-daily .stat-value {
-  color: #1890ff;
-}
-
-.stat-card.stat-revenue {
-  background: #f0e6ff;
-  border-color: #b37feb;
-}
-
-.stat-card.stat-revenue .stat-value {
-  color: #722ed1;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--g-main_color);
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--g-text-light);
-  margin-top: 4px;
-}
-
 .charts-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -631,9 +580,13 @@ onBeforeUnmount(() => {
 
 .chart-box {
   background: var(--g-white);
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.3s;
+}
+.chart-box:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 12px rgba(102,126,234,0.08);
 }
 
 .chart-box h4 {
@@ -839,22 +792,6 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 480px) {
-  .stats-grid {
-    gap: 8px;
-  }
-
-  .stat-card {
-    padding: 10px 8px;
-  }
-
-  .stat-value {
-    font-size: 18px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-  }
-
   .charts-row {
     gap: 10px;
   }

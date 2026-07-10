@@ -2,10 +2,11 @@
   <div>
     <h3>Super Admin Dashboard</h3>
 
-    <div class="stats-row g-flex" style="gap:12px;margin-bottom:20px">
-      <div class="stat-card" v-for="s in stats" :key="s.label">
-        <div class="stat-value">{{ s.value }}</div>
-        <div class="stat-label">{{ s.label }}</div>
+    <div class="dash-metrics dash-metrics-4" style="margin-bottom:24px">
+      <div v-for="(s, i) in stats" :key="s.label" class="glow-card" :style="{ '--card-accent': ['#667eea','#10b981','#f59e0b','#ec4899'][i], '--card-glow': ['rgba(102,126,234,0.15)','rgba(16,185,129,0.15)','rgba(245,158,11,0.15)','rgba(236,72,153,0.15)'][i] }">
+        <div class="gc-icon" :style="{ color: ['#667eea','#10b981','#f59e0b','#ec4899'][i] }"><i :class="['iconfont icon-yonghu','iconfont icon-dianpu','iconfont icon-shangpin','iconfont icon-jiaoyi'][i]"></i></div>
+        <div class="gc-value">{{ s.value }}</div>
+        <div class="gc-label">{{ s.label }}</div>
       </div>
     </div>
 
@@ -75,10 +76,10 @@
       </el-tab-pane>
 
       <el-tab-pane label="Product Images" name="images">
-        <div class="g-flex" style="gap:12px;margin-bottom:16px">
-          <div class="stat-card" style="flex:1"><div class="stat-value">{{ prodWithImages }}</div><div class="stat-label">With Images</div></div>
-          <div class="stat-card" style="flex:1"><div class="stat-value">{{ prodWithoutImages }}</div><div class="stat-label">No Images</div></div>
-          <div class="stat-card" style="flex:1"><div class="stat-value">{{ totalProducts }}</div><div class="stat-label">Total Products</div></div>
+        <div class="dash-metrics" style="margin-bottom:16px">
+          <div class="glow-card" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)"><div class="gc-icon" style="color:#10b981"><i class="iconfont icon-tupian"></i></div><div class="gc-value">{{ prodWithImages }}</div><div class="gc-label">With Images</div></div>
+          <div class="glow-card" style="--card-accent:#ef4444;--card-glow:rgba(239,68,68,0.15)"><div class="gc-icon" style="color:#ef4444"><i class="iconfont icon-tupian"></i></div><div class="gc-value">{{ prodWithoutImages }}</div><div class="gc-label">No Images</div></div>
+          <div class="glow-card" style="--card-accent:#667eea;--card-glow:rgba(102,126,234,0.15)"><div class="gc-icon" style="color:#667eea"><i class="iconfont icon-shangpin"></i></div><div class="gc-value">{{ totalProducts }}</div><div class="gc-label">Total Products</div></div>
         </div>
         <el-button @click="refreshProdStats">Refresh Stats</el-button>
         <el-button type="success" @click="runFixImages">Fix Missing Images</el-button>
@@ -214,8 +215,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-card { background: var(--g-bg); border-radius: 8px; padding: 20px; text-align: center; flex: 1; }
-.stat-value { font-size: 32px; font-weight: 700; }
-.stat-label { font-size: 13px; color: #999; margin-top: 4px; }
 .el-form-item { margin-bottom: 16px; }
 </style>

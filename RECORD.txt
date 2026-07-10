@@ -129,11 +129,13 @@ Cloudflare:
 
 19. Buyer Dashboard Metrics (MyAccount.vue) - Redesigned MyAccount.vue with 4 metric cards at top: Total Orders (from /home/userOrder/getList), Active Orders, Wishlist Count (from /home/userCollect/getProductList), Wallet Balance (from /home/userWallet/getList). Added recent orders table below. Profile editing form retained below metrics. Responsive grid: 4 columns desktop, 2 tablet, 1 mobile.
 
+20. Advanced Dashboard Redesign with Glowing Cards & Borders - Upgraded all 4 dashboards (buyer, seller, admin, superadmin) with glow-card visual system. Added reusable .glow-card class in global.css with: gradient left border accent (4px), radial-gradient mouse-follow glow effect, hover lift (translateY -4px) with colored box-shadow glow, transition on all properties. Added .dash-metrics grid layout utility (shared across all dashboards). Upgraded MyAccount.vue (buyer 4-card metrics), MyStore.vue (seller 8-card metrics + chart boxes + store info cards with border accent + hover glow), AdminDashboard.vue (6-card metrics + removed redundant CSS), SuperAdminDashboard.vue (4-card stats + image stats with glow cards, removed old basic CSS).
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): via Netlify (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Preview): https://9ca83c85.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://33612438.theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Admin): admin.theoutnet-wholesale.pages.dev (pending deployment)

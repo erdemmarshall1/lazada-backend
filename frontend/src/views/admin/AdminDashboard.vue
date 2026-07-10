@@ -13,11 +13,11 @@
     </div>
 
     <!-- Metric Cards -->
-    <div class="metric-grid">
-      <div v-for="card in metricCards" :key="card.label" class="metric-card" :style="{ '--accent': card.color }" @click="$router.push(card.link)">
-        <div class="mc-icon"><i :class="card.icon"></i></div>
-        <div class="mc-value">{{ card.value }}</div>
-        <div class="mc-label">{{ card.label }}</div>
+    <div class="dash-metrics dash-metrics-6">
+      <div v-for="card in metricCards" :key="card.label" class="glow-card" :style="{ '--card-accent': card.color, '--card-glow': card.color + '33' }" @click="$router.push(card.link)">
+        <div class="gc-icon" :style="{ color: card.color }"><i :class="card.icon"></i></div>
+        <div class="gc-value">{{ card.value }}</div>
+        <div class="gc-label">{{ card.label }}</div>
       </div>
     </div>
 
@@ -251,16 +251,6 @@ onBeforeUnmount(() => {
 .welcome-actions { display: flex; gap: 10px; }
 .welcome-actions .el-button { --el-button-bg-color: rgba(255,255,255,0.2); --el-button-border-color: rgba(255,255,255,0.4); --el-button-text-color: #fff; --el-button-hover-bg-color: rgba(255,255,255,0.35); --el-button-hover-border-color: #fff; }
 
-.metric-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
-.metric-card {
-  background: var(--g-white); border-radius: 12px; padding: 18px 20px;
-  border-left: 4px solid var(--accent); cursor: pointer;
-  transition: all 0.25s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-.mc-icon { font-size: 24px; color: var(--accent); margin-bottom: 6px; }
-.mc-value { font-size: 24px; font-weight: 800; color: var(--g-text); line-height: 1.2; }
-.mc-label { font-size: 13px; color: var(--g-text-light); margin-top: 2px; }
 
 .quick-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
 .quick-card {
@@ -286,16 +276,12 @@ onBeforeUnmount(() => {
 .page-header .subtitle { font-size: 12px; color: var(--g-text-light); margin-left: auto; }
 
 @media (max-width: 1024px) {
-  .metric-grid { grid-template-columns: repeat(3, 1fr); }
   .quick-grid { grid-template-columns: repeat(3, 1fr); }
   .chart-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
-  .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .quick-grid { grid-template-columns: repeat(2, 1fr); }
   .welcome-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .metric-card { padding: 14px; }
-  .mc-value { font-size: 20px; }
   .chart-box { height: 200px; }
 }
 </style>

@@ -1,14 +1,10 @@
 <template>
   <div>
-    <div class="buyer-metrics">
-      <div class="metric-card" v-for="m in metrics" :key="m.label" :style="{ borderTop: '3px solid ' + m.color }">
-        <div class="metric-icon" :style="{ background: m.bg }">
-          <i :class="m.icon"></i>
-        </div>
-        <div class="metric-info">
-          <div class="metric-value">{{ m.value }}</div>
-          <div class="metric-label">{{ m.label }}</div>
-        </div>
+    <div class="dash-metrics dash-metrics-4">
+      <div v-for="m in metrics" :key="m.label" class="glow-card" :style="{ '--card-accent': m.color, '--card-glow': m.color + '33' }">
+        <div class="gc-icon" :style="{ color: m.color }"><i :class="m.icon"></i></div>
+        <div class="gc-value">{{ m.value }}</div>
+        <div class="gc-label">{{ m.label }}</div>
       </div>
     </div>
 
@@ -166,53 +162,4 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.buyer-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-.metric-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.metric-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.metric-icon i {
-  font-size: 22px;
-  color: #333;
-}
-.metric-info {
-  flex: 1;
-  min-width: 0;
-}
-.metric-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a2e;
-  line-height: 1.2;
-}
-.metric-label {
-  font-size: 13px;
-  color: #999;
-  margin-top: 2px;
-}
-@media (max-width: 900px) {
-  .buyer-metrics { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .buyer-metrics { grid-template-columns: 1fr; }
-  .metric-card { padding: 14px; }
-}
 </style>
