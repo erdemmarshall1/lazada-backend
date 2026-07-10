@@ -131,11 +131,13 @@ Cloudflare:
 
 20. Advanced Dashboard Redesign with Glowing Cards & Borders - Upgraded all 4 dashboards (buyer, seller, admin, superadmin) with glow-card visual system. Added reusable .glow-card class in global.css with: gradient left border accent (4px), radial-gradient mouse-follow glow effect, hover lift (translateY -4px) with colored box-shadow glow, transition on all properties. Added .dash-metrics grid layout utility (shared across all dashboards). Upgraded MyAccount.vue (buyer 4-card metrics), MyStore.vue (seller 8-card metrics + chart boxes + store info cards with border accent + hover glow), AdminDashboard.vue (6-card metrics + removed redundant CSS), SuperAdminDashboard.vue (4-card stats + image stats with glow cards, removed old basic CSS).
 
+21. Sidebar Menu Glow Upgrade (All 4 Components) - Upgraded all sidebar/menu components with glow hover/border accent system matching the dashboard glow-card design language. MyCenter.vue: glow-user-card with gradient top border + subtle shadow, glow-menu-section with hover glow border/shadow, glow-menu-item with radial-gradient overlay on hover + left border color transition, glow-menu-item--active with inset glow shadow. AdminLayout.vue: admin-glow-item with purple-tinted radial overlay on hover, admin-glow-item--active with box-shadow glow, admin-footer-glow with gradient top border. MainLayoutHeader.vue: mobile drawer items (ton-drawer-item) get left border accent on hover + radial gradient overlay + padding shift, search input focus ring glow. MainLayoutNav.vue: nav items (ton-nav-bar-item) get radial overlay on hover, active underline enhanced with box-shadow glow.
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): via Netlify (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Preview): https://33612438.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://f23b4a56.theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Admin): admin.theoutnet-wholesale.pages.dev (pending deployment)
