@@ -146,6 +146,12 @@ const routes = [
       { path: 'superadmin-dashboard', name: 'admin-superadmin-dashboard', component: () => import('@/views/admin/SuperAdminDashboard.vue'), meta: { title: 'Super Admin', requiresAuth: true } },
     ]
   },
+  {
+    path: '/admin/login',
+    name: 'admin-login',
+    component: () => import('@/views/auth/AdminLogin.vue'),
+    meta: { title: 'Admin Login' },
+  },
   { path: '/refresh', name: 'refresh', component: () => import('@/views/other/Refresh.vue') },
   { path: '/:pathMatch(.*)*', name: 'notfound', component: () => import('@/views/other/NotFound.vue'), meta: { title: '404' } },
 ]
@@ -181,9 +187,17 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (window.location.hostname.startsWith('admin') && (to.path === '/' || to.path === '/main')) {
-    next('/admin/dashboard')
-    return
+  if (window.location.hostname.startsWith('admin') && to.path !== '/admin/login') {
+    if (!store.isLogin) {
+      if (to.path === '/' || to.path === '/main' || to.path === '/login') {
+        next('/admin/login')
+        return
+      }
+      if (to.matched.some(r => r.meta.requiresAuth)) {
+        next('/admin/login')
+        return
+      }
+    }
   }
 
   const redirectPath = adminPathMap[to.path]
@@ -197,6 +211,10 @@ router.beforeEach((to, from, next) => {
 
   if (to.name === 'login' && store.isLogin) {
     next('/main')
+    return
+  }
+  if (to.name === 'admin-login' && store.isLogin) {
+    next('/admin/dashboard')
     return
   }
 

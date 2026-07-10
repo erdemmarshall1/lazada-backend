@@ -2,10 +2,11 @@ name: Deploy
 
 on:
   push:
-    branches: [master]
+    branches: [master, admin]
 
 jobs:
   deploy-backend:
+    if: github.ref_name == 'master'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,12 +42,13 @@ jobs:
           VITE_SOCKET_URL: https://the-outnet-backend-production-3b57.up.railway.app
 
       - name: Deploy to Netlify
+        if: github.ref_name == 'master'
         run: npx netlify-cli deploy --prod --dir=dist
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist --project-name=theoutnet-wholesale --branch=master
+        run: npx wrangler pages deploy dist --project-name=theoutnet-wholesale --branch=${{ github.ref_name }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
