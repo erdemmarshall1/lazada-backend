@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-homepage-sections">
+  <div class="admin-page admin-homepage-sections">
     <div class="admin-cms-header">
       <h2>Homepage Sections</h2>
       <el-button type="primary" @click="showForm(null)">+ Add Section</el-button>

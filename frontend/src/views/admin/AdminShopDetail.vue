@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-shop-detail">
+  <div class="admin-page admin-shop-detail">
     <div class="detail-header">
       <el-button text @click="$router.push('/admin-sellers')">&larr; Back to Sellers</el-button>
       <h2>Seller Application Dashboard</h2>

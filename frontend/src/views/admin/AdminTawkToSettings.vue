@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-tawkto-settings">
+  <div class="admin-page admin-tawkto-settings">
     <h2>Tawk.to Chat Settings</h2>
     <p class="desc">Configure the Tawk.to live chat widget on your site.</p>
 

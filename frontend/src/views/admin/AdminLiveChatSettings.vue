@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-live-chat-settings">
+  <div class="admin-page admin-live-chat-settings">
     <h2>Live Chat Settings</h2>
     <p class="desc">Configure the live chat widget appearance and assign support agents.</p>
 

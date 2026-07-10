@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-users">
+  <div class="admin-page admin-users">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-yonghu"></i>

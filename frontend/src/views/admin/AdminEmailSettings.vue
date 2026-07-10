@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-email-settings">
+  <div class="admin-page admin-email-settings">
     <h2>Email Settings</h2>
     <p class="desc">Configure SMTP credentials and toggle which customer email notifications are sent.</p>
 

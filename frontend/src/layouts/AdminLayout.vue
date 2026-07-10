@@ -218,10 +218,17 @@ const menuGroups = computed(() => [
     ]
   },
 ])
+
+onMounted(() => {
+  document.documentElement.classList.add('admin-active')
+})
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove('admin-active')
+})
 </script>
 
 <style scoped>
-.admin-layout { display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+.admin-layout { display: flex; height: 100vh; overflow: hidden; background: var(--dash-dark-bg); }
 .sidebar-overlay { display: none; }
 .admin-sidebar { width: 260px; min-width: 260px; background: #1a1a2e; color: #a0aec0; display: flex; flex-direction: column; transition: width 0.3s ease, min-width 0.3s ease; z-index: 100; }
 .admin-sidebar.collapsed { width: 64px; min-width: 64px; }
@@ -266,20 +273,21 @@ const menuGroups = computed(() => [
 .logout-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; }
 .logout-btn:hover { color: #e74c3c; background: rgba(255,255,255,0.06); }
 .admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.admin-topbar { display: flex; align-items: center; justify-content: space-between; height: 60px; background: #fff; padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); z-index: 10; flex-shrink: 0; }
+.admin-topbar { display: flex; align-items: center; justify-content: space-between; height: 60px; background: var(--dash-dark-card); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); z-index: 10; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .topbar-left { display: flex; align-items: center; gap: 16px; }
-.hamburger-btn { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: #555; padding: 4px; }
-.breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #999; }
-.breadcrumb-sep { color: #ddd; margin: 0 2px; }
-.breadcrumb-item.active { color: #333; font-weight: 600; }
+.hamburger-btn { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: rgba(255,255,255,0.5); padding: 4px; }
+.hamburger-btn:hover { color: #fff; }
+.breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 13px; color: rgba(255,255,255,0.35); }
+.breadcrumb-sep { color: rgba(255,255,255,0.15); margin: 0 2px; }
+.breadcrumb-item.active { color: rgba(255,255,255,0.7); font-weight: 600; }
 .topbar-right { display: flex; align-items: center; gap: 16px; }
-.topbar-search { display: flex; align-items: center; gap: 8px; background: #f5f5f9; border-radius: 8px; padding: 6px 12px; width: 200px; transition: width 0.2s; }
-.topbar-search:focus-within { width: 260px; background: #fff; box-shadow: 0 0 0 2px rgba(102,126,234,0.2); }
-.topbar-search i { color: #999; font-size: 14px; }
-.topbar-search input { border: none; background: none; outline: none; font-size: 13px; color: #333; width: 100%; }
-.topbar-search input::placeholder { color: #bbb; }
-.topbar-notif { position: relative; cursor: pointer; font-size: 20px; color: #555; padding: 4px; }
-.topbar-notif:hover { color: #333; }
+.topbar-search { display: flex; align-items: center; gap: 8px; background: var(--dash-dark-card-alt); border-radius: 8px; padding: 6px 12px; width: 200px; transition: width 0.2s; border: 1px solid rgba(255,255,255,0.06); }
+.topbar-search:focus-within { width: 260px; border-color: #667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.15); }
+.topbar-search i { color: rgba(255,255,255,0.3); font-size: 14px; }
+.topbar-search input { border: none; background: none; outline: none; font-size: 13px; color: rgba(255,255,255,0.7); width: 100%; }
+.topbar-search input::placeholder { color: rgba(255,255,255,0.25); }
+.topbar-notif { position: relative; cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.5); padding: 4px; }
+.topbar-notif:hover { color: #fff; }
 .notif-badge { position: absolute; top: -2px; right: -4px; background: #e74c3c; color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .topbar-user { cursor: pointer; }
 .user-avatar-small { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }

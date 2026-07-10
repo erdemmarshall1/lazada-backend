@@ -1,11 +1,9 @@
 <template>
-  <div class="admin-login-wrap">
-    <div class="admin-login-box">
-      <div class="admin-login-header">
-        <div class="admin-logo">A</div>
-        <h2>Admin Login</h2>
-        <p class="admin-login-sub">Administrator Portal</p>
-      </div>
+  <div class="admin-login-page">
+    <div class="admin-login-card">
+      <div class="admin-login-logo">A</div>
+      <h2>Admin Login</h2>
+      <p>Administrator Portal</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
         <el-form-item label="Username / Email" prop="username">
           <el-input v-model="form.username" placeholder="Enter username or email" size="large" />
@@ -17,15 +15,13 @@
           <el-input v-model="form.twoFactorCode" placeholder="Enter 6-digit code" size="large" maxlength="6" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleLogin">
+          <el-button type="primary" size="large" :loading="loading" @click="handleLogin">
             {{ twoFactorRequired ? 'Verify' : 'Login' }}
           </el-button>
         </el-form-item>
       </el-form>
       <div class="admin-login-footer">
         <span class="link" @click="$router.push('/forgetpwd')">Forgot password?</span>
-      </div>
-      <div class="admin-login-back">
         <span class="link" @click="$router.push('/main')">&larr; Back to main site</span>
       </div>
     </div>
@@ -137,69 +133,14 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.admin-login-wrap {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  padding: 40px 16px;
-}
-.admin-login-box {
-  width: 420px;
-  max-width: 100%;
-  background: #fff;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.admin-login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-.admin-logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 16px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 800;
-  font-size: 24px;
-}
-.admin-login-header h2 {
-  font-size: 22px;
-  color: #1a1a2e;
-  margin: 0 0 4px;
-}
-.admin-login-sub {
-  font-size: 13px;
-  color: #999;
-  margin: 0;
-}
-.admin-login-footer {
-  text-align: center;
-  margin-top: 12px;
-}
-.admin-login-back {
-  text-align: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-}
 .link {
-  color: #667eea;
+  color: rgba(255,255,255,0.4);
   cursor: pointer;
   font-size: 13px;
+  display: block;
+  margin-top: 12px;
 }
 .link:hover {
-  text-decoration: underline;
-}
-@media (max-width: 768px) {
-  .admin-login-wrap { padding: 16px; }
-  .admin-login-box { padding: 24px 20px; }
+  color: #667eea;
 }
 </style>

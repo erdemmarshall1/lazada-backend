@@ -1,4 +1,5 @@
 <template>
+  <div class="admin-page">
   <div class="admin-invitation-codes">
     <div class="page-card">
       <div class="page-header">
@@ -39,6 +40,7 @@
     </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>

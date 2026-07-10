@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-cms">
+  <div class="admin-page admin-cms">
     <div class="admin-cms-header">
       <h2>Navigation Menus</h2>
       <el-button type="primary" @click="openDialog()">New Menu</el-button>

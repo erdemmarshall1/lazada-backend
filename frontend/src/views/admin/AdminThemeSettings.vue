@@ -1,5 +1,5 @@
 <template>
-  <div class="theme-settings">
+  <div class="admin-page theme-settings">
     <h3 class="page-title">Theme Settings</h3>
 
     <el-form label-position="top" class="theme-form">

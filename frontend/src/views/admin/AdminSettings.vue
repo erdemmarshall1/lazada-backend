@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-settings">
+  <div class="admin-page admin-settings">
     <h2>Settings</h2>
     <el-tabs v-model="activeTab">
       <!-- General Settings -->

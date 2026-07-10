@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-user-privacy">
+  <div class="admin-page admin-user-privacy">
     <div class="g-flex g-flex-align-center g-gap12" style="margin-bottom:20px">
       <el-button size="small" @click="$router.push('/admin-users')">Back to Users</el-button>
       <h3 style="margin:0">User Privacy & Security</h3>

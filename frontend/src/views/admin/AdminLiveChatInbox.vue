@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-live-chat-inbox">
+  <div class="admin-page admin-live-chat-inbox">
     <h2>Live Chat Inbox</h2>
     <p class="desc">Reply to live chat messages from users. Real-time updates via WebSocket.</p>
 

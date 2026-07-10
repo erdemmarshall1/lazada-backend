@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-reviews">
+  <div class="admin-page admin-reviews">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-xingxing"></i>

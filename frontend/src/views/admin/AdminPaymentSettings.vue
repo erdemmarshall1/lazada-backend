@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-payment-settings">
+  <div class="admin-page admin-payment-settings">
     <h2>Payment Settings</h2>
     <el-button type="primary" style="margin-bottom:16px" @click="openAddDialog">+ Add Payment Method</el-button>
     <div class="g-responsive-table">

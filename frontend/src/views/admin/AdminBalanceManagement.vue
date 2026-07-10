@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-balance">
+  <div class="admin-page admin-balance">
     <h2>Balance Management</h2>
 
     <el-card class="search-card" shadow="never">

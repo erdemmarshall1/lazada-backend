@@ -1,5 +1,5 @@
 <template>
-  <div class="user-detail" v-loading="loading">
+  <div class="admin-page user-detail" v-loading="loading">
     <h3>User Detail</h3>
     <div v-if="user" class="user-card">
       <div class="user-info">

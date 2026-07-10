@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-platform-wallet">
+  <div class="admin-page admin-platform-wallet">
     <h2>Platform Wallet Management</h2>
 
     <div class="stats-grid">

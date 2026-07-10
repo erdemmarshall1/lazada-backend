@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-transactions">
+  <div class="admin-page admin-transactions">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-jiaoyi"></i>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="admin-page">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-tupian"></i>

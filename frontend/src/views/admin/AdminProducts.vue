@@ -1,4 +1,5 @@
 <template>
+  <div class="admin-page">
   <div class="admin-products">
     <div class="page-card">
       <div class="page-header">
@@ -114,6 +115,7 @@
     </el-dialog>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>

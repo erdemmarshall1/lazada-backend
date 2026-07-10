@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-sellers">
+  <div class="admin-page admin-sellers">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-dianpu"></i>

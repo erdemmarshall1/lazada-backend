@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="admin-page">
     <h3>Inquiries & Submissions</h3>
     <div class="filters">
       <el-select v-model="filterStatus" placeholder="Status" clearable style="width:120px" @change="fetchList">

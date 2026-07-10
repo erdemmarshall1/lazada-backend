@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-sessions">
+  <div class="admin-page admin-sessions">
     <h2>Sessions & Audit Logs</h2>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Active Sessions" name="sessions">

@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-roles">
+  <div class="admin-page admin-roles">
     <div class="page-card">
       <div class="page-header">
         <i class="iconfont icon-anquan"></i>

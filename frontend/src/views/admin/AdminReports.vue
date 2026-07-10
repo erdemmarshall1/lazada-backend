@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-reports">
+  <div class="admin-page admin-reports">
     <h2>Reports</h2>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Overview" name="overview">

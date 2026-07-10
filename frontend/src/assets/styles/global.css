@@ -487,3 +487,374 @@ input, button, textarea { outline: none; border: none; font-family: inherit; }
   .dash-grid-3 { grid-template-columns: 1fr; }
   .dash-welcome { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+
+/* ===== ADMIN SAAS DESIGN SYSTEM ===== */
+
+/* Base admin page wrapper — add to all admin pages */
+.admin-page {
+  padding: 24px;
+}
+@media (max-width: 768px) {
+  .admin-page { padding: 16px; }
+}
+
+/* Dark theme for page-card and page-header (used across all admin pages) */
+.page-card {
+  background: var(--dash-dark-card) !important;
+  border-radius: var(--dash-card-radius) !important;
+  padding: 20px 24px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  margin-bottom: 24px;
+}
+.page-header h2 {
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin: 0;
+}
+.page-header i {
+  color: #667eea !important;
+  font-size: 20px;
+}
+.page-header .subtitle {
+  color: rgba(255,255,255,0.4) !important;
+  font-size: 12px !important;
+  margin-left: auto;
+}
+
+/* Filter and action bars */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-bar .el-input,
+.filter-bar .el-select {
+  width: 200px;
+}
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* ===== ADMIN ROOT OVERRIDES (set class on <html> via AdminLayout) ===== */
+.admin-active {
+  /* Base Element Plus CSS variables */
+  --el-bg-color: var(--dash-dark-card);
+  --el-bg-color-overlay: var(--dash-dark-card-alt);
+  --el-text-color-primary: rgba(255,255,255,0.85);
+  --el-text-color-regular: rgba(255,255,255,0.6);
+  --el-text-color-secondary: rgba(255,255,255,0.45);
+  --el-text-color-placeholder: rgba(255,255,255,0.3);
+  --el-border-color: rgba(255,255,255,0.06);
+  --el-border-color-light: rgba(255,255,255,0.08);
+  --el-border-color-lighter: rgba(255,255,255,0.04);
+  --el-border-color-extra-light: rgba(255,255,255,0.02);
+  --el-fill-color: var(--dash-dark-card-alt);
+  --el-fill-color-light: rgba(255,255,255,0.04);
+  --el-fill-color-lighter: rgba(255,255,255,0.02);
+  --el-fill-color-blank: var(--dash-dark-card);
+  --el-fill-color-extra-light: rgba(255,255,255,0.02);
+  --el-mask-color: rgba(0,0,0,0.6);
+}
+.admin-active body {
+  background: var(--dash-dark-bg) !important;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Dialog */
+.admin-active .el-dialog {
+  --el-dialog-bg-color: var(--dash-dark-card-alt);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--dash-card-radius);
+}
+.admin-active .el-dialog__header { padding: 20px 24px 0; }
+.admin-active .el-dialog__title { color: #fff; }
+.admin-active .el-dialog__headerbtn .el-dialog__close { color: rgba(255,255,255,0.4); }
+.admin-active .el-dialog__headerbtn:hover .el-dialog__close { color: rgba(255,255,255,0.7); }
+.admin-active .el-dialog__body { padding: 20px 24px; color: rgba(255,255,255,0.6); }
+.admin-active .el-dialog__footer { padding: 16px 24px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+/* Input */
+.admin-active .el-input__wrapper {
+  background-color: var(--dash-dark-card-alt);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset;
+}
+.admin-active .el-input__wrapper:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset; }
+.admin-active .el-input__wrapper.is-focus { box-shadow: 0 0 0 1px #667eea inset; }
+.admin-active .el-input__inner { color: rgba(255,255,255,0.85); }
+.admin-active .el-input__inner::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Textarea */
+.admin-active .el-textarea__inner {
+  background-color: var(--dash-dark-card-alt);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset;
+  color: rgba(255,255,255,0.85);
+}
+.admin-active .el-textarea__inner:focus { box-shadow: 0 0 0 1px #667eea inset; }
+.admin-active .el-textarea__inner::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Input number */
+.admin-active .el-input-number__decrease,
+.admin-active .el-input-number__increase {
+  background: var(--dash-dark-card-alt);
+  color: rgba(255,255,255,0.4);
+}
+.admin-active .el-input-number__decrease:hover,
+.admin-active .el-input-number__increase:hover { color: #667eea; }
+
+/* Select */
+.admin-active .el-select .el-input__wrapper { background-color: var(--dash-dark-card-alt); }
+.admin-active .el-select-dropdown {
+  background: var(--dash-dark-card-alt);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.admin-active .el-select-dropdown__item { color: rgba(255,255,255,0.6); }
+.admin-active .el-select-dropdown__item.hover { background: rgba(255,255,255,0.04); }
+.admin-active .el-select-dropdown__item.selected { color: #667eea; background: rgba(102,126,234,0.08); }
+
+/* Pagination */
+.admin-active .el-pagination button { background: transparent; color: rgba(255,255,255,0.6); }
+.admin-active .el-pagination button:disabled { color: rgba(255,255,255,0.2); }
+.admin-active .el-pager li { background: transparent; color: rgba(255,255,255,0.5); }
+.admin-active .el-pager li.active { color: #667eea; font-weight: 700; }
+.admin-active .el-pager li:hover { color: #667eea; }
+
+/* Tags */
+.admin-active .el-tag { --el-tag-text-color: rgba(255,255,255,0.85); }
+.admin-active .el-tag--success { --el-tag-bg-color: rgba(16,185,129,0.15); --el-tag-border-color: rgba(16,185,129,0.3); }
+.admin-active .el-tag--warning { --el-tag-bg-color: rgba(245,158,11,0.15); --el-tag-border-color: rgba(245,158,11,0.3); }
+.admin-active .el-tag--danger { --el-tag-bg-color: rgba(239,68,68,0.15); --el-tag-border-color: rgba(239,68,68,0.3); }
+.admin-active .el-tag--info { --el-tag-bg-color: rgba(255,255,255,0.06); --el-tag-border-color: rgba(255,255,255,0.12); }
+.admin-active .el-tag--primary { --el-tag-bg-color: rgba(102,126,234,0.15); --el-tag-border-color: rgba(102,126,234,0.3); }
+
+/* Switch */
+.admin-active .el-switch { --el-switch-off-color: rgba(255,255,255,0.15); }
+
+/* Radio */
+.admin-active .el-radio { --el-radio-text-color: rgba(255,255,255,0.6); }
+.admin-active .el-radio__label { color: rgba(255,255,255,0.6); }
+.admin-active .el-radio.is-checked .el-radio__label { color: #667eea; }
+
+/* Checkbox */
+.admin-active .el-checkbox { --el-checkbox-text-color: rgba(255,255,255,0.6); }
+.admin-active .el-checkbox__label { color: rgba(255,255,255,0.6); }
+.admin-active .el-checkbox.is-checked .el-checkbox__label { color: #667eea; }
+
+/* Date picker */
+.admin-active .el-date-editor .el-input__wrapper { background-color: var(--dash-dark-card-alt); }
+.admin-active .el-picker-panel { background: var(--dash-dark-card-alt); border: 1px solid rgba(255,255,255,0.08); }
+.admin-active .el-date-table th { color: rgba(255,255,255,0.4); }
+.admin-active .el-date-table td .el-date-table-cell__text { color: rgba(255,255,255,0.6); }
+.admin-active .el-date-table td.today .el-date-table-cell__text { color: #667eea; font-weight: 700; }
+.admin-active .el-date-table td.current:not(.disabled) .el-date-table-cell__text { background: #667eea; color: #fff; border-radius: 50%; }
+
+/* Upload */
+.admin-active .el-upload-dragger { background: var(--dash-dark-card-alt); border-color: rgba(255,255,255,0.08); }
+.admin-active .el-upload-dragger:hover { border-color: #667eea; }
+.admin-active .el-upload__tip { color: rgba(255,255,255,0.35); }
+
+/* Rate */
+.admin-active .el-rate { --el-rate-icon-color: rgba(255,255,255,0.15); --el-rate-fill-color: #f59e0b; }
+
+/* Color picker */
+.admin-active .el-color-picker__trigger { background: var(--dash-dark-card-alt); border-color: rgba(255,255,255,0.08); }
+.admin-active .el-color-dropdown { background: var(--dash-dark-card-alt); border: 1px solid rgba(255,255,255,0.08); }
+
+/* Descriptions */
+.admin-active .el-descriptions { --el-descriptions-table-border-color: rgba(255,255,255,0.06); }
+.admin-active .el-descriptions__title { color: rgba(255,255,255,0.85); }
+.admin-active .el-descriptions__label { color: rgba(255,255,255,0.4); }
+.admin-active .el-descriptions__content { color: rgba(255,255,255,0.7); }
+.admin-active .el-descriptions__body .el-descriptions__table .el-descriptions__cell { background: transparent; }
+
+/* Divider */
+.admin-active .el-divider { --el-divider-border-color: rgba(255,255,255,0.06); }
+
+/* Card */
+.admin-active .el-card { --el-card-bg-color: var(--dash-dark-card); border: 1px solid rgba(255,255,255,0.04); }
+.admin-active .el-card__header { border-bottom: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+
+/* Empty */
+.admin-active .el-empty__description p { color: rgba(255,255,255,0.3); }
+
+/* Tabs */
+.admin-active .el-tabs__item { color: rgba(255,255,255,0.45); }
+.admin-active .el-tabs__item.is-active { color: #667eea; }
+.admin-active .el-tabs__active-bar { background: #667eea; }
+.admin-active .el-tabs__nav-wrap::after { background: rgba(255,255,255,0.06); }
+
+/* Form */
+.admin-active .el-form-item__label { color: rgba(255,255,255,0.5); }
+.admin-active .el-form-item.is-required .el-form-item__label::before { color: #ef4444; }
+
+/* Upload list */
+.admin-active .el-upload-list__item { color: rgba(255,255,255,0.6); }
+.admin-active .el-upload-list__item-name { color: rgba(255,255,255,0.6); }
+
+/* Message box */
+.admin-active .el-message-box { --el-messagebox-bg-color: var(--dash-dark-card-alt); }
+.admin-active .el-message-box__title { color: #fff; }
+.admin-active .el-message-box__message { color: rgba(255,255,255,0.6); }
+.admin-active .el-message-box__headerbtn .el-message-box__close { color: rgba(255,255,255,0.4); }
+
+/* Dropdown */
+.admin-active .el-dropdown-menu { background: var(--dash-dark-card-alt); border: 1px solid rgba(255,255,255,0.08); }
+.admin-active .el-dropdown-menu__item { color: rgba(255,255,255,0.6); }
+.admin-active .el-dropdown-menu__item:hover { background: rgba(255,255,255,0.04); color: #667eea; }
+
+/* Table (comprehensive) */
+.admin-active .el-table {
+  --el-bg-color: transparent;
+  --el-table-tr-bg: transparent;
+  --el-table-border-color: rgba(255,255,255,0.06);
+  --el-text-color-primary: rgba(255,255,255,0.85);
+  --el-text-color-regular: rgba(255,255,255,0.6);
+  --el-table-row-bg: transparent;
+}
+.admin-active .el-table th.el-table__cell {
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.admin-active .el-table td.el-table__cell { background: transparent; }
+.admin-active .el-table__body tr:hover > td { background: rgba(255,255,255,0.03); }
+.admin-active .el-table__empty-text { color: rgba(255,255,255,0.3); }
+.admin-active .el-table__body tr.el-table__row--striped td { background: rgba(255,255,255,0.015); }
+
+/* Loading */
+.admin-active .el-loading-mask { background: rgba(0,0,0,0.5); }
+
+/* Collapse */
+.admin-active .el-collapse { --el-collapse-header-bg-color: transparent; --el-collapse-content-bg-color: transparent; }
+.admin-active .el-collapse-item__header { color: rgba(255,255,255,0.7); }
+.admin-active .el-collapse-item__wrap { border-color: rgba(255,255,255,0.06); }
+.admin-active .el-collapse-item__content { color: rgba(255,255,255,0.6); }
+
+/* Alert */
+.admin-active .el-alert--info { --el-alert-bg-color: rgba(255,255,255,0.04); --el-alert-title-color: rgba(255,255,255,0.6); }
+
+/* Step / Timeline */
+.admin-active .el-timeline-item__timestamp { color: rgba(255,255,255,0.4); }
+
+/* ===== ADMIN LOGIN ===== */
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dash-dark-bg);
+  position: relative;
+  overflow: hidden;
+  padding: 40px 16px;
+}
+.admin-login-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.admin-login-page::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(118,75,162,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.admin-login-card {
+  width: 420px;
+  max-width: 100%;
+  background: var(--dash-dark-card);
+  border-radius: var(--dash-card-radius);
+  padding: 40px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  z-index: 1;
+}
+.admin-login-card h2 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.admin-login-card p {
+  color: rgba(255,255,255,0.4);
+  font-size: 14px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.admin-login-card .el-form-item__label { color: rgba(255,255,255,0.5); }
+.admin-login-card .el-input__wrapper { background: var(--dash-dark-card-alt); }
+.admin-login-card .el-button--primary {
+  width: 100%;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--dash-purple-start), var(--dash-purple-end));
+  border: none;
+  box-shadow: 0 4px 16px rgba(102,126,234,0.3);
+}
+.admin-login-card .el-button--primary:hover {
+  box-shadow: 0 6px 24px rgba(102,126,234,0.45);
+  transform: translateY(-1px);
+}
+
+/* Admin login extras */
+.admin-login-logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, var(--dash-purple-start), var(--dash-purple-end));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 24px;
+  box-shadow: 0 8px 24px rgba(102,126,234,0.3);
+}
+.admin-login-footer {
+  text-align: center;
+  margin-top: 20px;
+}
+.admin-login-footer .link {
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  font-size: 13px;
+  display: block;
+  margin-top: 12px;
+}
+.admin-login-footer .link:hover {
+  color: #667eea;
+}
+
+/* Primary button gradient override for admin */
+.admin-active .el-button--primary {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: transparent;
+  --el-button-text-color: #fff;
+  background: linear-gradient(135deg, var(--dash-purple-start), var(--dash-purple-end)) !important;
+  border: none !important;
+}
+.admin-active .el-button--primary:hover {
+  box-shadow: 0 4px 16px rgba(102,126,234,0.35);
+  opacity: 0.9;
+}
