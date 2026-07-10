@@ -123,10 +123,17 @@ Cloudflare:
 15. MyCenter.vue Mobile Sidebar Enhancement - replaced display: none/block toggle with fixed slide-in drawer (left: -240px to left: 0) + backdrop overlay for mobile (<768px). Body scroll locked while open. Matches AdminLayout and MainLayoutHeader drawer patterns.
 16. Seller ID Strict Assignment + Admin Application Dashboard - backend: POST /migrate-seller-ids (one-time migration), POST /login-as-seller/:userId (temp JWT for admin to access seller portal). Frontend: AdminSellers.vue — removed manual Generate ID button, added Docs badge (x/4), added Login as Seller button; AdminShopDetail.vue — redesigned as application dashboard with summary header, document gallery with hover preview + lightbox dialog, Approve/Reject, Login to Seller Portal opens /mystore in new tab with temp_token. Router guard consumes temp_token query param and sets store token. Request interceptor falls back to seller_temp_token localStorage key.
 
+17. Header Slider Image Fix - Re-ran fix_live_banner_images.js to refresh all 5 slider banners with new Pixabay image URLs (these expire over time). Frontend proxy list already includes pixabay.com. Images load via backend proxy at /home/image/proxy?url=...
+
+18. Admin Login Page + Sub-domain Support - Created AdminLogin.vue (dedicated login page for administrators only — no registration, admin branding with dark gradient background). Added /admin/login route in router. Updated router beforeEach guard: admin subdomain + not logged in → /admin/login (instead of /login). Added admin-login route guard for already-logged-in users (redirects to /admin/dashboard). Created + pushed admin git branch for Cloudflare Pages — auto-deploys to admin.theoutnet-wholesale.pages.dev. Updated deploy.yml to support both master and admin branches; admin branch skips Railway backend + Netlify, only deploys frontend to Cloudflare Pages.
+
+19. Buyer Dashboard Metrics (MyAccount.vue) - Redesigned MyAccount.vue with 4 metric cards at top: Total Orders (from /home/userOrder/getList), Active Orders, Wishlist Count (from /home/userCollect/getProductList), Wallet Balance (from /home/userWallet/getList). Added recent orders table below. Profile editing form retained below metrics. Responsive grid: 4 columns desktop, 2 tablet, 1 mobile.
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): via Netlify (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Preview): https://51b987aa.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://9ca83c85.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Admin): admin.theoutnet-wholesale.pages.dev (pending deployment)
