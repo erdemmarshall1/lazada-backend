@@ -1,5 +1,7 @@
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
+const User = require('../models/User');
+const { createNotification } = require('./notificationController');
 const { success, fail, paginate } = require('../utils/response');
 
 exports.add = async (req, res) => {
@@ -35,6 +37,13 @@ exports.rechargeAdd = async (req, res) => {
       receipt: receipt || '',
       description: paymentMethod ? `Recharge via ${paymentMethod}` : 'Account recharge',
     });
+    const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id').lean();
+    await Promise.all(admins.map(a =>
+      createNotification(a._id, 'payment', 'New Payment Submitted',
+        `$${amount} recharge via ${paymentMethod || 'unknown'} — pending approval`,
+        { transactionId: tx._id }, '/admin/transactions')
+    ));
+
     res.json(success(tx, 'Recharge submitted for admin approval'));
   } catch (error) {
     res.json(fail(error.message));
@@ -187,6 +196,9 @@ exports.adminApproveTransaction = async (req, res) => {
     tx.balanceBefore = wallet.balance - (tx.type === 'recharge' ? tx.amount : -Math.abs(tx.amount));
     tx.balanceAfter = wallet.balance;
     await tx.save();
+    createNotification(tx.userId, 'payment', 'Transaction Approved',
+      `Your ${tx.type} of $${Math.abs(tx.amount)} has been approved`,
+      { transactionId: tx._id }, tx.type === 'recharge' ? '/balance' : '');
     res.json(success(tx, 'Transaction approved'));
   } catch (error) {
     res.json(fail(error.message));
@@ -201,6 +213,9 @@ exports.adminRejectTransaction = async (req, res) => {
     if (tx.status !== 0) return res.json(fail('Transaction already processed'));
     tx.status = 2;
     await tx.save();
+    createNotification(tx.userId, 'payment', 'Transaction Rejected',
+      `Your ${tx.type} of $${Math.abs(tx.amount)} has been rejected`,
+      { transactionId: tx._id }, '');
     res.json(success(tx, 'Transaction rejected'));
   } catch (error) {
     res.json(fail(error.message));

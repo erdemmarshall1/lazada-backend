@@ -176,6 +176,16 @@ const adminPathMap = {
   '/superadmin-dashboard': '/admin/superadmin-dashboard',
 }
 
+const isTokenExpired = (token) => {
+  if (!token) return true
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return false
+  }
+}
+
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
 
@@ -209,11 +219,11 @@ router.beforeEach((to, from, next) => {
   window.scrollTo(0, 0)
   document.title = to.meta.title || 'Shopify Wholesale'
 
-  if (to.name === 'login' && store.isLogin && store.userInfo?.username) {
+  if (to.name === 'login' && store.isLogin && store.userInfo?.username && !isTokenExpired(store.token)) {
     next('/main')
     return
   }
-  if (to.name === 'admin-login' && store.isLogin && store.userInfo?.username) {
+  if (to.name === 'admin-login' && store.isLogin && store.userInfo?.username && !isTokenExpired(store.token)) {
     next('/admin/dashboard')
     return
   }

@@ -52,6 +52,29 @@
         <el-button type="primary" :loading="saving" @click="handleSave">{{ isEdit ? 'Update' : 'Create' }}</el-button>
       </template>
     </el-dialog>
+
+    <el-divider />
+
+    <div class="approval-settings-section">
+      <h3>Payment Approval Settings</h3>
+      <el-form label-position="top" style="max-width:500px">
+        <el-form-item label="Auto-approve payments">
+          <el-switch v-model="approvalSettings.autoApprove" />
+          <span style="margin-left:10px;color:#888;font-size:13px">When enabled, all payments are approved automatically</span>
+        </el-form-item>
+        <el-form-item label="Auto-approve amount threshold (USD)">
+          <el-input-number v-model="approvalSettings.autoApproveAmount" :min="0" :max="999999" style="width:200px" />
+          <span style="margin-left:10px;color:#888;font-size:13px">Payments at or below this amount auto-approve (0 = disabled)</span>
+        </el-form-item>
+        <el-form-item label="Notify admin on new payment">
+          <el-switch v-model="approvalSettings.notifyOnSubmit" />
+          <span style="margin-left:10px;color:#888;font-size:13px">Send alert when a user submits a payment</span>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="savingApproval" @click="saveApprovalSettings">Save Approval Settings</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
   </div>
 </template>
 
@@ -67,6 +90,13 @@ const isEdit = ref(false)
 const saving = ref(false)
 const editId = ref('')
 const formRef = ref(null)
+
+const approvalSettings = reactive({
+  autoApprove: false,
+  autoApproveAmount: 0,
+  notifyOnSubmit: true,
+})
+const savingApproval = ref(false)
 
 const form = reactive({
   method: '',
@@ -157,10 +187,39 @@ const handleDelete = async (id) => {
   }
 }
 
-onMounted(loadList)
+const loadApprovalSettings = async () => {
+  const res = await get('/home/admin/payment-approval-settings')
+  if (res?.code === 0 && res.data) {
+    approvalSettings.autoApprove = !!res.data.autoApprove
+    approvalSettings.autoApproveAmount = Number(res.data.autoApproveAmount) || 0
+    approvalSettings.notifyOnSubmit = res.data.notifyOnSubmit !== undefined ? !!res.data.notifyOnSubmit : true
+  }
+}
+
+const saveApprovalSettings = async () => {
+  savingApproval.value = true
+  const res = await $http.put('/home/admin/payment-approval-settings', {
+    autoApprove: approvalSettings.autoApprove,
+    autoApproveAmount: approvalSettings.autoApproveAmount,
+    notifyOnSubmit: approvalSettings.notifyOnSubmit,
+  })
+  savingApproval.value = false
+  if (res?.code === 0) {
+    ElMessage.success('Approval settings saved')
+  } else {
+    ElMessage.error(res?.msg || 'Failed to save')
+  }
+}
+
+onMounted(() => {
+  loadList()
+  loadApprovalSettings()
+})
 </script>
 
 <style scoped>
 .admin-payment-settings { padding: 20px; }
 .admin-payment-settings h2 { margin-bottom: 16px; }
+.approval-settings-section { margin-top: 20px; }
+.approval-settings-section h3 { margin-bottom: 16px; font-size: 18px; }
 </style>

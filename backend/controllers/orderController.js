@@ -96,6 +96,20 @@ exports.add = async (req, res) => {
     emitToShop(req, shopId, 'newOrder', { order: populated, message: `New order ${order.orderNo}` })
     emitToAll(req, 'newOrder', { order: populated, message: `New order ${order.orderNo}` })
 
+    const { createNotification } = require('./notificationController');
+    const adminUsers = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id').lean();
+    await Promise.all(adminUsers.map(a =>
+      createNotification(a._id, 'order', 'New Order', `Order ${order.orderNo} for $${order.finalAmount}`,
+        { orderId: order._id }, '/admin/transactions')
+    ));
+    if (order.shopId) {
+      const shop = await Shop.findById(order.shopId).select('userId').lean();
+      if (shop) {
+        createNotification(shop.userId, 'order', 'New Order', `New order ${order.orderNo} received`,
+          { orderId: order._id }, '/storeordercontrol');
+      }
+    }
+
     const user = await User.findById(req.user._id);
     if (user?.email) emailService.sendOrderConfirmation(user, order).catch(() => {});
 

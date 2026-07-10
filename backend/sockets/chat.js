@@ -31,8 +31,15 @@ module.exports = (server) => {
           content, type: type || 'text', sessionId,
         });
         const populatedMsg = await Message.findById(msg._id).populate('fromUserId', 'username avatar');
+
+        const { createNotification } = require('../controllers/notificationController');
         if (toUserId) {
           io.to(`user_${toUserId}`).emit('newMessage', populatedMsg);
+          const sender = populatedMsg.fromUserId;
+          if (sender && sender.username) {
+            createNotification(toUserId, 'message', `New message from ${sender.username}`,
+              content?.substring(0, 100), { messageId: msg._id }, '/admin/livechat-inbox');
+          }
         }
         if (shopId) {
           io.to(`shop_${shopId}`).emit('newMessage', populatedMsg);

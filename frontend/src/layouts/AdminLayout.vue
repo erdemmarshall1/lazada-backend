@@ -64,9 +64,8 @@
             <i class="iconfont icon-31sousuo"></i>
             <input v-model="searchQuery" placeholder="Search pages..." @keyup.enter="handleSearch" />
           </div>
-          <div class="topbar-notif" @click="$router.push('/admin/transactions')">
-            <i class="iconfont icon-xiaoxi"></i>
-            <span class="notif-badge" v-if="store.newOrderCount > 0">{{ store.newOrderCount }}</span>
+          <div class="topbar-notif">
+            <NotificationBell />
           </div>
           <el-dropdown trigger="click" class="topbar-lang-btn" @command="handleLangChange">
             <div class="topbar-lang-trigger" :title="currentLangName" aria-label="Language">
@@ -109,6 +108,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import i18n from '@/locales'
+import { connectSocket, joinUser } from '@/socket'
+
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -244,6 +246,10 @@ const menuGroups = computed(() => [
 
 onMounted(() => {
   document.documentElement.classList.add('admin-active')
+  const socket = connectSocket()
+  if (store.isLogin && store.userInfo?._id) {
+    joinUser(store.userInfo._id)
+  }
 })
 onBeforeUnmount(() => {
   document.documentElement.classList.remove('admin-active')

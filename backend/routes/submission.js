@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { auth, adminAuth } = require('../middleware/auth');
 const Submission = require('../models/Submission');
+const User = require('../models/User');
+const { createNotification } = require('../controllers/notificationController');
 const { success, fail, paginate } = require('../utils/response');
 
 // ---- Public: Submit a contact/inquiry form ----
@@ -13,6 +15,13 @@ router.post('/submissions', async (req, res) => {
     }
     const userId = req.user?._id || null;
     const submission = await Submission.create({ userId, name, email, phone, subject, category, message, attachments });
+
+    const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id').lean();
+    await Promise.all(admins.map(a =>
+      createNotification(a._id, 'system', 'New Inquiry', `${name} submitted: ${subject}`,
+        { submissionId: submission._id }, '/admin/submissions')
+    ));
+
     res.json(success({ id: submission._id }, 'Inquiry submitted successfully'));
   } catch (error) {
     res.json(fail(error.message));

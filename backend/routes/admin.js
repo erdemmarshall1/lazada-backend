@@ -786,6 +786,52 @@ router.delete('/payment-settings/:id', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Payment Approval Settings ----
+const Setting = require('../models/Setting');
+
+router.get('/payment-approval-settings', adminAuth, async (req, res) => {
+  try {
+    let setting = await Setting.findOne({ key: 'payment_approval' });
+    if (!setting) {
+      setting = await Setting.create({
+        key: 'payment_approval',
+        value: {
+          autoApprove: false,
+          autoApproveAmount: 0,
+          notifyOnSubmit: true,
+        },
+        type: 'json',
+        label: 'Payment Approval Settings',
+        description: 'Configure payment approval behavior',
+      });
+    }
+    res.json(success(setting.value));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/payment-approval-settings', adminAuth, async (req, res) => {
+  try {
+    const { autoApprove, autoApproveAmount, notifyOnSubmit } = req.body;
+    const setting = await Setting.findOneAndUpdate(
+      { key: 'payment_approval' },
+      {
+        value: {
+          autoApprove: !!autoApprove,
+          autoApproveAmount: Math.max(0, Number(autoApproveAmount) || 0),
+          notifyOnSubmit: notifyOnSubmit !== undefined ? !!notifyOnSubmit : true,
+        },
+        type: 'json',
+      },
+      { new: true, upsert: true }
+    );
+    res.json(success(setting.value, 'Payment approval settings updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Email Settings ----
 const EmailSetting = require('../models/EmailSetting');
 const emailService = require('../services/emailService');

@@ -31,7 +31,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { get, put } from '@/api/request'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { getSocket } from '@/socket'
+import { getSocket, joinUser } from '@/socket'
 
 const router = useRouter()
 const store = useAppStore()
@@ -97,6 +97,9 @@ const timeAgo = (date) => {
 onMounted(() => {
   if (store.isLogin) {
     loadUnreadCount()
+    if (store.userInfo?._id) {
+      joinUser(store.userInfo._id)
+    }
   }
   document.addEventListener('click', handleDocumentClick)
   try {
@@ -141,5 +144,6 @@ onUnmounted(() => {
 .ton-notif-type-system { background: #f0eef6; color: #8e44ad; }
 .ton-notif-type-promotion { background: #fef0e8; color: #e67e22; }
 .ton-notif-type-review { background: #e8f4fd; color: #2980b9; }
+.ton-notif-type-message { background: #f0eef6; color: #8e44ad; }
 .ton-notif-empty { padding: 40px 16px; text-align: center; color: #999; font-size: 13px; }
 </style>
