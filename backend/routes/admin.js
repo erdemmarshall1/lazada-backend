@@ -113,12 +113,17 @@ router.post('/approve-shop', adminAuth, async (req, res) => {
     );
     const storeNumber = `S${String(storeCounter.seq).padStart(5, '0')}`;
     
+    await Counter.updateOne(
+      { name: 'sellerId' },
+      { $setOnInsert: { seq: 171910 } },
+      { upsert: true }
+    );
     const sellerCounter = await Counter.findOneAndUpdate(
       { name: 'sellerId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { new: true }
     );
-    const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
+    const sellerId = `S${sellerCounter.seq}`;
     
     const shop = await Shop.findByIdAndUpdate(req.body.id, { 
       status: 1, 
@@ -149,12 +154,17 @@ router.post('/generate-seller-id', adminAuth, async (req, res) => {
     if (!id) return res.json(fail('Shop id is required'));
     const shop = await Shop.findById(id);
     if (!shop) return res.json(fail('Shop not found'));
+    await Counter.updateOne(
+      { name: 'sellerId' },
+      { $setOnInsert: { seq: 171910 } },
+      { upsert: true }
+    );
     const sellerCounter = await Counter.findOneAndUpdate(
       { name: 'sellerId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { new: true }
     );
-    const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
+    const sellerId = `S${sellerCounter.seq}`;
     await User.findByIdAndUpdate(shop.userId, { sellerId });
     res.json(success({ sellerId }, `Seller ID generated: ${sellerId}`));
   } catch (error) {
@@ -179,12 +189,17 @@ router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
     let migrated = 0;
     for (const shop of approvedShops) {
       if (!shop.userId || shop.userId.sellerId) continue;
+      await Counter.updateOne(
+        { name: 'sellerId' },
+        { $setOnInsert: { seq: 171910 } },
+        { upsert: true }
+      );
       const sellerCounter = await Counter.findOneAndUpdate(
         { name: 'sellerId' },
         { $inc: { seq: 1 } },
-        { new: true, upsert: true }
+        { new: true }
       );
-      const sellerId = `SLD${String(sellerCounter.seq).padStart(5, '0')}`;
+      const sellerId = `S${sellerCounter.seq}`;
       await User.findByIdAndUpdate(shop.userId._id, { sellerId });
       migrated++;
     }
