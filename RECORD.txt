@@ -137,7 +137,7 @@ Cloudflare:
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
 Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
-Frontend (Netlify): via Netlify (site ID in GitHub secrets)
+Frontend (Netlify): https://shopify-wholesale.netlify.app (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Preview): https://f23b4a56.theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Admin): admin.theoutnet-wholesale.pages.dev (pending deployment)
