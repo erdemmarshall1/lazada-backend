@@ -106,7 +106,7 @@ service.interceptors.response.use(
                 store.logout()
                 if (router.currentRoute.value.fullPath !== '/login') {
                   router.push('/login')
-                  showAuthErrorOnce('Session expired, please login again')
+                  showAuthErrorOnce('Please enter your username/email and password to access your account')
                 }
               }
             })
@@ -117,7 +117,7 @@ service.interceptors.response.use(
               store.logout()
               if (router.currentRoute.value.fullPath !== '/login') {
                 router.push('/login')
-                ElMessage.error('Session expired, please login again')
+                ElMessage.error('Please enter your username/email and password to access your account')
               }
             })
         }
@@ -133,7 +133,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        showAuthErrorOnce('Session expired, please login again')
+        showAuthErrorOnce('Please enter your username/email and password to access your account')
       }
       return Promise.reject(data)
     }
@@ -171,7 +171,7 @@ service.interceptors.response.use(
                 store.logout()
                 if (router.currentRoute.value.fullPath !== '/login') {
                   router.push('/login')
-                  showAuthErrorOnce('Session expired, please login again')
+                  showAuthErrorOnce('Please enter your username/email and password to access your account')
                 }
               }
             })
@@ -182,7 +182,7 @@ service.interceptors.response.use(
               store.logout()
               if (router.currentRoute.value.fullPath !== '/login') {
                 router.push('/login')
-                ElMessage.error('Session expired, please login again')
+                ElMessage.error('Please enter your username/email and password to access your account')
               }
             })
         }
@@ -198,7 +198,7 @@ service.interceptors.response.use(
       store.logout()
       if (router.currentRoute.value.fullPath !== '/login') {
         router.push('/login')
-        showAuthErrorOnce('Session expired, please login again')
+        showAuthErrorOnce('Please enter your username/email and password to access your account')
       }
       return Promise.reject(error)
     }

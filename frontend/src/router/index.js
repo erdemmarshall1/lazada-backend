@@ -228,7 +228,7 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (to.matched.some(r => r.meta.requiresAuth) && !store.isLogin) {
+  if (to.matched.some(r => r.meta.requiresAuth) && (!store.isLogin || isTokenExpired(store.token))) {
     next({ name: 'login', query: { redirect: to.fullPath } })
     return
   }
