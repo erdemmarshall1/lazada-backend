@@ -77,46 +77,96 @@
         </div>
       </div>
 
-      <div class="dash-metrics" v-if="totalInfo">
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#667eea;--card-glow:rgba(102,126,234,0.15)">
-          <div class="gc-icon" style="color:#667eea"><i class="iconfont icon-qianbao"></i></div>
-          <div class="gc-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
-          <div class="gc-label">Total Revenue</div>
+      <div class="dash-grid-4" v-if="totalInfo" style="margin-bottom:24px">
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <rect x="10" y="28" width="54" height="34" rx="6" fill="#667eea" opacity="0.7"/>
+              <rect x="10" y="20" width="54" height="14" rx="6" fill="#667eea" opacity="0.85"/>
+              <circle cx="54" cy="46" r="8" fill="#667eea" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="dc-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
+          <div class="dc-label">Total Revenue</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)">
-          <div class="gc-icon" style="color:#10b981"><i class="iconfont icon-qianbao"></i></div>
-          <div class="gc-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
-          <div class="gc-label">Total Profit</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <rect x="14" y="48" width="12" height="20" rx="2" fill="#667eea" opacity="0.65"/>
+              <rect x="34" y="32" width="12" height="36" rx="2" fill="#667eea" opacity="0.85"/>
+              <rect x="54" y="20" width="12" height="48" rx="2" fill="#667eea" opacity="0.5"/>
+              <path d="M12 64L68 64" stroke="#667eea" stroke-width="2" opacity="0.35"/>
+            </svg>
+          </div>
+          <div class="dc-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
+          <div class="dc-label">Total Profit</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#2980b9;--card-glow:rgba(41,128,185,0.15)">
-          <div class="gc-icon" style="color:#2980b9"><i class="iconfont icon-dingdan"></i></div>
-          <div class="gc-value">{{ totalInfo.orderCount || 0 }}</div>
-          <div class="gc-label">Total Orders</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <path d="M40 10L66 25L40 40L14 25L40 10Z" fill="#667eea" opacity="0.85"/>
+              <path d="M14 25V49L40 64V40L14 25Z" fill="#667eea" opacity="0.5"/>
+              <path d="M66 25V49L40 64V40L66 25Z" fill="#667eea" opacity="0.65"/>
+            </svg>
+          </div>
+          <div class="dc-value">{{ totalInfo.orderCount || 0 }}</div>
+          <div class="dc-label">Total Orders</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#f59e0b;--card-glow:rgba(245,158,11,0.15)">
-          <div class="gc-icon" style="color:#f59e0b"><i class="iconfont icon-wuliu"></i></div>
-          <div class="gc-value">{{ totalInfo.todayOrderCount || 0 }}</div>
-          <div class="gc-label">Today's Orders</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="28" fill="#667eea" opacity="0.7"/>
+              <path d="M40 22V40L52 48" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+              <circle cx="40" cy="40" r="3" fill="#fff" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="dc-value">{{ totalInfo.todayOrderCount || 0 }}</div>
+          <div class="dc-label">Today's Orders</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#8b5cf6;--card-glow:rgba(139,92,246,0.15)">
-          <div class="gc-icon" style="color:#8b5cf6"><i class="iconfont icon-qianbao"></i></div>
-          <div class="gc-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
-          <div class="gc-label">Today's Revenue</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <ellipse cx="40" cy="32" rx="24" ry="10" fill="#667eea" opacity="0.7"/>
+              <ellipse cx="40" cy="52" rx="24" ry="10" fill="#667eea" opacity="0.4"/>
+              <rect x="16" y="30" width="48" height="22" fill="#667eea" opacity="0.55"/>
+            </svg>
+          </div>
+          <div class="dc-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
+          <div class="dc-label">Today's Revenue</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#ec4899;--card-glow:rgba(236,72,153,0.15)">
-          <div class="gc-icon" style="color:#ec4899"><i class="iconfont icon-tixing"></i></div>
-          <div class="gc-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
-          <div class="gc-label">Pending Shipment</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <rect x="8" y="30" width="42" height="24" rx="3" fill="#667eea" opacity="0.7"/>
+              <path d="M50 34L62 34L70 46V54H50V34Z" fill="#667eea" opacity="0.85"/>
+              <circle cx="20" cy="58" r="6" fill="#667eea" opacity="0.45"/>
+              <circle cx="60" cy="58" r="6" fill="#667eea" opacity="0.45"/>
+            </svg>
+          </div>
+          <div class="dc-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
+          <div class="dc-label">Pending Shipment</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#ef4444;--card-glow:rgba(239,68,68,0.15)">
-          <div class="gc-icon" style="color:#ef4444"><i class="iconfont icon-tixing"></i></div>
-          <div class="gc-value">{{ totalInfo.refundRequestCount || 0 }}</div>
-          <div class="gc-label">Refund Requests</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <path d="M40 12c-4 0-8 4-8 8v2C22 26 16 34 16 44v6l-4 6h56l-4-6v-6c0-10-6-18-16-22v-2c0-4-4-8-8-8z" fill="#667eea" opacity="0.75"/>
+              <path d="M32 60c2 4 4 6 8 6s6-2 8-6" fill="#667eea" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="dc-value">{{ totalInfo.refundRequestCount || 0 }}</div>
+          <div class="dc-label">Refund Requests</div>
         </div>
-        <div class="glow-card" @click="$router.push('/storeordercontrol')" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)">
-          <div class="gc-icon" style="color:#10b981"><i class="iconfont icon-qianbao"></i></div>
-          <div class="gc-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
-          <div class="gc-label">Today's Profit</div>
+        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+          <div class="dash-illustration">
+            <svg viewBox="0 0 80 80" fill="none">
+              <rect x="14" y="48" width="12" height="20" rx="2" fill="#667eea" opacity="0.65"/>
+              <rect x="34" y="32" width="12" height="36" rx="2" fill="#667eea" opacity="0.85"/>
+              <rect x="54" y="20" width="12" height="48" rx="2" fill="#667eea" opacity="0.5"/>
+              <path d="M12 64L68 64" stroke="#667eea" stroke-width="2" opacity="0.35"/>
+            </svg>
+          </div>
+          <div class="dc-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
+          <div class="dc-label">Today's Profit</div>
         </div>
       </div>
 
@@ -139,7 +189,7 @@
             <div class="bar-row" v-for="item in monthlyBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
               <div class="bar-track">
-                <div class="bar-fill" :style="{ width: item.pct + '%', background: 'var(--g-main_color)' }"></div>
+                <div class="bar-fill" :style="{ width: item.pct + '%', background: '#667eea' }"></div>
               </div>
               <span class="bar-value">${{ item.value }}</span>
             </div>
@@ -155,7 +205,7 @@
             <div class="bar-row" v-for="item in monthlyProfitBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
               <div class="bar-track">
-                <div class="bar-fill" :style="{ width: item.pct + '%', background: 'var(--g-success)' }"></div>
+                <div class="bar-fill" :style="{ width: item.pct + '%', background: '#10b981' }"></div>
               </div>
               <span class="bar-value">${{ item.value }}</span>
             </div>
@@ -353,6 +403,10 @@ onBeforeUnmount(() => {
 <style scoped>
 .seller-dashboard {
   padding: 0;
+  background: var(--dash-dark-bg);
+  min-height: 80vh;
+  border-radius: var(--dash-card-radius);
+  padding: 16px;
 }
 
 .dashboard-header {
@@ -365,6 +419,7 @@ onBeforeUnmount(() => {
 .dashboard-header h3 {
   margin: 0;
   font-size: 18px;
+  color: #fff;
 }
 
 .dashboard-header-actions {
@@ -439,7 +494,7 @@ onBeforeUnmount(() => {
 
 .empty-text {
   display: block;
-  color: #999;
+  color: rgba(255,255,255,0.5);
   margin-bottom: 16px;
 }
 
@@ -459,6 +514,7 @@ onBeforeUnmount(() => {
 .status-awaiting-review h4 {
   font-size: 20px;
   margin: 0 0 8px;
+  color: #fff;
 }
 
 .status-awaiting-review p {
@@ -472,22 +528,24 @@ onBeforeUnmount(() => {
 }
 
 .shop-details-card {
-  border-radius: 12px;
+  background: var(--dash-dark-card);
+  border-radius: var(--dash-card-radius);
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  border-left: 4px solid var(--g-main_color);
-  transition: box-shadow 0.3s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-left: 4px solid #667eea;
+  transition: all 0.3s;
 }
 .shop-details-card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.06);
+  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .section-title {
   font-size: 14px;
   letter-spacing: 1.5px;
   margin-bottom: 16px;
-  color: #000;
+  color: rgba(255,255,255,0.5);
 }
 
 .shop-details-grid {
@@ -499,7 +557,7 @@ onBeforeUnmount(() => {
 .detail-label {
   display: block;
   font-size: 11px;
-  color: #999;
+  color: rgba(255,255,255,0.35);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 4px;
@@ -509,7 +567,7 @@ onBeforeUnmount(() => {
   display: block;
   font-size: 16px;
   font-weight: 600;
-  color: #000;
+  color: #fff;
 }
 
 .balance-value {
@@ -530,14 +588,16 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 20px;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: var(--dash-card-radius);
   margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  border-left: 4px solid var(--g-main_color);
-  transition: box-shadow 0.3s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-left: 4px solid #667eea;
+  background: var(--dash-dark-card);
+  transition: all 0.3s;
 }
 .store-info-card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.06);
+  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .store-logo {
@@ -556,10 +616,11 @@ onBeforeUnmount(() => {
 .store-info-body h4 {
   margin: 0 0 4px;
   word-break: break-word;
+  color: #fff;
 }
 
 .store-desc {
-  color: #666;
+  color: rgba(255,255,255,0.5);
   font-size: 13px;
   margin: 0;
   word-break: break-word;
@@ -579,19 +640,21 @@ onBeforeUnmount(() => {
 }
 
 .chart-box {
-  background: var(--g-white);
-  border-radius: 12px;
+  background: var(--dash-dark-card);
+  border-radius: var(--dash-card-radius);
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: box-shadow 0.3s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: all 0.3s;
 }
 .chart-box:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 12px rgba(102,126,234,0.08);
+  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .chart-box h4 {
   font-size: 14px;
   margin: 0 0 12px;
+  color: #fff;
 }
 
 .bar-chart {
@@ -611,13 +674,13 @@ onBeforeUnmount(() => {
   width: 80px;
   flex-shrink: 0;
   text-align: right;
-  color: #666;
+  color: rgba(255,255,255,0.45);
 }
 
 .bar-track {
   flex: 1;
   height: 18px;
-  background: var(--g-bg);
+  background: rgba(255,255,255,0.06);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -633,12 +696,12 @@ onBeforeUnmount(() => {
   width: 60px;
   flex-shrink: 0;
   font-weight: 600;
-  color: var(--g-text);
+  color: rgba(255,255,255,0.7);
 }
 
 .chart-empty {
   text-align: center;
-  color: #999;
+  color: rgba(255,255,255,0.3);
   padding: 20px;
 }
 
@@ -659,18 +722,18 @@ onBeforeUnmount(() => {
 .score-number {
   font-size: 48px;
   font-weight: 700;
-  color: var(--g-text);
+  color: #fff;
 }
 
 .score-unit {
   font-size: 16px;
-  color: #999;
+  color: rgba(255,255,255,0.35);
 }
 
 .score-track {
   width: 100%;
   height: 20px;
-  background: var(--g-bg);
+  background: rgba(255,255,255,0.06);
   border-radius: 10px;
   overflow: hidden;
 }

@@ -1,12 +1,35 @@
 <template>
   <div>
-    <h3>Super Admin Dashboard</h3>
+    <h3 style="color:#fff;margin-bottom:20px;font-size:20px;font-weight:700">Super Admin Dashboard</h3>
 
-    <div class="dash-metrics dash-metrics-4" style="margin-bottom:24px">
-      <div v-for="(s, i) in stats" :key="s.label" class="glow-card" :style="{ '--card-accent': ['#667eea','#10b981','#f59e0b','#ec4899'][i], '--card-glow': ['rgba(102,126,234,0.15)','rgba(16,185,129,0.15)','rgba(245,158,11,0.15)','rgba(236,72,153,0.15)'][i] }">
-        <div class="gc-icon" :style="{ color: ['#667eea','#10b981','#f59e0b','#ec4899'][i] }"><i :class="['iconfont icon-yonghu','iconfont icon-dianpu','iconfont icon-shangpin','iconfont icon-jiaoyi'][i]"></i></div>
-        <div class="gc-value">{{ s.value }}</div>
-        <div class="gc-label">{{ s.label }}</div>
+    <div class="dash-grid-4" style="margin-bottom:24px">
+      <div v-for="(s, i) in stats" :key="s.label" class="dash-dark-card">
+        <div class="dash-illustration">
+          <svg v-if="i===0" viewBox="0 0 80 80" fill="none">
+            <circle cx="30" cy="22" r="12" fill="#667eea" opacity="0.8"/>
+            <circle cx="56" cy="28" r="10" fill="#667eea" opacity="0.6"/>
+            <path d="M8 66c0-12 10-22 22-22s22 10 22 22" fill="#667eea" opacity="0.55"/>
+            <path d="M40 64c0-10 8-18 18-18s18 8 18 18" fill="#667eea" opacity="0.4"/>
+          </svg>
+          <svg v-else-if="i===1" viewBox="0 0 80 80" fill="none">
+            <path d="M8 36L40 12L72 36" fill="#667eea" opacity="0.7"/>
+            <rect x="16" y="34" width="48" height="28" rx="2" fill="#667eea" opacity="0.85"/>
+            <rect x="28" y="46" width="24" height="16" rx="2" fill="#667eea" opacity="0.5"/>
+          </svg>
+          <svg v-else-if="i===2" viewBox="0 0 80 80" fill="none">
+            <rect x="18" y="28" width="44" height="36" rx="4" fill="#667eea" opacity="0.85"/>
+            <path d="M28 28V20a12 12 0 0 1 24 0v8" fill="#667eea" opacity="0.55"/>
+            <rect x="18" y="28" width="44" height="6" rx="2" fill="#667eea" opacity="0.5"/>
+          </svg>
+          <svg v-else viewBox="0 0 80 80" fill="none">
+            <path d="M56 14L72 30L56 46" fill="#667eea" opacity="0.7"/>
+            <path d="M16 36L72 36" stroke="#667eea" stroke-width="4" opacity="0.5"/>
+            <path d="M24 66L8 50L24 34" fill="#667eea" opacity="0.7"/>
+            <path d="M64 44L8 44" stroke="#667eea" stroke-width="4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="dc-value">{{ s.value }}</div>
+        <div class="dc-label">{{ s.label }}</div>
       </div>
     </div>
 
@@ -76,10 +99,40 @@
       </el-tab-pane>
 
       <el-tab-pane label="Product Images" name="images">
-        <div class="dash-metrics" style="margin-bottom:16px">
-          <div class="glow-card" style="--card-accent:#10b981;--card-glow:rgba(16,185,129,0.15)"><div class="gc-icon" style="color:#10b981"><i class="iconfont icon-tupian"></i></div><div class="gc-value">{{ prodWithImages }}</div><div class="gc-label">With Images</div></div>
-          <div class="glow-card" style="--card-accent:#ef4444;--card-glow:rgba(239,68,68,0.15)"><div class="gc-icon" style="color:#ef4444"><i class="iconfont icon-tupian"></i></div><div class="gc-value">{{ prodWithoutImages }}</div><div class="gc-label">No Images</div></div>
-          <div class="glow-card" style="--card-accent:#667eea;--card-glow:rgba(102,126,234,0.15)"><div class="gc-icon" style="color:#667eea"><i class="iconfont icon-shangpin"></i></div><div class="gc-value">{{ totalProducts }}</div><div class="gc-label">Total Products</div></div>
+        <div class="dash-grid-3" style="margin-bottom:16px">
+          <div class="dash-dark-card" style="cursor:default">
+            <div class="dash-illustration">
+              <svg viewBox="0 0 80 80" fill="none">
+                <rect x="18" y="28" width="44" height="36" rx="4" fill="#667eea" opacity="0.85"/>
+                <path d="M28 28V20a12 12 0 0 1 24 0v8" fill="#667eea" opacity="0.55"/>
+                <rect x="18" y="28" width="44" height="6" rx="2" fill="#667eea" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="dc-value">{{ prodWithImages }}</div>
+            <div class="dc-label">With Images</div>
+          </div>
+          <div class="dash-dark-card" style="cursor:default">
+            <div class="dash-illustration">
+              <svg viewBox="0 0 80 80" fill="none">
+                <path d="M40 10L66 22V40C66 54 40 70 40 70C40 70 14 54 14 40V22L40 10Z" fill="#667eea" opacity="0.8"/>
+                <circle cx="40" cy="40" r="10" fill="#667eea" opacity="0.35"/>
+                <path d="M36 40l2 2 4-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="dc-value">{{ prodWithoutImages }}</div>
+            <div class="dc-label">No Images</div>
+          </div>
+          <div class="dash-dark-card" style="cursor:default">
+            <div class="dash-illustration">
+              <svg viewBox="0 0 80 80" fill="none">
+                <rect x="18" y="28" width="44" height="36" rx="4" fill="#667eea" opacity="0.85"/>
+                <path d="M28 28V20a12 12 0 0 1 24 0v8" fill="#667eea" opacity="0.55"/>
+                <rect x="18" y="28" width="44" height="6" rx="2" fill="#667eea" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="dc-value">{{ totalProducts }}</div>
+            <div class="dc-label">Total Products</div>
+          </div>
         </div>
         <el-button @click="refreshProdStats">Refresh Stats</el-button>
         <el-button type="success" @click="runFixImages">Fix Missing Images</el-button>
@@ -216,4 +269,7 @@ onMounted(() => {
 
 <style scoped>
 .el-form-item { margin-bottom: 16px; }
+.el-tabs { --el-tabs-header-text-color: rgba(255,255,255,0.5); --el-tabs-active-color: #667eea; }
+.el-descriptions { --el-descriptions-title-color: rgba(255,255,255,0.8); --el-descriptions-table-border-color: rgba(255,255,255,0.06); --el-descriptions-item-label-color: rgba(255,255,255,0.4); --el-descriptions-item-value-color: rgba(255,255,255,0.7); background: transparent; }
+.el-form { --el-text-color-regular: rgba(255,255,255,0.6); }
 </style>

@@ -1,10 +1,30 @@
 <template>
   <div>
-    <div class="dash-metrics dash-metrics-4">
-      <div v-for="m in metrics" :key="m.label" class="glow-card" :style="{ '--card-accent': m.color, '--card-glow': m.color + '33' }">
-        <div class="gc-icon" :style="{ color: m.color }"><i :class="m.icon"></i></div>
-        <div class="gc-value">{{ m.value }}</div>
-        <div class="gc-label">{{ m.label }}</div>
+    <div class="dash-grid-4" style="margin-bottom:24px">
+      <div v-for="(m, i) in metrics" :key="m.label" class="dash-dark-card">
+        <div class="dash-illustration">
+          <svg v-if="i===0" viewBox="0 0 80 80" fill="none">
+            <path d="M40 10L66 25L40 40L14 25L40 10Z" fill="#667eea" opacity="0.85"/>
+            <path d="M14 25V49L40 64V40L14 25Z" fill="#667eea" opacity="0.5"/>
+            <path d="M66 25V49L40 64V40L66 25Z" fill="#667eea" opacity="0.65"/>
+          </svg>
+          <svg v-else-if="i===1" viewBox="0 0 80 80" fill="none">
+            <rect x="8" y="30" width="42" height="24" rx="3" fill="#667eea" opacity="0.7"/>
+            <path d="M50 34L62 34L70 46V54H50V34Z" fill="#667eea" opacity="0.85"/>
+            <circle cx="20" cy="58" r="6" fill="#667eea" opacity="0.45"/>
+            <circle cx="60" cy="58" r="6" fill="#667eea" opacity="0.45"/>
+          </svg>
+          <svg v-else-if="i===2" viewBox="0 0 80 80" fill="none">
+            <path d="M40 66C40 66 16 48 16 32C16 22 24 14 34 14C39 14 40 18 40 18C40 18 41 14 46 14C56 14 64 22 64 32C64 48 40 66 40 66Z" fill="#667eea" opacity="0.8"/>
+          </svg>
+          <svg v-else viewBox="0 0 80 80" fill="none">
+            <rect x="10" y="28" width="54" height="34" rx="6" fill="#667eea" opacity="0.7"/>
+            <rect x="10" y="20" width="54" height="14" rx="6" fill="#667eea" opacity="0.85"/>
+            <circle cx="54" cy="46" r="8" fill="#667eea" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="dc-value">{{ m.value }}</div>
+        <div class="dc-label">{{ m.label }}</div>
       </div>
     </div>
 
@@ -162,4 +182,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.page-card { background: var(--dash-dark-card); border-radius: var(--dash-card-radius); padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.04); margin-bottom: 24px; }
+.page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.page-header i { font-size: 20px; color: #667eea; }
+.page-header h2 { margin: 0; font-size: 16px; font-weight: 700; color: #fff; }
+.el-form { --el-text-color-regular: rgba(255,255,255,0.6); }
 </style>

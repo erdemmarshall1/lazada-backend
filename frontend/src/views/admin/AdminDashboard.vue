@@ -1,70 +1,109 @@
 <template>
-  <div class="admin-dashboard" v-loading="loading">
+  <div v-loading="loading">
     <!-- Welcome Banner -->
-    <div class="welcome-banner">
-      <div class="welcome-text">
+    <div class="dash-welcome">
+      <div>
         <h2>Welcome back, {{ store.userInfo?.username || 'Admin' }}</h2>
         <p>{{ today }} &middot; {{ summaryText }}</p>
       </div>
-      <div class="welcome-actions">
-        <el-button type="primary" @click="quickGenerate" :loading="generating">+ Generate Code</el-button>
-        <el-button plain @click="$router.push('/admin/transactions')">All Transactions</el-button>
+      <div style="display:flex;gap:10px">
+        <button class="dash-btn dash-btn-primary" @click="quickGenerate" :disabled="generating">+ Generate Code</button>
+        <button class="dash-btn dash-btn-ghost" @click="$router.push('/admin/transactions')">All Transactions</button>
       </div>
     </div>
 
     <!-- Metric Cards -->
-    <div class="dash-metrics dash-metrics-6">
-      <div v-for="card in metricCards" :key="card.label" class="glow-card" :style="{ '--card-accent': card.color, '--card-glow': card.color + '33' }" @click="$router.push(card.link)">
-        <div class="gc-icon" :style="{ color: card.color }"><i :class="card.icon"></i></div>
-        <div class="gc-value">{{ card.value }}</div>
-        <div class="gc-label">{{ card.label }}</div>
+    <div class="dash-grid-6" style="margin-bottom:24px">
+      <div v-for="(card, i) in metricCards" :key="card.label" class="dash-dark-card" @click="$router.push(card.link)">
+        <div class="dash-illustration">
+          <svg v-if="i===0" viewBox="0 0 80 80" fill="none">
+            <circle cx="30" cy="22" r="12" fill="#667eea" opacity="0.8"/>
+            <circle cx="56" cy="28" r="10" fill="#667eea" opacity="0.6"/>
+            <path d="M8 66c0-12 10-22 22-22s22 10 22 22" fill="#667eea" opacity="0.55"/>
+            <path d="M40 64c0-10 8-18 18-18s18 8 18 18" fill="#667eea" opacity="0.4"/>
+          </svg>
+          <svg v-else-if="i===1" viewBox="0 0 80 80" fill="none">
+            <path d="M8 36L40 12L72 36" fill="#667eea" opacity="0.7"/>
+            <rect x="16" y="34" width="48" height="28" rx="2" fill="#667eea" opacity="0.85"/>
+            <rect x="28" y="46" width="24" height="16" rx="2" fill="#667eea" opacity="0.5"/>
+          </svg>
+          <svg v-else-if="i===2" viewBox="0 0 80 80" fill="none">
+            <rect x="18" y="28" width="44" height="36" rx="4" fill="#667eea" opacity="0.85"/>
+            <path d="M28 28V20a12 12 0 0 1 24 0v8" fill="#667eea" opacity="0.55"/>
+            <rect x="18" y="28" width="44" height="6" rx="2" fill="#667eea" opacity="0.5"/>
+          </svg>
+          <svg v-else-if="i===3" viewBox="0 0 80 80" fill="none">
+            <path d="M56 14L72 30L56 46" fill="#667eea" opacity="0.7"/>
+            <path d="M16 36L72 36" stroke="#667eea" stroke-width="4" opacity="0.5"/>
+            <path d="M24 66L8 50L24 34" fill="#667eea" opacity="0.7"/>
+            <path d="M64 44L8 44" stroke="#667eea" stroke-width="4" opacity="0.5"/>
+          </svg>
+          <svg v-else-if="i===4" viewBox="0 0 80 80" fill="none">
+            <rect x="10" y="28" width="54" height="34" rx="6" fill="#667eea" opacity="0.7"/>
+            <rect x="10" y="20" width="54" height="14" rx="6" fill="#667eea" opacity="0.85"/>
+            <circle cx="54" cy="46" r="8" fill="#667eea" opacity="0.4"/>
+          </svg>
+          <svg v-else viewBox="0 0 80 80" fill="none">
+            <path d="M40 10L66 22V40C66 54 40 70 40 70C40 70 14 54 14 40V22L40 10Z" fill="#667eea" opacity="0.8"/>
+            <circle cx="40" cy="40" r="10" fill="#667eea" opacity="0.35"/>
+            <path d="M36 40l2 2 4-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="dc-value">{{ card.value }}</div>
+        <div class="dc-label">{{ card.label }}</div>
       </div>
     </div>
 
     <!-- Quick Access -->
-    <div class="quick-grid">
-      <div v-for="q in quickLinks" :key="q.label" class="quick-card" @click="$router.push(q.link)">
-        <i :class="q.icon"></i>
-        <span>{{ q.label }}</span>
+    <div class="dark-section">
+      <div class="section-header"><h3>Quick Access</h3><span class="subtitle">Manage platform</span></div>
+      <div class="qa-grid">
+        <div v-for="q in quickLinks" :key="q.label" class="qa-item" @click="$router.push(q.link)">
+          <i :class="q.icon"></i>
+          <span>{{ q.label }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Charts Row -->
     <div class="chart-row">
-      <div class="page-card">
-        <div class="chart-head">
-          <h3>Revenue (Weekly)</h3>
-          <el-radio-group v-model="revenueWeeks" size="small" @change="fetchSalesData">
-            <el-radio-button value="4">4w</el-radio-button>
-            <el-radio-button value="8">8w</el-radio-button>
-            <el-radio-button value="12">12w</el-radio-button>
-          </el-radio-group>
-        </div>
-        <div class="chart-box">
-          <Line v-if="lineData" :data="lineData" :options="lineOpts" />
-          <el-empty v-else description="No data" :image-size="72" />
+      <div class="chart-main">
+        <div class="dark-section" style="margin-bottom:0;height:100%">
+          <div class="section-header">
+            <h3>Revenue</h3>
+            <el-radio-group v-model="revenueWeeks" size="small" @change="fetchSalesData">
+              <el-radio-button value="4">4w</el-radio-button>
+              <el-radio-button value="8">8w</el-radio-button>
+              <el-radio-button value="12">12w</el-radio-button>
+            </el-radio-group>
+          </div>
+          <div class="chart-container-dark">
+            <Line v-if="lineData" :data="lineData" :options="lineOpts" />
+            <el-empty v-else description="No data" :image-size="72" />
+          </div>
         </div>
       </div>
-      <div class="page-card">
-        <div class="chart-head"><h3>Category Sales</h3></div>
-        <div class="chart-box doughnut-box">
-          <Doughnut v-if="doughnutData" :data="doughnutData" :options="doughnutOpts" />
-          <el-empty v-else description="No data" :image-size="72" />
+      <div class="chart-side">
+        <div class="dark-section" style="margin-bottom:0;height:100%">
+          <div class="section-header"><h3>Category</h3></div>
+          <div class="chart-container-dark" style="height:260px">
+            <Doughnut v-if="doughnutData" :data="doughnutData" :options="doughnutOpts" />
+            <el-empty v-else description="No data" :image-size="72" />
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="page-card">
-      <div class="page-header">
-        <i class="iconfont icon-dingdan"></i>
-        <h2>Recent Activity</h2>
-        <span class="subtitle">Latest pending items</span>
+    <div class="dark-section">
+      <div class="section-header">
+        <h3>Recent Activity</h3>
+        <span class="subtitle">Latest 10 events</span>
       </div>
       <el-table :data="recentActivity" style="width:100%" size="small" max-height="320" v-if="recentActivity.length">
         <el-table-column prop="type" label="Type" width="100">
           <template #default="{row}">
-            <el-tag :type="row.type === 'order' ? 'warning' : row.type === 'refund' ? 'danger' : 'info'" size="small">{{ row.type }}</el-tag>
+            <el-tag :type="row.type === 'order' ? 'warning' : row.type === 'refund' ? 'danger' : 'info'" size="small" style="text-transform:capitalize">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="ref" label="ID" width="160" />
@@ -239,49 +278,17 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.admin-dashboard { padding: 8px; min-height: 80vh; }
-
-.welcome-banner {
-  background: linear-gradient(135deg, var(--g-primary, #2980b9), var(--g-blue, #3498db));
-  border-radius: 14px; padding: 24px 32px; margin-bottom: 24px;
-  display: flex; align-items: center; justify-content: space-between; color: #fff;
-}
-.welcome-text h2 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
-.welcome-text p { margin: 0; font-size: 14px; opacity: 0.85; }
-.welcome-actions { display: flex; gap: 10px; }
-.welcome-actions .el-button { --el-button-bg-color: rgba(255,255,255,0.2); --el-button-border-color: rgba(255,255,255,0.4); --el-button-text-color: #fff; --el-button-hover-bg-color: rgba(255,255,255,0.35); --el-button-hover-border-color: #fff; }
-
-
-.quick-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
-.quick-card {
-  background: var(--g-white); border-radius: 10px; padding: 18px 12px;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid var(--g-border, #eee);
-}
-.quick-card:hover { border-color: var(--g-primary, #2980b9); box-shadow: 0 4px 16px rgba(41,128,185,0.12); transform: translateY(-2px); }
-.quick-card i { font-size: 28px; color: var(--g-primary, #2980b9); }
-.quick-card span { font-size: 13px; font-weight: 600; color: var(--g-text); }
-
 .chart-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 24px; }
-.chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.chart-head h3 { margin: 0; font-size: 15px; font-weight: 700; }
-.chart-box { position: relative; height: 260px; }
-.doughnut-box { display: flex; align-items: center; justify-content: center; }
-
-.page-card { background: var(--g-white); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; }
-.page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.page-header i { font-size: 20px; color: var(--g-primary, #2980b9); }
-.page-header h2 { margin: 0; font-size: 16px; font-weight: 700; }
-.page-header .subtitle { font-size: 12px; color: var(--g-text-light); margin-left: auto; }
-
-@media (max-width: 1024px) {
-  .quick-grid { grid-template-columns: repeat(3, 1fr); }
-  .chart-row { grid-template-columns: 1fr; }
+.qa-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.qa-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  border: 1px solid rgba(255,255,255,0.04); background: var(--dash-dark-card-alt);
 }
-@media (max-width: 600px) {
-  .quick-grid { grid-template-columns: repeat(2, 1fr); }
-  .welcome-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .chart-box { height: 200px; }
-}
+.qa-item:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.qa-item i { font-size: 24px; color: #667eea; }
+.qa-item span { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); }
+
+@media (max-width: 1024px) { .chart-row { grid-template-columns: 1fr; } .qa-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .qa-grid { grid-template-columns: repeat(2, 1fr); } }
 </style>
