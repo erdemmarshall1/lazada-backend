@@ -253,7 +253,7 @@ const updateQR = async (address) => {
   }
 }
 
-const DEFAULT_WALLET = 'lv2939dhH93j299jd20Ooo92jj3j8dj!88jd'
+const DEFAULT_WALLET = ''
 
 const onPaymentMethodChange = (method) => {
   const setting = settings.value.find(s => s.method === method)

@@ -6,7 +6,7 @@
           <span class="ton-header-top-divider"></span>
           <a href="javascript:void(0)" @click="$router.push('/ordertracking')">Track Your Order</a>
           <a href="javascript:void(0)" @click="$router.push('/myorder')">Create A Return</a>
-          <a href="javascript:void(0)" @click="$router.push('/contact-us')">Customer Care</a>
+          <a href="javascript:void(0)" @click="openCustomerCare">Customer Care</a>
           <a href="javascript:void(0)" @click="$router.push('/download-app')">Download the App</a>
         </div>
         <div class="ton-header-top-right">
@@ -34,12 +34,12 @@
           <img src="/img/outnet-logo.png" alt="THE OUTNET" class="ton-logo-img" />
         </div>
         <nav class="ton-nav desktop-only">
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Just In</a>
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Designers</a>
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Clothing</a>
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Shoes</a>
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Bags</a>
-          <a href="javascript:void(0)" @click="$router.push('/searchgoods')">Accessories</a>
+          <a href="javascript:void(0)" @click="$router.push('/just-in')">Just In</a>
+          <a href="javascript:void(0)" @click="$router.push('/designers')">Designers</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/clothing')">Clothing</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/shoes')">Shoes</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/bags')">Bags</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/accessories')">Accessories</a>
         </nav>
         <div class="ton-header-actions">
           <button class="ton-header-icon" @click="$router.push('/searchgoods')" aria-label="Search">
@@ -80,12 +80,12 @@
       </div>
       <div class="ton-drawer-items">
         <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false">Home</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Just In</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Designers</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Clothing</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Shoes</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Bags</div>
-        <div class="ton-drawer-item" @click="$router.push('/searchgoods'); mobileMenuOpen = false">Accessories</div>
+        <div class="ton-drawer-item" @click="$router.push('/just-in'); mobileMenuOpen = false">Just In</div>
+        <div class="ton-drawer-item" @click="$router.push('/designers'); mobileMenuOpen = false">Designers</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/clothing'); mobileMenuOpen = false">Clothing</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/shoes'); mobileMenuOpen = false">Shoes</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/bags'); mobileMenuOpen = false">Bags</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/accessories'); mobileMenuOpen = false">Accessories</div>
         <div class="ton-drawer-divider"></div>
         <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false">Bestsellers</div>
         <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false">Recommended</div>
@@ -94,7 +94,7 @@
         <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false">Categories</div>
         <div class="ton-drawer-divider"></div>
         <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false">About THE OUTNET</div>
-        <div class="ton-drawer-item" @click="$router.push('/contact-us'); mobileMenuOpen = false">Customer Care</div>
+        <div class="ton-drawer-item" @click="openCustomerCareMobile">Customer Care</div>
         <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false">FAQ</div>
         <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false">Download the App</div>
       </div>
@@ -133,6 +133,23 @@ const searchMobile = () => {
     router.push({ path: '/searchgoods', query: { keyword: keyword.value } })
     mobileMenuOpen.value = false
   }
+}
+
+const openTawkto = () => {
+  if (window.Tawk_API && store.tawktoActive) {
+    window.Tawk_API.maximize()
+  }
+}
+
+const openCustomerCare = () => {
+  router.push('/contact-us')
+  setTimeout(() => openTawkto(), 500)
+}
+
+const openCustomerCareMobile = () => {
+  mobileMenuOpen.value = false
+  router.push('/contact-us')
+  setTimeout(() => openTawkto(), 500)
 }
 
 const handleLogout = async () => {

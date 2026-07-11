@@ -129,8 +129,8 @@ onMounted(loadSettings)
 <style scoped>
 .admin-email-settings { padding: 20px; max-width: 720px; }
 .admin-email-settings h2 { margin-bottom: 4px; }
-.admin-email-settings .desc { color: #999; font-size: 13px; margin-bottom: 16px; }
-.toggle-label { margin-left: 12px; font-size: 13px; color: #666; }
+.admin-email-settings .desc { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 16px; }
+.toggle-label { margin-left: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
 .el-divider { margin: 24px 0 16px; }
 .el-form-item { margin-bottom: 18px; }
 </style>

@@ -24,12 +24,16 @@ const router = useRouter()
 const currentPath = computed(() => route.path)
 
 const navItems = [
-  { label: 'Just In', path: '/searchgoods' },
+  { label: 'Just In', path: '/just-in' },
+  { label: 'Designers', path: '/designers' },
+  { label: 'Clothing', path: '/categories/clothing' },
+  { label: 'Shoes', path: '/categories/shoes' },
+  { label: 'Bags', path: '/categories/bags' },
+  { label: 'Accessories', path: '/categories/accessories' },
   { label: 'Bestsellers', path: '/remenglist' },
   { label: 'Recommended', path: '/tuijianlist' },
   { label: 'Shop Street', path: '/shopjie' },
   { label: 'Flash Deals', path: '/miaoshalist' },
-  { label: 'Categories', path: '/main' },
 ]
 
 const goNav = (path) => { router.push(path) }

@@ -21,7 +21,7 @@
         </el-form-item>
       </el-form>
       <div class="admin-login-footer">
-        <span class="link" @click="$router.push('/forgetpwd')">Forgot password?</span>
+        <span class="link" @click="$router.push('/admin/forgetpwd')">Forgot password?</span>
         <span class="link" @click="$router.push('/main')">&larr; Back to main site</span>
       </div>
     </div>
@@ -32,13 +32,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useAppStore } from '@/stores/app'
-import { post } from '@/api/request'
-import { connectSocket } from '@/socket'
+import { useAdminAppStore } from '@/stores/adminApp'
+import { adminPost } from '@/api/adminRequest'
 
 const router = useRouter()
 const route = useRoute()
-const store = useAppStore()
+const store = useAdminAppStore()
 const formRef = ref(null)
 const loading = ref(false)
 
@@ -65,7 +64,7 @@ const handleLogin = async () => {
   loading.value = true
   try {
     if (twoFactorRequired.value) {
-      const res = await post('/main/user/login/2fa', { tempToken: tempToken.value, code: form.twoFactorCode })
+      const res = await adminPost('/home/admin/auth/login/2fa', { tempToken: tempToken.value, code: form.twoFactorCode })
       const payload = res?.data || res
       const token = payload?.token || res?.token
       const refreshToken = payload?.refreshToken || res?.refreshToken
@@ -76,7 +75,6 @@ const handleLogin = async () => {
         store.setToken(token)
         if (refreshToken) store.setRefreshToken(refreshToken)
         if (userInfo) store.setUserInfo(userInfo)
-        connectSocket()
         ElMessage.success(message)
         await router.replace('/admin/dashboard')
       } else {
@@ -85,7 +83,7 @@ const handleLogin = async () => {
       return
     }
 
-    const res = await post('/main/user/login', { username: form.username, password: form.password })
+    const res = await adminPost('/home/admin/auth/login', { username: form.username, password: form.password })
 
     if (res?.twoFactorRequired && res?.tempToken) {
       twoFactorRequired.value = true
@@ -110,11 +108,10 @@ const handleLogin = async () => {
       store.setToken(token)
       if (refreshToken) store.setRefreshToken(refreshToken)
       if (userInfo) store.setUserInfo(userInfo)
-      connectSocket()
 
       if (responseBody.needsPasswordSetup || userInfo?.needsPasswordSetup) {
         ElMessage.info('Please set up your password first')
-        await router.replace('/setup-password')
+        await router.replace('/admin/setup-password')
         return
       }
 

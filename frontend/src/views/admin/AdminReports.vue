@@ -216,8 +216,8 @@ onMounted(() => {
 .admin-reports h2 { margin-bottom: 16px; }
 .report-filters { display: flex; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 4px; }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.stat-card { background: #f9f8f4; border: 1px solid #e8e6e2; border-radius: 8px; padding: 16px; text-align: center; }
-.stat-value { font-size: 22px; font-weight: 700; color: #222; }
-.stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+.stat-card { background: var(--dash-dark-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: center; }
+.stat-value { font-size: 22px; font-weight: 700; color: rgba(255,255,255,0.85); }
+.stat-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
 .admin-reports :deep(.el-table) { margin-bottom: 12px; }
 </style>

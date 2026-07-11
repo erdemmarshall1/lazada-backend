@@ -100,19 +100,31 @@
         <h3>Recent Activity</h3>
         <span class="subtitle">Latest 10 events</span>
       </div>
-      <el-table :data="recentActivity" style="width:100%" size="small" max-height="320" v-if="recentActivity.length">
-        <el-table-column prop="type" label="Type" width="100">
+      <el-table :data="recentActivity" style="width:100%" size="small" max-height="360" v-if="recentActivity.length">
+        <el-table-column label="Type" width="100">
           <template #default="{row}">
-            <el-tag :type="row.type === 'order' ? 'warning' : row.type === 'refund' ? 'danger' : 'info'" size="small" style="text-transform:capitalize">{{ row.type }}</el-tag>
+            <el-tag :type="row.type === 'order' ? 'warning' : row.type === 'payment' ? 'primary' : 'success'" size="small" style="text-transform:capitalize">{{ row.type === 'shop' ? 'Store App' : row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="ref" label="ID" width="160" />
-        <el-table-column prop="user" label="User" min-width="120" />
-        <el-table-column prop="amount" label="Amount" width="100">
-          <template #default="{row}">${{ row.amount?.toFixed(2) }}</template>
+        <el-table-column prop="ref" label="ID/Ref" width="150" />
+        <el-table-column prop="user" label="User" min-width="110" />
+        <el-table-column label="Amount" width="90">
+          <template #default="{row}">{{ row.amount != null ? '$' + Number(row.amount).toFixed(2) : '—' }}</template>
         </el-table-column>
-        <el-table-column label="Date" width="100">
-          <template #default="{row}">{{ new Date(row.date).toLocaleDateString() }}</template>
+        <el-table-column label="Status" width="100">
+          <template #default="{row}">
+            <el-tag :type="row.statusType || 'info'" size="small">{{ row.statusLabel || row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" width="140" fixed="right">
+          <template #default="{row}">
+            <el-button v-if="row.type === 'order'" size="small" type="primary" link @click="viewOrder(row)">View</el-button>
+            <template v-else-if="row.type === 'payment'">
+              <el-button size="small" type="success" link :loading="row._loading" @click="approvePayment(row)">Approve</el-button>
+              <el-button size="small" type="danger" link :loading="row._loading" @click="rejectPayment(row)">Reject</el-button>
+            </template>
+            <el-button v-else-if="row.type === 'shop'" size="small" type="primary" link @click="reviewShop(row)">Review</el-button>
+          </template>
         </el-table-column>
       </el-table>
       <el-empty v-else description="All clear — no pending items" :image-size="72" />
@@ -122,6 +134,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
@@ -132,6 +145,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler)
 
 const store = useAppStore()
+const router = useRouter()
 const loading = ref(true)
 const generating = ref(false)
 const revenueWeeks = ref('8')
@@ -183,6 +197,13 @@ const fetchStats = async () => {
   summaryText.value = `${u?.data?.total ?? 0} users · ${s?.data?.total ?? 0} shops · ${t?.data?.total ?? 0} transactions`
 }
 
+const statusLabels = {
+  0: 'Pending', 1: 'Paid', 2: 'Shipped', 3: 'Completed', 4: 'Completed', 5: 'Completed', 6: 'Cancelled',
+}
+const statusTypes = {
+  0: 'warning', 1: 'primary', 2: 'primary', 3: 'success', 4: 'success', 5: 'success', 6: 'info',
+}
+
 const fetchSalesData = async () => {
   const weeks = parseInt(revenueWeeks.value)
   const res = await qe(get('/home/report/sales', { params: { days: weeks * 7 } }))
@@ -190,21 +211,63 @@ const fetchSalesData = async () => {
   const d = res.data
   buildLineChart(d.timeSeries)
   buildDoughnutChart(d.categorySales)
-  recentActivity.value = (d.recentOrders || []).slice(0, 10).map(o => ({
-    type: o.status === 'pending' ? 'order' : 'completed',
-    ref: o._id?.slice(-8),
+  const items = []
+  ;(d.recentOrders || []).forEach(o => items.push({
+    type: 'order',
+    ref: o.orderNo || o._id?.slice(-8),
     user: o.userId?.username || '—',
-    amount: o.amount || 0,
+    amount: o.finalAmount || o.totalAmount || 0,
+    status: o.status,
+    statusLabel: statusLabels[o.status] || 'Unknown',
+    statusType: statusTypes[o.status] || 'info',
     date: o.createdAt,
+    _id: o._id,
   }))
-  const pendRefunds = (d.pendingRefunds || []).slice(0, 5).map(r => ({
-    type: 'refund',
-    ref: r._id?.slice(-8),
-    user: r.userId?.username || '—',
-    amount: r.amount || 0,
-    date: r.createdAt,
+  ;(d.recentPayments || []).forEach(t => items.push({
+    type: 'payment',
+    ref: t._id?.slice(-8),
+    user: t.userId?.username || '—',
+    amount: t.amount || 0,
+    status: t.status,
+    statusLabel: t.status === 0 ? 'Pending' : t.status === 1 ? 'Approved' : 'Rejected',
+    statusType: t.status === 0 ? 'warning' : t.status === 1 ? 'success' : 'danger',
+    date: t.createdAt,
+    _id: t._id,
   }))
-  recentActivity.value = [...recentActivity.value, ...pendRefunds].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10)
+  ;(d.recentShopApps || []).forEach(s => items.push({
+    type: 'shop',
+    ref: s._id?.slice(-8),
+    user: s.userId?.username || '—',
+    amount: null,
+    status: s.status,
+    statusLabel: 'Pending',
+    statusType: 'warning',
+    date: s.createdAt,
+    _id: s._id,
+  }))
+  recentActivity.value = items.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10)
+}
+
+const viewOrder = (row) => {
+  router.push('/admin/orders')
+}
+
+const approvePayment = async (row) => {
+  row._loading = true
+  const res = await qe(post('/home/admin/approve-transaction', { id: row._id }))
+  row._loading = false
+  if (res) { ElMessage.success('Payment approved'); fetchSalesData() }
+}
+
+const rejectPayment = async (row) => {
+  row._loading = true
+  const res = await qe(post('/home/admin/reject-transaction', { id: row._id }))
+  row._loading = false
+  if (res) { ElMessage.success('Payment rejected'); fetchSalesData() }
+}
+
+const reviewShop = (row) => {
+  router.push('/admin/sellers')
 }
 
 const buildLineChart = (timeSeries) => {

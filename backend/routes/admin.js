@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const speakeasy = require('speakeasy');
 const { adminAuth } = require('../middleware/auth');
+const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
 const walletController = require('../controllers/walletController');
 const User = require('../models/User');
 const Shop = require('../models/Shop');
@@ -15,6 +19,153 @@ const { ROLES, PERMISSIONS, ROLE_PERMISSIONS, hasPermission } = require('../conf
 const themeController = require('../controllers/themeController');
 const privacyController = require('../controllers/privacyController');
 const upload = require('../middleware/upload');
+
+// ---- Admin Authentication ----
+const adminGenerateToken = (id) => {
+  return jwt.sign({ id, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+const adminGenerateRefreshToken = (user) => {
+  const version = user.tokenVersion || '';
+  return jwt.sign({ id: user._id, type: 'refresh', version }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+};
+
+const adminIssueTokens = (user) => {
+  const token = adminGenerateToken(user._id);
+  const refreshToken = adminGenerateRefreshToken(user);
+  return { token, refreshToken };
+};
+
+const adminRecordLogin = (userId, req, method = 'password', success = true) => {
+  const LoginHistory = require('../models/LoginHistory');
+  LoginHistory.create({
+    userId,
+    ip: req.ip || req.connection?.remoteAddress || '',
+    userAgent: req.headers?.['user-agent'] || '',
+    method,
+    success,
+  }).catch(() => {});
+};
+
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.json(fail('Username and password required'));
+    }
+    const user = await User.findOne({
+      $or: [{ email: username }, { username }, { phone: username }],
+    });
+    if (!user) {
+      return res.json(fail('User not found'));
+    }
+    if (!['admin', 'super_admin', 'manager', 'staff'].includes(user.role)) {
+      return res.json(fail('Admin access required'));
+    }
+    if (user.status === 0) {
+      return res.json(fail('Account disabled'));
+    }
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.json(fail('Invalid password'));
+    }
+    if (user.twoFactorEnabled) {
+      adminRecordLogin(user._id, req, 'password', true);
+      const tempToken = jwt.sign({ id: user._id, twoFactorPending: true }, JWT_SECRET, { expiresIn: '5m' });
+      return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
+    }
+    adminRecordLogin(user._id, req, 'password', true);
+    const tokens = adminIssueTokens(user);
+    const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
+    res.json(success({ ...tokens, userInfo: user, ...extra }, 'Login successful'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/auth/login/2fa', async (req, res) => {
+  try {
+    const { tempToken, token: twoFactorCode } = req.body;
+    if (!tempToken || !twoFactorCode) {
+      return res.json(fail('Temporary token and 2FA code required'));
+    }
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, JWT_SECRET);
+    } catch (e) {
+      return res.json(fail('Temporary token expired or invalid'));
+    }
+    if (!decoded.twoFactorPending) {
+      return res.json(fail('Invalid token'));
+    }
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.json(fail('User not found'));
+    }
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: twoFactorCode,
+      window: 2,
+    });
+    if (verified) {
+      adminRecordLogin(user._id, req, '2fa', true);
+      const tokens = adminIssueTokens(user);
+      return res.json(success({ ...tokens, userInfo: user }, 'Login successful'));
+    }
+    const isBackup = user.backupCodes.find(c => bcrypt.compareSync(twoFactorCode, c));
+    if (isBackup) {
+      user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
+      await user.save();
+      adminRecordLogin(user._id, req, 'backup_code', true);
+      const tokens = adminIssueTokens(user);
+      return res.json(success({ ...tokens, userInfo: user }, 'Login successful (backup code used)'));
+    }
+    adminRecordLogin(user._id, req, '2fa', false);
+    res.json(fail('Invalid 2FA code'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/auth/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.json(fail('Refresh token required'));
+    }
+    const { verifyRefreshToken } = require('../middleware/auth');
+    const decoded = verifyRefreshToken(refreshToken);
+    if (!decoded || decoded.type !== 'refresh') {
+      return res.json({ code: -1, msg: 'Invalid or expired refresh token' });
+    }
+    const user = await User.findById(decoded.id);
+    if (!user || user.status === 0) {
+      return res.json({ code: -1, msg: 'User not found or disabled' });
+    }
+    if (user.tokenVersion && decoded.version !== user.tokenVersion) {
+      return res.json({ code: -1, msg: 'Refresh token revoked' });
+    }
+    const tokens = adminIssueTokens(user);
+    res.json(success({ ...tokens, userInfo: user }, 'Token refreshed'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/auth/logout', adminAuth, async (req, res) => {
+  try {
+    const crypto = require('crypto');
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
+    }
+    res.json(success(null, 'Logged out successfully'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
 
 // ---- Pending transactions ----
 /**
@@ -1398,6 +1549,205 @@ router.put('/tawkto-settings', adminAuth, async (req, res) => {
   } catch (error) {
     res.json(fail(error.message));
   }
+});
+
+// ---- Seller ID Settings ----
+router.get('/seller-id-settings', adminAuth, async (req, res) => {
+  try {
+    const Counter = require('../models/Counter');
+    const counter = await Counter.findOne({ name: 'sellerId' });
+    const sellers = await User.find({ sellerId: { $exists: true, $ne: '' } })
+      .select('sellerId username email role')
+      .sort({ sellerId: 1 });
+    res.json(success({ counter: counter || { name: 'sellerId', seq: 171910 }, sellers }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/seller-id-settings', adminAuth, async (req, res) => {
+  try {
+    const Counter = require('../models/Counter');
+    const { startingNumber } = req.body;
+    if (startingNumber === undefined || typeof startingNumber !== 'number' || startingNumber < 1) {
+      return res.json(fail('Starting number must be a positive integer'));
+    }
+    await Counter.updateOne(
+      { name: 'sellerId' },
+      { $set: { seq: startingNumber } },
+      { upsert: true }
+    );
+    const counter = await Counter.findOne({ name: 'sellerId' });
+    res.json(success(counter, `Seller ID counter set to ${startingNumber}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/seller-id-override', adminAuth, async (req, res) => {
+  try {
+    const { userId, sellerId } = req.body;
+    if (!userId || !sellerId) {
+      return res.json(fail('userId and sellerId are required'));
+    }
+    const existing = await User.findOne({ sellerId, _id: { $ne: userId } });
+    if (existing) {
+      return res.json(fail(`Seller ID ${sellerId} is already assigned to another user`));
+    }
+    const user = await User.findByIdAndUpdate(userId, { sellerId }, { new: true });
+    if (!user) return res.json(fail('User not found'));
+    res.json(success({ userId: user._id, sellerId: user.sellerId }, `Seller ID updated to ${sellerId}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Logistics Management ----
+const Shipping = require('../models/Shipping');
+const ShippingMethod = require('../models/ShippingMethod');
+
+const CARRIERS = [
+  { id: 'sf', name: 'SF Express' },
+  { id: 'yto', name: 'YTO Express' },
+  { id: 'zto', name: 'ZTO Express' },
+  { id: 'sto', name: 'STO Express' },
+  { id: 'yd', name: 'Yunda Express' },
+  { id: 'ems', name: 'EMS' },
+  { id: 'ups', name: 'UPS' },
+  { id: 'fedex', name: 'FedEx' },
+  { id: 'dhl', name: 'DHL' },
+  { id: 'tnt', name: 'TNT' },
+];
+
+const TRACKING_STATUS = {
+  0: 'Pending Pickup', 1: 'Picked Up', 2: 'In Transit',
+  3: 'Out for Delivery', 4: 'Delivered', 5: 'Delivery Failed', 6: 'Returned',
+};
+
+router.get('/logistics/stats', adminAuth, async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.shopId) filter.shopId = req.query.shopId;
+    const stats = await Shipping.aggregate([
+      { $match: filter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+    const result = { total: 0 };
+    Object.keys(TRACKING_STATUS).forEach(k => { result[k] = 0; });
+    stats.forEach(s => { result[s._id] = s.count; result.total += s.count; });
+    res.json(success({ stats: result, labels: TRACKING_STATUS }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.get('/logistics/carriers', adminAuth, async (req, res) => {
+  res.json(success(CARRIERS));
+});
+
+router.get('/logistics', adminAuth, async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.status !== undefined && req.query.status !== '') filter.status = parseInt(req.query.status);
+    if (req.query.carrier) filter.carrier = req.query.carrier;
+    if (req.query.shopId) filter.shopId = req.query.shopId;
+    if (req.query.search) {
+      const orders = await Order.find({ orderNo: { $regex: req.query.search, $options: 'i' } }).select('_id');
+      filter.orderId = { $in: orders.map(o => o._id) };
+    }
+    const { skip, limit, page, pageSize } = paginate(req.query.page, req.query.pageSize || 20);
+    const [list, total] = await Promise.all([
+      Shipping.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)
+        .populate({ path: 'orderId', select: 'orderNo finalAmount status userId' })
+        .populate({ path: 'shopId', select: 'name' }),
+      Shipping.countDocuments(filter),
+    ]);
+    res.json(success({
+      list: list.map(s => ({
+        ...s.toObject(),
+        statusLabel: TRACKING_STATUS[s.status] || 'Unknown',
+      })),
+      total, page, pageSize,
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.get('/logistics/:id', adminAuth, async (req, res) => {
+  try {
+    const shipping = await Shipping.findById(req.params.id)
+      .populate({ path: 'orderId', select: 'orderNo finalAmount status userId createdAt' })
+      .populate({ path: 'shopId', select: 'name' });
+    if (!shipping) return res.json(fail('Shipping record not found'));
+    res.json(success({
+      ...shipping.toObject(),
+      statusLabel: TRACKING_STATUS[shipping.status] || 'Unknown',
+      statusHistory: (shipping.statusHistory || []).map(h => ({
+        ...h, statusLabel: TRACKING_STATUS[h.status] || 'Unknown',
+      })),
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/logistics/:id/tracking', adminAuth, async (req, res) => {
+  try {
+    const { newStatus, location, description } = req.body;
+    if (newStatus === undefined) return res.json(fail('newStatus is required'));
+    const shipping = await Shipping.findById(req.params.id);
+    if (!shipping) return res.json(fail('Shipping record not found'));
+    shipping.statusHistory.push({
+      status: newStatus, location: location || '',
+      description: description || TRACKING_STATUS[newStatus] || 'Status updated',
+      timestamp: new Date(),
+    });
+    shipping.status = newStatus;
+    if (newStatus === 4) shipping.deliveredAt = new Date();
+    await shipping.save();
+    const order = await Order.findById(shipping.orderId);
+    const io = req.app?.get('io');
+    if (io && order) {
+      io.to(`user_${order.userId}`).emit('trackingUpdated', {
+        orderId: order._id, trackingNo: shipping.trackingNo,
+        status: newStatus, statusLabel: TRACKING_STATUS[newStatus] || 'Unknown',
+        message: `Your order ${order.orderNo} tracking updated: ${TRACKING_STATUS[newStatus] || 'Status updated'}`,
+      });
+    }
+    res.json(success(shipping, 'Tracking updated'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+// ---- Shipping Methods (Admin override of settings routes) ----
+router.get('/logistics/shipping-methods', adminAuth, async (req, res) => {
+  try {
+    const methods = await ShippingMethod.find().sort({ sort: 1 });
+    res.json(success(methods));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/logistics/shipping-methods', adminAuth, async (req, res) => {
+  try {
+    const { name, carrier, type, rate, freeShippingThreshold, estimatedDays, regions, status, sort } = req.body;
+    if (!name) return res.json(fail('Name is required'));
+    const method = await ShippingMethod.create({
+      name, carrier, type: type || 'flat', rate: rate || 0,
+      freeShippingThreshold, estimatedDays: estimatedDays || '3-7',
+      regions: regions || [], status: status !== undefined ? status : 1, sort: sort || 0,
+    });
+    res.json(success(method, 'Shipping method created'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/logistics/shipping-methods/:id', adminAuth, async (req, res) => {
+  try {
+    const method = await ShippingMethod.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!method) return res.json(fail('Shipping method not found'));
+    res.json(success(method, 'Shipping method updated'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.delete('/logistics/shipping-methods/:id', adminAuth, async (req, res) => {
+  try {
+    const method = await ShippingMethod.findByIdAndDelete(req.params.id);
+    if (!method) return res.json(fail('Shipping method not found'));
+    res.json(success(null, 'Shipping method deleted'));
+  } catch (error) { res.json(fail(error.message)); }
 });
 
 module.exports = router;

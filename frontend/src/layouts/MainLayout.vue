@@ -10,8 +10,11 @@
         </transition>
       </router-view>
       <MainLayoutFooter />
-      <TawkToWidget />
-      <div class="kefu" v-if="store.kefu" @click="openKefu">
+      <div class="kefu" v-if="store.tawkTo.enabled" @click="openTawkto">
+        <i class="iconfont icon-kefu"></i>
+        <span class="kefu-label">Chat</span>
+      </div>
+      <div class="kefu" v-else-if="store.kefu" @click="openKefu">
         <i class="iconfont icon-kefu"></i>
       </div>
     </div>
@@ -26,7 +29,6 @@ import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
-import TawkToWidget from '@/components/TawkToWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null
@@ -44,6 +46,12 @@ watch(() => store.token, (newToken) => {
   }
 })
 
+const openTawkto = () => {
+  if (window.Tawk_API && store.tawkTo.enabled) {
+    window.Tawk_API.maximize()
+  }
+}
+
 const openKefu = () => {
   window.open(store.kefu, '_blank')
 }
@@ -57,42 +65,7 @@ const loadWallet = async () => {
 }
 
 const applyTheme = (theme) => {
-  if (!theme) return
-  const root = document.documentElement
-  const map = {
-    primaryColor: '--g-main_color',
-    backgroundColor: '--g-bg',
-    textColor: '--g-text',
-    accentColor: '--g-accent',
-    borderColor: '--g-border',
-    fontFamily: '--g-font-family',
-    customCSS: null,
-  }
-  Object.entries(map).forEach(([key, cssVar]) => {
-    if (cssVar && theme[key]) {
-      root.style.setProperty(cssVar, theme[key])
-    }
-  })
-  if (theme.customCSS) {
-    let styleEl = document.getElementById('theme-custom-css')
-    if (!styleEl) {
-      styleEl = document.createElement('style')
-      styleEl.id = 'theme-custom-css'
-      document.head.appendChild(styleEl)
-    }
-    styleEl.textContent = theme.customCSS
-  }
-  if (theme.siteName) {
-    document.title = theme.siteName
-  }
-  if (theme.logoUrl) {
-    const logo = document.querySelector('.ton-logo-img')
-    if (logo) logo.src = theme.logoUrl
-  }
-  if (theme.faviconUrl) {
-    const link = document.getElementById('linkicon')
-    if (link) link.href = theme.faviconUrl
-  }
+  store.applyTheme(theme)
 }
 
 onMounted(async () => {
@@ -104,9 +77,8 @@ onMounted(async () => {
     store.webLogo = res.data.webLogo || {}
     store.kefu = res.data.kefu || ''
   }
-  const themeRes = await qe(get('/home/settings/theme'))
-  if (themeRes?.data) {
-    applyTheme(themeRes.data)
+  if (res?.data?.themeSettings) {
+    applyTheme(res.data.themeSettings)
   }
   if (store.token) {
     const userRes = await qe(get('/home/user/getInfo'))
@@ -126,8 +98,11 @@ onUnmounted(() => {
 <style scoped>
 .v_app { min-height: 100vh; display: flex; flex-direction: column; }
 .v_main_layout { flex: 1; display: flex; flex-direction: column; }
-.kefu { position: fixed; right: 20px; bottom: 100px; width: 50px; height: 50px; border-radius: 50%; background: var(--g-main_color); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-.kefu .iconfont { font-size: 24px; }
+.kefu { position: fixed; right: 20px; bottom: 100px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 4px 16px rgba(102,126,234,0.4); transition: transform 0.2s, box-shadow 0.2s; }
+.kefu:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(102,126,234,0.5); }
+.kefu .iconfont { font-size: 26px; }
+.kefu-label { position: absolute; right: 62px; background: #333; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.kefu:hover .kefu-label { opacity: 1; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

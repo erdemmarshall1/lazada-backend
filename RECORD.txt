@@ -1,5 +1,5 @@
 UPDATE & FIX RECORD
-Date: July 9, 2026
+Date: July 10, 2026
 
 === CREDENTIALS ===
 
@@ -16,99 +16,121 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
 
 === CHANGES ===
 
-1. Chat Widget
-   - Status: Already configured, Tawk.to widget active
-   - Component: frontend/src/components/TawkToWidget.vue in MainLayout.vue
-   - Admin panel manages widget ID, enabled/disabled
+1. Full Code Audit & Bug Fixes
+   - Fixed: main.js missing `usePwa` import (line 84 called usePwa() without importing it)
+   - Fixed: Removed duplicate TawkToWidget from MainLayout.vue (was rendered twice — once in App.vue, once in MainLayout.vue)
+   - Fixed: MainLayout.vue referenced `store.tawktoActive` (non-existent) — changed to `store.tawkTo.enabled`
+   - Fixed: Renamed postcss.config.js → postcss.config.cjs, tailwind.config.js → tailwind.config.cjs to resolve ESM/CJS module conflict with "type": "module" in package.json
 
-2. Seller ID Assignment
-   - Status: No changes needed
-   - Auto-assigned (SLDxxxxx) on admin approval via Counter model
-   - backend/routes/admin.js route POST /approve-shop
+2. Tawk.to Chat Widget Upgrade
+   - Replaced basic TawkToWidget.vue with full floating popup widget matching LiveChatWidget design
+   - Chat panel includes: Tawk.to Live Chat, WhatsApp, and In-App Chat options
+   - Auto-loads Tawk.to script in background when enabled
+   - Pulse animation on floating button, slide transition for panel
+   - Admin can still manage via /admin/tawkto-settings
 
-3. Cloudinary Config Centralized
-   - backend/config/cloudinary.js -- created (centralized initialization)
-   - backend/config/app.js -- CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET added
-   - backend/.env -- Cloudinary credentials added
-   - backend/.env.example -- Cloudinary credentials added
-   - backend/server.js -- require('./config/cloudinary') added
+3. Advanced PWA Upgrade
+   - Service Worker (sw.js) rewritten with multi-strategy caching:
+     - Images: dedicated IMAGE_CACHE (cache-first)
+     - Fonts: cache-first (CACHE)
+     - API endpoints: network-first with 120s TTL (API_CACHE)
+     - Navigation: network-first with 60s TTL + offline fallback (RUNTIME_CACHE)
+     - Product/content pages: cache-first then refresh in background
+   - Enhanced push notifications with vibration, requireInteraction, renotify
+   - Manifest (manifest.json) upgraded with:
+     - Full icon set (48px → 1024px) with maskable support
+     - Shortcuts (Shop, Orders, Store, Cart)
+     - display_override for better standalone experience
+     - Screenshot metadata
+   - Offline page redesigned with dark gradient theme, try-again button, feature showcase
+   - BeforeInstallPrompt event handling across all layouts
 
-4. Product Image Fix (Phase 1 - Title Match)
-   - backend/scripts/check_broken_images.js -- verified all 515 local images work
-   - backend/scripts/match_and_upload_products.js -- matched 42 Products/ folder images by title
-   - 42 products updated with Cloudinary URLs from Products folder (>= 80% confidence)
+4. Backend Theme & Admin UI
+   - Admin layout (AdminLayout.vue) upgraded with:
+     - Dark sidebar (#1a1a2e) with collapsible menu groups
+     - Top navbar with breadcrumbs, search, notifications bell, language switcher, user menu
+     - Mobile responsive with hamburger + overlay drawer
+     - PWA install tour and banner in admin layout
+   - global.css enhanced with:
+     - Full dark admin theme (Element Plus overrides for tables, dialogs, inputs, selects, etc.)
+     - Responsive grid system for dashboards (dash-grid-4, dash-grid-6, dash-grid-3)
+     - Touch target improvements (44×44px WCAG minimum)
+     - Admin login page styling
+     - Dark section table overrides
 
-5. Product Image Fix (Phase 2 - Comprehensive)
-   - backend/scripts/fix_product_images_comprehensive.js -- improved matching, uploaded all 35 matched
-   - backend/scripts/upload_local_assets.js -- uploaded 515 images from local_assets/ to Cloudinary
-   - RESULT: All 2269 products now have Cloudinary-hosted images
+5. Live Notifications System
+   - Socket.io integration in dedicated socket/index.js with real-time events:
+     - newMessage, messagesRead, newOrder, orderPaid, orderShipped
+     - orderCancelled, orderCompleted, refundRequested, refundProcessed, walletUpdated
+   - NotificationBell.vue: dropdown panel with mark-all-read, time-ago, click-to-navigate
+   - Web Push notifications via VAPID keys (backend pushService)
+   - Browser Notification API fallback for inactive tabs
+   - Audio notification support (store.addAudio)
+   - Backend notificationController with SMS + Web Push dispatch
 
-6. UI Revert (to ~July 9 00:00 PDT state)
-   - All admin sidebar/UX/Chart.js dashboard changes removed
-   - Cloudinary config + product image scripts retained
-   - Preview: https://de4e6ee5.theoutnet-wholesale.pages.dev
+6. Build & Deployment
+   - Build: `npm run build` passed successfully (2228 modules, no errors)
+   - Cloudflare Pages preview deployed:
+     - Preview: https://6e1229a6.theoutnet-wholesale.pages.dev
+     - Alias: https://preview.theoutnet-wholesale.pages.dev
 
-7. Admin Dashboard Redesign (Infographic)
-   - AdminDashboard.vue: 6 colored metric cards with icons, Chart.js bar+line combo revenue chart with day/week/month toggle, category doughnut, recent orders + top products tables, pending approvals tabs
-   - global.css: added .page-card and .page-header utility classes
-   - 12 admin list views (Users, Sellers, Products, Transactions, Coupons, Banners, InvitationCodes, Reviews, Roles, Pages, Blogs, Faqs): wrapped in .page-card with .page-header (iconfont icon + title)
-   - MyCenter.vue sidebar: collapsible menu sections with chevron toggles; hover effects with left border accent; max-height + overflow-y: auto for scroll support; Live Chat Inbox/Settings links for admin
-   - router/index.js: added routes for /admin-livechat-inbox, /admin-livechat-settings, /storegoodcontrol, /storeordercontrol
-   - Build: npm run build passed (no errors)
-   - Cloudflare Pages preview: https://a7eb59c2.theoutnet-wholesale.pages.dev
-   - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
+7. Logo Replacement
+   - Replaced favicon.ico, favicon.png, /img/outnet-logo.png with Outnet logo.png
+   - Updated outnet-logo.svg to reference the PNG
 
-8. Full Admin Portal Redesign (Modern Dark Sidebar)
-   - Created AdminLayout.vue: dedicated admin layout with dark sidebar (#1a1a2e), 6 collapsible menu groups (Dashboard, Commerce, Finance, Content, Communication, System), top navbar with breadcrumbs/search/notifications/user dropdown, profile section at sidebar bottom, mobile responsive with hamburger + overlay
-   - router/index.js: added /admin/* route group with 28 child routes under AdminLayout, all admin views accessible at clean paths (/admin/dashboard, /admin/users, etc.)
-   - AdminDashboard.vue: rewritten as admin portal homepage with welcome banner (gradient #667eea->#764ba2), 6 metric cards, 2-column charts (bar+line + doughnut), quick access grid (6 cards: Sellers, Users, Products, Transactions, Reports, Settings), recent activity table
-   - global.css: added admin-specific CSS variables + utility classes (admin-metric-grid, admin-chart-row, admin-tables-row, admin-quick-grid, admin-welcome-banner, etc.)
-   - Build: npm run build passed (no errors)
-   - Cloudflare Pages preview: https://a212fd2e.theoutnet-wholesale.pages.dev
-   - Deploy alias: https://preview.theoutnet-wholesale.pages.dev
+8. Admin Logistics Feature
+   - Backend: Added logistics routes in admin.js — stats, carriers, shipments CRUD, tracking updates with Socket.io push, shipping methods CRUD
+   - Frontend: Created AdminLogistics.vue with Stats, Shipments table, Shipping Methods management, Tracking update dialog, Shipment detail view
+   - Router: Added /admin/logistics route and adminPathMap redirect
+   - Sidebar: Added "Logistics" menu item under Commerce group
 
-9. Fix Admin 404 Paths + Path Redirects
-   - Root cause: AdminDashboard.vue metricCards/quickLinks + welcome banner button used old /admin-xxx paths (didn't match /admin/xxx routes)
-   - Fixed: All /admin-xxx paths changed to /admin/xxx in metricCards, quickLinks, and welcome banner
-   - Fixed: router/index.js added adminPathMap redirect dict in beforeEach guard to redirect old /admin-* to /admin/*
-   - Fixed: admin hostname guard now points to /admin/dashboard
-   - Fixed: AdminLayout.vue user dropdown links updated
-   - Commit: 2c79f73
+9. Menu Categories Restructuring
+    - Created JustIn.vue — dedicated page with Trending / Hottest / Newest tabs
+    - Created Designers.vue — shows product tags as designer brand filters with product grid
+    - Created CategoryProducts.vue — reusable page for Clothing/Shoes/Bags/Accessories via /categories/:slug route
+    - Updated router with new routes: /just-in, /designers, /categories/:slug
+    - Updated MainLayoutHeader.vue desktop nav + mobile drawer links to point to new routes
+    - Updated MainLayoutNav.vue secondary nav bar with all category links
 
-10. Generate Seller ID Button + Backend Endpoint
-    - Backend: Added POST /home/admin/generate-seller-id endpoint (backend/routes/admin.js:145-163)
-      Takes { id } (shop ID), increments Counter for sellerId, generates SLD + zero-padded seq, updates user's sellerId field
-    - Frontend: Added yellow "Generate ID" button in AdminSellers.vue Action column (line 31)
-      - Visible when status === 1 (approved), disabled when sellerId already exists
-    - Commit: 2c907c2
+10. Admin Redirect Enforcement
+    - AdminLayout.vue: sidebar profile avatar click → /admin/dashboard
+    - Login.vue: added isAdmin fallback check after login to redirect admins to dashboard
+    - MainLayoutHeader.vue: account icon checks store.isAdmin and redirects admins to /admin/dashboard
+    - MyAccount.vue: onMounted guard redirects admins to /admin/dashboard
+    - Admin login page: no registration option (only "Forgot password?" and "Back to main site")
 
-11. Fix 404 on Generate Seller ID + Admin Auto-Redirect
-     - Frontend Login.vue (line 62): Added store.isAdmin check in getRedirectPath() — admin users auto-redirect to /admin/dashboard after login
-     - Backend: The 404 on generate-seller-id was caused by backend not being restarted — route IS properly mounted in server.js
-     - Deploy preview: https://c2fe6bed.theoutnet-wholesale.pages.dev
+11. Dark Blue Container Backgrounds
+    - global.css: changed CSS variables for deeper dark blue:
+      - --dash-dark-bg: #0d1b3e (was #1a1a2e)
+      - --dash-dark-card: #1a237e (was #16213e)
+      - --dash-dark-card-alt: #283593 (was #1c2a4a)
+    - AdminLayout.vue: sidebar background changed to use var(--dash-dark-bg) instead of hardcoded #1a1a2e
+    - Affects all admin container boxes, cards, panels, and sections across ~15+ files
 
-12. Add Missing Store Routes + Fix Seller-Logistics Path Mismatch
-     - Added /storeordercontrol and /storegoodcontrol routes in router/index.js under MainLayout (requiresAuth)
-     - Fixed /sellerlogistics → /seller-logistics in StoreOrderControl.vue (lines 5, 97) and MyStore.vue (line 161)
-     - Build passed: StoreOrderControl and StoreGoodControl chunks now included
-     - Commits: 072300c, d5b121b
+12. Admin Backend on Cloudflare Pages (admin.theoutnet-wholesale.pages.dev)
+    - Created frontend/functions/[[path]].js — Cloudflare Pages Function acting as API proxy
+    - Proxies /home/* and /uploads/* requests to Railway backend (https://lazada-backend-production-3b57.up.railway.app)
+    - Created frontend/.env.admin for admin-specific builds (VITE_API_BASE_URL='' so API calls go to same domain)
+    - Admin subdomain now self-contained: frontend + API proxy on same domain
+    - No CORS issues, admin backend logically "lives" on admin.theoutnet-wholesale.pages.dev
+    - Build: npm run build -- --mode admin (2233 modules, 0 errors)
 
-13. Seller Auto-Redirect to /mystore After Login
-     - Login.vue (line 64): Added `if (store.isSeller) return '/mystore'` — sellers now go to their store dashboard, regular users go to /myaccount
-     - Cloudflare Preview: https://preview.theoutnet-wholesale.pages.dev
-     - Cloudflare Production: https://main.theoutnet-wholesale.pages.dev
-     - Netlify Production: https://gleaming-yeot-b22423.netlify.app
-     - Commits: 4746817, 3ccc73d
+13. Admin Subdomain Route Restriction
+    - Updated frontend/functions/[[path]].js to restrict non-admin routes:
+      - /admin/* → serve index.html (SPA handles routing)
+      - /assets/*, *.js, *.css, etc. → serve static assets
+      - /home/*, /uploads/* → proxy to Railway backend
+      - All other paths → 302 redirect to /admin/login
+    - Fixed bug: Request constructor was passing Request object as init (invalid)
 
-14. Fix Railway Deploy + Generate Seller ID Route
-     - Railway backend was running stale code — `POST /home/admin/generate-seller-id` returned 404
-     - Root cause: GitHub Actions `RAILWAY_TOKEN` and `NETLIFY_AUTH_TOKEN` secrets expired
-     - Fixed: Redeployed Railway backend via local CLI (`railway up` — works without token since session cached)
-     - Fixed: deploy.yml — removed `--yes` flag (not supported in v5) and `railway login --token` (use env var instead)
-     - Fixed: .gitignore — added `uiux.html` and `uiux_files/` to prevent junk file commits
-     - Verified: `POST /home/admin/generate-seller-id` returns `SLD00001` successfully
-     - NOTE: GitHub secret `RAILWAY_TOKEN` and `NETLIFY_AUTH_TOKEN` need manual renewal from their dashboards
-     - Commits: 8cd9b81
+=== EXISTING DEPLOYMENTS ===
+
+GitHub: https://github.com/erdemmarshall1/lazada-backend.git
+Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
+Frontend (Netlify): https://shopify-wholesale.netlify.app (site ID in GitHub secrets)
+Frontend (Cloudflare Pages): https://theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Preview): https://preview.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Admin): https://admin.theoutnet-wholesale.pages.dev
 
 === CREDENTIALS ===
 
@@ -119,25 +141,3 @@ Cloudinary:
 
 Cloudflare:
   API Token: (set as GitHub secret CLOUDFLARE_API_TOKEN)
-
-15. MyCenter.vue Mobile Sidebar Enhancement - replaced display: none/block toggle with fixed slide-in drawer (left: -240px to left: 0) + backdrop overlay for mobile (<768px). Body scroll locked while open. Matches AdminLayout and MainLayoutHeader drawer patterns.
-16. Seller ID Strict Assignment + Admin Application Dashboard - backend: POST /migrate-seller-ids (one-time migration), POST /login-as-seller/:userId (temp JWT for admin to access seller portal). Frontend: AdminSellers.vue — removed manual Generate ID button, added Docs badge (x/4), added Login as Seller button; AdminShopDetail.vue — redesigned as application dashboard with summary header, document gallery with hover preview + lightbox dialog, Approve/Reject, Login to Seller Portal opens /mystore in new tab with temp_token. Router guard consumes temp_token query param and sets store token. Request interceptor falls back to seller_temp_token localStorage key.
-
-17. Header Slider Image Fix - Re-ran fix_live_banner_images.js to refresh all 5 slider banners with new Pixabay image URLs (these expire over time). Frontend proxy list already includes pixabay.com. Images load via backend proxy at /home/image/proxy?url=...
-
-18. Admin Login Page + Sub-domain Support - Created AdminLogin.vue (dedicated login page for administrators only — no registration, admin branding with dark gradient background). Added /admin/login route in router. Updated router beforeEach guard: admin subdomain + not logged in → /admin/login (instead of /login). Added admin-login route guard for already-logged-in users (redirects to /admin/dashboard). Created + pushed admin git branch for Cloudflare Pages — auto-deploys to admin.theoutnet-wholesale.pages.dev. Updated deploy.yml to support both master and admin branches; admin branch skips Railway backend + Netlify, only deploys frontend to Cloudflare Pages.
-
-19. Buyer Dashboard Metrics (MyAccount.vue) - Redesigned MyAccount.vue with 4 metric cards at top: Total Orders (from /home/userOrder/getList), Active Orders, Wishlist Count (from /home/userCollect/getProductList), Wallet Balance (from /home/userWallet/getList). Added recent orders table below. Profile editing form retained below metrics. Responsive grid: 4 columns desktop, 2 tablet, 1 mobile.
-
-20. Advanced Dashboard Redesign with Glowing Cards & Borders - Upgraded all 4 dashboards (buyer, seller, admin, superadmin) with glow-card visual system. Added reusable .glow-card class in global.css with: gradient left border accent (4px), radial-gradient mouse-follow glow effect, hover lift (translateY -4px) with colored box-shadow glow, transition on all properties. Added .dash-metrics grid layout utility (shared across all dashboards). Upgraded MyAccount.vue (buyer 4-card metrics), MyStore.vue (seller 8-card metrics + chart boxes + store info cards with border accent + hover glow), AdminDashboard.vue (6-card metrics + removed redundant CSS), SuperAdminDashboard.vue (4-card stats + image stats with glow cards, removed old basic CSS).
-
-21. Sidebar Menu Glow Upgrade (All 4 Components) - Upgraded all sidebar/menu components with glow hover/border accent system matching the dashboard glow-card design language. MyCenter.vue: glow-user-card with gradient top border + subtle shadow, glow-menu-section with hover glow border/shadow, glow-menu-item with radial-gradient overlay on hover + left border color transition, glow-menu-item--active with inset glow shadow. AdminLayout.vue: admin-glow-item with purple-tinted radial overlay on hover, admin-glow-item--active with box-shadow glow, admin-footer-glow with gradient top border. MainLayoutHeader.vue: mobile drawer items (ton-drawer-item) get left border accent on hover + radial gradient overlay + padding shift, search input focus ring glow. MainLayoutNav.vue: nav items (ton-nav-bar-item) get radial overlay on hover, active underline enhanced with box-shadow glow.
-
-=== EXISTING DEPLOYMENTS ===
-
-GitHub: https://github.com/erdemmarshall1/lazada-backend.git
-Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
-Frontend (Netlify): https://shopify-wholesale.netlify.app (site ID in GitHub secrets)
-Frontend (Cloudflare Pages): theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Preview): https://f23b4a56.theoutnet-wholesale.pages.dev
-Frontend (Cloudflare Admin): admin.theoutnet-wholesale.pages.dev (pending deployment)

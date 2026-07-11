@@ -87,7 +87,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, qe } from '@/api/request'
+import { get, post, del, qe } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const coupons = ref([])
@@ -111,7 +111,7 @@ const toggleStatus = async (id) => {
 const removeCoupon = async (id) => {
   try {
     await ElMessageBox.confirm('Delete this coupon?', 'Confirm', { type: 'warning' })
-    const res = await qe(fetch(`/home/admin/coupons/${id}`, { method: 'DELETE' }).then(r => r.json()))
+    const res = await qe(del(`/home/admin/coupons/${id}`))
     if (res) { ElMessage.success(res.msg); fetchCoupons() }
   } catch {}
 }

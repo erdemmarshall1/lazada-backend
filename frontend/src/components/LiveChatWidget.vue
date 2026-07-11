@@ -73,8 +73,7 @@ const TELEGRAM_USERNAME = 'theoutnet_support' // Telegram username
 const whatsappUrl = computed(() => `https://wa.me/${PHONE_NUMBER}?text=Hello%20THE%20OUTNET%20support%2C%20I%20need%20help`)
 const telegramUrl = computed(() => `https://t.me/${TELEGRAM_USERNAME}`)
 
-const trackClick = (channel) => {
-  console.log(`Live chat clicked: ${channel}`)
+const trackClick = () => {
 }
 
 const openInAppChat = () => {

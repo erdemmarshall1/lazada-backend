@@ -32,10 +32,15 @@ router.get('/list', auth, notificationController.list);
  *         description: { count: number }
  */
 router.get('/unread-count', auth, async (req, res) => {
-  const { success } = require('../utils/response');
-  const Notification = require('../models/Notification');
-  const count = await Notification.countDocuments({ userId: req.user._id, isRead: false });
-  res.json(success({ count }));
+  try {
+    const { success } = require('../utils/response');
+    const Notification = require('../models/Notification');
+    const count = await Notification.countDocuments({ userId: req.user._id, isRead: false });
+    res.json(success({ count }));
+  } catch (error) {
+    const { fail } = require('../utils/response');
+    res.json(fail(error.message));
+  }
 });
 
 /**

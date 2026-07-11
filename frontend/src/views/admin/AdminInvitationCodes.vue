@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post } from '@/api/request'
+import { get, post, patch, qe } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const codes = ref([])
@@ -73,7 +73,7 @@ const generateCode = async () => {
 const deactivate = async (id) => {
   try {
     await ElMessageBox.confirm('Deactivate this invitation code?', 'Confirm', { type: 'warning' })
-    const res = await fetch(`/home/admin/invitation-codes/${id}/deactivate`, { method: 'PATCH' }).then(r => r.json())
+    const res = await qe(patch(`/home/admin/invitation-codes/${id}/deactivate`))
     if (res) {
       ElMessage.success(res.msg || 'Code deactivated')
       fetchCodes()

@@ -288,9 +288,9 @@ onMounted(() => {
 .admin-platform-wallet { padding: 20px; }
 .admin-platform-wallet h2 { margin-bottom: 16px; }
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-.stat-card { background: var(--g-bg, #f5f5f5); border-radius: 8px; padding: 20px; text-align: center; }
-.stat-label { font-size: 13px; color: var(--g-text-light, #999); margin-bottom: 8px; }
-.stat-value { font-size: 28px; font-weight: 700; color: var(--g-main_color, #ff6a00); }
+.stat-card { background: var(--dash-dark-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 20px; text-align: center; }
+.stat-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
 .stat-value.escrow { color: #e6a23c; }
 .stat-value.revenue { color: #67c23a; }
 .stat-value.available { color: #409eff; }

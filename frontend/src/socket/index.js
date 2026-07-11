@@ -122,6 +122,12 @@ export const disconnectSocket = () => {
 
 export const getSocket = () => socket
 
+export const joinUser = (userId) => {
+  if (socket?.connected && userId) {
+    socket.emit('join', { userId })
+  }
+}
+
 export const sendSocketMessage = (data) => {
   if (socket?.connected) {
     socket.emit('sendMessage', data)

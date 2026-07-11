@@ -68,6 +68,10 @@ export const useAppStore = defineStore('app', {
     newOrderCount: 0,
     refundRequestCount: 0,
     walletBalance: 0,
+    tawkTo: {
+      enabled: false,
+      widgetId: ''
+    },
   }),
 
   getters: {
@@ -118,6 +122,47 @@ export const useAppStore = defineStore('app', {
     addAudio(src) {
       this.audioList.push(src)
     },
+    applyTheme(theme) {
+      if (!theme) return
+      const root = document.documentElement
+      const map = {
+        primaryColor: '--g-main_color',
+        backgroundColor: '--g-bg',
+        textColor: '--g-text',
+        accentColor: '--g-accent',
+        borderColor: '--g-border',
+        fontFamily: '--g-font-family',
+      }
+      Object.entries(map).forEach(([key, cssVar]) => {
+        if (cssVar && theme[key]) {
+          root.style.setProperty(cssVar, theme[key])
+        }
+      })
+      if (theme.primaryColor) {
+        root.style.setProperty('--g-main_color_hover', theme.primaryColor + 'cc')
+        root.style.setProperty('--el-color-primary', theme.primaryColor)
+      }
+      if (theme.customCSS) {
+        let styleEl = document.getElementById('theme-custom-css')
+        if (!styleEl) {
+          styleEl = document.createElement('style')
+          styleEl.id = 'theme-custom-css'
+          document.head.appendChild(styleEl)
+        }
+        styleEl.textContent = theme.customCSS
+      }
+      if (theme.siteName) {
+        document.title = theme.siteName
+      }
+      if (theme.logoUrl) {
+        const logo = document.querySelector('.ton-logo-img')
+        if (logo) logo.src = theme.logoUrl
+      }
+      if (theme.faviconUrl) {
+        const link = document.getElementById('linkicon')
+        if (link) link.href = theme.faviconUrl
+      }
+    },
     incrementNewOrderCount() {
       this.newOrderCount++
     },
@@ -129,6 +174,17 @@ export const useAppStore = defineStore('app', {
     },
     resetRefundRequestCount() {
       this.refundRequestCount = 0
+    },
+    async fetchTawkToSettings() {
+      try {
+        const res = await get('/home/admin/tawkto-settings')
+        if (res?.code === 0 && res?.data) {
+          this.tawkTo.enabled = !!res.data.enabled
+          this.tawkTo.widgetId = res.data.widgetId || ''
+        }
+      } catch (error) {
+        console.error('Failed to fetch Tawk.to settings:', error)
+      }
     },
   },
 })

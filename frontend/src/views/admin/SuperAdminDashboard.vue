@@ -145,6 +145,9 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { get, post, qe, API_BASE } from '@/api/request'
+import { useAppStore } from '@/stores/app'
+
+const store = useAppStore()
 
 const activeTab = ref('settings')
 const saving = ref(false)
@@ -253,9 +256,12 @@ const runFixImages = async () => {
 
 const saveSettings = async () => {
   saving.value = true
-  await qe(post('/home/admin/settings/theme', settingsForm))
+  const res = await qe(post('/home/admin/settings/theme', settingsForm))
   saving.value = false
-  ElMessage.success('Settings saved')
+  if (res) {
+    store.applyTheme({ ...settingsForm })
+    ElMessage.success('Settings saved')
+  }
 }
 
 onMounted(() => {

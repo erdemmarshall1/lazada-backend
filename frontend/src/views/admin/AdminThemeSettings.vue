@@ -1,8 +1,12 @@
 <template>
-  <div class="admin-page theme-settings">
-    <h3 class="page-title">Theme Settings</h3>
+  <div class="admin-page">
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-shezhi"></i>
+        <h2>Theme Settings</h2>
+      </div>
 
-    <el-form label-position="top" class="theme-form">
+      <el-form label-position="top" class="theme-form">
       <el-divider content-position="left">Branding</el-divider>
       <el-form-item label="Site Name">
         <el-input v-model="form.siteName" placeholder="THE OUTNET WHOLESALE" />
@@ -78,6 +82,7 @@
         </el-button>
       </el-form-item>
     </el-form>
+    </div>
   </div>
 </template>
 
@@ -85,7 +90,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { get, post } from '@/api/request'
+import { useAppStore } from '@/stores/app'
 
+const store = useAppStore()
 const saving = ref(false)
 
 const form = reactive({
@@ -118,6 +125,7 @@ const handleSave = async () => {
     const res = await post('/home/admin/settings/theme', form)
     if (res?.code === 0 || res?.code === 1 || res?.data) {
       ElMessage.success('Theme settings saved')
+      store.applyTheme({ ...form })
     } else {
       ElMessage.error(res?.msg || 'Failed to save')
     }
@@ -145,9 +153,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.theme-settings { max-width: 700px; }
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
 .theme-form { max-width: 600px; }
+.theme-form:deep(.page-title) { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
 .color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .color-grid .el-form-item { margin-bottom: 12px; }
 .theme-preview { border: 1px solid var(--preview-border); border-radius: 8px; padding: 20px; background: var(--preview-bg); color: var(--preview-text); margin-bottom: 16px; }
@@ -157,7 +164,12 @@ onMounted(async () => {
 .preview-btn { padding: 8px 20px; font-size: 12px; border-radius: 4px; cursor: default; }
 .preview-btn-primary { background: var(--preview-primary); color: #fff; }
 .preview-btn-accent { background: var(--preview-accent); color: #fff; }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .color-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .color-grid { grid-template-columns: 1fr; }
+  .preview-buttons { flex-direction: column; gap: 6px; }
+  .preview-btn { text-align: center; }
 }
 </style>

@@ -19,7 +19,7 @@
           </div>
           <div class="menu-items" v-show="!isGroupCollapsed(group.title)">
             <div
-              v-for="item in group.items.filter(i => !i.adminOnly || store.isAdmin)"
+              v-for="item in group.items.filter(i => !i.adminOnly || adminStore.isAdmin)"
               :key="item.path"
               class="menu-item admin-glow-item"
               :class="{ active: isActive(item.path), 'admin-glow-item--active': isActive(item.path) }"
@@ -32,17 +32,22 @@
           </div>
         </div>
       </div>
-      <div class="sidebar-footer admin-footer-glow" v-show="!sidebarCollapsed" v-if="store.isLogin">
-        <div class="user-info admin-user-card">
-          <div class="user-avatar">{{ store.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
+      <div class="sidebar-footer admin-footer-glow" v-show="!sidebarCollapsed" v-if="adminStore.isLogin">
+        <div class="user-info admin-user-card" style="cursor:pointer" @click="$router.push('/admin/dashboard')">
+          <div class="user-avatar">{{ adminStore.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
           <div class="user-details">
-            <div class="user-name">{{ store.userInfo?.username || 'Admin' }}</div>
+            <div class="user-name">{{ adminStore.userInfo?.username || 'Admin' }}</div>
             <div class="user-role">Administrator</div>
           </div>
         </div>
-        <button class="logout-btn" @click="handleLogout">
-          <i class="iconfont icon-tuichu"></i>
-        </button>
+        <div class="sidebar-footer-actions">
+          <button class="footer-action-btn" title="Download App" @click="$router.push('/download-app')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14m0 0l-4-4m4 4l4-4M4 18v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          </button>
+          <button class="logout-btn" @click="handleLogout">
+            <i class="iconfont icon-tuichu"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -73,13 +78,13 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
+                <el-dropdown-item v-for="l in appStore.langList" :key="l.code" :command="l.code" :class="{ active: appStore.lang === l.code }">{{ l.name }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <el-dropdown trigger="click">
             <div class="topbar-user">
-              <span class="user-avatar-small">{{ store.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</span>
+              <span class="user-avatar-small">{{ adminStore.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</span>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
@@ -100,35 +105,43 @@
     </div>
 
     <div class="sidebar-overlay" v-if="mobileSidebarOpen" @click="mobileSidebarOpen = false"></div>
+    <PwaInstallBanner mode="popup" />
+    <PwaInstallTour ref="tourRef" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAdminAppStore } from '@/stores/adminApp'
 import { useAppStore } from '@/stores/app'
+import { adminPost } from '@/api/adminRequest'
 import i18n from '@/locales'
 import { connectSocket, joinUser } from '@/socket'
 
 import NotificationBell from '@/components/NotificationBell.vue'
+import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
+import PwaInstallTour from '@/components/PwaInstallTour.vue'
 
 const router = useRouter()
 const route = useRoute()
-const store = useAppStore()
+const adminStore = useAdminAppStore()
+const appStore = useAppStore()
 
 const sidebarCollapsed = ref(false)
 const mobileSidebarOpen = ref(false)
 const searchQuery = ref('')
 const collapsedGroups = ref(new Set())
+const tourRef = ref(null)
 
 const currentLangName = computed(() => {
-  const lang = store.langList?.find(l => l.code === store.lang)
+  const lang = appStore.langList?.find(l => l.code === appStore.lang)
   return lang?.name || 'English'
 })
 
 const handleLangChange = (code) => {
-  if (code === store.lang) return
-  store.setLanguage(code)
+  if (code === appStore.lang) return
+  appStore.setLanguage(code)
   i18n.global.locale.value = code
   window.location.reload()
 }
@@ -148,9 +161,10 @@ const navigate = (path) => {
   mobileSidebarOpen.value = false
 }
 
-const handleLogout = () => {
-  store.logout()
-  router.push('/login')
+const handleLogout = async () => {
+  await adminPost('/home/admin/auth/logout').catch(() => {})
+  adminStore.logout()
+  router.push('/admin/login')
 }
 
 const handleSearch = () => {
@@ -177,7 +191,7 @@ const breadcrumbs = computed(() => {
       submissions: 'Inquiries', 'tawkto-settings': 'Tawk.to Chat',
       'livechat-inbox': 'Live Chat Inbox', 'livechat-settings': 'Live Chat Settings',
       'user-privacy': 'User Privacy', 'user-detail': 'User Detail',
-      'shop-detail': 'Shop Detail', 'superadmin-dashboard': 'Super Admin',
+      'shop-detail': 'Shop Detail', logistics: 'Logistics', 'superadmin-dashboard': 'Super Admin',
     }
     return labels[p] || p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, ' ')
   })
@@ -198,6 +212,7 @@ const menuGroups = computed(() => [
       { icon: 'iconfont icon-dianpu', label: 'Sellers', path: '/admin/sellers' },
       { icon: 'iconfont icon-shangpin', label: 'Products', path: '/admin/products' },
       { icon: 'iconfont icon-coupon', label: 'Coupons', path: '/admin/coupons' },
+      { icon: 'iconfont icon-daifahuo', label: 'Logistics', path: '/admin/logistics' },
       { icon: 'iconfont icon-anquan', label: 'Invitation Codes', path: '/admin/invitation-codes' },
       { icon: 'iconfont icon-xingxing', label: 'Reviews', path: '/admin/reviews' },
     ]
@@ -239,6 +254,7 @@ const menuGroups = computed(() => [
       { icon: 'iconfont icon-anquan', label: 'Roles & Permissions', path: '/admin/roles' },
       { icon: 'iconfont icon-anquan', label: 'Sessions & Audit', path: '/admin/sessions-audit' },
       { icon: 'iconfont icon-shezhi', label: 'General Settings', path: '/admin/settings' },
+      { icon: 'iconfont icon-anquan', label: 'Seller ID Settings', path: '/admin/seller-id-settings' },
       { icon: 'iconfont icon-dashboard', label: 'Super Admin', path: '/admin/superadmin-dashboard' },
     ]
   },
@@ -247,9 +263,12 @@ const menuGroups = computed(() => [
 onMounted(() => {
   document.documentElement.classList.add('admin-active')
   const socket = connectSocket()
-  if (store.isLogin && store.userInfo?._id) {
-    joinUser(store.userInfo._id)
+  if (adminStore.isLogin && adminStore.userInfo?._id) {
+    joinUser(adminStore.userInfo._id)
   }
+  setTimeout(() => {
+    if (tourRef.value) tourRef.value.show()
+  }, 3000)
 })
 onBeforeUnmount(() => {
   document.documentElement.classList.remove('admin-active')
@@ -259,7 +278,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .admin-layout { display: flex; height: 100vh; overflow: hidden; background: var(--dash-dark-bg); }
 .sidebar-overlay { display: none; }
-.admin-sidebar { width: 260px; min-width: 260px; background: #1a1a2e; color: #a0aec0; display: flex; flex-direction: column; transition: width 0.3s ease, min-width 0.3s ease; z-index: 100; }
+.admin-sidebar { width: 260px; min-width: 260px; background: var(--dash-dark-bg); color: #a0aec0; display: flex; flex-direction: column; transition: width 0.3s ease, min-width 0.3s ease; z-index: 100; }
 .admin-sidebar.collapsed { width: 64px; min-width: 64px; }
 .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
 .sidebar-logo { display: flex; align-items: center; gap: 10px; overflow: hidden; }
@@ -299,7 +318,10 @@ onBeforeUnmount(() => {
 .user-details { overflow: hidden; }
 .user-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-role { font-size: 11px; color: #6c7a8d; }
-.logout-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; }
+.sidebar-footer-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.footer-action-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 16px; padding: 6px; border-radius: 4px; display: flex; align-items: center; }
+.footer-action-btn:hover { color: #667eea; background: rgba(255,255,255,0.06); }
+.logout-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 18px; padding: 6px; border-radius: 4px; display: flex; align-items: center; }
 .logout-btn:hover { color: #e74c3c; background: rgba(255,255,255,0.06); }
 .admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .admin-topbar { display: flex; align-items: center; justify-content: space-between; height: 60px; background: var(--dash-dark-card); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); z-index: 10; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }

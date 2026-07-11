@@ -163,7 +163,7 @@ onMounted(fetchDetail)
 .admin-shop-detail { padding: 20px; max-width: 1100px; }
 .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .detail-header h2 { margin: 0; font-size: 20px; }
-.detail-summary { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 20px; background: linear-gradient(135deg, #f0f2ff, #fff); border: 1px solid #e8e8e8; border-radius: 12px; margin-bottom: 24px; }
+.detail-summary { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 20px; background: linear-gradient(135deg, var(--dash-dark-card-alt), var(--dash-dark-card)); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 24px; }
 .summary-left { display: flex; flex-direction: column; gap: 8px; }
 .summary-left h3 { margin: 0; font-size: 22px; }
 .summary-tags { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -171,9 +171,9 @@ onMounted(fetchDetail)
 .detail-grid { display: flex; flex-direction: column; gap: 24px; }
 .section-title { font-size: 15px; font-weight: 600; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--g-main_color, #e67e22); display: inline-block; }
 .documents-grid { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
-.doc-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; width: 200px; background: #fafafa; transition: box-shadow 0.2s; }
-.doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.doc-card h4 { margin: 0 0 8px; font-size: 13px; color: #666; }
+.doc-card { border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; width: 200px; background: var(--dash-dark-card-alt); transition: box-shadow 0.2s; }
+.doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+.doc-card h4 { margin: 0 0 8px; font-size: 13px; color: rgba(255,255,255,0.5); }
 .doc-preview { position: relative; cursor: pointer; border-radius: 6px; overflow: hidden; }
 .doc-preview img { width: 100%; height: 140px; object-fit: cover; display: block; }
 .doc-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; gap: 4px; opacity: 0; transition: opacity 0.2s; }

@@ -54,7 +54,7 @@
         <el-divider />
         <div class="detail-section">
           <p><strong>Message:</strong></p>
-          <p style="white-space:pre-wrap;background:#f9f9f9;padding:12px;border-radius:4px">{{ view.message }}</p>
+          <p style="white-space:pre-wrap;background:var(--dash-dark-card-alt);padding:12px;border-radius:4px">{{ view.message }}</p>
         </div>
         <div class="detail-section">
           <p><strong>Admin Notes / Reply:</strong></p>

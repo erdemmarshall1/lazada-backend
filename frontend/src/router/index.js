@@ -1,5 +1,6 @@
 ﻿import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useAdminAppStore } from '@/stores/adminApp'
 
 const routes = [
   {
@@ -28,6 +29,9 @@ const routes = [
       { path: 'sourcegoodsdetail', name: 'sourcegoodsdetail', component: () => import('@/views/wholesale/SourceGoodsDetail.vue'), meta: { title: 'Wholesale' } },
       { path: 'rule', name: 'rule', component: () => import('@/views/other/Rule.vue'), meta: { title: 'Terms' } },
       { path: 'miaoshalist', name: 'miaoshalist', component: () => import('@/views/product/MiaoShaList.vue'), meta: { title: 'Flash Sale' } },
+      { path: 'just-in', name: 'just-in', component: () => import('@/views/category/JustIn.vue'), meta: { title: 'Just In' } },
+      { path: 'designers', name: 'designers', component: () => import('@/views/category/Designers.vue'), meta: { title: 'Designers' } },
+      { path: 'categories/:slug', name: 'categories', component: () => import('@/views/category/CategoryProducts.vue'), meta: { title: 'Category' } },
       { path: 'about-us', name: 'about-us', component: () => import('@/views/info/AboutUs.vue'), meta: { title: 'About Us' } },
       { path: 'join-us', name: 'join-us', component: () => import('@/views/info/JoinUs.vue'), meta: { title: 'Join Us' } },
       { path: 'contact-us', name: 'contact-us', component: () => import('@/views/info/ContactUs.vue'), meta: { title: 'Contact Us' } },
@@ -106,6 +110,7 @@ const routes = [
           { path: '/admin-tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true } },
           { path: '/admin-livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true } },
           { path: '/admin-livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true } },
+          { path: '/admin-seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true } },
         ],
       },
     ],
@@ -143,6 +148,8 @@ const routes = [
       { path: 'tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true } },
       { path: 'livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true } },
       { path: 'livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true } },
+      { path: 'seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true } },
+      { path: 'logistics', name: 'admin-logistics', component: () => import('@/views/admin/AdminLogistics.vue'), meta: { title: 'Logistics', requiresAuth: true } },
       { path: 'superadmin-dashboard', name: 'admin-superadmin-dashboard', component: () => import('@/views/admin/SuperAdminDashboard.vue'), meta: { title: 'Super Admin', requiresAuth: true } },
     ]
   },
@@ -173,6 +180,8 @@ const adminPathMap = {
   '/admin-settings': '/admin/settings', '/admin-homepage-sections': '/admin/homepage-sections',
   '/admin-submissions': '/admin/submissions', '/admin-tawkto-settings': '/admin/tawkto-settings',
   '/admin-livechat-inbox': '/admin/livechat-inbox', '/admin-livechat-settings': '/admin/livechat-settings',
+  '/admin-seller-id-settings': '/admin/seller-id-settings',
+  '/admin-logistics': '/admin/logistics',
   '/superadmin-dashboard': '/admin/superadmin-dashboard',
 }
 
@@ -188,6 +197,7 @@ const isTokenExpired = (token) => {
 
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
+  const adminStore = useAdminAppStore()
 
   if (to.query.temp_token) {
     localStorage.setItem('seller_temp_token', to.query.temp_token)
@@ -195,19 +205,6 @@ router.beforeEach((to, from, next) => {
     const { temp_token, ...rest } = to.query
     next({ path: to.path, query: rest })
     return
-  }
-
-  if (window.location.hostname.startsWith('admin') && to.path !== '/admin/login') {
-    if (!store.isLogin) {
-      if (to.path === '/' || to.path === '/main' || to.path === '/login') {
-        next('/admin/login')
-        return
-      }
-      if (to.matched.some(r => r.meta.requiresAuth)) {
-        next('/admin/login')
-        return
-      }
-    }
   }
 
   const redirectPath = adminPathMap[to.path]
@@ -223,12 +220,17 @@ router.beforeEach((to, from, next) => {
     next('/main')
     return
   }
-  if (to.name === 'admin-login' && store.isLogin && store.userInfo?.username && !isTokenExpired(store.token)) {
+  if (to.name === 'admin-login' && adminStore.isLogin && adminStore.userInfo?.username && !isTokenExpired(adminStore.token)) {
     next('/admin/dashboard')
     return
   }
 
-  if (to.matched.some(r => r.meta.requiresAuth) && (!store.isLogin || isTokenExpired(store.token))) {
+  if (to.path.startsWith('/admin') && to.name !== 'admin-login') {
+    if (!adminStore.isLogin || isTokenExpired(adminStore.token)) {
+      next({ name: 'admin-login' })
+      return
+    }
+  } else if (to.matched.some(r => r.meta.requiresAuth) && (!store.isLogin || isTokenExpired(store.token))) {
     next({ name: 'login', query: { redirect: to.fullPath } })
     return
   }

@@ -129,9 +129,9 @@ onMounted(() => {
 <style scoped>
 .admin-live-chat-settings { padding: 20px; max-width: 720px; }
 .admin-live-chat-settings h2 { margin-bottom: 4px; }
-.admin-live-chat-settings .desc { color: #999; font-size: 13px; margin-bottom: 16px; }
-.toggle-label { margin-left: 12px; font-size: 13px; color: #666; }
+.admin-live-chat-settings .desc { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 16px; }
+.toggle-label { margin-left: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
 .el-divider { margin: 24px 0 16px; }
 .el-form-item { margin-bottom: 18px; }
-.color-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 3px; border: 1px solid #ddd; vertical-align: middle; }
+.color-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); vertical-align: middle; }
 </style>

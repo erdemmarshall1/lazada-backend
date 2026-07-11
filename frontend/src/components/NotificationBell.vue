@@ -103,11 +103,29 @@ onMounted(() => {
   }
   document.addEventListener('click', handleDocumentClick)
   try {
+    // Request browser notification permission on mount
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+
     socket = getSocket()
     if (socket) {
       socket.on('notification', (notif) => {
         notifications.value.unshift(notif)
         unreadCount.value++
+        store.userUnreadMsgNum = unreadCount.value
+        
+        // Show browser notification if tab is inactive
+        if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification(notif.title, {
+            body: notif.message,
+            icon: '/favicon.ico',
+            data: { url: window.location.origin + (notif.link || '/') }
+          }).onclick = function() {
+            window.open(this.data.url, '_blank')
+            window.focus()
+          }
+        }
       })
     }
   } catch {}

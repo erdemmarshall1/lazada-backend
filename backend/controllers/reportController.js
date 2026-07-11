@@ -5,6 +5,7 @@ const Transaction = require('../models/Transaction');
 const PlatformWallet = require('../models/PlatformWallet');
 const Review = require('../models/Review');
 const Category = require('../models/Category');
+const Shop = require('../models/Shop');
 const { success, fail, paginate } = require('../utils/response');
 
 exports.getDashboard = async (req, res) => {
@@ -45,7 +46,7 @@ exports.getSalesReport = async (req, res) => {
 
     const dateFormat = groupBy === 'month' ? '%Y-%m' : groupBy === 'year' ? '%Y' : '%Y-%m-%d';
 
-    const [overview, timeSeries, topProducts, paymentBreakdown, categorySales, paginatedOrders] = await Promise.all([
+    const [overview, timeSeries, topProducts, paymentBreakdown, categorySales, paginatedOrders, recentOrders, recentPayments, recentShopApps] = await Promise.all([
       Order.aggregate([
         { $match: match },
         { $group: {
@@ -104,6 +105,9 @@ exports.getSalesReport = async (req, res) => {
         .skip((Number(page) - 1) * Number(pageSize))
         .limit(Number(pageSize))
         .lean(),
+      Order.find().sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
+      Transaction.find({ status: 0 }).sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
+      Shop.find({ status: 0 }).sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
     ]);
 
     const catIds = categorySales.filter(c => c._id).map(c => c._id);
@@ -123,6 +127,9 @@ exports.getSalesReport = async (req, res) => {
       paymentBreakdown,
       categorySales,
       orders: paginatedOrders,
+      recentOrders,
+      recentPayments,
+      recentShopApps,
       total: totalOrders,
       page: Number(page) || 1,
       pageSize: Number(pageSize) || 20,

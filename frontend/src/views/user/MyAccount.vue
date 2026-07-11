@@ -164,6 +164,7 @@ const saveProfile = async () => {
 }
 
 onMounted(async () => {
+  if (store.isAdmin) { router.replace('/admin/dashboard'); return }
   await loadStats()
   if (store.userInfo) {
     const u = store.userInfo

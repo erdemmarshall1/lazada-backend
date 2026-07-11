@@ -123,7 +123,7 @@ onMounted(() => { fetchUser(); fetchOrders(); fetchSubmissions() })
 </script>
 
 <style scoped>
-.user-card { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+.user-card { background: var(--dash-dark-card); padding: 20px; border-radius: 8px; }
 .user-info { display: flex; gap: 24px; }
 .avatar-wrap { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
 .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }

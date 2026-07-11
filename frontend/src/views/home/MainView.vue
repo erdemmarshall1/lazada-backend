@@ -105,10 +105,11 @@
               <div class="home-footer-title">THE OUTNET CN</div>
               <div class="home-footer-tips">Luxury fashion at wholesale prices</div>
             </div>
-            <div class="home-footer-item">
-              <img class="home-footer-img" src="/assets/notice-icon-D6jtWCg-.png" alt="support" />
+            <div class="home-footer-item chat-service" @click="openTawkto" style="cursor:pointer">
+              <img class="home-footer-img" src="/assets/notice-icon-D6jtWCg-.png" alt="customer service" />
               <div class="home-footer-title">24/7 Support</div>
               <div class="home-footer-tips">Customer care available around the clock</div>
+              <div v-if="store.tawktoActive" class="chat-now-badge">Chat Now</div>
             </div>
             <div class="home-footer-item">
               <svg class="home-footer-img" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -127,6 +128,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAppStore } from '@/stores/app'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import SwiperCore, { Autoplay, Pagination, Navigation } from 'swiper'
 import 'swiper/css'
@@ -136,6 +138,7 @@ import { get } from '@/api/request'
 import { getCategoryIcon, CATEGORY_FALLBACK as EMOJI_FALLBACK } from '@/utils/categoryIcons'
 import HomepageSectionsRenderer from '@/components/HomepageSectionsRenderer.vue'
 
+const store = useAppStore()
 const router = useRouter()
 
 const SwiperAutoplay = Autoplay
@@ -150,6 +153,12 @@ const findProducts = ref([])
 const affiches = ref([])
 const homepageSections = ref([])
 const sectionProductMap = ref({})
+
+const openTawkto = () => {
+  if (window.Tawk_API && store.tawktoActive) {
+    window.Tawk_API.maximize()
+  }
+}
 
 const formatPrice = (price) => {
   if (price === undefined || price === null) return '0.00'
@@ -597,5 +606,14 @@ onMounted(async () => {
   letter-spacing: .4px;
   line-height: 26px;
   text-align: center;
+}
+.home-footer-item.chat-service { position: relative; }
+.home-footer-item.chat-service:hover .home-footer-img { opacity: 0.8; }
+.chat-now-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: #667eea; color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 10px;
+  letter-spacing: 0.5px;
 }
 </style>
