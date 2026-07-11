@@ -123,6 +123,17 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
       - All other paths → 302 redirect to /admin/login
     - Fixed bug: Request constructor was passing Request object as init (invalid)
 
+14. Unlink Admin Login from Frontend (Customer) Login
+    - Created frontend/src/api/adminRequest.js: admin-specific axios instance with separate localStorage tokens (theoutnet_admin_*)
+    - Created frontend/src/stores/adminApp.js: separate Pinia store (adminApp) for admin auth/user state
+    - Backend routes/admin.js: added POST /auth/login, /auth/login/2fa, /auth/refresh, /auth/logout (role-gated to admin roles)
+    - AdminLogin.vue: rewritten to use adminRequest + useAdminAppStore instead of shared request.js + useAppStore
+    - AdminLayout.vue: uses useAdminAppStore for auth, appStore for language; handleLogout → /admin/login
+    - Login.vue: removed isAdmin redirect from getRedirectPath()
+    - MainLayoutHeader.vue: account icon always goes to /myaccount (no more admin check)
+    - Router guards separated: admin routes check useAdminAppStore, customer routes check useAppStore
+    - Deployed via: npx wrangler pages deploy dist --project-name=theoutnet-wholesale --branch=admin
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
