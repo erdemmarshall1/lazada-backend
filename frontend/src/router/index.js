@@ -185,6 +185,8 @@ const adminPathMap = {
   '/superadmin-dashboard': '/admin/superadmin-dashboard',
 }
 
+const isAdminSubdomain = window.location.hostname.startsWith('admin')
+
 const isTokenExpired = (token) => {
   if (!token) return true
   try {
@@ -198,6 +200,11 @@ const isTokenExpired = (token) => {
 router.beforeEach((to, from, next) => {
   const store = useAppStore()
   const adminStore = useAdminAppStore()
+
+  if (isAdminSubdomain && !to.path.startsWith('/admin')) {
+    next({ name: 'admin-login' })
+    return
+  }
 
   if (to.query.temp_token) {
     localStorage.setItem('seller_temp_token', to.query.temp_token)
