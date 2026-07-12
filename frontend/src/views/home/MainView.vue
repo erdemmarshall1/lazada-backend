@@ -70,7 +70,7 @@
           <div class="home-hots" v-if="recommendedProducts.length">
             <div class="home-hots-box">
               <div class="home-hots-operate">
-                <div class="home-hots-title" style="color: #27272a;">Recommended For You</div>
+                <div class="home-hots-title" style="color: #192537;">Recommended For You</div>
                 <div class="home-hots-view" @click="$router.push('/tuijianlist')">View All</div>
               </div>
               <div class="home-goods-content">
@@ -86,7 +86,7 @@
           <div class="home-hots" v-if="findProducts.length">
             <div class="home-hots-box">
               <div class="home-hots-operate">
-                <div class="home-hots-title" style="color: #27272a;">Find Products</div>
+                <div class="home-hots-title" style="color: #192537;">Find Products</div>
                 <div class="home-hots-view" @click="$router.push('/searchgoods')">View All</div>
               </div>
               <div class="home-goods-content" style="grid-template-columns: repeat(4, 1fr); height: auto;">
@@ -288,7 +288,7 @@ onMounted(async () => {
 .hnb-text {
   font-size: 10px;
   font-weight: 600;
-  color: #003ea1;
+  color: #0a68ff;
 }
 
 .hnb-right {
@@ -311,7 +311,7 @@ onMounted(async () => {
 
 .hnb-marquee-item {
   font-size: 10px;
-  color: #003ea1;
+  color: #0a68ff;
   font-weight: 500;
 }
 
@@ -355,7 +355,7 @@ onMounted(async () => {
 }
 
 .mc-menu-item:hover {
-  box-shadow: 1px 0 5px #b9b8b8;
+  box-shadow: 0 4px 4px rgba(64,75,91,0.02), 0 16px 32px rgba(29,53,89,0.08);
 }
 
 .mc-menu-icon {
@@ -379,7 +379,7 @@ onMounted(async () => {
 
 .mc-menu-text {
   margin-left: 6px;
-  color: #808089;
+  color: #192537;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -436,6 +436,11 @@ onMounted(async () => {
   width: 100%;
   cursor: pointer;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.quick-link-item:hover {
+  transform: translateY(-2px);
 }
 
 .quick-link-item .quick-link-img {
@@ -458,7 +463,7 @@ onMounted(async () => {
   margin-top: 4px;
   font-size: 12px;
   line-height: 15px;
-  color: #27272a;
+  color: #192537;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -489,7 +494,7 @@ onMounted(async () => {
   font-size: 16px;
   font-weight: 600;
   line-height: 150%;
-  color: #d93843;
+  color: #ee4d2d;
 }
 
 .home-hots-box .home-hots-operate .home-hots-view {
@@ -498,6 +503,11 @@ onMounted(async () => {
   line-height: 150%;
   color: #0a68ff;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.home-hots-box .home-hots-operate .home-hots-view:hover {
+  opacity: 0.7;
 }
 
 .home-hots-box .home-hots-content {
@@ -526,15 +536,16 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   height: 222px;
-  border: 1px solid rgb(235, 235, 240);
+  border: 1px solid #e9e9e9;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: .3s;
+  transition: all 0.3s ease;
 }
 
 .home-hots-box .home-hots-item:hover {
-  box-shadow: #0000001a 0 0 20px;
+  box-shadow: 0 4px 4px rgba(64,75,91,0.02), 0 16px 32px rgba(29,53,89,0.08);
+  transform: translateY(-2px);
 }
 
 .home-hots-box .home-hots-item .home-hots-img {
@@ -550,7 +561,7 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   align-self: stretch;
   overflow: hidden;
-  color: #27272a;
+  color: #192537;
   text-overflow: ellipsis;
   font-size: 12px;
   font-weight: 400;
@@ -565,7 +576,7 @@ onMounted(async () => {
   font-size: 16px;
   font-weight: 600;
   line-height: 150%;
-  color: #d93843;
+  color: #ee4d2d;
   text-align: left;
 }
 
@@ -611,7 +622,7 @@ onMounted(async () => {
 .home-footer-item.chat-service:hover .home-footer-img { opacity: 0.8; }
 .chat-now-badge {
   position: absolute; top: 8px; right: 8px;
-  background: #667eea; color: #fff;
+  background: linear-gradient(90deg, #ff3333, #0a68ff); color: #fff;
   font-size: 11px; font-weight: 700;
   padding: 3px 10px; border-radius: 10px;
   letter-spacing: 0.5px;

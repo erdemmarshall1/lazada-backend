@@ -83,26 +83,27 @@ const year = new Date().getFullYear()
 </script>
 
 <style scoped>
-.ton-footer { background: #faf8f4; border-top: 1px solid #e8e6e2; margin-top: auto; }
+.ton-footer { background: #ffffff; border-top: 1px solid #e9e9e9; margin-top: auto; }
 .ton-footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 20px 20px; }
 .ton-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 32px; }
-.ton-footer-col h4 { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 16px; font-weight: 400; }
+.ton-footer-col h4 { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 16px; font-weight: 400; color: #192537; }
 .ton-footer-col ul { list-style: none; padding: 0; margin: 0; }
 .ton-footer-col ul li { margin-bottom: 8px; }
-.ton-footer-col ul li a { font-size: 13px; color: #555; text-decoration: none; cursor: pointer; }
-.ton-footer-col ul li a:hover { color: #000; text-decoration: underline; }
+.ton-footer-col ul li a { font-size: 13px; color: #666; text-decoration: none; cursor: pointer; }
+.ton-footer-col ul li a:hover { color: #ee4d2d; text-decoration: underline; }
 .ton-social-icons { display: flex; gap: 8px; margin-bottom: 24px; }
-.ton-social-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid #e8e6e2; border-radius: 50%; transition: background 0.2s; }
-.ton-social-icon:hover { background: #e8e6e2; }
-.ton-footer-newsletter p { font-size: 12px; color: #555; margin-bottom: 12px; line-height: 1.5; }
+.ton-social-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid #e9e9e9; border-radius: 50%; transition: all 0.2s; }
+.ton-social-icon:hover { background: #ee4d2d; border-color: #ee4d2d; }
+.ton-social-icon:hover svg { fill: #fff; }
+.ton-footer-newsletter p { font-size: 12px; color: #666; margin-bottom: 12px; line-height: 1.5; }
 .ton-newsletter-form { display: flex; gap: 8px; }
-.ton-newsletter-form input { flex: 1; height: 36px; padding: 0 12px; border: 1px solid #e8e6e2; font-size: 13px; background: #fff; outline: none; }
-.ton-newsletter-form button { height: 36px; padding: 0 16px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
+.ton-newsletter-form input { flex: 1; height: 36px; padding: 0 12px; border: 1px solid #e9e9e9; font-size: 13px; background: #fff; outline: none; border-radius: 6px; }
+.ton-newsletter-form button { height: 36px; padding: 0 16px; background: linear-gradient(90deg, #ff3333, #0a68ff); color: #fff; border: none; cursor: pointer; font-size: 11px; letter-spacing: 1px; border-radius: 6px; transition: opacity 0.2s; }
 .ton-newsletter-form button:hover { opacity: 0.8; }
-.ton-footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid #e8e6e2; }
-.ton-footer-bottom p { font-size: 12px; color: #888; }
+.ton-footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid #e9e9e9; }
+.ton-footer-bottom p { font-size: 12px; color: #999; }
 .ton-footer-payment { display: flex; gap: 16px; }
-.ton-footer-payment span { font-size: 11px; color: #888; letter-spacing: 1px; font-weight: 600; }
+.ton-footer-payment span { font-size: 11px; color: #999; letter-spacing: 1px; font-weight: 600; }
 
 @media (max-width: 768px) {
   .ton-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }

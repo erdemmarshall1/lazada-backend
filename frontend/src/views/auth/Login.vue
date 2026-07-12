@@ -148,11 +148,32 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-view { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 0; background: var(--g-bg); }
-.login-box { width: 420px; background: var(--g-white); border-radius: 8px; padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-.login-title { text-align: center; margin-bottom: 30px; font-size: 24px; }
+.login-box { width: 420px; background: var(--g-white); border-radius: 10px; padding: 40px 45px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.login-title { text-align: center; margin-bottom: 30px; font-size: 24px; color: #242424; }
 .login-links { margin-top: 16px; }
 .link { color: var(--g-main_color); cursor: pointer; font-size: 13px; }
 .link:hover { text-decoration: underline; }
+.login-view :deep(.el-button--primary) {
+  background: linear-gradient(90deg, #0a68ff, #ff3333);
+  border-color: transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.login-view :deep(.el-button--primary:hover) {
+  background: linear-gradient(90deg, #0957e0, #e62e2e);
+  border-color: transparent;
+}
+.login-view :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  background: #f4f6fa;
+}
+.login-view :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px rgba(10,104,255,0.2) inset;
+}
+.login-view :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px rgba(10,104,255,0.4) inset;
+}
 @media (max-width: 768px) {
   .login-view { padding: 16px; min-height: calc(100vh - 120px); }
   .login-box { width: 100%; padding: 24px 20px; }

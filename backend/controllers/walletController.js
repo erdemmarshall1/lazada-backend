@@ -65,8 +65,6 @@ exports.rechargeGetList = async (req, res) => {
   }
 };
 
-const User = require('../models/User');
-
 exports.withdrawAdd = async (req, res) => {
   try {
     const { amount, paymentMethod, withdrawalDetails, fundPassword } = req.body;

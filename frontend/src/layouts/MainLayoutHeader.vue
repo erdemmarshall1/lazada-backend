@@ -79,24 +79,24 @@
         <input v-model="keyword" type="text" placeholder="Search..." @keyup.enter="searchMobile" />
       </div>
       <div class="ton-drawer-items">
-        <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false">Home</div>
-        <div class="ton-drawer-item" @click="$router.push('/just-in'); mobileMenuOpen = false">Just In</div>
-        <div class="ton-drawer-item" @click="$router.push('/designers'); mobileMenuOpen = false">Designers</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/clothing'); mobileMenuOpen = false">Clothing</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/shoes'); mobileMenuOpen = false">Shoes</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/bags'); mobileMenuOpen = false">Bags</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/accessories'); mobileMenuOpen = false">Accessories</div>
+        <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false"><i class="iconfont icon-shouye"></i> Home</div>
+        <div class="ton-drawer-item" @click="$router.push('/just-in'); mobileMenuOpen = false"><i class="iconfont icon-31sousuo"></i> Just In</div>
+        <div class="ton-drawer-item" @click="$router.push('/designers'); mobileMenuOpen = false"><i class="iconfont icon-ziyuanxhdpi"></i> Designers</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/clothing'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Clothing</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/shoes'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Shoes</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/bags'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Bags</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/accessories'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Accessories</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false">Bestsellers</div>
-        <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false">Recommended</div>
-        <div class="ton-drawer-item" @click="$router.push('/shopjie'); mobileMenuOpen = false">Shop Street</div>
-        <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false">Flash Deals</div>
-        <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false">Categories</div>
+        <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false"><i class="iconfont icon-jiangbei"></i> Bestsellers</div>
+        <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false"><i class="iconfont icon-shoucang1"></i> Recommended</div>
+        <div class="ton-drawer-item" @click="$router.push('/shopjie'); mobileMenuOpen = false"><i class="iconfont icon-dianpu"></i> Shop Street</div>
+        <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false"><i class="iconfont icon-tiantianquan"></i> Flash Deals</div>
+        <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Categories</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false">About THE OUTNET</div>
-        <div class="ton-drawer-item" @click="openCustomerCareMobile">Customer Care</div>
-        <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false">FAQ</div>
-        <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false">Download the App</div>
+        <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> About THE OUTNET</div>
+        <div class="ton-drawer-item" @click="openCustomerCareMobile"><i class="iconfont icon-kefu"></i> Customer Care</div>
+        <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> FAQ</div>
+        <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false"><i class="iconfont icon-xiazai"></i> Download the App</div>
       </div>
     </div>
   </div>
@@ -169,51 +169,52 @@ watch(mobileMenuOpen, (val) => {
 </script>
 
 <style scoped>
-.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-.ton-header-top { background: #faf8f4; border-bottom: 1px solid #e8e6e2; }
+.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
+.ton-header-top { background: #ffffff; border-bottom: 1px solid #e9e9e9; }
 .ton-header-top-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 20px; }
 .ton-header-top-left { display: flex; align-items: center; gap: 20px; }
-.ton-header-top-left a { font-size: 11px; color: #555; letter-spacing: 0.3px; text-decoration: none; cursor: pointer; }
-.ton-header-top-left a:hover { color: #000; text-decoration: underline; }
+.ton-header-top-left a { font-size: 11px; color: #666; letter-spacing: 0.3px; text-decoration: none; cursor: pointer; }
+.ton-header-top-left a:hover { color: #192537; text-decoration: underline; }
 .ton-header-top-right { display: flex; align-items: center; gap: 16px; }
-.ton-header-top-right a, .ton-header-top-right span { font-size: 11px; color: #555; cursor: pointer; }
-.ton-header-top-right a:hover, .ton-header-top-right span:hover { color: #000; }
+.ton-header-top-right a, .ton-header-top-right span { font-size: 11px; color: #666; cursor: pointer; }
+.ton-header-top-right a:hover, .ton-header-top-right span:hover { color: #192537; }
 .ton-header-signin { font-weight: 600; }
 .ton-header-user { display: flex; align-items: center; gap: 4px; }
 .ton-header-user .iconfont { font-size: 14px; }
-.ton-header-wallet { color: #b8922a !important; font-weight: 600; }
-.ton-header-logout { color: #c0392b !important; }
-.ton-header-top-divider { width: 1px; height: 14px; background: #e8e6e2; margin: 0 4px; }
+.ton-header-wallet { color: #ee4d2d !important; font-weight: 600; }
+.ton-header-logout { color: #f56c6c !important; }
+.ton-header-top-divider { width: 1px; height: 14px; background: #e9e9e9; margin: 0 4px; }
 .ton-header-lang-btn { cursor: pointer; display: flex; align-items: center; }
 
-.ton-header-main { background: #ffffff; border-bottom: 1px solid #e8e6e2; }
+.ton-header-main { background: #ffffff; border-bottom: 1px solid #e9e9e9; }
 .ton-header-main-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; padding: 0 20px; }
-.ton-hamburger { display: none; font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; margin-right: 16px; color: #000; }
+.ton-hamburger { display: none; font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; margin-right: 16px; color: #192537; }
 .ton-logo { cursor: pointer; white-space: nowrap; margin-right: 40px; display: flex; align-items: center; }
 .ton-logo-img { height: 36px; width: auto; display: block; }
 .ton-nav { display: flex; align-items: center; gap: 28px; flex: 1; }
-.ton-nav a { font-size: 12px; letter-spacing: 1.5px; color: #000; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 700; }
+.ton-nav a { font-size: 12px; letter-spacing: 1.5px; color: #192537; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; text-decoration: none; font-weight: 700; }
 .ton-nav a:hover { opacity: 0.5; }
 .ton-header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-.ton-header-icon { position: relative; background: none; border: none; cursor: pointer; padding: 6px; color: #000; display: flex; align-items: center; }
+.ton-header-icon { position: relative; background: none; border: none; cursor: pointer; padding: 6px; color: #192537; display: flex; align-items: center; }
 .ton-header-icon:hover { opacity: 0.5; }
-.ton-header-cart-count { position: absolute; top: 0; right: 0; background: #000; color: #fff; font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.ton-header-cart-count { position: absolute; top: 0; right: 0; background: #ee4d2d; color: #fff; font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 
 .ton-mobile-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998; display: none; }
 .ton-mobile-drawer-overlay.open { display: block; }
 .ton-mobile-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 999; transition: left 0.3s ease; overflow-y: auto; }
 .ton-mobile-drawer.open { left: 0; }
-.ton-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #e8e6e2; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #faf8f4 0%, #fff 100%); }
+.ton-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #e9e9e9; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #f7f7f7 0%, #fff 100%); }
 .ton-drawer-header button { font-size: 24px; background: none; border: none; cursor: pointer; }
-.ton-drawer-search { padding: 12px 16px; border-bottom: 1px solid #e8e6e2; }
-.ton-drawer-search input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #e8e6e2; font-size: 14px; outline: none; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
-.ton-drawer-search input:focus { border-color: rgba(74,144,226,0.4); box-shadow: 0 0 8px rgba(74,144,226,0.1); }
+.ton-drawer-search { padding: 12px 16px; border-bottom: 1px solid #e9e9e9; }
+.ton-drawer-search input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #e9e9e9; font-size: 14px; outline: none; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; border-radius: 6px; }
+.ton-drawer-search input:focus { border-color: rgba(10,104,255,0.4); box-shadow: 0 0 8px rgba(10,104,255,0.1); }
 .ton-drawer-items { padding: 4px 0; }
-.ton-drawer-item { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #000; transition: all 0.25s; border-left: 3px solid transparent; position: relative; }
-.ton-drawer-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(74,144,226,0.04) 0%, transparent 70%); pointer-events: none; }
-.ton-drawer-item:hover { background: rgba(74,144,226,0.04); border-left-color: rgba(74,144,226,0.3); padding-left: 19px; }
+.ton-drawer-item { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #192537; transition: all 0.25s; border-left: 3px solid transparent; position: relative; }
+.ton-drawer-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(238,77,45,0.04) 0%, transparent 70%); pointer-events: none; }
+.ton-drawer-item:hover { background: rgba(238,77,45,0.04); border-left-color: rgba(238,77,45,0.3); padding-left: 19px; }
 .ton-drawer-item:hover::before { opacity: 1; }
-.ton-drawer-divider { height: 1px; background: #e8e6e2; margin: 4px 16px; }
+.ton-drawer-divider { height: 1px; background: #e9e9e9; margin: 4px 16px; }
+.ton-drawer-item i { margin-right: 10px; font-size: 16px; }
 @media (max-width: 768px) {
   .ton-hamburger { display: flex; align-items: center; }
   .ton-nav { display: none; }

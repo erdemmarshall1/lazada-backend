@@ -86,12 +86,26 @@ const handleRegister = async () => {
 
 <style scoped>
 .register-view { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 0; background: var(--g-bg); }
-.register-box { width: 480px; background: var(--g-white); border-radius: 8px; padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-.register-title { text-align: center; margin-bottom: 4px; font-size: 24px; }
+.register-box { width: 480px; background: var(--g-white); border-radius: 10px; padding: 40px 45px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.register-title { text-align: center; margin-bottom: 4px; font-size: 24px; color: #242424; }
 .register-subtitle { text-align: center; color: var(--g-text-light); font-size: 14px; margin-bottom: 30px; }
 .register-links { margin-top: 16px; }
 .link { color: var(--g-main_color); cursor: pointer; font-size: 13px; }
 .link:hover { text-decoration: underline; }
+.register-view :deep(.el-button--primary) {
+  background: linear-gradient(90deg, #0a68ff, #ff3333);
+  border-color: transparent;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.register-view :deep(.el-button--primary:hover) {
+  background: linear-gradient(90deg, #0957e0, #e62e2e);
+  border-color: transparent;
+}
+.register-view :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  background: #f4f6fa;
+}
 @media (max-width: 768px) {
   .register-view { padding: 16px; min-height: calc(100vh - 120px); }
   .register-box { width: 100%; padding: 24px 20px; }

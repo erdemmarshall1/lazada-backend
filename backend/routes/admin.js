@@ -360,9 +360,6 @@ router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
   }
 });
 
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/app');
-
 router.post('/login-as-seller/:userId', adminAuth, async (req, res) => {
   try {
     const targetUser = await User.findById(req.params.userId).select('-password');

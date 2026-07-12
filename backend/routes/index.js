@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import all route modules
-const index = require('./index');
+const index = require('./indexRoutes');
 const auth = require('./auth');
 const category = require('./category');
 const product = require('./product');

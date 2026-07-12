@@ -4,6 +4,12 @@ import { useAdminAppStore } from '@/stores/adminApp'
 
 const routes = [
   {
+    path: '/countries',
+    name: 'countries',
+    component: () => import('@/views/landing/CountrySelection.vue'),
+    meta: { title: 'Select Your Country' }
+  },
+  {
     path: '/',
     component: () => import('@/layouts/MainLayout.vue'),
     redirect: '/main',
