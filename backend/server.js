@@ -106,6 +106,26 @@ const startServer = (dbConnected) => {
     const escrowService = require('./services/escrowService');
     escrowService.start();
   }
+
+  // Health check endpoint
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+  });
+
+  // Self-ping to prevent Railway free tier sleep (every 10 minutes)
+  const SELF_URL = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.SELF_URL;
+  if (SELF_URL) {
+    const http = require('http');
+    const pingInterval = setInterval(() => {
+      const url = `http://${SELF_URL}/health`;
+      http.get(url, (res) => {
+        console.log(`[keep-alive] Self-ping: ${res.statusCode}`);
+      }).on('error', (err) => {
+        console.log(`[keep-alive] Self-ping error: ${err.message}`);
+      });
+    }, 10 * 60 * 1000);
+    console.log(`[keep-alive] Self-ping enabled every 10 min -> ${SELF_URL}`);
+  }
 };
 
 connectDB().then(() => {
