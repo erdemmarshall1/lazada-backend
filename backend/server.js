@@ -75,6 +75,11 @@ app.get('/api/reimport', async (req, res) => {
 
 const errorHandler = require('./middleware/errorHandler');
 
+// Health check endpoint (must be before SPA fallback)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
+
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];
@@ -106,11 +111,6 @@ const startServer = (dbConnected) => {
     const escrowService = require('./services/escrowService');
     escrowService.start();
   }
-
-  // Health check endpoint
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
-  });
 
   // Self-ping to prevent Railway free tier sleep (every 10 minutes)
   const SELF_URL = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.SELF_URL;
