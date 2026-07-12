@@ -188,7 +188,7 @@ const breadcrumbs = computed(() => {
       'theme-settings': 'Theme Settings', balance: 'Balance Mgmt',
       'platform-wallet': 'Platform Wallet', 'sessions-audit': 'Sessions & Audit',
       settings: 'Settings', 'homepage-sections': 'Homepage Sections',
-      submissions: 'Inquiries', 'tawkto-settings': 'Tawk.to Chat',
+      submissions: 'Inquiries',       'tawkto-settings': 'Tawk.to Chat', 'chatwoot-settings': 'Chatwoot Chat',
       'livechat-inbox': 'Live Chat Inbox', 'livechat-settings': 'Live Chat Settings',
       'user-privacy': 'User Privacy', 'user-detail': 'User Detail',
       'shop-detail': 'Shop Detail', logistics: 'Logistics', 'superadmin-dashboard': 'Super Admin',
@@ -241,6 +241,7 @@ const menuGroups = computed(() => [
     items: [
       { icon: 'iconfont icon-xinxi', label: 'Inquiries', path: '/admin/submissions' },
       { icon: 'iconfont icon-kefu', label: 'Tawk.to Chat', path: '/admin/tawkto-settings' },
+      { icon: 'iconfont icon-kefu', label: 'Chatwoot Chat', path: '/admin/chatwoot-settings' },
       { icon: 'iconfont icon-kefu', label: 'Live Chat Inbox', path: '/admin/livechat-inbox' },
       { icon: 'iconfont icon-shezhi', label: 'Live Chat Settings', path: '/admin/livechat-settings' },
     ]

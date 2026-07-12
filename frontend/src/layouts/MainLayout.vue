@@ -10,6 +10,7 @@
         </transition>
       </router-view>
       <MainLayoutFooter />
+      <ChatwootWidget />
       <div class="kefu" v-if="store.tawkTo.enabled" @click="openTawkto">
         <i class="iconfont icon-kefu"></i>
         <span class="kefu-label">Chat</span>
@@ -29,6 +30,7 @@ import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
+import ChatwootWidget from '@/components/ChatwootWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null
@@ -80,6 +82,7 @@ onMounted(async () => {
   if (res?.data?.themeSettings) {
     applyTheme(res.data.themeSettings)
   }
+  await store.fetchChatwootSettings()
   if (store.token) {
     const userRes = await qe(get('/home/user/getInfo'))
     if (userRes && userRes.data) {
@@ -98,8 +101,8 @@ onUnmounted(() => {
 <style scoped>
 .v_app { min-height: 100vh; display: flex; flex-direction: column; }
 .v_main_layout { flex: 1; display: flex; flex-direction: column; }
-.kefu { position: fixed; right: 20px; bottom: 100px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 4px 16px rgba(102,126,234,0.4); transition: transform 0.2s, box-shadow 0.2s; }
-.kefu:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(102,126,234,0.5); }
+.kefu { position: fixed; right: 20px; bottom: 100px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(90deg, #ff3333, #0a68ff); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 4px 16px rgba(238,77,45,0.3); transition: transform 0.2s, box-shadow 0.2s; }
+.kefu:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(238,77,45,0.4); }
 .kefu .iconfont { font-size: 26px; }
 .kefu-label { position: absolute; right: 62px; background: #333; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .kefu:hover .kefu-label { opacity: 1; }

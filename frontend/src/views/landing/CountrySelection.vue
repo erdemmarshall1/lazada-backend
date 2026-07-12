@@ -80,7 +80,7 @@ const selectCountry = (country) => {
 </script>
 
 <style scoped>
-.country-page { min-height: 100vh; display: flex; flex-direction: column; font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
+.country-page { min-height: 100vh; display: flex; flex-direction: column; font-family: 'TheOutnetWebXL', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
 
 .country-header { height: 72px; border-bottom: 1px solid #d0d1d3; display: flex; align-items: center; justify-content: center; background: #fff; }
 .country-header-inner { max-width: 1200px; width: 100%; padding: 0 20px; }

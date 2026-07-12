@@ -49,9 +49,45 @@
           </div>
         </div>
       </div>
+      <div class="store-card g-flex-align-center">
+        <div class="store-card-logo">
+          <img :src="$imgUrl(product.shopId?.logo || '')" loading="lazy" @error="$imgFallback" />
+        </div>
+        <div class="store-card-info">
+          <h3 class="store-card-name">{{ product.shopId?.name || 'Official Store' }}</h3>
+          <div class="store-card-meta">
+            <span>⭐ {{ product.shopId?.rating || 5 }}</span>
+            <span>Products: {{ product.shopId?.productCount || 0 }}</span>
+            <span>Followers: {{ product.shopId?.followerCount || 0 }}</span>
+          </div>
+          <div class="store-card-services">
+            <span class="service-badge"><i class="iconfont icon-dianpu"></i> Shop Services</span>
+            <span class="service-badge"><i class="iconfont icon-wuliu"></i> Logistics Services</span>
+            <span class="service-badge"><i class="iconfont icon-dianpu"></i> Quality Rating: ⭐ {{ product.shopId?.rating || 5 }}</span>
+          </div>
+        </div>
+        <div class="store-card-actions">
+          <el-button type="primary" plain size="large" @click="visitStore">Visit Store</el-button>
+          <el-button type="success" size="large" @click="consultStore">Consult</el-button>
+        </div>
+      </div>
       <div class="detail-section">
         <h3>Description</h3>
         <div class="product-desc">{{ product.description }}</div>
+      </div>
+      <div class="detail-section">
+        <h3>You May Also Like</h3>
+        <div class="related-grid">
+          <div class="related-card" v-for="item in relatedProducts" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
+            <div class="related-img">
+              <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
+            </div>
+            <div class="related-info">
+              <h4 class="g-text-ellipsis">{{ item.name }}</h4>
+              <span class="related-price">${{ item.minPrice }}</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="detail-section">
         <h3>Reviews ({{ product.reviewCount || 0 }})</h3>
@@ -89,6 +125,7 @@ const selectedAttrs = ref({})
 const loading = ref(true)
 const isFavorited = ref(false)
 const wishlistLoading = ref(false)
+const relatedProducts = ref([])
 
 const currentSku = computed(() => {
   if (!product.value?.skus) return null
@@ -144,6 +181,29 @@ const toggleWishlist = async () => {
   }
 }
 
+const visitStore = () => {
+  if (product.value?.shopId?._id) {
+    router.push(`/storedetail?id=${product.value.shopId._id}`)
+  }
+}
+
+const consultStore = () => {
+  if (store.kefu) {
+    window.open(store.kefu, '_blank')
+  } else if (store.tawkTo?.enabled && window.Tawk_API) {
+    window.Tawk_API.maximize()
+  } else {
+    ElMessage.info('No chat support available at this time')
+  }
+}
+
+const fetchRelatedProducts = async () => {
+  const res = await get('/main/goods/getRandList', {})
+  if (res?.data) {
+    relatedProducts.value = res.data.filter(p => p._id !== route.query.id).slice(0, 8)
+  }
+}
+
 onMounted(async () => {
   const promises = [
     get('/main/goods/getInfo', { id: route.query.id }),
@@ -164,6 +224,7 @@ onMounted(async () => {
   }
   if (revRes?.data) reviews.value = revRes.data.list || []
   if (favRes?.data) isFavorited.value = favRes.data.favorited
+  await fetchRelatedProducts()
   loading.value = false
 })
 </script>
@@ -207,12 +268,39 @@ onMounted(async () => {
 .review-username { font-weight: 600; font-size: 14px; }
 .review-rating { font-size: 13px; }
 .review-content { font-size: 14px; color: #666; }
+.store-card { background: var(--g-white); border-radius: 8px; padding: 20px; margin: 16px 16px 0; gap: 20px; border: 1px solid var(--g-border); }
+.store-card-logo { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.store-card-logo img { width: 100%; height: 100%; object-fit: cover; }
+.store-card-info { flex: 1; }
+.store-card-name { font-size: 18px; font-weight: 600; margin: 0 0 8px 0; }
+.store-card-meta { display: flex; gap: 16px; font-size: 13px; color: #666; margin-bottom: 12px; }
+.store-card-services { display: flex; gap: 12px; flex-wrap: wrap; }
+.service-badge { background: #f5f5f5; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #555; }
+.service-badge i { margin-right: 4px; }
+.store-card-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.related-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.related-card { background: var(--g-white); border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid var(--g-border); }
+.related-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.related-img { width: 100%; aspect-ratio: 1; overflow: hidden; }
+.related-img img { width: 100%; height: 100%; object-fit: cover; }
+.related-info { padding: 8px; }
+.related-info h4 { font-size: 13px; margin: 0 0 4px 0; line-height: 1.4; }
+.related-price { font-size: 15px; font-weight: 700; color: var(--g-main_color); }
 
+@media (max-width: 1024px) {
+  .related-grid { grid-template-columns: repeat(4, 1fr); }
+}
 @media (max-width: 768px) {
   .detail-view { padding: 12px 0; }
   .detail-main { flex-direction: column; padding: 16px; }
   .detail-left { width: 100%; }
   .detail-section { margin: 12px 0; padding: 16px; }
+  .store-card { margin: 12px 0; padding: 16px; flex-direction: column; text-align: center; }
+  .store-card-actions { flex-direction: row; width: 100%; }
+  .store-card-actions .el-button { flex: 1; }
+  .store-card-services { justify-content: center; }
+  .store-card-meta { justify-content: center; }
+  .related-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .product-name { font-size: 17px; }
   .price-current { font-size: 24px; }
   .action-buttons { flex-direction: column; }
@@ -222,6 +310,11 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .detail-main { padding: 12px; }
   .detail-section { padding: 12px; }
+  .store-card-logo { width: 60px; height: 60px; }
+  .store-card-name { font-size: 16px; }
+  .store-card-meta { flex-wrap: wrap; justify-content: center; }
+  .store-card-services { flex-direction: column; align-items: center; }
+  .related-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .product-price-box { padding: 10px 12px; }
   .thumb-item { width: 52px; height: 52px; }
 }

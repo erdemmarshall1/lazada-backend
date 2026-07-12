@@ -83,7 +83,7 @@ const year = new Date().getFullYear()
 </script>
 
 <style scoped>
-.ton-footer { background: #ffffff; border-top: 1px solid #e9e9e9; margin-top: auto; }
+.ton-footer { background: #ffffff; border-top: 1px solid #e9e9e9; margin-top: auto; font-family: 'TheOutnetWebXL', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
 .ton-footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 20px 20px; }
 .ton-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 32px; }
 .ton-footer-col h4 { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 16px; font-weight: 400; color: #192537; }
@@ -106,11 +106,20 @@ const year = new Date().getFullYear()
 .ton-footer-payment span { font-size: 11px; color: #999; letter-spacing: 1px; font-weight: 600; }
 
 @media (max-width: 768px) {
-  .ton-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .ton-footer-inner { padding: 24px 16px 16px; }
+  .ton-footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
   .ton-footer-social { grid-column: 1 / -1; }
+  .ton-social-icons { justify-content: flex-start; }
+  .ton-newsletter-form { flex-direction: column; gap: 8px; }
+  .ton-newsletter-form input { width: 100%; height: 40px; }
+  .ton-newsletter-form button { width: 100%; height: 40px; }
   .ton-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .ton-footer-payment { justify-content: center; }
 }
 @media (max-width: 480px) {
   .ton-footer-grid { grid-template-columns: 1fr; }
+  .ton-footer-col ul li { margin-bottom: 6px; }
+  .ton-footer-col ul li a { font-size: 12px; }
+  .ton-footer-col h4 { font-size: 10px; margin-bottom: 12px; }
 }
 </style>

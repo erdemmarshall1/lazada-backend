@@ -1425,6 +1425,18 @@ router.post('/users/:id/set-role', adminAuth, async (req, res) => {
   } catch (error) { res.json(fail(error.message)); }
 });
 
+router.post('/users/:id/reset-password', adminAuth, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.json(fail('Password must be at least 6 characters'));
+    const user = await User.findById(req.params.id);
+    if (!user) return res.json(fail('User not found'));
+    user.password = password;
+    await user.save();
+    res.json(success({ message: 'Password reset successfully' }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
 router.get('/users/:id/permissions', adminAuth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -1543,6 +1555,34 @@ router.put('/tawkto-settings', adminAuth, async (req, res) => {
     if (widgetColor !== undefined) settings.widgetColor = widgetColor;
     await settings.save();
     res.json(success(settings, 'Tawk.to settings saved'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Chatwoot Chat Settings ----
+router.get('/chatwoot-settings', adminAuth, async (req, res) => {
+  try {
+    const ChatwootSetting = require('../models/ChatwootSetting');
+    let settings = await ChatwootSetting.findOne();
+    if (!settings) settings = await ChatwootSetting.create({});
+    res.json(success(settings));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/chatwoot-settings', adminAuth, async (req, res) => {
+  try {
+    const ChatwootSetting = require('../models/ChatwootSetting');
+    const { enabled, websiteToken, baseUrl } = req.body;
+    let settings = await ChatwootSetting.findOne();
+    if (!settings) settings = new ChatwootSetting();
+    if (enabled !== undefined) settings.enabled = enabled;
+    if (websiteToken !== undefined) settings.websiteToken = websiteToken;
+    if (baseUrl !== undefined) settings.baseUrl = baseUrl;
+    await settings.save();
+    res.json(success(settings, 'Chatwoot settings saved'));
   } catch (error) {
     res.json(fail(error.message));
   }

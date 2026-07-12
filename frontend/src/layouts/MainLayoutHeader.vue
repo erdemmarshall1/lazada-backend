@@ -169,7 +169,7 @@ watch(mobileMenuOpen, (val) => {
 </script>
 
 <style scoped>
-.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
+.ton-header { width: 100%; z-index: 1000; position: sticky; top: 0; font-family: 'TheOutnetWebXL', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
 .ton-header-top { background: #ffffff; border-bottom: 1px solid #e9e9e9; }
 .ton-header-top-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 20px; }
 .ton-header-top-left { display: flex; align-items: center; gap: 20px; }
@@ -203,13 +203,13 @@ watch(mobileMenuOpen, (val) => {
 .ton-mobile-drawer-overlay.open { display: block; }
 .ton-mobile-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 999; transition: left 0.3s ease; overflow-y: auto; }
 .ton-mobile-drawer.open { left: 0; }
-.ton-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #e9e9e9; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #f7f7f7 0%, #fff 100%); }
-.ton-drawer-header button { font-size: 24px; background: none; border: none; cursor: pointer; }
+.ton-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #e9e9e9; font-weight: 600; font-size: 14px; background: #192537; color: #fff; }
+.ton-drawer-header button { font-size: 24px; background: none; border: none; cursor: pointer; color: #fff; }
 .ton-drawer-search { padding: 12px 16px; border-bottom: 1px solid #e9e9e9; }
 .ton-drawer-search input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #e9e9e9; font-size: 14px; outline: none; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; border-radius: 6px; }
 .ton-drawer-search input:focus { border-color: rgba(10,104,255,0.4); box-shadow: 0 0 8px rgba(10,104,255,0.1); }
 .ton-drawer-items { padding: 4px 0; }
-.ton-drawer-item { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #192537; transition: all 0.25s; border-left: 3px solid transparent; position: relative; }
+.ton-drawer-item { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #192537; transition: all 0.25s; border-left: 3px solid transparent; position: relative; min-height: 44px; display: flex; align-items: center; }
 .ton-drawer-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(238,77,45,0.04) 0%, transparent 70%); pointer-events: none; }
 .ton-drawer-item:hover { background: rgba(238,77,45,0.04); border-left-color: rgba(238,77,45,0.3); padding-left: 19px; }
 .ton-drawer-item:hover::before { opacity: 1; }
@@ -219,4 +219,9 @@ watch(mobileMenuOpen, (val) => {
   .ton-hamburger { display: flex; align-items: center; }
   .ton-nav { display: none; }
   .ton-header-top { display: none; }
+  .ton-header-main-inner { height: 56px; padding: 0 12px; }
+  .ton-logo-img { height: 28px; }
+  .ton-logo { margin-right: 0; }
+  .ton-header-actions { gap: 8px; }
+  .ton-header-icon { min-width: 44px; min-height: 44px; justify-content: center; }
 }</style>

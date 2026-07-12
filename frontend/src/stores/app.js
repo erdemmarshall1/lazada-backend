@@ -72,6 +72,11 @@ export const useAppStore = defineStore('app', {
       enabled: false,
       widgetId: ''
     },
+    chatwoot: {
+      enabled: false,
+      websiteToken: '',
+      baseUrl: 'https://app.chatwoot.com'
+    },
   }),
 
   getters: {
@@ -184,6 +189,18 @@ export const useAppStore = defineStore('app', {
         }
       } catch (error) {
         console.error('Failed to fetch Tawk.to settings:', error)
+      }
+    },
+    async fetchChatwootSettings() {
+      try {
+        const res = await get('/main/chatwoot-settings')
+        if (res?.code === 0 && res?.data) {
+          this.chatwoot.enabled = !!res.data.enabled
+          this.chatwoot.websiteToken = res.data.websiteToken || ''
+          this.chatwoot.baseUrl = res.data.baseUrl || 'https://app.chatwoot.com'
+        }
+      } catch (error) {
+        console.error('Failed to fetch Chatwoot settings:', error)
       }
     },
   },

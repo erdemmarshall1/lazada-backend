@@ -32,6 +32,7 @@ let removeAfterEach = null
 
 onMounted(() => {
   store.fetchTawkToSettings()
+  store.fetchChatwootSettings()
 
   const updateOnline = () => { isOffline.value = false }
   const updateOffline = () => { isOffline.value = true }
