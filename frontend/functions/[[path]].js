@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://lazada-backend-production-3b57.up.railway.app'
+const BACKEND_URL = 'https://supportive-delight-production-b90c.up.railway.app'
 
 const PROXY_PREFIXES = ['/home/', '/uploads/']
 const ADMIN_PREFIX = '/admin/'

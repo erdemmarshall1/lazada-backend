@@ -38,8 +38,8 @@ jobs:
       - name: Build frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://the-outnet-backend-production-3b57.up.railway.app
-          VITE_SOCKET_URL: https://the-outnet-backend-production-3b57.up.railway.app
+          VITE_API_BASE_URL: https://supportive-delight-production-b90c.up.railway.app
+          VITE_SOCKET_URL: https://supportive-delight-production-b90c.up.railway.app
 
       - name: Deploy to Netlify
         if: github.ref_name == 'master'
