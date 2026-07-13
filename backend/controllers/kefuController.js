@@ -92,3 +92,47 @@ exports.getMsgNums = async (req, res) => {
     res.json(fail(error.message));
   }
 };
+
+exports.adminGetConversations = async (req, res) => {
+  try {
+    const conversations = await Message.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $group: { _id: '$fromUserId', lastMessage: { $first: '$$ROOT' } } },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $project: { userId: '$_id', lastMessage: 1, user: { username: 1, avatar: 1, email: 1 } } },
+      { $sort: { 'lastMessage.createdAt': -1 } },
+    ]);
+    res.json(success({ conversations, agentOnline: true }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.adminGetMessages = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const messages = await Message.find({
+      $or: [{ fromUserId: userId, toUserId: req.user._id }, { fromUserId: req.user._id, toUserId: userId }],
+    }).sort({ createdAt: 1 }).limit(100);
+    res.json(success(messages));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.adminSendReply = async (req, res) => {
+  try {
+    const { toUserId, content } = req.body;
+    const msg = await Message.create({
+      fromUserId: req.user._id,
+      toUserId,
+      content,
+      type: 'text',
+      sessionId: `admin_${req.user._id}_${toUserId}`,
+    });
+    res.json(success(msg, 'Reply sent'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};

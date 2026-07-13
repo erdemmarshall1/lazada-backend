@@ -1815,4 +1815,69 @@ router.delete('/logistics/shipping-methods/:id', adminAuth, async (req, res) => 
   } catch (error) { res.json(fail(error.message)); }
 });
 
+// ---- Live Chat Settings ----
+router.get('/live-chat-settings', adminAuth, async (req, res) => {
+  try {
+    const LiveChatSetting = require('../models/LiveChatSetting');
+    let settings = await LiveChatSetting.findOne().populate('agentIds', 'username email avatar');
+    if (!settings) {
+      settings = await LiveChatSetting.create({});
+      settings = await LiveChatSetting.findById(settings._id).populate('agentIds', 'username email avatar');
+    }
+    res.json(success(settings));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/live-chat-settings', adminAuth, async (req, res) => {
+  try {
+    const LiveChatSetting = require('../models/LiveChatSetting');
+    const { enabled, widgetTitle, widgetColor, widgetPosition, autoGreeting, offlineMessage, agentIds } = req.body;
+    let settings = await LiveChatSetting.findOne();
+    if (!settings) {
+      settings = await LiveChatSetting.create({ enabled, widgetTitle, widgetColor, widgetPosition, autoGreeting, offlineMessage, agentIds });
+    } else {
+      if (enabled !== undefined) settings.enabled = enabled;
+      if (widgetTitle !== undefined) settings.widgetTitle = widgetTitle;
+      if (widgetColor !== undefined) settings.widgetColor = widgetColor;
+      if (widgetPosition !== undefined) settings.widgetPosition = widgetPosition;
+      if (autoGreeting !== undefined) settings.autoGreeting = autoGreeting;
+      if (offlineMessage !== undefined) settings.offlineMessage = offlineMessage;
+      if (agentIds !== undefined) settings.agentIds = agentIds;
+      await settings.save();
+    }
+    res.json(success(settings, 'Live chat settings saved'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+// ---- Geo / Device Analytics ----
+router.get('/geo-devices/summary', adminAuth, async (req, res) => {
+  try {
+    const LoginHistory = require('../models/LoginHistory');
+    const sessions = await LoginHistory.find({}).sort({ createdAt: -1 }).limit(5000).lean();
+    const osMap = {}, browserMap = {}, deviceMap = {}, locationMap = {};
+    for (const s of sessions) {
+      const ua = (s.userAgent || '').toLowerCase();
+      let os = 'Other', browser = 'Other', device = 'Desktop';
+      if (/windows/.test(ua)) os = 'Windows';
+      else if (/macintosh|mac os/.test(ua)) os = 'macOS';
+      else if (/linux/.test(ua)) os = 'Linux';
+      else if (/android/.test(ua)) { os = 'Android'; device = 'Mobile'; }
+      else if (/iphone|ipad|ios/.test(ua)) { os = 'iOS'; device = 'Mobile'; }
+      if (/chrome|chromium/.test(ua) && !/edge|opr/.test(ua)) browser = 'Chrome';
+      else if (/firefox/.test(ua)) browser = 'Firefox';
+      else if (/safari/.test(ua) && !/chrome/.test(ua)) browser = 'Safari';
+      else if (/edge/.test(ua)) browser = 'Edge';
+      else if (/opr|opera/.test(ua)) browser = 'Opera';
+      osMap[os] = (osMap[os] || 0) + 1;
+      browserMap[browser] = (browserMap[browser] || 0) + 1;
+      deviceMap[device] = (deviceMap[device] || 0) + 1;
+      if (s.location) locationMap[s.location] = (locationMap[s.location] || 0) + 1;
+    }
+    const toArray = (map) => Object.entries(map).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    res.json(success({
+      os: toArray(osMap), browsers: toArray(browserMap), devices: toArray(deviceMap), locations: toArray(locationMap),
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
 module.exports = router;

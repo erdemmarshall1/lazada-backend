@@ -48,7 +48,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { ElMessage } from 'element-plus'
-import { post, get } from '@/api/request'
+import { post, get, uploadFile } from '@/api/request'
 
 const router = useRouter()
 const store = useAppStore()
@@ -72,13 +72,15 @@ const triggerAvatarUpload = () => {
 const handleAvatarUpload = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
-  const formData = new FormData()
-  formData.append('file', file)
   try {
-    const res = await post('/home/user/uploadAvatar', formData)
-    if (res?.data?.url) {
-      store.setUserInfo({ ...store.userInfo, avatar: res.data.url })
+    const res = await uploadFile(file)
+    const url = res?.data?.url || res?.url
+    if (url) {
+      await post('/home/user/edit', { avatar: url })
+      store.setUserInfo({ ...store.userInfo, avatar: url })
       ElMessage.success('Avatar updated')
+    } else {
+      ElMessage.error('Failed to upload avatar')
     }
   } catch {
     ElMessage.error('Failed to upload avatar')

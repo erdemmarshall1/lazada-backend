@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('../middleware/auth');
+const { auth, adminAuth } = require('../middleware/auth');
 const kefuController = require('../controllers/kefuController');
 
 router.get('/getSessionId', auth, kefuController.getSessionId);
@@ -12,5 +12,9 @@ router.get('/getUserList', auth, kefuController.getUserList);
 router.get('/getSessionInfo', auth, kefuController.getSessionInfo);
 router.post('/setRead', auth, kefuController.setRead);
 router.get('/getMsgNums', auth, kefuController.getMsgNums);
+
+router.get('/admin/conversations', auth, kefuController.adminGetConversations);
+router.get('/admin/messages', auth, kefuController.adminGetMessages);
+router.post('/admin/sendReply', auth, kefuController.adminSendReply);
 
 module.exports = router;
