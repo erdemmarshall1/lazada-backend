@@ -262,7 +262,7 @@ router.post('/approve-shop', adminAuth, async (req, res) => {
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    const storeNumber = `S${String(storeCounter.seq).padStart(5, '0')}`;
+    const storeNumber = `${storeCounter.seq}`;
     
     await Counter.updateOne(
       { name: 'sellerId' },
@@ -274,7 +274,7 @@ router.post('/approve-shop', adminAuth, async (req, res) => {
       { $inc: { seq: 1 } },
       { new: true }
     );
-    const sellerId = `S${sellerCounter.seq}`;
+    const sellerId = `${sellerCounter.seq}`;
     
     const shop = await Shop.findByIdAndUpdate(req.body.id, { 
       status: 1, 
@@ -315,7 +315,7 @@ router.post('/generate-seller-id', adminAuth, async (req, res) => {
       { $inc: { seq: 1 } },
       { new: true }
     );
-    const sellerId = `S${sellerCounter.seq}`;
+    const sellerId = `${sellerCounter.seq}`;
     await User.findByIdAndUpdate(shop.userId, { sellerId });
     res.json(success({ sellerId }, `Seller ID generated: ${sellerId}`));
   } catch (error) {
@@ -342,7 +342,7 @@ router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
       if (!shop.userId || shop.userId.sellerId) continue;
       await Counter.updateOne(
         { name: 'sellerId' },
-        { $setOnInsert: { seq: 171910 } },
+        { $setOnInsert: { seq: 101127 } },
         { upsert: true }
       );
       const sellerCounter = await Counter.findOneAndUpdate(
@@ -350,11 +350,39 @@ router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
         { $inc: { seq: 1 } },
         { new: true }
       );
-      const sellerId = `S${sellerCounter.seq}`;
+      const sellerId = `${sellerCounter.seq}`;
       await User.findByIdAndUpdate(shop.userId._id, { sellerId });
       migrated++;
     }
     res.json(success({ migrated }, `Migrated ${migrated} seller(s)`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/backfill-store-numbers', adminAuth, async (req, res) => {
+  try {
+    const Counter = require('../models/Counter');
+    if (req.body.startFrom) {
+      await Counter.findOneAndUpdate(
+        { name: 'storeNumber' },
+        { $set: { seq: req.body.startFrom - 1 } },
+        { upsert: true }
+      );
+    }
+    const shops = await Shop.find({ status: 1 }).sort({ createdAt: 1 });
+    let updated = 0;
+    for (const shop of shops) {
+      const counter = await Counter.findOneAndUpdate(
+        { name: 'storeNumber' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      shop.storeNumber = `${counter.seq}`;
+      await shop.save();
+      updated++;
+    }
+    res.json(success({ updated }, `Backfilled ${updated} store number(s)`));
   } catch (error) {
     res.json(fail(error.message));
   }

@@ -23,4 +23,17 @@ const shopSchema = new mongoose.Schema({
   followerCount: { type: Number, default: 0 },
 }, { timestamps: true });
 
+shopSchema.pre('save', async function(next) {
+  if (this.isNew && this.status === 1 && !this.storeNumber) {
+    const Counter = mongoose.model('Counter');
+    const counter = await Counter.findOneAndUpdate(
+      { name: 'storeNumber' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.storeNumber = `${counter.seq}`;
+  }
+  next();
+});
+
 module.exports = mongoose.model('Shop', shopSchema);
