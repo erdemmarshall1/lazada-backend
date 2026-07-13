@@ -6,7 +6,7 @@
         <div class="pwa-popup-icon">
           <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="var(--g-main_color)" stroke-width="1.5"><path d="M12 2v14m0 0l-4-4m4 4l4-4M4 18v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
         </div>
-        <h3 class="pwa-popup-title">Install Shopify Wholesale</h3>
+        <h3 class="pwa-popup-title">Install The Outnet Wholesale</h3>
         <p class="pwa-popup-desc">Get the fastest experience with our PWA app. Works on iOS, Android &amp; Windows.</p>
         <div v-if="pwa.isIOS.value" class="pwa-ios-instructions">
           <p>1. Tap the <strong>Share</strong> button <span class="ios-share-icon">&#8593;</span> in Safari</p>
@@ -25,7 +25,7 @@
         </div>
         <div class="pwa-home-text">
           <strong>Get the App</strong>
-          <span>Install Shopify Wholesale on your device for the best experience</span>
+          <span>Install The Outnet Wholesale on your device for the best experience</span>
         </div>
         <button v-if="!pwa.isIOS.value" class="pwa-install-btn-sm" @click="install">Install</button>
         <button v-else class="pwa-install-btn-sm" @click="pwa.dismiss()">How to Install</button>

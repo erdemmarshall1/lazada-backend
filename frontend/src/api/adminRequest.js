@@ -96,7 +96,7 @@ service.interceptors.response.use(
                 isRefreshing = false
                 refreshSubscribers = []
                 removeAdminTokens()
-                window.location.hash = '#/admin/login'
+                window.location.href = '/admin'
                 showAuthErrorOnce('Please enter your username/email and password to access your account')
               }
             })
@@ -104,7 +104,7 @@ service.interceptors.response.use(
               isRefreshing = false
               refreshSubscribers = []
               removeAdminTokens()
-              window.location.hash = '#/admin/login'
+              window.location.href = '/admin'
               ElMessage.error('Please enter your username/email and password to access your account')
             })
         }
@@ -118,8 +118,8 @@ service.interceptors.response.use(
         })
       }
       removeAdminTokens()
-      if (window.location.hash !== '#/admin/login') {
-        window.location.hash = '#/admin/login'
+      if (window.location.pathname !== '/admin') {
+        window.location.href = '/admin'
         showAuthErrorOnce('Please enter your username/email and password to access your account')
       }
       return Promise.reject(data)
@@ -154,7 +154,7 @@ service.interceptors.response.use(
                 isRefreshing = false
                 refreshSubscribers = []
                 removeAdminTokens()
-                window.location.hash = '#/admin/login'
+                window.location.href = '/admin'
                 showAuthErrorOnce('Please enter your username/email and password to access your account')
               }
             })
@@ -162,7 +162,7 @@ service.interceptors.response.use(
               isRefreshing = false
               refreshSubscribers = []
               removeAdminTokens()
-              window.location.hash = '#/admin/login'
+              window.location.href = '/admin'
               ElMessage.error('Please enter your username/email and password to access your account')
             })
         }
@@ -176,8 +176,8 @@ service.interceptors.response.use(
         })
       }
       removeAdminTokens()
-      if (window.location.hash !== '#/admin/login') {
-        window.location.hash = '#/admin/login'
+      if (window.location.pathname !== '/admin') {
+        window.location.href = '/admin'
         showAuthErrorOnce('Please enter your username/email and password to access your account')
       }
       return Promise.reject(error)

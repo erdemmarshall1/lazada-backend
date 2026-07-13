@@ -86,7 +86,7 @@ const handleLogin = async () => {
         ElMessage.success(message)
         const redirectPath = getRedirectPath()
         try { await router.replace(redirectPath) }
-        catch { window.location.hash = `#${redirectPath}` }
+        catch { window.location.href = redirectPath }
       } else {
         ElMessage.error(message)
       }
@@ -132,7 +132,7 @@ const handleLogin = async () => {
       try {
         await router.replace(redirectPath)
       } catch (navigationError) {
-        window.location.hash = `#${redirectPath}`
+        window.location.href = redirectPath
       }
     } else {
       ElMessage.error(message)

@@ -77,8 +77,8 @@
         </div>
       </div>
 
-      <div class="dash-grid-4" v-if="totalInfo" style="margin-bottom:24px">
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+      <div class="store-metrics-grid" v-if="totalInfo" style="margin-bottom:24px">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <rect x="10" y="28" width="54" height="34" rx="6" fill="#667eea" opacity="0.7"/>
@@ -89,7 +89,7 @@
           <div class="dc-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
           <div class="dc-label">Total Revenue</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <rect x="14" y="48" width="12" height="20" rx="2" fill="#667eea" opacity="0.65"/>
@@ -101,7 +101,7 @@
           <div class="dc-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
           <div class="dc-label">Total Profit</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <path d="M40 10L66 25L40 40L14 25L40 10Z" fill="#667eea" opacity="0.85"/>
@@ -112,7 +112,7 @@
           <div class="dc-value">{{ totalInfo.orderCount || 0 }}</div>
           <div class="dc-label">Total Orders</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <circle cx="40" cy="40" r="28" fill="#667eea" opacity="0.7"/>
@@ -123,7 +123,7 @@
           <div class="dc-value">{{ totalInfo.todayOrderCount || 0 }}</div>
           <div class="dc-label">Today's Orders</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <ellipse cx="40" cy="32" rx="24" ry="10" fill="#667eea" opacity="0.7"/>
@@ -134,7 +134,7 @@
           <div class="dc-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
           <div class="dc-label">Today's Revenue</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <rect x="8" y="30" width="42" height="24" rx="3" fill="#667eea" opacity="0.7"/>
@@ -146,7 +146,7 @@
           <div class="dc-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
           <div class="dc-label">Pending Shipment</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <path d="M40 12c-4 0-8 4-8 8v2C22 26 16 34 16 44v6l-4 6h56l-4-6v-6c0-10-6-18-16-22v-2c0-4-4-8-8-8z" fill="#667eea" opacity="0.75"/>
@@ -156,7 +156,7 @@
           <div class="dc-value">{{ totalInfo.refundRequestCount || 0 }}</div>
           <div class="dc-label">Refund Requests</div>
         </div>
-        <div class="dash-dark-card" @click="$router.push('/storeordercontrol')">
+        <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
             <svg viewBox="0 0 80 80" fill="none">
               <rect x="14" y="48" width="12" height="20" rx="2" fill="#667eea" opacity="0.65"/>
@@ -401,483 +401,115 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.store-metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.store-metric-card { background: var(--g-white); border-radius: 8px; padding: 16px; border: 1px solid var(--g-border); cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+.store-metric-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); transform: translateY(-2px); }
+.store-metric-card .dc-value { font-size: 22px; font-weight: 700; color: var(--g-text); }
+.store-metric-card .dc-label { font-size: 12px; color: var(--g-text-light); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.store-metric-card .dash-illustration { width: 48px; height: 48px; margin-bottom: 4px; }
+.store-metric-card .dash-illustration svg { width: 100%; height: 100%; }
+
 .seller-dashboard {
   padding: 0;
-  background: var(--dash-dark-bg);
+  background: transparent;
   min-height: 80vh;
-  border-radius: var(--dash-card-radius);
+  border-radius: 8px;
   padding: 16px;
 }
 
-.dashboard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
+.dashboard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.dashboard-header h3 { margin: 0; font-size: 18px; color: var(--g-text); }
+.dashboard-header-actions { position: relative; display: inline-block; }
 
-.dashboard-header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #fff;
-}
+.notif-badge { position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px; padding: 0 6px; background: #f56c6c; color: #fff; border-radius: 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.notif-badge-sm { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; background: #f56c6c; color: #fff; border-radius: 9px; font-size: 11px; font-weight: 700; margin-left: 4px; }
 
-.dashboard-header-actions {
-  position: relative;
-  display: inline-block;
-}
+.new-order-alert { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; margin-bottom: 12px; font-size: 14px; color: #d46b08; flex-wrap: wrap; }
+.new-order-alert strong { font-weight: 700; }
+.iconfont { margin-right: 8px; }
+.alert-actions { display: flex; gap: 8px; margin-left: auto; }
 
-.notif-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: #f56c6c;
-  color: #fff;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-text { display: block; color: var(--g-text-light); margin-bottom: 16px; }
 
-.notif-badge-sm {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: #f56c6c;
-  color: #fff;
-  border-radius: 9px;
-  font-size: 11px;
-  font-weight: 700;
-  margin-left: 4px;
-}
+.status-awaiting-review { text-align: center; padding: 60px 20px; }
+.status-awaiting-review .status-icon-wrapper { margin-bottom: 16px; }
+.status-awaiting-review .status-icon-text { font-size: 48px; }
+.status-awaiting-review h4 { font-size: 20px; margin: 0 0 8px; color: var(--g-text); }
+.status-awaiting-review p { font-size: 14px; color: var(--g-text-light); margin: 0 0 24px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.6; }
 
-.new-order-alert {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fff7e6;
-  border: 1px solid #ffd591;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #d46b08;
-  flex-wrap: wrap;
-}
+.shop-details-card { background: var(--g-white); border-radius: 8px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--g-border); border-left: 4px solid var(--g-main_color); transition: all 0.3s; }
+.shop-details-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
 
-.new-order-alert strong {
-  font-weight: 700;
-}
+.section-title { font-size: 14px; letter-spacing: 1.5px; margin-bottom: 16px; color: var(--g-text-light); }
 
-.iconfont {
-  margin-right: 8px;
-}
+.shop-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.detail-label { display: block; font-size: 11px; color: var(--g-text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.detail-value { display: block; font-size: 16px; font-weight: 600; color: var(--g-text); }
+.balance-value { color: #52c41a; }
+.rating-value { color: #fa8c16; }
+.rating-total { font-size: 12px; color: #999; }
 
-.alert-actions {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-}
+.store-info-card { display: flex; align-items: center; gap: 20px; padding: 20px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--g-border); border-left: 4px solid var(--g-main_color); background: var(--g-white); transition: all 0.3s; }
+.store-info-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.store-logo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.store-info-body { flex: 1; min-width: 0; }
+.store-info-body h4 { margin: 0 0 4px; word-break: break-word; color: var(--g-text); }
+.store-desc { color: var(--g-text-light); font-size: 13px; margin: 0; word-break: break-word; }
+.store-info-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-}
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.chart-box { background: var(--g-white); border-radius: 8px; padding: 16px; border: 1px solid var(--g-border); transition: all 0.3s; }
+.chart-box:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.chart-box h4 { font-size: 14px; margin: 0 0 12px; color: var(--g-text); }
 
-.empty-text {
-  display: block;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 16px;
-}
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.bar-label { width: 80px; flex-shrink: 0; text-align: right; color: var(--g-text-light); }
+.bar-track { flex: 1; height: 18px; background: rgba(0,0,0,0.04); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; min-width: 2px; }
+.bar-value { width: 60px; flex-shrink: 0; font-weight: 600; color: var(--g-text); }
+.chart-empty { text-align: center; color: var(--g-text-light); padding: 20px; }
 
-.status-awaiting-review {
-  text-align: center;
-  padding: 60px 20px;
-}
+.credit-score-display { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0; }
+.score-circle { display: flex; align-items: baseline; gap: 2px; }
+.score-number { font-size: 48px; font-weight: 700; color: var(--g-text); }
+.score-unit { font-size: 16px; color: var(--g-text-light); }
+.score-track { width: 100%; height: 20px; background: rgba(0,0,0,0.04); border-radius: 10px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
 
-.status-awaiting-review .status-icon-wrapper {
-  margin-bottom: 16px;
-}
+.quick-links { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
 
-.status-awaiting-review .status-icon-text {
-  font-size: 48px;
-}
-
-.status-awaiting-review h4 {
-  font-size: 20px;
-  margin: 0 0 8px;
-  color: #fff;
-}
-
-.status-awaiting-review p {
-  font-size: 14px;
-  color: var(--g-text-light);
-  margin: 0 0 24px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
-}
-
-.shop-details-card {
-  background: var(--dash-dark-card);
-  border-radius: var(--dash-card-radius);
-  padding: 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-left: 4px solid #667eea;
-  transition: all 0.3s;
-}
-.shop-details-card:hover {
-  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.section-title {
-  font-size: 14px;
-  letter-spacing: 1.5px;
-  margin-bottom: 16px;
-  color: rgba(255,255,255,0.5);
-}
-
-.shop-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.detail-label {
-  display: block;
-  font-size: 11px;
-  color: rgba(255,255,255,0.35);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-
-.detail-value {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.balance-value {
-  color: #52c41a;
-}
-
-.rating-value {
-  color: #fa8c16;
-}
-
-.rating-total {
-  font-size: 12px;
-  color: #999;
-}
-
-.store-info-card {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-  border-radius: var(--dash-card-radius);
-  margin-top: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-left: 4px solid #667eea;
-  background: var(--dash-dark-card);
-  transition: all 0.3s;
-}
-.store-info-card:hover {
-  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.store-logo {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.store-info-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.store-info-body h4 {
-  margin: 0 0 4px;
-  word-break: break-word;
-  color: #fff;
-}
-
-.store-desc {
-  color: rgba(255,255,255,0.5);
-  font-size: 13px;
-  margin: 0;
-  word-break: break-word;
-}
-
-.store-info-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.charts-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.chart-box {
-  background: var(--dash-dark-card);
-  border-radius: var(--dash-card-radius);
-  padding: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.04);
-  transition: all 0.3s;
-}
-.chart-box:hover {
-  box-shadow: 0 12px 40px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.chart-box h4 {
-  font-size: 14px;
-  margin: 0 0 12px;
-  color: #fff;
-}
-
-.bar-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.bar-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.bar-label {
-  width: 80px;
-  flex-shrink: 0;
-  text-align: right;
-  color: rgba(255,255,255,0.45);
-}
-
-.bar-track {
-  flex: 1;
-  height: 18px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-  min-width: 2px;
-}
-
-.bar-value {
-  width: 60px;
-  flex-shrink: 0;
-  font-weight: 600;
-  color: rgba(255,255,255,0.7);
-}
-
-.chart-empty {
-  text-align: center;
-  color: rgba(255,255,255,0.3);
-  padding: 20px;
-}
-
-.credit-score-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 0;
-}
-
-.score-circle {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.score-number {
-  font-size: 48px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.score-unit {
-  font-size: 16px;
-  color: rgba(255,255,255,0.35);
-}
-
-.score-track {
-  width: 100%;
-  height: 20px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.score-fill {
-  height: 100%;
-  border-radius: 10px;
-  transition: width 0.5s ease;
-}
-
-.quick-links {
-  margin-top: 20px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 1200px) {
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .shop-details-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 992px) {
-  .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-}
+@media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } .shop-details-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
 
 @media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 14px 10px;
-  }
-
-  .stat-value {
-    font-size: 22px;
-  }
-
-  .charts-row {
-    grid-template-columns: 1fr;
-  }
-
-  .store-info-card {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .store-logo {
-    width: 60px;
-    height: 60px;
-  }
-
-  .store-info-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .shop-details-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .quick-links {
-    flex-direction: column;
-  }
-
-  .quick-links .el-button {
-    width: 100%;
-  }
-
-  .new-order-alert {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .new-order-alert .alert-actions {
-    margin-left: 0;
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .bar-label {
-    width: 60px;
-    font-size: 12px;
-  }
-
-  .bar-value {
-    width: 50px;
-    font-size: 12px;
-  }
-
-  .status-awaiting-review {
-    padding: 40px 16px;
-  }
-
-  .section-title {
-    font-size: 13px;
-  }
-
-  .detail-value {
-    font-size: 14px;
-  }
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 14px 10px; }
+  .stat-value { font-size: 22px; }
+  .charts-row { grid-template-columns: 1fr; }
+  .store-info-card { flex-direction: column; align-items: flex-start; text-align: left; }
+  .store-logo { width: 60px; height: 60px; }
+  .store-info-actions { width: 100%; justify-content: flex-start; }
+  .shop-details-grid { grid-template-columns: 1fr; gap: 12px; }
+  .quick-links { flex-direction: column; }
+  .quick-links .el-button { width: 100%; }
+  .new-order-alert { flex-direction: column; align-items: flex-start; }
+  .new-order-alert .alert-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .bar-label { width: 60px; font-size: 12px; }
+  .bar-value { width: 50px; font-size: 12px; }
+  .status-awaiting-review { padding: 40px 16px; }
+  .section-title { font-size: 13px; }
+  .detail-value { font-size: 14px; }
 }
 
 @media (max-width: 480px) {
-  .charts-row {
-    gap: 10px;
-  }
-
-  .chart-box {
-    padding: 12px;
-  }
-
-  .chart-box h4 {
-    font-size: 13px;
-  }
-
-  .store-info-card {
-    padding: 14px;
-    gap: 12px;
-  }
-
-  .shop-details-card {
-    padding: 14px;
-  }
-
-  .store-desc {
-    font-size: 12px;
-  }
+  .charts-row { gap: 10px; }
+  .chart-box { padding: 12px; }
+  .chart-box h4 { font-size: 13px; }
+  .store-info-card { padding: 14px; gap: 12px; }
+  .shop-details-card { padding: 14px; }
+  .store-desc { font-size: 12px; }
 }
 </style>

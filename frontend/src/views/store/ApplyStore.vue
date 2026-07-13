@@ -37,8 +37,7 @@
         <el-input v-model="form.idNumber" placeholder="Social Security Number / ID Number" />
       </el-form-item>
       <el-form-item label="Invitation Code" prop="invitationCode">
-        <el-input v-model="form.invitationCode" placeholder="Invitation Code (8101081865)" />
-        <div style="font-size:12px;color:#999;margin-top:4px">Default code: 8101081865</div>
+        <el-input v-model="form.invitationCode" placeholder="Enter your invitation code" />
       </el-form-item>
       <el-form-item label="Upload Utility Bills" prop="utilityBill">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
@@ -86,7 +85,7 @@ const form = reactive({
   idFrontImage: '',
   idBackImage: '',
   idNumber: '',
-  invitationCode: '8101081865',
+  invitationCode: '',
   utilityBill: '',
   email: '',
   phone: '',

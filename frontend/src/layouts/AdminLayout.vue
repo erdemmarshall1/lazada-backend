@@ -164,7 +164,7 @@ const navigate = (path) => {
 const handleLogout = async () => {
   await adminPost('/home/admin/auth/logout').catch(() => {})
   adminStore.logout()
-  router.push('/admin/login')
+  router.push('/admin')
 }
 
 const handleSearch = () => {

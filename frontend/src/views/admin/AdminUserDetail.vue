@@ -26,6 +26,10 @@
           <p><strong>Inquiries:</strong> {{ user.submissionCount || 0 }}</p>
         </div>
       </div>
+      <div class="user-actions" style="margin-top:16px;display:flex;gap:8px">
+        <el-button type="primary" @click="$router.push('/admin-user-edit/' + user._id)">Edit User</el-button>
+        <el-button type="danger" @click="loginAsUser" :loading="logining">Login as User</el-button>
+      </div>
     </div>
     <el-tabs v-model="activeTab" style="margin-top:20px">
       <el-tab-pane label="Orders" name="orders">
@@ -71,7 +75,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { get } from '@/api/request'
+import { get, post } from '@/api/request'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const userId = route.params.id
@@ -88,6 +93,19 @@ const submissions = ref([])
 const subsLoading = ref(false)
 const subPage = ref(1)
 const subTotal = ref(0)
+const logining = ref(false)
+
+const loginAsUser = async () => {
+  logining.value = true
+  try {
+    const res = await post(`/home/admin/login-as-user/${userId}`)
+    if (res?.code === 0) {
+      localStorage.setItem('seller_temp_token', res.data.token)
+      ElMessage.success(`Logged in as ${res.data.username}`)
+      window.open('/', '_blank')
+    }
+  } catch {} finally { logining.value = false }
+}
 
 const fetchUser = async () => {
   loading.value = true

@@ -74,16 +74,17 @@ const handleAvatarUpload = async (e) => {
   if (!file) return
   try {
     const res = await uploadFile(file)
-    const url = res?.data?.url || res?.url
+    const url = res?.data?.data?.url || res?.data?.url || res?.url
     if (url) {
       await post('/home/user/edit', { avatar: url })
       store.setUserInfo({ ...store.userInfo, avatar: url })
       ElMessage.success('Avatar updated')
     } else {
-      ElMessage.error('Failed to upload avatar')
+      ElMessage.error(res?.msg || res?.message || 'Failed to upload avatar')
     }
-  } catch {
-    ElMessage.error('Failed to upload avatar')
+  } catch (err) {
+    const msg = err?.response?.data?.msg || err?.msg || err?.message || 'Failed to upload avatar'
+    ElMessage.error(msg)
   }
   e.target.value = ''
 }

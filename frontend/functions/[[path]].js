@@ -17,8 +17,12 @@ export async function onRequest(context) {
     return proxyRequest(url, request)
   }
 
-  if (path.startsWith(ADMIN_PREFIX)) {
+  if (path.startsWith(ADMIN_PREFIX) || path === '/admin') {
     return env.ASSETS.fetch(new URL('/index.html', url).toString())
+  }
+
+  if (path.startsWith('/seller')) {
+    return Response.redirect(new URL('/', url).toString(), 302)
   }
 
   const ext = path.substring(path.lastIndexOf('.')).toLowerCase()
@@ -26,7 +30,7 @@ export async function onRequest(context) {
     return env.ASSETS.fetch(request)
   }
 
-  return Response.redirect(new URL('/admin/login', url).toString(), 302)
+  return env.ASSETS.fetch(new URL('/index.html', url).toString())
 }
 
 async function proxyRequest(url, request) {
