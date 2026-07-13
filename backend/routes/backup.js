@@ -92,19 +92,14 @@ const buildManifest = (method) => ({
 // ── Method A: Download zip via HTTP ────────────────
 router.post('/backup', adminAuth, async (req, res) => {
   try {
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const data = await dumpAllCollections();
+    const archive = archiver('zip', { zlib: { level: 1 } });
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="full_backup_${new Date().toISOString().slice(0, 10)}.zip"`);
     archive.pipe(res);
 
-    const data = await dumpAllCollections();
     for (const [name, docs] of Object.entries(data)) {
       archive.append(JSON.stringify(docs, null, 2), { name: `database/${name}.json` });
-    }
-
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
-    if (fs.existsSync(uploadsDir)) {
-      archive.directory(uploadsDir, 'uploads');
     }
 
     for (const { src, name } of getEnvFiles()) {
@@ -115,6 +110,16 @@ router.post('/backup', adminAuth, async (req, res) => {
 
     archive.append(JSON.stringify(buildManifest('endpoint_download'), null, 2), { name: 'manifest.json' });
     archive.finalize();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Method D: Dump all DB data as JSON (fast, no uploads) ──
+router.post('/backup/d', adminAuth, async (req, res) => {
+  try {
+    const data = await dumpAllCollections();
+    res.json({ success: true, data, manifest: buildManifest('json_dump') });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
