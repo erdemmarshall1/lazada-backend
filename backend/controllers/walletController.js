@@ -1,15 +1,61 @@
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
+const UserWallet = require('../models/UserWallet');
 const { createNotification } = require('./notificationController');
 const { success, fail, paginate } = require('../utils/response');
 
 exports.add = async (req, res) => {
-  res.json(success(null, 'Wallet added'));
+  try {
+    const { label, address, type } = req.body;
+    if (!label || !address) return res.json(fail('Label and address are required'));
+    const count = await UserWallet.countDocuments({ userId: req.user._id });
+    const wallet = await UserWallet.create({
+      userId: req.user._id, label, address, type: type || 'other',
+      isDefault: count === 0,
+    });
+    res.json(success(wallet, 'Wallet added'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
 };
 
 exports.del = async (req, res) => {
-  res.json(success(null, 'Wallet deleted'));
+  try {
+    const wallet = await UserWallet.findOneAndDelete({ _id: req.body.id, userId: req.user._id });
+    if (!wallet) return res.json(fail('Wallet not found'));
+    res.json(success(null, 'Wallet deleted'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const { id, label, address, type, isDefault } = req.body;
+    if (!id) return res.json(fail('Wallet ID is required'));
+    if (isDefault) {
+      await UserWallet.updateMany({ userId: req.user._id }, { isDefault: false });
+    }
+    const wallet = await UserWallet.findOneAndUpdate(
+      { _id: id, userId: req.user._id },
+      { label, address, type, isDefault },
+      { new: true }
+    );
+    if (!wallet) return res.json(fail('Wallet not found'));
+    res.json(success(wallet, 'Wallet updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.getAddressList = async (req, res) => {
+  try {
+    const list = await UserWallet.find({ userId: req.user._id }).sort({ isDefault: -1, createdAt: -1 });
+    res.json(success(list));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
 };
 
 exports.getList = async (req, res) => {

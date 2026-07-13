@@ -1,9 +1,16 @@
 ﻿<template>
   <div>
     <h3>Balance</h3>
-    <div class="balance-card g-flex-center">
-      <div class="balance-amount">${{ balance.toFixed(2) }}</div>
-      <div class="balance-label">Available Balance</div>
+    <div class="balance-card">
+      <div class="balance-row">
+        <span class="balance-label">Account Balance</span>
+        <span class="balance-amount">${{ balance.toFixed(2) }}</span>
+      </div>
+      <div class="balance-divider"></div>
+      <div class="balance-row">
+        <span class="balance-label">Available</span>
+        <span class="balance-amount">${{ balance.toFixed(2) }}</span>
+      </div>
     </div>
     <div class="balance-actions g-flex" style="gap:12px;margin-top:16px">
       <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDeposit = true">Deposit</el-button>
@@ -279,9 +286,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.balance-card { flex-direction: column; padding: 40px; background: linear-gradient(135deg, var(--g-main_color), #ff8c38); border-radius: 12px; color: #fff; }
-.balance-amount { font-size: 48px; font-weight: 700; }
-.balance-label { font-size: 14px; opacity: 0.8; margin-top: 8px; }
+.balance-card { padding: 32px 40px; background: linear-gradient(135deg, var(--g-main_color), #ff8c38); border-radius: 12px; color: #fff; }
+.balance-row { display: flex; justify-content: space-between; align-items: center; }
+.balance-row .balance-label { font-size: 14px; opacity: 0.85; }
+.balance-row .balance-amount { font-size: 28px; font-weight: 700; }
+.balance-divider { height: 1px; background: rgba(255,255,255,0.25); margin: 12px 0; }
 .qr-section { text-align: center; margin-top: 16px; padding: 16px; border: 1px dashed var(--g-border); border-radius: 8px; }
 .qr-section img { width: 200px; height: 200px; }
 .qr-section p { font-size: 12px; color: var(--g-text-light); margin-top: 8px; }
