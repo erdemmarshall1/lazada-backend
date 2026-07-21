@@ -1,7 +1,9 @@
+const mongoose = require('mongoose');
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 const UserWallet = require('../models/UserWallet');
+const Setting = require('../models/Setting');
 const { createNotification } = require('./notificationController');
 const { success, fail, paginate } = require('../utils/response');
 
@@ -76,13 +78,37 @@ exports.rechargeAdd = async (req, res) => {
     if (!amount || amount <= 0) return res.json(fail('Invalid amount'));
     const wallet = await Wallet.findOne({ userId: req.user._id });
     if (!wallet) return res.json(fail('Wallet not found'));
+
+    const approvalSetting = await Setting.findOne({ key: 'payment_approval' });
+    const autoApprove = approvalSetting?.value?.autoApprove === true;
+    const autoApproveAmount = Number(approvalSetting?.value?.autoApproveAmount) || 0;
+    const shouldAutoApprove = autoApprove || (autoApproveAmount > 0 && amount <= autoApproveAmount);
+
+    let status = shouldAutoApprove ? 1 : 0;
+    let balanceAfter = wallet.balance;
+    if (shouldAutoApprove) {
+      wallet.balance += amount;
+      wallet.totalRecharge += amount;
+      await wallet.save();
+      balanceAfter = wallet.balance;
+    }
+
     const tx = await Transaction.create({
       userId: req.user._id, type: 'recharge', amount,
-      balanceBefore: wallet.balance, balanceAfter: wallet.balance,
-      paymentMethod: paymentMethod || '', status: 0,
+      balanceBefore: shouldAutoApprove ? balanceAfter - amount : wallet.balance,
+      balanceAfter,
+      paymentMethod: paymentMethod || '', status,
       receipt: receipt || '',
       description: paymentMethod ? `Recharge via ${paymentMethod}` : 'Account recharge',
     });
+
+    if (shouldAutoApprove) {
+      createNotification(req.user._id, 'payment', 'Deposit Approved',
+        `Your deposit of $${amount} has been approved automatically`,
+        { transactionId: tx._id }, '/balance');
+      return res.json(success(tx, 'Deposit approved automatically'));
+    }
+
     const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id').lean();
     await Promise.all(admins.map(a =>
       createNotification(a._id, 'payment', 'New Payment Submitted',
@@ -91,6 +117,14 @@ exports.rechargeAdd = async (req, res) => {
     ));
 
     res.json(success(tx, 'Recharge submitted for admin approval'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+};
+
+exports.checkFundPassword = async (req, res) => {
+  try {
+    res.json(success({ hasPassword: !!req.user?.fundPassword }));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -221,8 +255,12 @@ exports.adminGetPendingWithdraws = async (req, res) => {
 
 exports.adminApproveTransaction = async (req, res) => {
   try {
-    const { id } = req.body;
-    const tx = await Transaction.findById(id);
+    const { id, transactionId } = req.body;
+    const txId = id || transactionId;
+    if (!txId || !mongoose.Types.ObjectId.isValid(txId)) {
+      return res.json(fail('Invalid transaction ID'));
+    }
+    const tx = await Transaction.findById(txId);
     if (!tx) return res.json(fail('Transaction not found'));
     if (tx.status !== 0) return res.json(fail('Transaction already processed'));
     const wallet = await Wallet.findOne({ userId: tx.userId });
@@ -251,8 +289,12 @@ exports.adminApproveTransaction = async (req, res) => {
 
 exports.adminRejectTransaction = async (req, res) => {
   try {
-    const { id } = req.body;
-    const tx = await Transaction.findById(id);
+    const { id, transactionId } = req.body;
+    const txId = id || transactionId;
+    if (!txId || !mongoose.Types.ObjectId.isValid(txId)) {
+      return res.json(fail('Invalid transaction ID'));
+    }
+    const tx = await Transaction.findById(txId);
     if (!tx) return res.json(fail('Transaction not found'));
     if (tx.status !== 0) return res.json(fail('Transaction already processed'));
     tx.status = 2;

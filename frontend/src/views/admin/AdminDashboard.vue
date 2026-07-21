@@ -135,8 +135,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppStore } from '@/stores/app'
-import { get, post, qe } from '@/api/request'
+import { useAdminAppStore } from '@/stores/adminApp'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 import { getSocket } from '@/socket'
 import { Line, Doughnut } from 'vue-chartjs'
@@ -144,7 +144,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler)
 
-const store = useAppStore()
+const adminStore = useAdminAppStore()
 const router = useRouter()
 const loading = ref(true)
 const generating = ref(false)
@@ -181,18 +181,18 @@ const quickLinks = [
 
 const fetchStats = async () => {
   const [u, s, p, t, w, ic] = await Promise.all([
-    qe(get('/home/admin/users?pageSize=1')),
-    qe(get('/home/admin/shops?pageSize=1')),
-    qe(get('/home/admin/products?pageSize=1')),
-    qe(get('/home/admin/transactions?pageSize=1')),
-    qe(get('/home/admin/platform-wallet')),
-    qe(get('/home/admin/invitation-codes?pageSize=1')),
+    adminGet('/home/admin/users?pageSize=1'),
+    adminGet('/home/admin/shops?pageSize=1'),
+    adminGet('/home/admin/products?pageSize=1'),
+    adminGet('/home/admin/transactions?pageSize=1'),
+    adminGet('/home/admin/platform-wallet'),
+    adminGet('/home/admin/invitation-codes?pageSize=1'),
   ])
   metricCards.value[0].value = u?.data?.total ?? 0
   metricCards.value[1].value = s?.data?.total ?? 0
   metricCards.value[2].value = p?.data?.total ?? 0
   metricCards.value[3].value = t?.data?.total ?? 0
-  if (w?.data) metricCards.value[4].value = '$' + (w.data.totalRevenue?.toFixed(2) ?? '0.00')
+  if (w?.code === 0 && w?.data) metricCards.value[4].value = '$' + (w.data.totalRevenue?.toFixed(2) ?? '0.00')
   metricCards.value[5].value = ic?.data?.total ?? 0
   summaryText.value = `${u?.data?.total ?? 0} users · ${s?.data?.total ?? 0} shops · ${t?.data?.total ?? 0} transactions`
 }
@@ -206,8 +206,8 @@ const statusTypes = {
 
 const fetchSalesData = async () => {
   const weeks = parseInt(revenueWeeks.value)
-  const res = await qe(get('/home/report/sales', { params: { days: weeks * 7 } }))
-  if (!res?.data) return
+  const res = await adminGet('/home/report/sales', { params: { days: weeks * 7 } })
+  if (res?.code !== 0 || !res?.data) return
   const d = res.data
   buildLineChart(d.timeSeries)
   buildDoughnutChart(d.categorySales)
@@ -254,16 +254,18 @@ const viewOrder = (row) => {
 
 const approvePayment = async (row) => {
   row._loading = true
-  const res = await qe(post('/home/admin/approve-transaction', { id: row._id }))
+  const res = await adminPost('/home/admin/approve-transaction', { id: row._id })
   row._loading = false
-  if (res) { ElMessage.success('Payment approved'); fetchSalesData() }
+  if (res?.code === 0) { ElMessage.success('Payment approved'); fetchSalesData() }
+  else if (res?.msg) { ElMessage.error(res.msg) }
 }
 
 const rejectPayment = async (row) => {
   row._loading = true
-  const res = await qe(post('/home/admin/reject-transaction', { id: row._id }))
+  const res = await adminPost('/home/admin/reject-transaction', { id: row._id })
   row._loading = false
-  if (res) { ElMessage.success('Payment rejected'); fetchSalesData() }
+  if (res?.code === 0) { ElMessage.success('Payment rejected'); fetchSalesData() }
+  else if (res?.msg) { ElMessage.error(res.msg) }
 }
 
 const reviewShop = (row) => {
@@ -317,9 +319,10 @@ const buildDoughnutChart = (categorySales) => {
 
 const quickGenerate = async () => {
   generating.value = true
-  const res = await post('/home/admin/invitation-codes/generate')
+  const res = await adminPost('/home/admin/invitation-codes/generate')
   generating.value = false
-  if (res) { ElMessage.success(res.msg || 'Code generated'); fetchStats() }
+  if (res?.code === 0) { ElMessage.success(res.msg || 'Code generated'); fetchStats() }
+  else if (res?.msg) { ElMessage.error(res.msg) }
 }
 
 onMounted(async () => {

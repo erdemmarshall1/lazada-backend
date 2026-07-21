@@ -1,33 +1,33 @@
 ﻿<template>
   <div>
-    <h3>Balance</h3>
+    <h3>{{ $t('user.balance.title') }}</h3>
     <div class="balance-card">
       <div class="balance-row">
-        <span class="balance-label">Account Balance</span>
+        <span class="balance-label">{{ $t('user.balance.accountBalance') }}</span>
         <span class="balance-amount">${{ balance.toFixed(2) }}</span>
       </div>
       <div class="balance-divider"></div>
       <div class="balance-row">
-        <span class="balance-label">Available</span>
+        <span class="balance-label">{{ $t('user.balance.available') }}</span>
         <span class="balance-amount">${{ balance.toFixed(2) }}</span>
       </div>
     </div>
     <div class="balance-actions g-flex" style="gap:12px;margin-top:16px">
-      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDeposit = true">Deposit</el-button>
-      <el-button @click="showWithdraw = true">Withdraw</el-button>
+      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDeposit = true">{{ $t('user.balance.deposit') }}</el-button>
+      <el-button @click="showWithdraw = true">{{ $t('user.balance.withdraw') }}</el-button>
     </div>
 
-    <el-dialog v-model="showDeposit" title="Deposit" width="520px">
+    <el-dialog v-model="showDeposit" :title="$t('user.balance.deposit')" width="520px">
       <el-form ref="formRef" :model="formData" :rules="rules" label-position="top">
-        <el-form-item label="Amount" prop="depositAmount">
+        <el-form-item :label="$t('user.balance.amountLabel')" prop="depositAmount">
           <el-input-number v-model="formData.depositAmount" :min="1" :max="100000" style="width:100%" />
         </el-form-item>
-        <el-form-item label="Payment Method" prop="depositPaymentMethod">
-          <el-select v-model="formData.depositPaymentMethod" placeholder="Select payment method" style="width:100%" @change="onPaymentMethodChange">
+        <el-form-item :label="$t('user.balance.paymentMethodLabel')" prop="depositPaymentMethod">
+          <el-select v-model="formData.depositPaymentMethod" :placeholder="$t('user.balance.paymentPlaceholder')" style="width:100%" @change="onPaymentMethodChange">
             <el-option v-for="m in paymentMethods" :key="m.value" :label="m.label" :value="m.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Upload Payment Receipt" prop="receipt">
+        <el-form-item :label="$t('user.balance.receiptLabel')" prop="receipt">
           <el-upload
             ref="uploadRef"
             :action="uploadUrl"
@@ -41,55 +41,55 @@
             accept="image/*,.pdf"
             list-type="picture"
           >
-            <el-button size="small" type="primary" v-if="!receiptUrl">Click to Upload</el-button>
-            <template #tip><div style="font-size:12px;color:#999;margin-top:4px">JPG/PNG/PDF, max 10MB</div></template>
+            <el-button size="small" type="primary" v-if="!receiptUrl">{{ $t('user.balance.clickUpload') }}</el-button>
+            <template #tip><div style="font-size:12px;color:#999;margin-top:4px">{{ $t('user.balance.receiptHint') }}</div></template>
           </el-upload>
           <div v-if="receiptUrl" class="receipt-preview">
-            <img :src="imgUrl(receiptUrl)" alt="Receipt" @click="previewReceipt" />
-            <span class="receipt-preview-label">Receipt uploaded</span>
+            <img :src="imgUrl(receiptUrl)" :alt="$t('user.balance.receiptAlt')" @click="previewReceipt" />
+            <span class="receipt-preview-label">{{ $t('user.balance.receiptUploaded') }}</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="selectedWallet" label="Wallet Address">
+        <el-form-item v-if="selectedWallet" :label="$t('user.balance.walletAddressLabel')">
           <el-input :model-value="selectedWallet" readonly>
             <template #append>
-              <el-button @click="copyAddress">Copy</el-button>
+              <el-button @click="copyAddress">{{ $t('user.balance.copy') }}</el-button>
             </template>
           </el-input>
         </el-form-item>
         <div class="qr-section" v-if="qrDataUrl">
-          <img :src="qrDataUrl" alt="Payment QR Code" />
-          <p>Scan to pay</p>
+          <img :src="qrDataUrl" :alt="$t('user.balance.qrCodeAlt')" />
+          <p>{{ $t('user.balance.scanToPay') }}</p>
         </div>
       </el-form>
       <template #footer>
-        <el-button @click="showDeposit = false">Cancel</el-button>
-        <el-button type="primary" :loading="submitting" @click="doDeposit">Confirm</el-button>
+        <el-button @click="showDeposit = false">{{ $t('user.balance.cancel') }}</el-button>
+        <el-button type="primary" :loading="submitting" @click="doDeposit">{{ $t('user.balance.confirm') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="showWithdraw" title="Withdraw" width="480px">
+    <el-dialog v-model="showWithdraw" :title="$t('user.balance.withdraw')" width="480px">
       <el-form label-position="top">
-        <el-form-item label="Amount">
+        <el-form-item :label="$t('user.balance.amountLabel')">
           <el-input-number v-model="withdrawAmount" :min="1" :max="balance" style="width:100%" />
         </el-form-item>
-        <el-form-item label="Payment Method">
-          <el-select v-model="withdrawPaymentMethod" placeholder="Select payment method" style="width:100%">
+        <el-form-item :label="$t('user.balance.paymentMethodLabel')">
+          <el-select v-model="withdrawPaymentMethod" :placeholder="$t('user.balance.paymentPlaceholder')" style="width:100%">
             <el-option v-for="m in paymentMethods" :key="m.value" :label="m.label" :value="m.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Withdrawal Details">
-          <el-input v-model="withdrawalDetails" type="textarea" :rows="3" placeholder="Enter your wallet address, bank account details, or other withdrawal information" />
+        <el-form-item :label="$t('user.balance.withdrawalDetailsLabel')">
+          <el-input v-model="withdrawalDetails" type="textarea" :rows="3" :placeholder="$t('user.balance.withdrawalPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showWithdraw = false">Cancel</el-button>
-        <el-button type="primary" @click="openWithdrawPasswordDialog">Confirm</el-button>
+        <el-button @click="showWithdraw = false">{{ $t('user.balance.cancel') }}</el-button>
+        <el-button type="primary" @click="openWithdrawPasswordDialog">{{ $t('user.balance.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <TransactionPasswordDialog
       :visible="showPasswordDialog"
-      title="Confirm Withdrawal"
+      :title="$t('user.balance.confirmWithdrawalTitle')"
       :description="`Withdraw $${withdrawAmount} via ${withdrawPaymentMethod || 'selected method'}`"
       :amount="withdrawAmount"
       :api-func="apiFunc"
@@ -202,22 +202,26 @@ const doDeposit = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   submitting.value = true
-  await qe(post('/home/userRecharge/add', {
+  const res = await post('/home/userRecharge/add', {
     amount: formData.depositAmount,
     paymentMethod: formData.depositPaymentMethod,
     receipt: formData.receipt,
-  }))
+  })
   submitting.value = false
-  showDeposit.value = false
-  receiptUrl.value = ''
-  receiptFileList.value = []
-  formData.depositAmount = 100
-  formData.depositPaymentMethod = ''
-  formData.receipt = ''
-  selectedWallet.value = ''
-  qrDataUrl.value = ''
-  ElMessage.success('Deposit submitted for admin review')
-  await loadBalance()
+  if (res?.code === 0) {
+    showDeposit.value = false
+    receiptUrl.value = ''
+    receiptFileList.value = []
+    formData.depositAmount = 100
+    formData.depositPaymentMethod = ''
+    formData.receipt = ''
+    selectedWallet.value = ''
+    qrDataUrl.value = ''
+    ElMessage.success(res.msg || 'Deposit submitted for review')
+    await loadBalance()
+  } else {
+    ElMessage.error(res?.msg || 'Deposit failed')
+  }
 }
 
 const openWithdrawPasswordDialog = () => {

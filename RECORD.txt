@@ -1,5 +1,5 @@
 UPDATE & FIX RECORD
-Date: July 10, 2026
+Date: July 16, 2026
 
 === CREDENTIALS ===
 
@@ -134,6 +134,54 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
     - Router guards separated: admin routes check useAdminAppStore, customer routes check useAppStore
     - Deployed via: npx wrangler pages deploy dist --project-name=theoutnet-wholesale --branch=admin
 
+15. Shop Details Feature — Merchant Application Flow Update
+    - MyCenter.vue sidebar: shows "Apply for Merchant" for non-sellers, "Shop Details" for approved sellers
+      (conditional on store.isSeller — links to /applystore or /storesettings respectively)
+    - StoreSettings.vue: "Become a Merchant" promo page for non-sellers, pending status view for applicants,
+      full shop details dashboard for approved sellers
+    - MyStore.vue "Apply Now" → "Apply for Merchant" (translation key store.myStore.applyButton updated to
+      "Apply for Merchant" across all locale files: en, es, fr, de, ar, hi, id, it, ja, ko, ms, nl, pl, pt,
+      ru, th, tr, vi, zh-CN, zh-TW)
+
+16. Preview Deployment — Shop Details Feature
+    - Built: npm run build (2251 modules, 0 errors)
+    - Deployed to Cloudflare Pages preview (branch: main)
+    - Preview URL: https://f6a3eea8.theoutnet-wholesale.pages.dev
+    - Alias URL: https://main.theoutnet-wholesale.pages.dev
+
+17. Production Deployment — Shop Details Feature
+    - Deployed to Cloudflare Pages production (branch: master)
+    - Production URL: https://30b46410.theoutnet-wholesale.pages.dev
+    - Live URL: https://theoutnet-wholesale.pages.dev
+
+18. Fixed "Not allowed nest placeholder" Error (vue-i18n message compiler)
+    - Root cause: profitLabel translations in en.json had ${{retailPrice}} which the
+      message compiler's tokenizer misinterpreted as nested placeholder when braceNest
+      was already active from the preceding {{percentage}} placeholder
+    - Fix: Removed $ sign from translation strings (en.json lines 818, 823), prepended
+      $ to retailPrice value at the template call site instead
+    - Files modified:
+      - frontend/src/locales/en.json (profitLabel translations)
+      - frontend/src/views/wholesale/SourceGoods.vue (line 33)
+      - frontend/src/views/wholesale/SourceGoodsDetail.vue (line 11)
+
+19. Fixed NOT_ALLOW_NEST_PLACEHOLDER Across All Locales
+    - Root cause: ALL locale files used {{param}} (double-brace) syntax which triggers
+      NOT_ALLOW_NEST_PLACEHOLDER in vue-i18n v9 message compiler's tokenizer (every { increments
+      braceNest, second { in {{ throws when braceNest >= 1)
+    - Fix: Replaced all {{param}} → {param} (correct v9 syntax) across all 20 locale JSON files
+    - Parameters affected: year, stock, categoryTitle, amount, price, percentage, retailPrice
+    - No template changes needed ($t() calls already pass named parameters correctly)
+    - Build: 2248 modules, 0 errors
+
+20. Fixed "Transaction not found" on Admin Deposit Approval
+    - Root cause: Field name mismatch — frontend sends { transactionId: id } but backend
+      reads const { id } = req.body → findById(undefined) → null → "Transaction not found"
+    - Fix: Changed walletController.js adminApproveTransaction (line 224) and
+      adminRejectTransaction (line 254) to read const { id, transactionId } = req.body
+      and use const txId = id || transactionId
+    - Files modified: backend/controllers/walletController.js
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
@@ -141,6 +189,7 @@ Backend (Railway): https://the-outnet-backend-production-3b57.up.railway.app
 Frontend (Netlify): https://shopify-wholesale.netlify.app (site ID in GitHub secrets)
 Frontend (Cloudflare Pages): https://theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Preview): https://preview.theoutnet-wholesale.pages.dev
+Frontend (Cloudflare Main Preview): https://main.theoutnet-wholesale.pages.dev
 Frontend (Cloudflare Admin): https://admin.theoutnet-wholesale.pages.dev
 
 === CREDENTIALS ===
