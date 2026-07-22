@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 
-mongoose.set('bufferTimeoutMS', 120000);
+mongoose.set('bufferTimeoutMS', 300000);
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
