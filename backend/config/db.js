@@ -6,7 +6,9 @@ const net = require('net');
 
 let mongodProcess = null;
 
-const waitForPort = (port, host, timeout = 30000) => {
+const MONGO_OPTS = { bufferTimeoutMS: 120000, serverSelectionTimeoutMS: 60000, connectTimeoutMS: 60000 };
+
+const waitForPort = (port, host, timeout = 60000) => {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const tryConnect = () => {
@@ -28,14 +30,14 @@ const startSystemMongod = async () => {
   const dbPath = path.join(__dirname, '..', 'data');
   fs.mkdirSync(dbPath, { recursive: true });
   console.log(`Starting mongod from ${mongoBinary} with dbpath ${dbPath}`);
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     mongodProcess = spawn(mongoBinary, [
       '--dbpath', dbPath, '--port', '27017', '--bind_ip', '127.0.0.1', '--noauth',
     ], { stdio: ['ignore', 'pipe', 'pipe'] });
-    mongodProcess.stderr.on('data', (d) => { if (process.env.NODE_ENV !== 'production' || d.toString().includes('waiting for connections')) process.stdout.write(`mongod: ${d}`); });
+    mongodProcess.stderr.on('data', (d) => { process.stdout.write(`mongod: ${d}`); });
     mongodProcess.on('error', (err) => { console.error('Failed to start mongod:', err.message); resolve(false); });
-    mongodProcess.on('exit', (code) => { if (code !== 0) console.error(`mongod exited with code ${code}`); });
-    waitForPort(27017, '127.0.0.1', 30000).then(() => resolve(true)).catch((err) => { console.error(err.message); resolve(false); });
+    mongodProcess.on('exit', (code) => { if (code !== 0) console.error(`mongod exited with code ${code}`); resolve(false); });
+    waitForPort(27017, '127.0.0.1', 60000).then(() => resolve(true)).catch((err) => { console.error(err.message); resolve(false); });
   });
 };
 
@@ -43,7 +45,7 @@ const connectDB = async () => {
   const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
   if (uri && !uri.includes('localhost') && !uri.includes('127.0.0.1')) {
     try {
-      const conn = await mongoose.connect(uri);
+      const conn = await mongoose.connect(uri, MONGO_OPTS);
       console.log(`MongoDB connected: ${conn.connection.host}`);
       try { await seedFullData(); } catch (e) { console.error('Seed error:', e.message); }
       return true;
@@ -54,7 +56,7 @@ const connectDB = async () => {
   if (process.env.MONGOMS_SYSTEM_BINARY) {
     const started = await startSystemMongod();
     if (started) {
-      await mongoose.connect('mongodb://127.0.0.1:27017/lazada');
+      await mongoose.connect('mongodb://127.0.0.1:27017/lazada', MONGO_OPTS);
       console.log('MongoDB connected via system mongod');
       await seedFullData();
       return true;
@@ -65,7 +67,7 @@ const connectDB = async () => {
     const { MongoMemoryServer } = require('mongodb-memory-server');
     const mongod = await MongoMemoryServer.create();
     const uri = mongod.getUri();
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, MONGO_OPTS);
     console.log(`In-memory MongoDB started at ${uri}`);
     await seedFullData();
     return true;
