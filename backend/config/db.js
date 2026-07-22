@@ -1,8 +1,29 @@
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
+const net = require('net');
 
 mongoose.set('bufferTimeoutMS', 300000);
+
+let mongodProcess = null;
+
+const waitForPort = (port, host, timeout = 60000) => {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tryConnect = () => {
+      const sock = new net.Socket();
+      sock.once('connect', () => { sock.destroy(); resolve(); });
+      sock.once('error', () => {
+        sock.destroy();
+        if (Date.now() - start > timeout) reject(new Error(`Timeout waiting for ${host}:${port}`));
+        else setTimeout(tryConnect, 500);
+      });
+      sock.connect(port, host);
+    };
+    tryConnect();
+  });
+};
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
@@ -14,6 +35,30 @@ const connectDB = async () => {
       return true;
     } catch (error) {
       console.error(`MongoDB connection error: ${error.message}`);
+    }
+  }
+  const mongoBinary = process.env.MONGOMS_SYSTEM_BINARY;
+  if (mongoBinary) {
+    console.log(`Starting system mongod from ${mongoBinary}...`);
+    const dbPath = path.join(__dirname, '..', 'data');
+    fs.mkdirSync(dbPath, { recursive: true });
+    try {
+      const started = await new Promise((resolve) => {
+        const proc = spawn(mongoBinary, ['--dbpath', dbPath, '--port', '27017', '--bind_ip', '127.0.0.1'], { stdio: ['ignore', 'pipe', 'pipe'] });
+        proc.stderr.on('data', (d) => process.stdout.write(`mongod: ${d}`));
+        proc.on('error', (e) => { console.error('mongod spawn error:', e.message); resolve(false); });
+        proc.on('exit', (c) => { if (c !== 0) console.error(`mongod exited code ${c}`); resolve(false); });
+        mongodProcess = proc;
+        waitForPort(27017, '127.0.0.1', 30000).then(() => resolve(true)).catch((err) => { console.error(err.message); resolve(false); });
+      });
+      if (started) {
+        await mongoose.connect('mongodb://127.0.0.1:27017/lazada');
+        console.log('MongoDB connected via system mongod');
+        await seedFullData();
+        return true;
+      }
+    } catch (e) {
+      console.error('Failed to start system mongod:', e.message);
     }
   }
   console.log('Starting in-memory MongoDB...');
@@ -29,6 +74,11 @@ const connectDB = async () => {
     console.error('Failed to start in-memory MongoDB:', err.message);
     return false;
   }
+};
+
+const closeDB = async () => {
+  if (mongodProcess) { mongodProcess.kill('SIGTERM'); mongodProcess = null; }
+  await mongoose.disconnect();
 };
 
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
