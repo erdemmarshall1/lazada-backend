@@ -4,6 +4,10 @@ const fs = require('fs');
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
+  if (!uri || uri.includes('localhost') || uri.includes('127.0.0.1')) {
+    console.log('No remote MongoDB URI configured, starting in-memory MongoDB...');
+    return await startInMemoryDB();
+  }
   try {
     const conn = await mongoose.connect(uri);
     console.log(`MongoDB connected: ${conn.connection.host}`);
@@ -52,7 +56,9 @@ const seedFullData = async () => {
   }
   if (existingProducts > 0 && !scrapedShop) {
     console.log(`Database has ${existingProducts} products but no THE OUTNET CN shop, running scraped import only`);
+  if (!process.env.SKIP_SCRAPED_SEED) {
     await seedScrapedProducts();
+  }
     console.log('Scraped import complete');
     return;
   }
