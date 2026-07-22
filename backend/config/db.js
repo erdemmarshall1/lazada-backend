@@ -4,9 +4,11 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const net = require('net');
 
+mongoose.set('bufferTimeoutMS', 120000);
+
 let mongodProcess = null;
 
-const MONGO_OPTS = { bufferTimeoutMS: 120000, serverSelectionTimeoutMS: 60000, connectTimeoutMS: 60000 };
+const MONGO_OPTS = { serverSelectionTimeoutMS: 60000, connectTimeoutMS: 60000 };
 
 const waitForPort = (port, host, timeout = 60000) => {
   return new Promise((resolve, reject) => {
@@ -64,6 +66,7 @@ const connectDB = async () => {
   }
   console.log('Starting in-memory MongoDB...');
   try {
+    delete process.env.MONGOMS_SYSTEM_BINARY;
     const { MongoMemoryServer } = require('mongodb-memory-server');
     const mongod = await MongoMemoryServer.create();
     const uri = mongod.getUri();
