@@ -11,6 +11,7 @@ require('./config/cloudinary');
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -76,10 +77,6 @@ app.get('/api/reimport', async (req, res) => {
 const errorHandler = require('./middleware/errorHandler');
 
 // Health check endpoint (must be before SPA fallback)
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
-});
-
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];
@@ -110,6 +107,8 @@ const startServer = (dbConnected) => {
   if (dbConnected) {
     const escrowService = require('./services/escrowService');
     escrowService.start();
+    const autoClosureService = require('./services/autoClosureService');
+    autoClosureService.start();
   }
 
   // Self-ping to prevent Railway free tier sleep (every 10 minutes)
@@ -128,9 +127,20 @@ const startServer = (dbConnected) => {
   }
 };
 
-connectDB().then(() => {
-  startServer(true);
+let dbReady = false;
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
+});
+startServer(false);
+connectDB().then(connected => {
+  dbReady = connected;
+  if (connected) {
+    const escrowService = require('./services/escrowService');
+    escrowService.start();
+    const autoClosureService = require('./services/autoClosureService');
+    autoClosureService.start();
+  }
+  console.log(`MongoDB: ${connected ? 'connected' : 'disconnected'}`);
 }).catch(err => {
-  console.error('MongoDB connection failed, starting without database:', err.message);
-  startServer(false);
+  console.error('MongoDB connection error:', err.message);
 });
