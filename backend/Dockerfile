@@ -5,9 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 RUN wget -q https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian11-7.0.0.tgz -O /tmp/mongo.tgz && \
-    tar xzf /tmp/mongo.tgz -C /usr/local --strip-components=2 && \
+    tar xzf /tmp/mongo.tgz -C /usr/local && \
     rm /tmp/mongo.tgz && \
-    ln -s /usr/local/bin/mongod /usr/local/bin/mongod
+    mv /usr/local/mongodb-linux-x86_64-debian11-7.0.0/bin/* /usr/local/bin/ && \
+    rm -rf /usr/local/mongodb-linux-x86_64-debian11-7.0.0 && \
+    mongod --version
 ENV MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod
 COPY . .
 EXPOSE 3000
