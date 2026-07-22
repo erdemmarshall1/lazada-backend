@@ -76,7 +76,14 @@ app.get('/api/reimport', async (req, res) => {
 
 const errorHandler = require('./middleware/errorHandler');
 
-// Health check endpoint (must be before SPA fallback)
+// Error handling middleware
+app.use(errorHandler);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
+
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];
@@ -88,9 +95,6 @@ app.get('*', (req, res) => {
     res.json({ message: 'Backend API is running' });
   }
 });
-
-// Error handling middleware
-app.use(errorHandler);
 
 const startServer = (dbConnected) => {
   const server = app.listen(PORT, () => {
@@ -127,20 +131,16 @@ const startServer = (dbConnected) => {
   }
 };
 
-let dbReady = false;
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message, err.stack);
 });
-startServer(false);
-connectDB().then(connected => {
-  dbReady = connected;
-  if (connected) {
-    const escrowService = require('./services/escrowService');
-    escrowService.start();
-    const autoClosureService = require('./services/autoClosureService');
-    autoClosureService.start();
-  }
-  console.log(`MongoDB: ${connected ? 'connected' : 'disconnected'}`);
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+connectDB().then(() => {
+  startServer(true);
 }).catch(err => {
-  console.error('MongoDB connection error:', err.message);
+  console.error('MongoDB connection failed, starting without database:', err.message);
+  startServer(false);
 });
