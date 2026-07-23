@@ -109,21 +109,32 @@ app.get('/api/test-insert', async (req, res) => {
     const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
     const catId = scrapedCatMap[catName];
     if (!catId) return res.json({ error: 'No category ID for ' + catName });
+    let shop = await Shop.findOne({ name: 'THE OUTNET CN' });
+    if (!shop) {
+      const User = require('./models/User');
+      let u = await User.findOne({ username: 'outnet' });
+      if (!u) u = await User.create({ username: 'outnet', email: 'outnet@shopifywholesale.com', password: 'seller123', role: 'seller' });
+      shop = await Shop.create({ userId: u._id, name: 'THE OUTNET CN', description: 'Test', status: 1, rating: 4.5, salesCount: 50000 });
+    }
     const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
     const doc = {
       name: p.title, description: p.content || p.title,
       images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'],
-      categoryId: catId, shopId: null,
+      categoryId: catId, shopId: shop._id,
       skus: [{ price, originalPrice: Math.round(price * 1.3 * 100) / 100, stock: p.stock || 999 }],
       salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
       minPrice: price, maxPrice: price, originalPrice: Math.round(price * 1.3 * 100) / 100,
       originalId: `${p.mer_id || '0'}_${p.product_id}`,
     };
     try {
-      const result = await Product.insertMany([doc], { ordered: false });
-      res.json({ success: true, id: result[0]._id.toString(), name: result[0].name });
+      const result = await Product.insertMany([doc]);
+      if (result && result.length > 0) {
+        res.json({ success: true, id: result[0]._id.toString(), name: result[0].name });
+      } else {
+        res.json({ error: 'InsertMany returned empty result', docKeys: Object.keys(doc), categoryId: doc.categoryId ? doc.categoryId.toString() : null });
+      }
     } catch (insertErr) {
-      res.json({ error: 'InsertMany failed: ' + insertErr.message, stack: insertErr.stack });
+      res.json({ error: 'InsertMany failed: ' + insertErr.message, stack: insertErr.stack, name: insertErr.name });
     }
   } catch (e) {
     res.json({ error: e.message, stack: e.stack });
