@@ -74,25 +74,6 @@ app.get('/api/reimport', async (req, res) => {
   }
 });
 
-// One-shot assets upload (protected by ASSETS_SECRET)
-const multer = require('multer');
-const admZip = require('adm-zip');
-const assetsUpload = multer({ dest: '/tmp/assets_upload', limits: { fileSize: 100 * 1024 * 1024 } });
-app.post('/api/upload-assets', assetsUpload.single('zip'), async (req, res) => {
-  if (req.query.secret !== (process.env.ASSETS_SECRET || 'assets123')) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-  try {
-    const zip = new admZip(req.file.path);
-    zip.extractAllTo(path.join(__dirname, 'uploads'), true);
-    if (req.file.path) fs.unlinkSync(req.file.path);
-    res.json({ message: 'Assets uploaded and extracted successfully' });
-  } catch (e) {
-    res.status(500).json({ message: 'Extraction failed', error: e.message });
-  }
-});
-
 const errorHandler = require('./middleware/errorHandler');
 
 // Error handling middleware
