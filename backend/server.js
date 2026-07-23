@@ -82,21 +82,19 @@ app.get('/api/debug-files', (req, res) => {
   });
 });
 
-// Debug: test import first chunk
-app.get('/api/test-import', async (req, res) => {
+// Debug: test insert one product
+app.get('/api/test-insert', async (req, res) => {
   if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
   const fs = require('fs');
   const path = require('path');
-  const chunksDir = path.join(__dirname, 'scripts', 'chunks');
-  const firstChunk = path.join(chunksDir, 'scraped_chunk_0.json');
-  if (!fs.existsSync(firstChunk)) {
-    return res.json({ error: 'First chunk not found' });
-  }
+  const filePath = path.join(__dirname, 'scripts', 'scraped_details.json');
+  if (!fs.existsSync(filePath)) return res.json({ error: 'File not found' });
   try {
-    const chunk = JSON.parse(fs.readFileSync(firstChunk, 'utf8'));
-    const sample = chunk[0];
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const all = JSON.parse(raw);
+    const p = all[0];
     const Product = require('./models/Product');
     const Category = require('./models/Category');
     const Shop = require('./models/Shop');
@@ -108,18 +106,25 @@ app.get('/api/test-import', async (req, res) => {
       scrapedCatMap[n] = cat._id;
     }
     const scrapeCatMap = {13:'Boys',14:'Girls',15:'Accessories',16:'Men Bags',17:'Men Clothing',18:'Men Shoes',20:'Women Bags',21:'Women Clothing',22:'Women Shoes',23:'Lifestyle',24:'Global Purchase'};
-    const catName = scrapeCatMap[sample.category_id] || 'Uncategorized';
+    const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
     const catId = scrapedCatMap[catName];
-    res.json({
-      chunkLength: chunk.length,
-      sampleKeys: Object.keys(sample),
-      sampleCategoryId: sample.category_id,
-      sampleCategoryIdType: typeof sample.category_id,
-      catName,
-      catId: catId ? catId.toString() : null,
-      catIdExists: !!catId,
-      allCategoryIds: [...new Set(chunk.map(p => p.category_id))].slice(0, 20),
-    });
+    if (!catId) return res.json({ error: 'No category ID for ' + catName });
+    const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+    const doc = {
+      name: p.title, description: p.content || p.title,
+      images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'],
+      categoryId: catId, shopId: null,
+      skus: [{ price, originalPrice: Math.round(price * 1.3 * 100) / 100, stock: p.stock || 999 }],
+      salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
+      minPrice: price, maxPrice: price, originalPrice: Math.round(price * 1.3 * 100) / 100,
+      originalId: `${p.mer_id || '0'}_${p.product_id}`,
+    };
+    try {
+      const result = await Product.insertMany([doc], { ordered: false });
+      res.json({ success: true, id: result[0]._id.toString(), name: result[0].name });
+    } catch (insertErr) {
+      res.json({ error: 'InsertMany failed: ' + insertErr.message, stack: insertErr.stack });
+    }
   } catch (e) {
     res.json({ error: e.message, stack: e.stack });
   }
