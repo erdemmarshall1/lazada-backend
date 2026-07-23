@@ -71,12 +71,9 @@ export const useAppStore = defineStore('app', {
     walletBalance: 0,
     tawkTo: {
       enabled: false,
-      widgetId: ''
-    },
-    chatwoot: {
-      enabled: false,
-      websiteToken: '',
-      baseUrl: 'https://app.chatwoot.com'
+      widgetId: '',
+      widgetPosition: 'bottom-right',
+      widgetColor: '#ff6600'
     },
   }),
 
@@ -183,25 +180,15 @@ export const useAppStore = defineStore('app', {
     },
     async fetchTawkToSettings() {
       try {
-        const res = await get('/home/admin/tawkto-settings')
+        const res = await get('/main/tawkto-settings')
         if (res?.code === 0 && res?.data) {
           this.tawkTo.enabled = !!res.data.enabled
           this.tawkTo.widgetId = res.data.widgetId || ''
+          this.tawkTo.widgetPosition = res.data.widgetPosition || 'bottom-right'
+          this.tawkTo.widgetColor = res.data.widgetColor || '#ff6600'
         }
       } catch (error) {
         console.error('Failed to fetch Tawk.to settings:', error)
-      }
-    },
-    async fetchChatwootSettings() {
-      try {
-        const res = await get('/main/chatwoot-settings')
-        if (res?.code === 0 && res?.data) {
-          this.chatwoot.enabled = !!res.data.enabled
-          this.chatwoot.websiteToken = res.data.websiteToken || ''
-          this.chatwoot.baseUrl = res.data.baseUrl || 'https://app.chatwoot.com'
-        }
-      } catch (error) {
-        console.error('Failed to fetch Chatwoot settings:', error)
       }
     },
   },

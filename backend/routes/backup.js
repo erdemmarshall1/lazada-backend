@@ -35,7 +35,7 @@ const models = [
   { name: 'email_settings', model: require('../models/EmailSetting') },
   { name: 'live_chat_settings', model: require('../models/LiveChatSetting') },
   { name: 'tawkto_settings', model: require('../models/TawkToSetting') },
-  { name: 'chatwoot_settings', model: require('../models/ChatwootSetting') },
+
   { name: 'system_settings', model: require('../models/SystemSettings') },
   { name: 'settings', model: require('../models/Setting') },
   { name: 'counters', model: require('../models/Counter') },

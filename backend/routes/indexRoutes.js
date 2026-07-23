@@ -6,11 +6,11 @@ const { success, fail } = require('../utils/response');
 router.get('/init', init);
 router.get('/getLangData', getLangData);
 
-router.get('/chatwoot-settings', async (req, res) => {
+router.get('/tawkto-settings', async (req, res) => {
   try {
-    const ChatwootSetting = require('../models/ChatwootSetting');
-    let settings = await ChatwootSetting.findOne();
-    if (!settings) settings = await ChatwootSetting.create({});
+    const TawkToSetting = require('../models/TawkToSetting');
+    let settings = await TawkToSetting.findOne();
+    if (!settings) settings = await TawkToSetting.create({});
     res.json(success(settings));
   } catch (error) {
     res.json(fail(error.message));

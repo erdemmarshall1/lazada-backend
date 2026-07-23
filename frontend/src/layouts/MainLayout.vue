@@ -10,7 +10,6 @@
         </transition>
       </router-view>
       <MainLayoutFooter />
-      <ChatwootWidget />
       <div class="kefu" v-if="store.kefu" @click="openKefu">
         <i class="iconfont icon-kefu"></i>
       </div>
@@ -26,7 +25,6 @@ import MainLayoutHeader from './MainLayoutHeader.vue'
 import MainLayoutNav from './MainLayoutNav.vue'
 import MainLayoutFooter from './MainLayoutFooter.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
-import ChatwootWidget from '@/components/ChatwootWidget.vue'
 
 const store = useAppStore()
 let walletTimer = null
@@ -78,7 +76,6 @@ onMounted(async () => {
   if (res?.data?.themeSettings) {
     applyTheme(res.data.themeSettings)
   }
-  await store.fetchChatwootSettings()
   if (store.token) {
     const userRes = await qe(get('/home/user/getInfo'))
     if (userRes && userRes.data) {

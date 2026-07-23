@@ -1652,34 +1652,6 @@ router.put('/tawkto-settings', adminAuth, async (req, res) => {
   }
 });
 
-// ---- Chatwoot Chat Settings ----
-router.get('/chatwoot-settings', adminAuth, async (req, res) => {
-  try {
-    const ChatwootSetting = require('../models/ChatwootSetting');
-    let settings = await ChatwootSetting.findOne();
-    if (!settings) settings = await ChatwootSetting.create({});
-    res.json(success(settings));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
-});
-
-router.put('/chatwoot-settings', adminAuth, async (req, res) => {
-  try {
-    const ChatwootSetting = require('../models/ChatwootSetting');
-    const { enabled, websiteToken, baseUrl } = req.body;
-    let settings = await ChatwootSetting.findOne();
-    if (!settings) settings = new ChatwootSetting();
-    if (enabled !== undefined) settings.enabled = enabled;
-    if (websiteToken !== undefined) settings.websiteToken = websiteToken;
-    if (baseUrl !== undefined) settings.baseUrl = baseUrl;
-    await settings.save();
-    res.json(success(settings, 'Chatwoot settings saved'));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
-});
-
 // ---- Seller ID Settings ----
 router.get('/seller-id-settings', adminAuth, async (req, res) => {
   try {
