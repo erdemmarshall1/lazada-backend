@@ -3,7 +3,7 @@
     <!-- Welcome Banner -->
     <div class="dash-welcome">
       <div>
-        <h2>Welcome back, {{ store.userInfo?.username || 'Admin' }}</h2>
+        <h2>Welcome back, {{ adminStore.userInfo?.username || 'Admin' }}</h2>
         <p>{{ today }} &middot; {{ summaryText }}</p>
       </div>
       <div style="display:flex;gap:10px">
@@ -213,9 +213,7 @@ const fetchSalesData = async () => {
   const endDate = new Date()
   const startDate = new Date(endDate)
   startDate.setDate(startDate.getDate() - weeks * 7)
-  const res = await adminGet('/home/report/sales', {
-    params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
-  })
+  const res = await adminGet('/home/report/sales', { startDate: startDate.toISOString(), endDate: endDate.toISOString() })
   if (res?.code !== 0 || !res?.data) return
   const d = res.data
   buildLineChart(d.timeSeries)
@@ -284,7 +282,7 @@ const reviewShop = (row) => {
 const buildLineChart = (timeSeries) => {
   if (!timeSeries?.length) { lineData.value = null; return }
   lineData.value = {
-    labels: timeSeries.map(i => i.label || i.date),
+    labels: timeSeries.map(i => i._id),
     datasets: [{
       label: 'Revenue',
       data: timeSeries.map(i => i.revenue || i.total || 0),
@@ -311,9 +309,9 @@ const buildDoughnutChart = (categorySales) => {
   if (!categorySales?.length) { doughnutData.value = null; return }
   const colors = ['#2980b9','#27ae60','#8e44ad','#b8922a','#c0392b','#1abc9c','#e67e22','#34495e']
   doughnutData.value = {
-    labels: categorySales.map(i => i.name || i.category),
+    labels: categorySales.map(i => i.categoryName || 'Unknown'),
     datasets: [{
-      data: categorySales.map(i => i.total || i.count || 0),
+      data: categorySales.map(i => i.totalRevenue || i.totalSold || 0),
       backgroundColor: categorySales.map((_, i) => colors[i % colors.length]),
       borderWidth: 2, borderColor: '#fff',
     }],

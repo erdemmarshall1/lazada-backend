@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="user-actions" style="margin-top:16px;display:flex;gap:8px">
-        <el-button type="primary" @click="$router.push('/admin-user-edit/' + user._id)">Edit User</el-button>
+        <el-button type="primary" @click="$router.push('/admin/users/edit/' + user._id)">Edit User</el-button>
         <el-button type="danger" @click="loginAsUser" :loading="logining">Login as User</el-button>
       </div>
     </div>

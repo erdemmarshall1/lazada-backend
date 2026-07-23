@@ -16,7 +16,7 @@
       <el-table-column label="Actions" width="220">
         <template #default="{row}">
           <el-button size="small" @click="$router.push('/admin-user-privacy/' + row._id)">Privacy</el-button>
-          <el-button size="small" type="primary" @click="$router.push('/admin-user-edit/' + row._id)">Edit</el-button>
+          <el-button size="small" type="primary" @click="$router.push('/admin/users/edit/' + row._id)">Edit</el-button>
         </template>
       </el-table-column>
     </el-table>
