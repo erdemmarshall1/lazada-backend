@@ -1,9 +1,9 @@
 self.__WB_DISABLE_DEV_LOGS = true;
 
-const CACHE = 'theoutnet-wholesale-v2';
-const RUNTIME_CACHE = 'theoutnet-wholesale-runtime-v2';
-const IMAGE_CACHE = 'theoutnet-wholesale-images-v2';
-const API_CACHE = 'theoutnet-wholesale-api-v2';
+const CACHE = 'theoutnet-wholesale-v3';
+const RUNTIME_CACHE = 'theoutnet-wholesale-runtime-v3';
+const IMAGE_CACHE = 'theoutnet-wholesale-images-v3';
+const API_CACHE = 'theoutnet-wholesale-api-v3';
 const OFFLINE_URL = '/offline.html';
 const MANIFEST = self.__WB_MANIFEST || [];
 
