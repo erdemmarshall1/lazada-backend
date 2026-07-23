@@ -8,7 +8,6 @@ const connectDB = async () => {
     try {
       const conn = await mongoose.connect(uri);
       console.log(`MongoDB connected: ${conn.connection.host}`);
-      try { await seedFullData(); } catch (e) { console.error('Seed error:', e.message); }
       return true;
     } catch (error) {
       console.error(`MongoDB connection error: ${error.message}`);
@@ -21,13 +20,26 @@ const connectDB = async () => {
     const uri = mongod.getUri();
     await mongoose.connect(uri);
     console.log(`In-memory MongoDB started at ${uri}`);
-    await seedFullData();
     return true;
   } catch (err) {
     console.error('Failed to start in-memory MongoDB:', err.message);
     return false;
   }
 };
+
+const DB = { mongoose };
+
+const seedAll = async () => {
+  try {
+    await seedFullData();
+  } catch (err) {
+    console.error('Seed error:', err.message);
+  }
+};
+
+module.exports = connectDB;
+module.exports.seedAll = seedAll;
+module.exports.seedScrapedProducts = seedScrapedProducts;
 
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
 const colors = ['Black', 'White', 'Blue', 'Red', 'Green', 'Navy', 'Gray', 'Beige', 'Pink', 'Brown'];

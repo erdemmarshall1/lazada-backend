@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const connectDB = require('./config/db');
+const { seedAll } = require('./config/db');
 const { PORT } = require('./config/app');
 require('./config/cloudinary');
 
@@ -67,8 +68,7 @@ app.get('/api/reimport', async (req, res) => {
   }
   res.json({ message: 'Reimport started' });
   try {
-    const reimport = require('./scripts/reimport_clean');
-    await reimport();
+    await require('./config/db').seedScrapedProducts();
   } catch (e) {
     console.error('Reimport error:', e.message);
   }
@@ -77,7 +77,7 @@ app.get('/api/reimport', async (req, res) => {
 // One-shot assets upload (protected by ASSETS_SECRET)
 const multer = require('multer');
 const admZip = require('adm-zip');
-const assetsUpload = multer({ dest: '/tmp/assets_upload' });
+const assetsUpload = multer({ dest: '/tmp/assets_upload', limits: { fileSize: 100 * 1024 * 1024 } });
 app.post('/api/upload-assets', assetsUpload.single('zip'), async (req, res) => {
   if (req.query.secret !== (process.env.ASSETS_SECRET || 'assets123')) {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -161,6 +161,9 @@ process.on('unhandledRejection', (reason) => {
 startServer(false);
 connectDB().then(connected => {
   dbReady = connected;
+  if (connected) {
+    seedAll();
+  }
 }).catch(err => {
   console.error('MongoDB connection error:', err.message);
 });
