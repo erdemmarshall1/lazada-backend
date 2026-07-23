@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
 mongoose.set('bufferTimeoutMS', 300000);
 
@@ -152,15 +154,19 @@ const seedFullData = async () => {
   }
   console.log(`Seeded ${scrapedCats.length} scraped categories`);
 
-  // Load 802 products from products_with_images.json
+  // Load products from products_with_images.json
   const dataPath = path.join(__dirname, '..', '..', 'products_with_images.json');
-  if (!fs.existsSync(dataPath)) {
-    console.log('products_with_images.json not found, falling back to old seed');
-    const oldSeed = require('../seed/seeder');
-    return;
+  let rawProducts;
+  if (fs.existsSync(dataPath)) {
+    rawProducts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    console.log(`Loading ${rawProducts.length} products from products_with_images.json`);
+  } else {
+    console.log('products_with_images.json not found, generating 100 placeholder products');
+    rawProducts = [];
+    for (let i = 0; i < 100; i++) {
+      rawProducts.push({ Name: `Product ${i + 1}`, Price: 19.99 + i, OriginalPrice: 29.99 + i, description: `High quality product ${i + 1}` });
+    }
   }
-  const rawProducts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  console.log(`Loading ${rawProducts.length} products`);
 
   // Collect available images
   const uploadsDir = path.join(__dirname, '..', 'uploads');
