@@ -61,6 +61,27 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: t
 const themeController = require('./controllers/themeController');
 app.get('/home/settings/theme', themeController.getTheme);
 
+// Debug: check if chunk files exist
+app.get('/api/debug-files', (req, res) => {
+  const fs = require('fs');
+  const chunksDir = path.join(__dirname, 'scripts', 'chunks');
+  const singleFile = path.join(__dirname, 'scripts', 'scraped_details.json');
+  const chunksExist = fs.existsSync(chunksDir);
+  const singleExists = fs.existsSync(singleFile);
+  const chunks = chunksExist ? fs.readdirSync(chunksDir) : [];
+  res.json({
+    chunksDir,
+    chunksExist,
+    chunkCount: chunks.length,
+    chunks,
+    singleFile,
+    singleExists,
+    singleSize: singleExists ? fs.statSync(singleFile).size : 0,
+    uptime: process.uptime(),
+    heap: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+  });
+});
+
 // Reimport trigger (protected by REIMPORT_SECRET)
 app.get('/api/reimport', async (req, res) => {
   if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
