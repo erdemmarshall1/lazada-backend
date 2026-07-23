@@ -98,7 +98,7 @@ onMounted(() => {
   if (store.isLogin) {
     loadUnreadCount()
     if (store.userInfo?._id) {
-      joinUser(store.userInfo._id)
+      joinUser(store.userInfo?._id)
     }
   }
   document.addEventListener('click', handleDocumentClick)

@@ -1,44 +1,44 @@
 <template>
   <div class="account-container">
     <div class="account-box">
-      <div class="account-title">My Account</div>
+      <div class="account-title">{{ $t('user.myAccount.title') }}</div>
       <div class="account-row">
-        <div class="account-label">Store ID</div>
+        <div class="account-label">{{ $t('user.myAccount.storeId') }}</div>
         <div class="account-value">{{ storeNumber || '---' }}</div>
       </div>
       <div class="account-row">
-        <div class="account-label">Nick name</div>
+        <div class="account-label">{{ $t('user.myAccount.nickname') }}</div>
         <div class="account-value">{{ store.userInfo?.username || '---' }}</div>
       </div>
       <div class="account-row">
-        <div class="account-label">Avatar</div>
+        <div class="account-label">{{ $t('user.myAccount.avatar') }}</div>
         <div class="account-value account-value-btn" @click="triggerAvatarUpload">
-          <img v-if="store.userInfo?.avatar" :src="$imgUrl(store.userInfo.avatar)" class="account-avatar-thumb" @error="$imgFallback" />
-          <span v-else class="account-avatar-upload-text">Upload</span>
+          <img v-if="store.userInfo?.avatar" :src="$imgUrl(store.userInfo?.avatar)" class="account-avatar-thumb" @error="$imgFallback" />
+          <span v-else class="account-avatar-upload-text">{{ $t('user.myAccount.upload') }}</span>
           <input ref="avatarInput" type="file" accept="image/*" style="display:none" @change="handleAvatarUpload" />
         </div>
       </div>
       <div class="account-row">
-        <div class="account-label">Mail</div>
+        <div class="account-label">{{ $t('user.myAccount.mail') }}</div>
         <div class="account-value">{{ maskedEmail }}</div>
       </div>
       <div class="account-row">
         <div class="account-label">
-          <span>Login Password</span>
-          <span class="account-label-status">{{ hasPassword ? '******' : 'Not set' }}</span>
+          <span>{{ $t('user.myAccount.loginPassword') }}</span>
+          <span class="account-label-status">{{ hasPassword ? '******' : $t('user.myAccount.notSet') }}</span>
         </div>
-        <div class="account-value account-value-btn" @click="$router.push('/changepassword')">Go to Settings</div>
+        <div class="account-value account-value-btn" @click="$router.push('/changepassword')">{{ $t('user.myAccount.goToSettings') }}</div>
       </div>
       <div class="account-row">
         <div class="account-label">
-          <span>Payment password</span>
-          <span class="account-label-status">{{ 'Not set' }}</span>
+          <span>{{ $t('user.myAccount.paymentPassword') }}</span>
+          <span class="account-label-status">{{ $t('user.myAccount.notSet') }}</span>
         </div>
-        <div class="account-value account-value-btn" @click="$router.push('/changepassword')">Go to Settings</div>
+        <div class="account-value account-value-btn" @click="$router.push('/changepassword')">{{ $t('user.myAccount.goToSettings') }}</div>
       </div>
     </div>
     <div class="account-logout">
-      <div class="account-logout-btn" @click="handleLogout">Log out</div>
+      <div class="account-logout-btn" @click="handleLogout">{{ $t('user.myAccount.logout') }}</div>
     </div>
   </div>
 </template>
@@ -77,7 +77,7 @@ const handleAvatarUpload = async (e) => {
     const url = res?.data?.data?.url || res?.data?.url || res?.url
     if (url) {
       await post('/home/user/edit', { avatar: url })
-      store.setUserInfo({ ...store.userInfo, avatar: url })
+      store.setUserInfo({ ...(store.userInfo || {}), avatar: url })
       ElMessage.success('Avatar updated')
     } else {
       ElMessage.error(res?.msg || res?.message || 'Failed to upload avatar')

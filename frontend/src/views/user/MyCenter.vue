@@ -2,21 +2,21 @@
   <div class="mycenter-view">
     <div class="mycenter-container g-flex">
       <button class="mycenter-sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
-        <span v-if="!sidebarOpen">&#9776; Menu</span>
-        <span v-else>&times; Close</span>
+        <span v-if="!sidebarOpen">&#9776; {{ $t('user.myCenter.menu') }}</span>
+        <span v-else>&times; {{ $t('user.myCenter.close') }}</span>
       </button>
       <div class="sidebar-overlay" v-if="sidebarOpen" @click="sidebarOpen = false"></div>
       <div class="mycenter-sidebar" :class="{ open: sidebarOpen }">
         <div class="content-left">
           <div class="content-user" v-if="store.isLogin">
             <div v-if="shopLogo" class="store-identity">
-              <img :src="shopLogo" alt="Store Logo" class="store-logo" />
+              <img :src="shopLogo" :alt="$t('store.myStore.logoAlt')" class="store-logo" />
               <div class="store-name">{{ shopName }}</div>
               <div class="store-meta" v-if="storeNumber">{{ storeNumber }}</div>
-              <div class="user-title username-sm">{{ store.userInfo.username }}</div>
+              <div class="user-title username-sm">{{ store.userInfo?.username }}</div>
             </div>
             <div v-else>
-              <div class="user-title">{{ store.userInfo.username }}</div>
+              <div class="user-title">{{ store.userInfo?.username }}</div>
             </div>
           </div>
           <div
@@ -80,7 +80,7 @@ const flatMenu = computed(() => {
     { label: 'Internal Message', path: '/internalmsg' },
     { label: 'My Consultations', path: '/myconsultations' },
     { label: 'Wholesale Management', path: '/sourcegoods' },
-    { label: 'Shop Details', path: '/storesettings' },
+    { label: store.isSeller ? 'Shop Details' : 'Apply for Merchant', path: store.isSeller ? '/storesettings' : '/applystore' },
     { label: 'Product Management', path: '/storegoodcontrol' },
     { label: 'Logistics Management', path: '/seller-logistics', hidden: !store.isSeller },
   ]

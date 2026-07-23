@@ -109,7 +109,7 @@
               <img class="home-footer-img" src="/assets/notice-icon-D6jtWCg-.png" alt="customer service" />
               <div class="home-footer-title">24/7 Support</div>
               <div class="home-footer-tips">Customer care available around the clock</div>
-              <div v-if="store.tawktoActive" class="chat-now-badge">Chat Now</div>
+              <div v-if="store.tawkTo.enabled" class="chat-now-badge">Chat Now</div>
             </div>
             <div class="home-footer-item">
               <svg class="home-footer-img" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -155,7 +155,7 @@ const homepageSections = ref([])
 const sectionProductMap = ref({})
 
 const openTawkto = () => {
-  if (window.Tawk_API && store.tawktoActive) {
+  if (window.Tawk_API && store.tawkTo.enabled) {
     window.Tawk_API.maximize()
   }
 }

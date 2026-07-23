@@ -4,7 +4,7 @@
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <span class="logo-icon">A</span>
-          <span class="logo-text" v-show="!sidebarCollapsed">Admin Panel</span>
+          <span class="logo-text" v-show="!sidebarCollapsed">{{ $t('layout.admin.panel') }}</span>
         </div>
         <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
           <i class="iconfont icon-zhankaimulu"></i>
@@ -37,11 +37,11 @@
           <div class="user-avatar">{{ adminStore.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
           <div class="user-details">
             <div class="user-name">{{ adminStore.userInfo?.username || 'Admin' }}</div>
-            <div class="user-role">Administrator</div>
+            <div class="user-role">{{ $t('layout.admin.administrator') }}</div>
           </div>
         </div>
         <div class="sidebar-footer-actions">
-          <button class="footer-action-btn" title="Download App" @click="$router.push('/download-app')">
+          <button class="footer-action-btn" :title="$t('layout.admin.downloadAppTitle')" @click="$router.push('/download-app')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14m0 0l-4-4m4 4l4-4M4 18v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           </button>
           <button class="logout-btn" @click="handleLogout">
@@ -67,13 +67,13 @@
         <div class="topbar-right">
           <div class="topbar-search">
             <i class="iconfont icon-31sousuo"></i>
-            <input v-model="searchQuery" placeholder="Search pages..." @keyup.enter="handleSearch" />
+            <input v-model="searchQuery" :placeholder="$t('layout.admin.searchPlaceholder')" @keyup.enter="handleSearch" />
           </div>
           <div class="topbar-notif">
             <NotificationBell />
           </div>
           <el-dropdown trigger="click" class="topbar-lang-btn" @command="handleLangChange">
-            <div class="topbar-lang-trigger" :title="currentLangName" aria-label="Language">
+            <div class="topbar-lang-trigger" :title="currentLangName" :aria-label="$t('layout.admin.languageAria')">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
             <template #dropdown>
@@ -88,9 +88,9 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/admin/dashboard')">Dashboard</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/admin/settings')">Settings</el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout">Logout</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/admin/dashboard')">{{ $t('layout.admin.dashboard') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/admin/settings')">{{ $t('layout.admin.settings') }}</el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">{{ $t('layout.admin.logout') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -116,7 +116,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAdminAppStore } from '@/stores/adminApp'
 import { useAppStore } from '@/stores/app'
 import { adminPost } from '@/api/adminRequest'
-import i18n from '@/locales'
+import i18n, { isValidLang } from '@/locales'
 import { connectSocket, joinUser } from '@/socket'
 
 import NotificationBell from '@/components/NotificationBell.vue'
@@ -141,6 +141,7 @@ const currentLangName = computed(() => {
 
 const handleLangChange = (code) => {
   if (code === appStore.lang) return
+  if (!isValidLang(code)) return
   appStore.setLanguage(code)
   i18n.global.locale.value = code
   window.location.reload()
@@ -265,7 +266,7 @@ onMounted(() => {
   document.documentElement.classList.add('admin-active')
   const socket = connectSocket()
   if (adminStore.isLogin && adminStore.userInfo?._id) {
-    joinUser(adminStore.userInfo._id)
+    joinUser(adminStore.userInfo?._id)
   }
   setTimeout(() => {
     if (tourRef.value) tourRef.value.show()

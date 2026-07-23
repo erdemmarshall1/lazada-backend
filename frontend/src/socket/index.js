@@ -20,7 +20,7 @@ export const connectSocket = () => {
     const store = useAppStore()
     if (store.token && store.userInfo?._id) {
       socket.emit('join', {
-        userId: store.userInfo._id,
+        userId: store.userInfo?._id,
         shopId: store.userInfo?.shopId || null,
       })
     }

@@ -4,23 +4,23 @@
       <div class="ton-header-top-inner">
         <div class="ton-header-top-left">
           <span class="ton-header-top-divider"></span>
-          <a href="javascript:void(0)" @click="$router.push('/ordertracking')">Track Your Order</a>
-          <a href="javascript:void(0)" @click="$router.push('/myorder')">Create A Return</a>
-          <a href="javascript:void(0)" @click="openCustomerCare">Customer Care</a>
-          <a href="javascript:void(0)" @click="$router.push('/download-app')">Download the App</a>
+          <a href="javascript:void(0)" @click="$router.push('/ordertracking')">{{ $t('layout.header.trackOrder') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/myorder')">{{ $t('layout.header.createReturn') }}</a>
+          <a href="javascript:void(0)" @click="openCustomerCare">{{ $t('layout.header.customerCare') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/download-app')">{{ $t('layout.header.downloadApp') }}</a>
         </div>
         <div class="ton-header-top-right">
           <template v-if="!store.isLogin">
-            <a href="javascript:void(0)" class="ton-header-signin" @click="$router.push('/login')">Sign In</a>
+            <a href="javascript:void(0)" class="ton-header-signin" @click="$router.push('/login')">{{ $t('layout.header.signIn') }}</a>
           </template>
           <template v-else>
             <span class="ton-header-user" @click="$router.push('/myaccount')">
-              <i class="iconfont icon-yonghu"></i> {{ store.userInfo.username }}
+              <i class="iconfont icon-yonghu"></i> {{ store.userInfo?.username }}
             </span>
             <span class="ton-header-wallet" @click="$router.push('/balance')">
               ${{ store.walletBalance.toFixed(2) }}
             </span>
-            <span class="ton-header-logout" @click="handleLogout">Logout</span>
+            <span class="ton-header-logout" @click="handleLogout">{{ $t('layout.header.logout') }}</span>
           </template>
 
         </div>
@@ -31,30 +31,30 @@
       <div class="ton-header-main-inner">
         <button class="ton-hamburger" @click="mobileMenuOpen = !mobileMenuOpen">&#9776;</button>
         <div class="ton-logo" @click="$router.push('/main')">
-          <img src="/img/outnet-logo.png" alt="THE OUTNET" class="ton-logo-img" />
+          <img src="/img/outnet-logo.png" :alt="$t('layout.header.logoAlt')" class="ton-logo-img" />
         </div>
         <nav class="ton-nav desktop-only">
-          <a href="javascript:void(0)" @click="$router.push('/just-in')">Just In</a>
-          <a href="javascript:void(0)" @click="$router.push('/designers')">Designers</a>
-          <a href="javascript:void(0)" @click="$router.push('/categories/clothing')">Clothing</a>
-          <a href="javascript:void(0)" @click="$router.push('/categories/shoes')">Shoes</a>
-          <a href="javascript:void(0)" @click="$router.push('/categories/bags')">Bags</a>
-          <a href="javascript:void(0)" @click="$router.push('/categories/accessories')">Accessories</a>
+          <a href="javascript:void(0)" @click="$router.push('/just-in')">{{ $t('layout.header.justIn') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/designers')">{{ $t('layout.header.designers') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/clothing')">{{ $t('layout.header.clothing') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/shoes')">{{ $t('layout.header.shoes') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/bags')">{{ $t('layout.header.bags') }}</a>
+          <a href="javascript:void(0)" @click="$router.push('/categories/accessories')">{{ $t('layout.header.accessories') }}</a>
         </nav>
         <div class="ton-header-actions">
-          <button class="ton-header-icon" @click="$router.push('/searchgoods')" aria-label="Search">
+          <button class="ton-header-icon" @click="$router.push('/searchgoods')" :aria-label="$t('layout.header.searchAria')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </button>
-          <button class="ton-header-icon" @click="$router.push('/myaccount')" aria-label="Account">
+          <button class="ton-header-icon" @click="$router.push('/myaccount')" :aria-label="$t('layout.header.accountAria')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
           </button>
           <NotificationBell v-if="store.isLogin" />
-          <button class="ton-header-icon" @click="$router.push('/car')" aria-label="Cart">
+          <button class="ton-header-icon" @click="$router.push('/car')" :aria-label="$t('layout.header.cartAria')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span class="ton-header-cart-count" v-if="store.carNum > 0">{{ store.carNum }}</span>
           </button>
           <el-dropdown trigger="click" class="ton-header-lang-btn" @command="handleLangChange">
-            <button class="ton-header-icon" aria-label="Language">
+            <button class="ton-header-icon" :aria-label="$t('layout.header.languageAria')">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </button>
             <template #dropdown>
@@ -71,32 +71,32 @@
     <div class="ton-mobile-drawer-overlay" :class="{ open: mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
     <div class="ton-mobile-drawer" :class="{ open: mobileMenuOpen }">
       <div class="ton-drawer-header">
-        <span v-if="store.isLogin">{{ store.userInfo.username }}</span>
-        <span v-else @click="$router.push('/login'); mobileMenuOpen = false">Log in / Register</span>
+        <span v-if="store.isLogin">{{ store.userInfo?.username }}</span>
+        <span v-else @click="$router.push('/login'); mobileMenuOpen = false">{{ $t('layout.header.loginRegister') }}</span>
         <button @click="mobileMenuOpen = false">&times;</button>
       </div>
       <div class="ton-drawer-search">
-        <input v-model="keyword" type="text" placeholder="Search..." @keyup.enter="searchMobile" />
+        <input v-model="keyword" type="text" :placeholder="$t('layout.header.searchPlaceholder')" @keyup.enter="searchMobile" />
       </div>
       <div class="ton-drawer-items">
-        <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false"><i class="iconfont icon-shouye"></i> Home</div>
-        <div class="ton-drawer-item" @click="$router.push('/just-in'); mobileMenuOpen = false"><i class="iconfont icon-31sousuo"></i> Just In</div>
-        <div class="ton-drawer-item" @click="$router.push('/designers'); mobileMenuOpen = false"><i class="iconfont icon-ziyuanxhdpi"></i> Designers</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/clothing'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Clothing</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/shoes'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Shoes</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/bags'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Bags</div>
-        <div class="ton-drawer-item" @click="$router.push('/categories/accessories'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Accessories</div>
+        <div class="ton-drawer-item" @click="$router.push('/main'); mobileMenuOpen = false"><i class="iconfont icon-shouye"></i> {{ $t('layout.header.home') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/just-in'); mobileMenuOpen = false"><i class="iconfont icon-31sousuo"></i> {{ $t('layout.header.justIn') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/designers'); mobileMenuOpen = false"><i class="iconfont icon-ziyuanxhdpi"></i> {{ $t('layout.header.designers') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/clothing'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> {{ $t('layout.header.clothing') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/shoes'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> {{ $t('layout.header.shoes') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/bags'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> {{ $t('layout.header.bags') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/categories/accessories'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> {{ $t('layout.header.accessories') }}</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false"><i class="iconfont icon-jiangbei"></i> Bestsellers</div>
-        <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false"><i class="iconfont icon-shoucang1"></i> Recommended</div>
-        <div class="ton-drawer-item" @click="$router.push('/shopjie'); mobileMenuOpen = false"><i class="iconfont icon-dianpu"></i> Shop Street</div>
-        <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false"><i class="iconfont icon-tiantianquan"></i> Flash Deals</div>
-        <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> Categories</div>
+        <div class="ton-drawer-item" @click="$router.push('/remenglist'); mobileMenuOpen = false"><i class="iconfont icon-jiangbei"></i> {{ $t('layout.header.bestsellers') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/tuijianlist'); mobileMenuOpen = false"><i class="iconfont icon-shoucang1"></i> {{ $t('layout.header.recommended') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/shopjie'); mobileMenuOpen = false"><i class="iconfont icon-dianpu"></i> {{ $t('layout.header.shopStreet') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/miaoshalist'); mobileMenuOpen = false"><i class="iconfont icon-tiantianquan"></i> {{ $t('layout.header.flashDeals') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/secondsort'); mobileMenuOpen = false"><i class="iconfont icon-fenlei"></i> {{ $t('layout.header.categories') }}</div>
         <div class="ton-drawer-divider"></div>
-        <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> About THE OUTNET</div>
-        <div class="ton-drawer-item" @click="openCustomerCareMobile"><i class="iconfont icon-kefu"></i> Customer Care</div>
-        <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> FAQ</div>
-        <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false"><i class="iconfont icon-xiazai"></i> Download the App</div>
+        <div class="ton-drawer-item" @click="$router.push('/about-us'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> {{ $t('layout.header.about') }}</div>
+        <div class="ton-drawer-item" @click="openCustomerCareMobile"><i class="iconfont icon-kefu"></i> {{ $t('layout.header.customerCare') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/faq'); mobileMenuOpen = false"><i class="iconfont icon-bangzhu"></i> {{ $t('layout.header.faq') }}</div>
+        <div class="ton-drawer-item" @click="$router.push('/download-app'); mobileMenuOpen = false"><i class="iconfont icon-xiazai"></i> {{ $t('layout.header.downloadApp') }}</div>
       </div>
     </div>
   </div>
@@ -108,7 +108,7 @@ import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
-import i18n from '@/locales'
+import i18n, { isValidLang, t } from '@/locales'
 import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
@@ -123,6 +123,7 @@ const currentLangName = computed(() => {
 
 const handleLangChange = (code) => {
   if (code === store.lang) return
+  if (!isValidLang(code)) return
   store.setLanguage(code)
   i18n.global.locale.value = code
   window.location.reload()
@@ -136,7 +137,7 @@ const searchMobile = () => {
 }
 
 const openTawkto = () => {
-  if (window.Tawk_API && store.tawktoActive) {
+  if (window.Tawk_API && store.tawkTo.enabled) {
     window.Tawk_API.maximize()
   }
 }
@@ -155,7 +156,7 @@ const openCustomerCareMobile = () => {
 const handleLogout = async () => {
   await post('/home/auth/logout').catch(() => {})
   store.logout()
-  ElMessage.success('Logged out')
+  ElMessage.success(t('layout.header.logout'))
   router.push('/main')
 }
 

@@ -11,11 +11,7 @@
       </router-view>
       <MainLayoutFooter />
       <ChatwootWidget />
-      <div class="kefu" v-if="store.tawkTo.enabled" @click="openTawkto">
-        <i class="iconfont icon-kefu"></i>
-        <span class="kefu-label">Chat</span>
-      </div>
-      <div class="kefu" v-else-if="store.kefu" @click="openKefu">
+      <div class="kefu" v-if="store.kefu" @click="openKefu">
         <i class="iconfont icon-kefu"></i>
       </div>
     </div>
