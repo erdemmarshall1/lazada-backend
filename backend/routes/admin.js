@@ -1623,35 +1623,6 @@ router.get('/users/:id/submissions', adminAuth, async (req, res) => {
   }
 });
 
-// ---- Tawk.to Chat Settings ----
-router.get('/tawkto-settings', adminAuth, async (req, res) => {
-  try {
-    const TawkToSetting = require('../models/TawkToSetting');
-    let settings = await TawkToSetting.findOne();
-    if (!settings) settings = await TawkToSetting.create({});
-    res.json(success(settings));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
-});
-
-router.put('/tawkto-settings', adminAuth, async (req, res) => {
-  try {
-    const TawkToSetting = require('../models/TawkToSetting');
-    const { enabled, widgetId, widgetPosition, widgetColor } = req.body;
-    let settings = await TawkToSetting.findOne();
-    if (!settings) settings = new TawkToSetting();
-    if (enabled !== undefined) settings.enabled = enabled;
-    if (widgetId !== undefined) settings.widgetId = widgetId;
-    if (widgetPosition !== undefined) settings.widgetPosition = widgetPosition;
-    if (widgetColor !== undefined) settings.widgetColor = widgetColor;
-    await settings.save();
-    res.json(success(settings, 'Tawk.to settings saved'));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
-});
-
 // ---- Seller ID Settings ----
 router.get('/seller-id-settings', adminAuth, async (req, res) => {
   try {

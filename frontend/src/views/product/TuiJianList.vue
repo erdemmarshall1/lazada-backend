@@ -1,12 +1,12 @@
 <template>
   <div class="list-view">
     <div class="list-container">
-      <h2 class="list-title">⭐ Recommended Products</h2>
+      <h2 class="list-title">{{ $t('product.recommended.title') }}</h2>
       <div class="product-grid">
         <div class="product-card" v-for="item in list" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('product.recommended.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
@@ -14,11 +14,11 @@
               <span class="price-current">${{ item.minPrice }}</span>
               <span class="price-original" v-if="item.maxPrice > item.minPrice">${{ item.maxPrice }}</span>
             </div>
-            <div class="product-meta"><span>Sold {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
+            <div class="product-meta"><span>{{ $t('product.recommended.sold') }} {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
           </div>
         </div>
       </div>
-      <div v-if="list.length === 0" class="c-no-list"><span class="c-no-list-text">No products</span></div>
+      <div v-if="list.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('product.recommended.empty') }}</span></div>
       <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>

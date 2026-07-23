@@ -2,12 +2,12 @@
   <div class="country-page">
     <header class="country-header">
       <div class="country-header-inner">
-        <img src="/img/outnet-logo.png" alt="THE OUTNET" class="country-logo" />
+        <img src="/img/outnet-logo.png" :alt="$t('country.logoAlt')" class="country-logo" />
       </div>
     </header>
 
     <div class="country-content">
-      <h1 class="country-headline">THE OUTNET is available in the following countries</h1>
+      <h1 class="country-headline">{{ $t('country.headline') }}</h1>
 
       <div class="country-grid">
         <a
@@ -26,20 +26,22 @@
       <div class="services-inner">
         <div class="service-card" v-for="svc in services" :key="svc.title">
           <img :src="svc.icon" :alt="svc.title" class="service-img" />
-          <div class="service-title" :style="{ color: svc.color }">{{ svc.title }}</div>
-          <div class="service-tips">{{ svc.desc }}</div>
+          <div class="service-title" :style="{ color: svc.color }">{{ $t(svc.titleKey) }}</div>
+          <div class="service-tips">{{ $t(svc.descKey) }}</div>
         </div>
       </div>
     </div>
 
     <footer class="country-footer">
-      <a href="javascript:void(0)" class="footer-link">Back to Homepage</a>
+      <a href="javascript:void(0)" class="footer-link">{{ $t('country.backToHomepage') }}</a>
     </footer>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useAppStore } from '@/stores/app'
+import i18n, { isValidLang } from '@/locales'
 
 const router = useRouter()
 
@@ -66,15 +68,20 @@ const countries = [
 ]
 
 const services = [
-  { title: 'Logistics', icon: 'https://placehold.co/60x60/eee/333?text=📦', color: '#f84a2f', desc: 'Fast & reliable worldwide shipping to your door' },
-  { title: 'Payment', icon: 'https://placehold.co/60x60/eee/333?text=💳', color: '#f84a2f', desc: 'Secure payment with multiple methods accepted' },
-  { title: 'Platform', icon: 'https://placehold.co/60x60/eee/333?text=🏪', color: '#f84a2f', desc: 'Trusted wholesale platform for global buyers' },
-  { title: 'Customer Service', icon: 'https://placehold.co/60x60/eee/333?text=💬', color: '#f84a2f', desc: '24/7 multilingual support team' },
-  { title: 'Recommendations', icon: 'https://placehold.co/60x60/eee/333?text=⭐', color: '#f84a2f', desc: 'Curated luxury fashion from top brands' },
-  { title: 'API', icon: 'https://placehold.co/60x60/eee/333?text=🔗', color: '#f84a2f', desc: 'Dropshipping API integration available' },
+  { titleKey: 'country.logisticsTitle', icon: 'https://placehold.co/60x60/eee/333?text=📦', color: '#f84a2f', descKey: 'country.logisticsDesc' },
+  { titleKey: 'country.paymentTitle', icon: 'https://placehold.co/60x60/eee/333?text=💳', color: '#f84a2f', descKey: 'country.paymentDesc' },
+  { titleKey: 'country.platformTitle', icon: 'https://placehold.co/60x60/eee/333?text=🏪', color: '#f84a2f', descKey: 'country.platformDesc' },
+  { titleKey: 'country.customerServiceTitle', icon: 'https://placehold.co/60x60/eee/333?text=💬', color: '#f84a2f', descKey: 'country.customerServiceDesc' },
+  { titleKey: 'country.recommendationsTitle', icon: 'https://placehold.co/60x60/eee/333?text=⭐', color: '#f84a2f', descKey: 'country.recommendationsDesc' },
+  { titleKey: 'country.apiTitle', icon: 'https://placehold.co/60x60/eee/333?text=🔗', color: '#f84a2f', descKey: 'country.apiDesc' },
 ]
 
 const selectCountry = (country) => {
+  if (country.lang && isValidLang(country.lang)) {
+    const store = useAppStore()
+    store.setLanguage(country.lang)
+    i18n.global.locale.value = country.lang
+  }
   router.push('/main')
 }
 </script>

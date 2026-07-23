@@ -1,5 +1,5 @@
 ﻿<template>
-  <div><h3>Deposit History</h3><div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">No records</span></div><div v-for="item in list" :key="item._id" class="record-item">${{ item.amount }} - {{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'â€”' }}</div></div>
+  <div><h3>{{ $t('user.rechargeHistory.title') }}</h3><div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">{{ $t('user.rechargeHistory.empty') }}</span></div><div v-for="item in list" :key="item._id" class="record-item">${{ item.amount }} - {{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'â€”' }}</div></div>
 </template>
 
 <script setup>

@@ -51,6 +51,7 @@ const create = async (req, res) => {
 
     const shop = await Shop.findOne({ userId: req.user._id });
     if (!shop) return res.json(fail('Shop not found'));
+    if (shop.status === 3) return res.json(fail('Your store has been closed, kindly contact the customer support'));
     if (order.shopId.toString() !== shop._id.toString()) return res.json(fail('Unauthorized'));
 
     const existing = await Shipping.findOne({ orderId });

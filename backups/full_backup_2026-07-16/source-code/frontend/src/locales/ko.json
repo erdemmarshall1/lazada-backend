@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "로그인",
+    "registerText": "회원가입",
+    "myorderText": "내 주문",
+    "gouwucheText": "장바구니",
+    "shouyeText": "홈페이지",
+    "mymessageText": "내 메시지",
+    "dianpuxiaoxiText": "스토어 소식",
+    "zhanneiXinText": "사이트 메시지",
+    "searchTipsText": "상품 검색...",
+    "guanjianziText": "키워드 입력",
+    "soushangpingText": "상품",
+    "soudianpuText": "스토어",
+    "languageLabel": "언어"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "내 메시지",
+    "shoudaoxiaoxiText": "받은 메시지",
+    "dianpuxiaoxiTipsText": "스토어 메시지 알림"
+  },
+  "nolist": {
+    "nolist": "데이터 없음"
+  },
+  "jsLanguage": {
+    "copySuccessText": "복사 성공"
+  }
+}

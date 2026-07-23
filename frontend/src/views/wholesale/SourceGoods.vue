@@ -1,26 +1,26 @@
 <template>
   <div v-loading="loading">
-    <h3>Wholesale Center</h3>
+    <h3>{{ $t('wholesale.center.title') }}</h3>
 
     <div class="filter-bar">
-      <el-input v-model="keyword" placeholder="Search products..." clearable style="width:240px" @keyup.enter="onSearch" @clear="onSearch" @input="onKeywordInput" />
-      <el-select v-model="categoryId" placeholder="All Categories" clearable style="width:180px" @change="onSearch">
+      <el-input v-model="keyword" :placeholder="$t('wholesale.center.searchPlaceholder')" clearable style="width:240px" @keyup.enter="onSearch" @clear="onSearch" @input="onKeywordInput" />
+      <el-select v-model="categoryId" :placeholder="$t('wholesale.center.allCategories')" clearable style="width:180px" @change="onSearch">
         <el-option v-for="cat in categories" :key="cat._id" :label="cat.name" :value="cat._id" />
       </el-select>
-      <el-select v-model="sortBy" placeholder="Sort by" style="width:150px" @change="onSearch">
-        <el-option label="Relevance" value="relevance" />
-        <el-option label="Newest" value="new" />
-        <el-option label="Price: Low to High" value="price_asc" />
-        <el-option label="Price: High to Low" value="price_desc" />
-        <el-option label="Best Sales" value="sales" />
-        <el-option label="Top Rated" value="rating" />
+      <el-select v-model="sortBy" :placeholder="$t('wholesale.center.sortBy')" style="width:150px" @change="onSearch">
+        <el-option :label="$t('wholesale.center.relevance')" value="relevance" />
+        <el-option :label="$t('wholesale.center.newest')" value="new" />
+        <el-option :label="$t('wholesale.center.priceLowHigh')" value="price_asc" />
+        <el-option :label="$t('wholesale.center.priceHighLow')" value="price_desc" />
+        <el-option :label="$t('wholesale.center.bestSales')" value="sales" />
+        <el-option :label="$t('wholesale.center.topRated')" value="rating" />
       </el-select>
       <div class="price-range">
-        <el-input-number v-model="minPrice" :min="0" placeholder="Min" size="small" style="width:100px" controls-position="right" />
+        <el-input-number v-model="minPrice" :min="0" :placeholder="$t('wholesale.center.min')" size="small" style="width:100px" controls-position="right" />
         <span style="color:#999">—</span>
-        <el-input-number v-model="maxPrice" :min="0" placeholder="Max" size="small" style="width:100px" controls-position="right" />
+        <el-input-number v-model="maxPrice" :min="0" :placeholder="$t('wholesale.center.max')" size="small" style="width:100px" controls-position="right" />
       </div>
-      <el-button type="primary" @click="onSearch">Filter</el-button>
+      <el-button type="primary" @click="onSearch">{{ $t('wholesale.center.filter') }}</el-button>
     </div>
 
     <div class="product-grid">
@@ -28,16 +28,16 @@
         <div class="product-card-inner" @click="$router.push(`/sourcegoodsdetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('wholesale.center.quickView') }}</span></div>
           </div>
-          <div class="product-info"><h4 class="g-text-ellipsis">{{ item.name }}</h4><div class="product-price">${{ item.minPrice }}</div><div class="product-profit" v-if="item.profitPercentage">Profit {{ item.profitPercentage }}% → Retail ${{ (item.minPrice * (1 + item.profitPercentage/100)).toFixed(2) }}</div></div>
+          <div class="product-info"><h4 class="g-text-ellipsis">{{ item.name }}</h4><div class="product-price">${{ item.minPrice }}</div><div class="product-profit" v-if="item.profitPercentage">{{ $t('wholesale.center.profitLabel', { percentage: item.profitPercentage, retailPrice: '$' + (item.minPrice * (1 + item.profitPercentage/100)).toFixed(2) }) }}</div></div>
         </div>
         <div class="product-actions" v-if="store.isSeller">
-          <el-button size="small" type="primary" plain @click.stop="openDistribute(item)">Distribute</el-button>
+          <el-button size="small" type="primary" plain @click.stop="openDistribute(item)">{{ $t('wholesale.center.distribute') }}</el-button>
         </div>
       </div>
     </div>
-    <div v-if="list.length===0 && !loading" class="c-no-list"><span class="c-no-list-text">No wholesale products</span></div>
+    <div v-if="list.length===0 && !loading" class="c-no-list"><span class="c-no-list-text">{{ $t('wholesale.center.empty') }}</span></div>
 
     <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />

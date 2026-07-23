@@ -7,7 +7,6 @@
     <div class="route-loading-bar" :class="{ active: routeLoading }"></div>
     <router-view />
     <SwUpdateBanner />
-    <TawkToWidget />
     <audio ref="audioPlay" class="c_audio_play" :src="audioSrc" controls style="display:none"></audio>
     <el-backtop :right="24" :bottom="48" />
   </div>
@@ -31,7 +30,6 @@ let removeBeforeEach = null
 let removeAfterEach = null
 
 onMounted(() => {
-  store.fetchTawkToSettings()
 
   const updateOnline = () => { isOffline.value = false }
   const updateOffline = () => { isOffline.value = true }

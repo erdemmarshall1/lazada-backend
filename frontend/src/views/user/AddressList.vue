@@ -1,32 +1,32 @@
 <template>
   <div>
     <div class="g-flex-align-center g-flex-justify-between">
-      <h3>Addresses</h3>
-      <el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDialog = true">+ Add</el-button>
+      <h3>{{ $t('user.address.title') }}</h3>
+      <el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDialog = true">{{ $t('user.address.add') }}</el-button>
     </div>
     <div class="address-list" v-if="list.length > 0">
       <div class="address-card" v-for="addr in list" :key="addr._id">
         <div><strong>{{ addr.name }}</strong> {{ addr.phone }}</div>
         <div>{{ addr.province }} {{ addr.city }} {{ addr.district }} {{ addr.detail }}</div>
         <div class="address-actions">
-          <el-tag v-if="addr.isDefault" size="small" type="warning">Default</el-tag>
-          <el-button link type="primary" size="small" @click="setDefault(addr._id)">Set Default</el-button>
-          <el-button link type="danger" size="small" @click="delAddress(addr._id)">Delete</el-button>
+          <el-tag v-if="addr.isDefault" size="small" type="warning">{{ $t('user.address.default') }}</el-tag>
+          <el-button link type="primary" size="small" @click="setDefault(addr._id)">{{ $t('user.address.setDefault') }}</el-button>
+          <el-button link type="danger" size="small" @click="delAddress(addr._id)">{{ $t('user.address.delete') }}</el-button>
         </div>
       </div>
     </div>
-    <div v-else class="c-no-list"><span class="c-no-list-text">No addresses</span></div>
-    <el-dialog v-model="showDialog" title="Add Address" width="500px">
+    <div v-else class="c-no-list"><span class="c-no-list-text">{{ $t('user.address.empty') }}</span></div>
+    <el-dialog v-model="showDialog" :title="$t('user.address.addAddressTitle')" width="500px">
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Name" prop="name"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="Phone" prop="phone"><el-input v-model="form.phone" /></el-form-item>
-        <el-form-item label="Province" prop="province"><el-input v-model="form.province" /></el-form-item>
-        <el-form-item label="City" prop="city"><el-input v-model="form.city" /></el-form-item>
-        <el-form-item label="Detail" prop="detail"><el-input v-model="form.detail" type="textarea" /></el-form-item>
+        <el-form-item :label="$t('user.address.nameLabel')" prop="name"><el-input v-model="form.name" /></el-form-item>
+        <el-form-item :label="$t('user.address.phoneLabel')" prop="phone"><el-input v-model="form.phone" /></el-form-item>
+        <el-form-item :label="$t('user.address.provinceLabel')" prop="province"><el-input v-model="form.province" /></el-form-item>
+        <el-form-item :label="$t('user.address.cityLabel')" prop="city"><el-input v-model="form.city" /></el-form-item>
+        <el-form-item :label="$t('user.address.detailLabel')" prop="detail"><el-input v-model="form.detail" type="textarea" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="addAddress">Save</el-button>
+        <el-button @click="showDialog = false">{{ $t('user.address.cancel') }}</el-button>
+        <el-button type="primary" @click="addAddress">{{ $t('user.address.save') }}</el-button>
       </template>
     </el-dialog>
   </div>

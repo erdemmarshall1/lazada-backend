@@ -1,10 +1,10 @@
 <template>
   <div class="search-view">
     <div class="search-container">
-      <h2 class="search-title">Search Stores</h2>
+      <h2 class="search-title">{{ $t('search.stores.title') }}</h2>
       <div class="search-filters g-flex-align-center">
-        <el-input v-model="keyword" placeholder="Search stores..." size="large" style="width:400px" @keyup.enter="doSearch" />
-        <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="doSearch">Search</el-button>
+        <el-input v-model="keyword" :placeholder="$t('search.stores.searchPlaceholder')" size="large" style="width:400px" @keyup.enter="doSearch" />
+        <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="doSearch">{{ $t('search.stores.search') }}</el-button>
       </div>
       <div class="store-list" v-if="stores.length > 0">
         <div class="store-card g-flex-align-center" v-for="store in stores" :key="store._id" @click="$router.push(`/storedetail?id=${store._id}`)">
@@ -12,11 +12,11 @@
           <div class="store-info">
             <h4>{{ store.name }}</h4>
             <p>{{ store.description }}</p>
-            <div class="store-meta"><span>⭐ {{ store.rating || 5 }}</span><span>Sales: {{ store.salesCount || 0 }}</span></div>
+            <div class="store-meta"><span>⭐ {{ store.rating || 5 }}</span><span>{{ $t('search.stores.sales') }} {{ store.salesCount || 0 }}</span></div>
           </div>
         </div>
       </div>
-      <div v-else class="c-no-list"><span class="c-no-list-text">No stores found</span></div>
+      <div v-else class="c-no-list"><span class="c-no-list-text">{{ $t('search.stores.empty') }}</span></div>
     </div>
   </div>
 </template>

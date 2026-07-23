@@ -8,24 +8,26 @@ const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 const SECRET = process.env.ASSETS_SECRET || 'assets123';
 const TARGET = process.env.RENDER_URL || 'https://lazada-backend-1.onrender.com';
 
-const patterns = [
-  'product_images/hot_*.jpg',
-  'product_images/find_*.jpg',
-  'category/*.png',
-  'banners/*.jpg',
-  'product.png',
-];
-
-function collectFiles(dir, patterns) {
+function collectFiles(dir) {
   const files = [];
-  for (const p of patterns) {
-    const [subdir, glob] = p.includes('*') ? [path.dirname(p), path.basename(p)] : [path.dirname(p), path.basename(p)];
-    const fullDir = path.join(dir, subdir || '');
-    if (!fs.existsSync(fullDir)) continue;
-    const entries = fs.readdirSync(fullDir);
-    const re = new RegExp('^' + glob.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$');
-    for (const e of entries) {
-      if (re.test(e)) files.push(path.join(fullDir, e));
+  const categoryDir = path.join(dir, 'category');
+  if (fs.existsSync(categoryDir)) {
+    for (const e of fs.readdirSync(categoryDir)) {
+      files.push(path.join(categoryDir, e));
+    }
+  }
+  const bannersDir = path.join(dir, 'banners');
+  if (fs.existsSync(bannersDir)) {
+    for (const e of fs.readdirSync(bannersDir)) {
+      files.push(path.join(bannersDir, e));
+    }
+  }
+  const piDir = path.join(dir, 'product_images');
+  if (fs.existsSync(piDir)) {
+    for (const e of fs.readdirSync(piDir)) {
+      if (e.startsWith('hot_') || e.startsWith('find_')) {
+        files.push(path.join(piDir, e));
+      }
     }
   }
   return files;
@@ -79,7 +81,7 @@ function uploadZip(zipBuffer) {
 }
 
 (async () => {
-  const files = collectFiles(UPLOADS_DIR, patterns);
+  const files = collectFiles(UPLOADS_DIR);
   console.log(`Found ${files.length} files to upload`);
   if (files.length === 0) {
     console.log('No files found. Check UPLOADS_DIR:', UPLOADS_DIR);

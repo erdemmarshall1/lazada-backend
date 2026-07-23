@@ -4,7 +4,7 @@
       <h1 class="info-title">Contact THE OUTNET</h1>
       <div class="info-content">
         <p class="info-lead">We'd love to hear from you. Whether you have a question about our products, your order, or anything else, our team is here to help.</p>
-        <h2>Customer Service</h2><p>Email: support@theoutnet.com<br/>Phone: +1 (800) 123-4567<br/>Mon-Fri: 9AM-6PM EST</p><h2>Press Inquiries</h2><p>Email: press@theoutnet.com</p><h2>Partnerships</h2><p>Email: partnerships@theoutnet.com</p><h2>Office Address</h2><p>THE OUTNET<br/>123 Fashion Avenue<br/>New York, NY 10001<br/>United States</p>
+        <h2>Customer Service</h2><p>Email: outnetmerchantinfo@gmail.com<br/>Phone: +1 (656) 400-6008<br/>Mon-Fri: 9AM-6PM EST</p><h2>Press Inquiries</h2><p>Email: outnetmerchantinfo@gmail.com</p><h2>Partnerships</h2><p>Email: partnerships@theoutnet.com</p><h2>Office Address</h2><p>THE OUTNET<br/>123 Fashion Avenue<br/>New York, NY 10001<br/>United States</p>
       </div>
     </div>
   </div>

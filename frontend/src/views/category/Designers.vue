@@ -2,18 +2,18 @@
   <div class="list-view">
     <div class="list-container">
       <div class="page-header">
-        <h2 class="list-title">Designers</h2>
-        <p class="list-subtitle">Explore our hottest and trending fashion designers</p>
+        <h2 class="list-title">{{ $t('category.designers.title') }}</h2>
+        <p class="list-subtitle">{{ $t('category.designers.description') }}</p>
       </div>
       <div class="designer-tags" v-if="tags.length > 0">
-        <span class="tag-filter" :class="{ active: !selectedTag }" @click="filterByTag(null)">All</span>
+        <span class="tag-filter" :class="{ active: !selectedTag }" @click="filterByTag(null)">{{ $t('category.designers.all') }}</span>
         <span class="tag-filter" v-for="tag in tags" :key="tag" :class="{ active: selectedTag === tag }" @click="filterByTag(tag)">{{ tag }}</span>
       </div>
       <div class="product-grid">
         <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('category.designers.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
@@ -22,11 +22,11 @@
               <span class="price-current">${{ item.minPrice }}</span>
               <span class="price-original" v-if="item.maxPrice > item.minPrice">${{ item.maxPrice }}</span>
             </div>
-            <div class="product-meta"><span>Sold {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
+            <div class="product-meta"><span>{{ $t('category.designers.sold') }} {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
           </div>
         </div>
       </div>
-      <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">No products</span></div>
+      <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('category.designers.empty') }}</span></div>
       <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>

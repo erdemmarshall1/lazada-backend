@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>Application Status</h3>
+    <h3>{{ $t('store.applyConfirm.title') }}</h3>
 
     <div v-if="loading" v-loading="loading" style="height:200px"></div>
 
@@ -22,38 +22,38 @@
       </div>
 
       <div class="summary-card">
-        <h4>Application Details</h4>
+        <h4>{{ $t('store.applyConfirm.details') }}</h4>
         <div class="summary-grid">
           <div class="summary-item" v-if="shop.status === 1">
-            <span class="summary-label">Store #</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.storeHash') }}</span>
             <span class="summary-value">{{ shop.storeNumber }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Store Name</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.storeName') }}</span>
             <span class="summary-value">{{ shop.name }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Full Name</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.fullName') }}</span>
             <span class="summary-value">{{ shop.fullName }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Email Address</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.email') }}</span>
             <span class="summary-value">{{ shop.email }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Phone Number</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.phone') }}</span>
             <span class="summary-value">{{ shop.phone }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Address</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.address') }}</span>
             <span class="summary-value">{{ shop.address }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">SSN / ID Number</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.ssn') }}</span>
             <span class="summary-value">{{ shop.idNumber }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Invitation Code</span>
+            <span class="summary-label">{{ $t('store.applyConfirm.inviteCode') }}</span>
             <span class="summary-value">{{ shop.invitationCode }}</span>
           </div>
         </div>
@@ -61,13 +61,13 @@
 
       <div class="actions">
         <el-button v-if="shop.status === 1" type="primary" @click="$router.push('/mystore')">
-          Go to My Store
+          {{ $t('store.applyConfirm.goToMyStore') }}
         </el-button>
         <el-button v-else type="primary" @click="$router.push('/mystore')">
-          Back to Dashboard
+          {{ $t('store.applyConfirm.backToDashboard') }}
         </el-button>
         <el-button @click="$router.push('/applystore')">
-          View / Edit Application
+          {{ $t('store.applyConfirm.viewEditApplication') }}
         </el-button>
       </div>
     </div>

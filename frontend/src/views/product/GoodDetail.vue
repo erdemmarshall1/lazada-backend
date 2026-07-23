@@ -16,8 +16,8 @@
             </div>
           </div>
           <div class="action-buttons g-flex">
-            <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color);flex:1" @click="addToCart">Add to Cart</el-button>
-            <el-button type="danger" size="large" style="flex:1" @click="buyNow">Buy Now</el-button>
+            <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color);flex:1" @click="addToCart">{{ $t('product.goodDetail.addToCart') }}</el-button>
+            <el-button type="danger" size="large" style="flex:1" @click="buyNow">{{ $t('product.goodDetail.buyNow') }}</el-button>
           </div>
         </div>
         <div class="detail-info">
@@ -30,11 +30,11 @@
             <span class="price-original" v-if="currentSku?.originalPrice">${{ currentSku.originalPrice }}</span>
           </div>
           <div class="product-meta g-flex-align-center">
-            <span>Sold: {{ product.salesCount || 0 }}</span>
+            <span>{{ $t('product.goodDetail.sold') }} {{ product.salesCount || 0 }}</span>
             <span class="divider">|</span>
-            <span>Reviews: {{ product.reviewCount || 0 }}</span>
+            <span>{{ $t('product.goodDetail.reviews') }} {{ product.reviewCount || 0 }}</span>
             <span class="divider">|</span>
-            <span>Rating: ⭐ {{ product.rating || 5 }}</span>
+            <span>{{ $t('product.goodDetail.rating') }} ⭐ {{ product.rating || 5 }}</span>
           </div>
           <div class="sku-section" v-for="(attr, idx) in skuAttrs" :key="idx">
             <div class="sku-label">{{ attr.name }}:</div>
@@ -43,9 +43,9 @@
             </div>
           </div>
           <div class="quantity-section g-flex-align-center">
-            <span class="qty-label">Quantity:</span>
+            <span class="qty-label">{{ $t('product.goodDetail.quantity') }}</span>
             <el-input-number v-model="quantity" :min="1" :max="currentSku?.stock || 99" size="small" />
-            <span class="stock-text">{{ currentSku?.stock || 0 }} in stock</span>
+            <span class="stock-text">{{ $t('product.goodDetail.inStock', { stock: currentSku?.stock || 0 }) }}</span>
           </div>
         </div>
       </div>
@@ -61,22 +61,22 @@
             <span>Followers: {{ product.shopId?.followerCount || 0 }}</span>
           </div>
           <div class="store-card-services">
-            <span class="service-badge"><i class="iconfont icon-dianpu"></i> Shop Services</span>
-            <span class="service-badge"><i class="iconfont icon-wuliu"></i> Logistics Services</span>
-            <span class="service-badge"><i class="iconfont icon-dianpu"></i> Quality Rating: ⭐ {{ product.shopId?.rating || 5 }}</span>
+            <span class="service-badge"><i class="iconfont icon-dianpu"></i> {{ $t('product.goodDetail.shopServices') }}</span>
+            <span class="service-badge"><i class="iconfont icon-wuliu"></i> {{ $t('product.goodDetail.logisticsServices') }}</span>
+            <span class="service-badge"><i class="iconfont icon-dianpu"></i> {{ $t('product.goodDetail.qualityRating') }} ⭐ {{ product.shopId?.rating || 5 }}</span>
           </div>
         </div>
         <div class="store-card-actions">
-          <el-button type="primary" plain size="large" @click="visitStore">Visit Store</el-button>
-          <el-button type="success" size="large" @click="consultStore">Consult</el-button>
+          <el-button type="primary" plain size="large" @click="visitStore">{{ $t('product.goodDetail.visitStore') }}</el-button>
+          <el-button type="success" size="large" @click="consultStore">{{ $t('product.goodDetail.consult') }}</el-button>
         </div>
       </div>
       <div class="detail-section">
-        <h3>Description</h3>
+        <h3>{{ $t('product.goodDetail.description') }}</h3>
         <div class="product-desc">{{ product.description }}</div>
       </div>
       <div class="detail-section">
-        <h3>You May Also Like</h3>
+        <h3>{{ $t('product.goodDetail.youMayAlsoLike') }}</h3>
         <div class="related-grid">
           <div class="related-card" v-for="item in relatedProducts" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
             <div class="related-img">
@@ -90,20 +90,20 @@
         </div>
       </div>
       <div class="detail-section">
-        <h3>Reviews ({{ product.reviewCount || 0 }})</h3>
+        <h3>{{ $t('product.goodDetail.reviews') }} ({{ product.reviewCount || 0 }})</h3>
         <div v-if="reviews.length === 0" class="c-no-list">
-          <span class="c-no-list-text">No reviews yet</span>
+          <span class="c-no-list-text">{{ $t('product.goodDetail.noReviews') }}</span>
         </div>
         <div class="review-item" v-for="review in reviews" :key="review._id">
           <div class="review-user g-flex-align-center">
-            <span class="review-username">{{ review.userId?.username || 'Anonymous' }}</span>
+            <span class="review-username">{{ review.userId?.username || $t('product.goodDetail.anonymous') }}</span>
             <span class="review-rating">⭐ {{ review.rating }}</span>
           </div>
           <p class="review-content">{{ review.content }}</p>
         </div>
       </div>
     </div>
-    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">Product not found</span></div>
+    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">{{ $t('product.goodDetail.notFound') }}</span></div>
   </div>
 </template>
 
@@ -188,9 +188,7 @@ const visitStore = () => {
 }
 
 const consultStore = () => {
-  if (store.kefu) {
-    window.open(store.kefu, '_blank')
-  } else if (store.tawkTo?.enabled && window.Tawk_API) {
+  if (window.Tawk_API) {
     window.Tawk_API.maximize()
   } else {
     ElMessage.info('No chat support available at this time')

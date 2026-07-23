@@ -1,39 +1,39 @@
 <template>
   <div class="privacy-settings">
-    <h3 class="page-title">Privacy & Security</h3>
+    <h3 class="page-title">{{ $t('user.privacy.title') }}</h3>
     <el-tabs v-model="activeTab" class="privacy-tabs">
-      <el-tab-pane label="Security" name="security">
+      <el-tab-pane :label="$t('user.privacy.securityTab')" name="security">
         <div class="tab-section">
-          <h4>Password</h4>
-          <p class="tab-desc">Change your account password</p>
-          <el-button @click="$router.push('/changepassword')">Update Password</el-button>
+          <h4>{{ $t('user.privacy.password') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.passwordDesc') }}</p>
+          <el-button @click="$router.push('/changepassword')">{{ $t('user.privacy.updatePassword') }}</el-button>
         </div>
         <div class="tab-section">
-          <h4>Two-Factor Authentication</h4>
-          <p class="tab-desc">Add an extra layer of security to your account</p>
+          <h4>{{ $t('user.privacy.twoFactor') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.twoFactorDesc') }}</p>
           <div class="status-row">
             <el-tag :type="twoFactorEnabled ? 'success' : 'info'" size="small">
-              {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+              {{ twoFactorEnabled ? $t('user.privacy.enabledStatus') : $t('user.privacy.disabledStatus') }}
             </el-tag>
             <el-button size="small" @click="$router.push('/2fa')">
-              {{ twoFactorEnabled ? 'Manage' : 'Enable' }}
+              {{ twoFactorEnabled ? $t('user.privacy.manage') : $t('user.privacy.enable') }}
             </el-button>
           </div>
         </div>
         <div class="tab-section">
-          <h4>Login Alerts</h4>
-          <p class="tab-desc">Get notified when a new device logs into your account</p>
+          <h4>{{ $t('user.privacy.loginAlerts') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.loginAlertsDesc') }}</p>
           <el-switch v-model="loginAlerts" @change="saveSettings" />
         </div>
         <div class="tab-section">
-          <h4>Active Sessions</h4>
-          <p class="tab-desc">View and manage your active login sessions</p>
-          <el-button size="small" @click="logoutAll">Log Out All Sessions</el-button>
+          <h4>{{ $t('user.privacy.activeSessions') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.activeSessionsDesc') }}</p>
+          <el-button size="small" @click="logoutAll">{{ $t('user.privacy.logoutAllSessions') }}</el-button>
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Notifications" name="notifications">
-        <p class="tab-intro">Choose which email notifications you receive</p>
+      <el-tab-pane :label="$t('user.privacy.notificationsTab')" name="notifications">
+        <p class="tab-intro">{{ $t('user.privacy.notificationsDesc') }}</p>
         <div class="notif-list">
           <div class="notif-item" v-for="notif in notificationOptions" :key="notif.key">
             <div class="notif-info">
@@ -45,73 +45,73 @@
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Privacy" name="privacy">
+      <el-tab-pane :label="$t('user.privacy.privacyTab')" name="privacy">
         <div class="tab-section">
-          <h4>Profile Visibility</h4>
-          <p class="tab-desc">Control who can see your profile information</p>
+          <h4>{{ $t('user.privacy.profileVisibility') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.profileVisibilityDesc') }}</p>
           <el-radio-group v-model="profileVisibility" @change="saveSettings" class="vis-group">
-            <el-radio value="private">Private — Only me</el-radio>
-            <el-radio value="members_only">Members Only — Logged-in users</el-radio>
-            <el-radio value="public">Public — Anyone</el-radio>
+            <el-radio value="private">{{ $t('user.privacy.private') }}</el-radio>
+            <el-radio value="members_only">{{ $t('user.privacy.membersOnly') }}</el-radio>
+            <el-radio value="public">{{ $t('user.privacy.public') }}</el-radio>
           </el-radio-group>
         </div>
         <div class="tab-section">
-          <h4>Profile Fields</h4>
-          <p class="tab-desc">Choose which contact details are visible on your profile</p>
+          <h4>{{ $t('user.privacy.profileFields') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.profileFieldsDesc') }}</p>
           <div class="toggle-row">
-            <span>Show email on profile</span>
+            <span>{{ $t('user.privacy.showEmail') }}</span>
             <el-switch v-model="showEmail" @change="saveSettings" />
           </div>
           <div class="toggle-row">
-            <span>Show phone on profile</span>
+            <span>{{ $t('user.privacy.showPhone') }}</span>
             <el-switch v-model="showPhone" @change="saveSettings" />
           </div>
         </div>
         <div class="tab-section">
-          <h4>Cookie Consent</h4>
-          <p class="tab-desc">Manage your cookie preferences</p>
+          <h4>{{ $t('user.privacy.cookieConsent') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.cookieConsentDesc') }}</p>
           <div class="status-row">
             <el-tag :type="cookieConsent === 'accepted' ? 'success' : cookieConsent === 'rejected' ? 'danger' : 'info'" size="small">
-              {{ cookieConsent === 'accepted' ? 'Accepted' : cookieConsent === 'rejected' ? 'Rejected' : 'Not Set' }}
+              {{ cookieConsent === 'accepted' ? $t('user.privacy.accepted') : cookieConsent === 'rejected' ? $t('user.privacy.rejected') : $t('user.privacy.notSet') }}
             </el-tag>
-            <el-button size="small" v-if="cookieConsent !== 'accepted'" @click="cookieConsent = 'accepted'; saveSettings()">Accept</el-button>
-            <el-button size="small" v-if="cookieConsent !== 'rejected'" @click="cookieConsent = 'rejected'; saveSettings()">Reject</el-button>
+            <el-button size="small" v-if="cookieConsent !== 'accepted'" @click="cookieConsent = 'accepted'; saveSettings()">{{ $t('user.privacy.accept') }}</el-button>
+            <el-button size="small" v-if="cookieConsent !== 'rejected'" @click="cookieConsent = 'rejected'; saveSettings()">{{ $t('user.privacy.reject') }}</el-button>
           </div>
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Login History" name="sessions">
-        <p class="tab-intro">Review recent login activity on your account</p>
+      <el-tab-pane :label="$t('user.privacy.loginHistoryTab')" name="sessions">
+        <p class="tab-intro">{{ $t('user.privacy.loginHistoryDesc') }}</p>
         <el-table :data="loginHistory" v-loading="historyLoading" style="width:100%" size="small">
-          <el-table-column label="Date" width="160">
+          <el-table-column :label="$t('user.privacy.dateLabel')" width="160">
             <template #default="{row}">{{ new Date(row.createdAt).toLocaleString() }}</template>
           </el-table-column>
-          <el-table-column prop="method" label="Method" width="110">
+          <el-table-column prop="method" :label="$t('user.privacy.methodLabel')" width="110">
             <template #default="{row}">
               <el-tag :type="row.method === 'password' ? '' : row.method === '2fa' ? 'success' : row.method === 'backup_code' ? 'warning' : 'info'" size="small">
                 {{ row.method }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="ip" label="IP Address" width="140" />
-          <el-table-column prop="location" label="Location" />
-          <el-table-column prop="userAgent" label="Device" show-overflow-tooltip />
+          <el-table-column prop="ip" :label="$t('user.privacy.ipLabel')" width="140" />
+          <el-table-column prop="location" :label="$t('user.privacy.locationLabel')" />
+          <el-table-column prop="userAgent" :label="$t('user.privacy.deviceLabel')" show-overflow-tooltip />
         </el-table>
         <div class="pagination-wrap" v-if="historyTotal > 0">
           <el-pagination background layout="prev, pager, next" :total="historyTotal" :page-size="20" v-model:current-page="historyPage" @current-change="fetchHistory" small />
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Account" name="account">
+      <el-tab-pane :label="$t('user.privacy.accountTab')" name="account">
         <div class="tab-section">
-          <h4>Download My Data</h4>
-          <p class="tab-desc">Export all your account data including orders, transactions, and profile information</p>
-          <el-button :loading="exportLoading" @click="exportData">Download Data</el-button>
+          <h4>{{ $t('user.privacy.downloadData') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.downloadDataDesc') }}</p>
+          <el-button :loading="exportLoading" @click="exportData">{{ $t('user.privacy.downloadDataButton') }}</el-button>
         </div>
         <div class="tab-section tab-section--danger">
-          <h4>Delete Account</h4>
-          <p class="tab-desc">Permanently deactivate your account and anonymize your data. This cannot be undone.</p>
-          <el-button type="danger" :loading="deleteLoading" @click="confirmDelete">Delete My Account</el-button>
+          <h4>{{ $t('user.privacy.deleteAccount') }}</h4>
+          <p class="tab-desc">{{ $t('user.privacy.deleteAccountDesc') }}</p>
+          <el-button type="danger" :loading="deleteLoading" @click="confirmDelete">{{ $t('user.privacy.deleteAccountButton') }}</el-button>
         </div>
       </el-tab-pane>
     </el-tabs>

@@ -1,7 +1,7 @@
 <template>
   <div class="sort-view">
     <div class="sort-container">
-      <h2 class="sort-title">Categories</h2>
+      <h2 class="sort-title">{{ $t('product.categories.title') }}</h2>
       <div class="sort-content g-flex">
         <div class="sort-sidebar">
           <div class="sort-cat" v-for="cat in categories" :key="cat._id" :class="{ active: selectedCat === cat._id }" @click="selectCat(cat._id)">{{ cat.name }}</div>
@@ -19,7 +19,7 @@
             <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
               <div class="product-img">
                 <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-                <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+                <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('product.categories.quickView') }}</span></div>
               </div>
               <div class="product-info">
                 <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>

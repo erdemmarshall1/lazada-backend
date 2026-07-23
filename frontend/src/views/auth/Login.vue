@@ -1,26 +1,26 @@
 <template>
   <div class="login-view">
     <div class="login-box">
-      <h2 class="login-title">Login</h2>
+      <h2 class="login-title">{{ $t('auth.login.title') }}</h2>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Username / Email" prop="username">
-          <el-input v-model="form.username" placeholder="Enter username or email" size="large" />
+        <el-form-item :label="$t('auth.login.usernameLabel')" prop="username">
+          <el-input v-model="form.username" :placeholder="$t('auth.login.usernamePlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Password" prop="password" v-if="!twoFactorRequired">
-          <el-input v-model="form.password" type="password" show-password placeholder="Enter password" size="large" />
+        <el-form-item :label="$t('auth.login.passwordLabel')" prop="password" v-if="!twoFactorRequired">
+          <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.login.passwordPlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Authentication Code" prop="twoFactorCode" v-if="twoFactorRequired">
-          <el-input v-model="form.twoFactorCode" placeholder="Enter 6-digit code" size="large" maxlength="6" />
+        <el-form-item :label="$t('auth.login.codeLabel')" prop="twoFactorCode" v-if="twoFactorRequired">
+          <el-input v-model="form.twoFactorCode" :placeholder="$t('auth.login.codePlaceholder')" size="large" maxlength="6" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleLogin">
-            {{ twoFactorRequired ? 'Verify' : 'Login' }}
+            {{ twoFactorRequired ? $t('common.confirm') : $t('auth.login.title') }}
           </el-button>
         </el-form-item>
       </el-form>
       <div class="login-links g-flex-align-center g-flex-justify-between">
-        <span class="link" @click="$router.push('/register')">Register</span>
-        <span class="link" @click="$router.push('/forgetpwd')">Forgot password?</span>
+        <span class="link" @click="$router.push('/register')">{{ $t('auth.login.registerLink') }}</span>
+        <span class="link" @click="$router.push('/forgetpwd')">{{ $t('auth.login.forgotPassword') }}</span>
       </div>
     </div>
   </div>
@@ -31,6 +31,7 @@ import { ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
+import { useAdminAppStore } from '@/stores/adminApp'
 import { post } from '@/api/request'
 import { connectSocket } from '@/socket'
 
@@ -60,6 +61,7 @@ const getRedirectPath = () => {
     }
   }
 
+  if (store.isAdmin) return '/admin/dashboard'
   if (store.isSeller) return '/mystore'
   return '/myaccount'
 }
@@ -82,6 +84,12 @@ const handleLogin = async () => {
         store.setToken(token)
         if (refreshToken) store.setRefreshToken(refreshToken)
         if (userInfo) store.setUserInfo(userInfo)
+        if (store.isAdmin) {
+          const adminStore = useAdminAppStore()
+          adminStore.setToken(token)
+          if (refreshToken) adminStore.setRefreshToken(refreshToken)
+          if (userInfo) adminStore.setUserInfo(userInfo)
+        }
         connectSocket()
         ElMessage.success(message)
         const redirectPath = getRedirectPath()
@@ -118,6 +126,12 @@ const handleLogin = async () => {
       store.setToken(token)
       if (refreshToken) store.setRefreshToken(refreshToken)
       if (userInfo) store.setUserInfo(userInfo)
+      if (store.isAdmin) {
+        const adminStore = useAdminAppStore()
+        adminStore.setToken(token)
+        if (refreshToken) adminStore.setRefreshToken(refreshToken)
+        if (userInfo) adminStore.setUserInfo(userInfo)
+      }
       connectSocket()
 
       if (responseBody.needsPasswordSetup || userInfo?.needsPasswordSetup) {

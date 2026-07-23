@@ -180,7 +180,7 @@ const quickLinks = [
 ]
 
 const fetchStats = async () => {
-  const [u, s, p, t, w, ic] = await Promise.all([
+  const results = await Promise.allSettled([
     adminGet('/home/admin/users?pageSize=1'),
     adminGet('/home/admin/shops?pageSize=1'),
     adminGet('/home/admin/products?pageSize=1'),
@@ -188,6 +188,10 @@ const fetchStats = async () => {
     adminGet('/home/admin/platform-wallet'),
     adminGet('/home/admin/invitation-codes?pageSize=1'),
   ])
+  const extract = (r) => r.status === 'fulfilled' ? r.value : null
+  const u = extract(results[0]); const s = extract(results[1])
+  const p = extract(results[2]); const t = extract(results[3])
+  const w = extract(results[4]); const ic = extract(results[5])
   metricCards.value[0].value = u?.data?.total ?? 0
   metricCards.value[1].value = s?.data?.total ?? 0
   metricCards.value[2].value = p?.data?.total ?? 0
@@ -206,7 +210,12 @@ const statusTypes = {
 
 const fetchSalesData = async () => {
   const weeks = parseInt(revenueWeeks.value)
-  const res = await adminGet('/home/report/sales', { params: { days: weeks * 7 } })
+  const endDate = new Date()
+  const startDate = new Date(endDate)
+  startDate.setDate(startDate.getDate() - weeks * 7)
+  const res = await adminGet('/home/report/sales', {
+    params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
+  })
   if (res?.code !== 0 || !res?.data) return
   const d = res.data
   buildLineChart(d.timeSeries)

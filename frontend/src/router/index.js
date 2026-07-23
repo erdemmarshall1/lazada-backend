@@ -115,7 +115,7 @@ const routes = [
           { path: '/admin-submissions', name: 'admin-submissions', component: () => import('@/views/admin/AdminSubmissions.vue'), meta: { title: 'Inquiries', requiresAuth: true } },
           { path: '/admin-user-detail/:id', name: 'admin-user-detail', component: () => import('@/views/admin/AdminUserDetail.vue'), meta: { title: 'User Detail', requiresAuth: true } },
           { path: '/admin-shop-detail/:id', name: 'admin-shop-detail', component: () => import('@/views/admin/AdminShopDetail.vue'), meta: { title: 'Shop Detail', requiresAuth: true } },
-          { path: '/admin-tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true } },
+    
           { path: '/admin-livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true } },
           { path: '/admin-livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true } },
           { path: '/admin-seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true } },
@@ -155,7 +155,7 @@ const routes = [
       { path: 'settings', name: 'admin-settings', component: () => import('@/views/admin/AdminSettings.vue'), meta: { title: 'Settings', requiresAuth: true, adminLayout: true } },
       { path: 'homepage-sections', name: 'admin-homepage-sections', component: () => import('@/views/admin/AdminHomepageSections.vue'), meta: { title: 'Homepage Sections', requiresAuth: true, adminLayout: true } },
       { path: 'submissions', name: 'admin-submissions', component: () => import('@/views/admin/AdminSubmissions.vue'), meta: { title: 'Inquiries', requiresAuth: true, adminLayout: true } },
-      { path: 'tawkto-settings', name: 'admin-tawkto-settings', component: () => import('@/views/admin/AdminTawkToSettings.vue'), meta: { title: 'Tawk.to Chat', requiresAuth: true, adminLayout: true } },
+
       { path: 'livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true, adminLayout: true } },
       { path: 'livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true, adminLayout: true } },
       { path: 'seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true, adminLayout: true } },
@@ -183,7 +183,7 @@ const adminPathMap = {
   '/admin-theme-settings': '/admin/theme-settings', '/admin-balance': '/admin/balance',
   '/admin-platform-wallet': '/admin/platform-wallet', '/admin-sessions-audit': '/admin/sessions-audit',
   '/admin-settings': '/admin/settings', '/admin-homepage-sections': '/admin/homepage-sections',
-  '/admin-submissions': '/admin/submissions', '/admin-tawkto-settings': '/admin/tawkto-settings',
+  '/admin-submissions': '/admin/submissions',
   '/admin-livechat-inbox': '/admin/livechat-inbox', '/admin-livechat-settings': '/admin/livechat-settings',
   '/admin-seller-id-settings': '/admin/seller-id-settings',
   '/admin-logistics': '/admin/logistics',

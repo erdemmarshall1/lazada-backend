@@ -6,16 +6,16 @@
         <div class="store-info">
           <h2>{{ shop.name }}</h2>
           <p>{{ shop.description }}</p>
-          <div class="store-meta"><span>⭐ {{ shop.rating || 5 }}</span><span>Products: {{ shop.productCount || 0 }}</span><span>Followers: {{ shop.followerCount || 0 }}</span></div>
+          <div class="store-meta"><span>⭐ {{ shop.rating || 5 }}</span><span>{{ $t('store.settings.products') }} {{ shop.productCount || 0 }}</span><span>{{ $t('store.detail.followers') }} {{ shop.followerCount || 0 }}</span></div>
         </div>
-        <el-button type="primary" :plain="isFollowed" size="large" style="margin-left:auto" @click="toggleFollow">{{ isFollowed ? 'Following' : 'Follow' }}</el-button>
+        <el-button type="primary" :plain="isFollowed" size="large" style="margin-left:auto" @click="toggleFollow">{{ isFollowed ? $t('store.detail.following') : $t('store.detail.follow') }}</el-button>
       </div>
-      <h3 class="section-title">All Products</h3>
+      <h3 class="section-title">{{ $t('store.detail.allProducts') }}</h3>
       <div class="product-grid">
         <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('common.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="g-text-ellipsis">{{ item.name }}</h4>
@@ -27,7 +27,7 @@
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>
     </div>
-    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">Store not found</span></div>
+    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">{{ $t('store.detail.storeNotFound') }}</span></div>
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>

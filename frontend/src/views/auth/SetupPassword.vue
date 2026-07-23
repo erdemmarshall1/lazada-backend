@@ -1,18 +1,18 @@
 <template>
   <div class="setup-pwd-view">
     <div class="setup-pwd-box">
-      <h2 class="setup-pwd-title">Welcome! Set Your Password</h2>
-      <p class="setup-pwd-desc">This is your first login. Please set a new password to continue.</p>
+      <h2 class="setup-pwd-title">{{ $t('auth.setupPassword.title') }}</h2>
+      <p class="setup-pwd-desc">{{ $t('auth.setupPassword.description') }}</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="New Password" prop="password">
-          <el-input v-model="form.password" type="password" show-password placeholder="At least 6 characters" size="large" />
+        <el-form-item :label="$t('auth.setupPassword.passwordLabel')" prop="password">
+          <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.setupPassword.passwordPlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Confirm Password" prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" show-password placeholder="Re-enter new password" size="large" />
+        <el-form-item :label="$t('auth.setupPassword.confirmLabel')" prop="confirmPassword">
+          <el-input v-model="form.confirmPassword" type="password" show-password :placeholder="$t('auth.setupPassword.confirmPlaceholder')" size="large" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleSetup">
-            Set Password
+            {{ $t('auth.setupPassword.setPassword') }}
           </el-button>
         </el-form-item>
       </el-form>

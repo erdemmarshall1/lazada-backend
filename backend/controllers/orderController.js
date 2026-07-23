@@ -427,6 +427,8 @@ exports.ship = async (req, res) => {
   try {
     const { orderId, trackingNo } = req.body;
     const shop = await Shop.findOne({ userId: req.user._id });
+    if (!shop) return res.json(fail('Shop not found'));
+    if (shop.status === 3) return res.json(fail('Your store has been closed, kindly contact the customer support'));
     const order = await Order.findOne({ _id: orderId, shopId: shop._id });
     if (!order) return res.json(fail('Order not found'));
 

@@ -2,19 +2,19 @@
   <div class="list-view">
     <div class="list-container">
       <div class="page-header">
-        <h2 class="list-title">Just In</h2>
-        <p class="list-subtitle">Discover the hottest and most trending products right now</p>
+        <h2 class="list-title">{{ $t('category.justIn.title') }}</h2>
+        <p class="list-subtitle">{{ $t('category.justIn.description') }}</p>
       </div>
       <div class="sub-nav">
-        <span class="sub-nav-item" :class="{ active: activeTab === 'trending' }" @click="switchTab('trending')">Trending</span>
-        <span class="sub-nav-item" :class="{ active: activeTab === 'hottest' }" @click="switchTab('hottest')">Hottest</span>
-        <span class="sub-nav-item" :class="{ active: activeTab === 'newest' }" @click="switchTab('newest')">Newest</span>
+        <span class="sub-nav-item" :class="{ active: activeTab === 'trending' }" @click="switchTab('trending')">{{ $t('category.justIn.trending') }}</span>
+        <span class="sub-nav-item" :class="{ active: activeTab === 'hottest' }" @click="switchTab('hottest')">{{ $t('category.justIn.hottest') }}</span>
+        <span class="sub-nav-item" :class="{ active: activeTab === 'newest' }" @click="switchTab('newest')">{{ $t('category.justIn.newest') }}</span>
       </div>
       <div class="product-grid">
         <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('category.justIn.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
@@ -22,11 +22,11 @@
               <span class="price-current">${{ item.minPrice }}</span>
               <span class="price-original" v-if="item.maxPrice > item.minPrice">${{ item.maxPrice }}</span>
             </div>
-            <div class="product-meta"><span>Sold {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
+            <div class="product-meta"><span>{{ $t('category.justIn.sold') }} {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
           </div>
         </div>
       </div>
-      <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">No products</span></div>
+      <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('category.justIn.empty') }}</span></div>
       <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>

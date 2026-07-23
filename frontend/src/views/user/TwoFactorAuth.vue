@@ -1,55 +1,55 @@
 <template>
   <div class="twofa-page">
-    <h3 class="page-title">Two-Factor Authentication</h3>
+    <h3 class="page-title">{{ $t('auth.twoFactor.title') }}</h3>
 
     <div v-if="!twoFactorEnabled" class="twofa-setup">
-      <p class="twofa-intro">Enhance your account security with an additional verification step when signing in.</p>
+      <p class="twofa-intro">{{ $t('auth.twoFactor.intro') }}</p>
       <el-button type="primary" :loading="setupLoading" @click="handleSetup" style="background:var(--g-main_color);border-color:var(--g-main_color)">
-        Enable Two-Factor Authentication
+        {{ $t('auth.twoFactor.enableButton') }}
       </el-button>
     </div>
 
     <div v-else-if="showQR" class="twofa-qr-section">
       <div class="twofa-step">
-        <h4>Step 1: Scan QR Code</h4>
-        <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+        <h4>{{ $t('auth.twoFactor.step1Title') }}</h4>
+        <p>{{ $t('auth.twoFactor.step1Desc') }}</p>
         <div class="qr-container" v-if="qrCode">
-          <img :src="qrCode" alt="QR Code" />
+          <img :src="qrCode" :alt="$t('auth.twoFactor.qrCodeAlt')" />
         </div>
         <p v-if="secretKey" class="secret-key">
-          Or enter this key manually: <code>{{ secretKey }}</code>
+          {{ $t('auth.twoFactor.enterKeyManually') }} <code>{{ secretKey }}</code>
         </p>
       </div>
       <div class="twofa-step">
-        <h4>Step 2: Verify Code</h4>
-        <p>Enter the 6-digit code from your authenticator app to confirm setup.</p>
+        <h4>{{ $t('auth.twoFactor.step2Title') }}</h4>
+        <p>{{ $t('auth.twoFactor.step2Desc') }}</p>
         <div class="verify-row">
-          <el-input v-model="verifyCode" placeholder="000000" maxlength="6" class="code-input" />
+          <el-input v-model="verifyCode" :placeholder="$t('auth.twoFactor.codePlaceholder')" maxlength="6" class="code-input" />
           <el-button type="primary" :loading="verifyLoading" @click="handleVerify" style="background:var(--g-main_color);border-color:var(--g-main_color)">
-            Verify
+            {{ $t('auth.twoFactor.verify') }}
           </el-button>
         </div>
       </div>
     </div>
 
     <div v-else class="twofa-active">
-      <el-alert type="success" :closable="false" show-icon title="Two-factor authentication is enabled" />
+      <el-alert type="success" :closable="false" show-icon :title="$t('auth.twoFactor.enabled')" />
       <div class="backup-section" v-if="backupCodes.length">
-        <h4>Backup Codes</h4>
-        <p>Save these backup codes in a secure place. Each code can be used only once.</p>
+        <h4>{{ $t('auth.twoFactor.backupCodes') }}</h4>
+        <p>{{ $t('auth.twoFactor.backupCodesDesc') }}</p>
         <div class="backup-codes">
           <div class="backup-code" v-for="(code, i) in backupCodes" :key="i">
             <span>{{ code }}</span>
-            <el-tag size="small" type="warning" v-if="code.used">Used</el-tag>
+            <el-tag size="small" type="warning" v-if="code.used">{{ $t('auth.twoFactor.used') }}</el-tag>
           </div>
         </div>
-        <el-button size="small" @click="generateBackupCodes" :loading="backupLoading">Generate New Backup Codes</el-button>
+        <el-button size="small" @click="generateBackupCodes" :loading="backupLoading">{{ $t('auth.twoFactor.generateBackupCodes') }}</el-button>
       </div>
       <div class="disable-section">
-        <h4>Disable Two-Factor Authentication</h4>
+        <h4>{{ $t('auth.twoFactor.disableTitle') }}</h4>
         <div class="verify-row">
-          <el-input v-model="disablePassword" type="password" placeholder="Enter your password" class="code-input" />
-          <el-button type="danger" :loading="disableLoading" @click="handleDisable">Disable</el-button>
+          <el-input v-model="disablePassword" type="password" :placeholder="$t('auth.twoFactor.passwordPlaceholder')" class="code-input" />
+          <el-button type="danger" :loading="disableLoading" @click="handleDisable">{{ $t('auth.twoFactor.disable') }}</el-button>
         </div>
       </div>
     </div>

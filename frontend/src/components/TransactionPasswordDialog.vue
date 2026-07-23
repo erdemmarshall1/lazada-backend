@@ -56,7 +56,7 @@ const dialogTitle = computed(() => mode.value === 'setup' ? 'Set Transaction Pas
 
 watch(() => props.visible, (val) => {
   if (val) {
-    mode.value = 'confirm'
+    mode.value = props.startInSetup ? 'setup' : 'confirm'
     password.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
@@ -80,7 +80,7 @@ const handleConfirm = async () => {
       const res = await post('/home/user/editFundPassword', { password: newPassword.value })
       if (res.code === 0) {
         password.value = newPassword.value
-        mode.value = 'confirm'
+        mode.value = props.startInSetup ? 'setup' : 'confirm'
         newPassword.value = ''
         confirmPassword.value = ''
         loading.value = false
@@ -128,7 +128,7 @@ const handleClose = () => {
   confirmPassword.value = ''
   error.value = ''
   loading.value = false
-  mode.value = 'confirm'
+  mode.value = props.startInSetup ? 'setup' : 'confirm'
   emit('close')
 }
 </script>

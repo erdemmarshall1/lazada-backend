@@ -1,26 +1,27 @@
 <template>
   <div>
-    <div class="g-flex-align-center g-flex-justify-between"><h3>Product Management</h3><el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd">+ Add Product</el-button></div>
+    <el-alert v-if="shopClosed" :title="$t('store.goods.storeClosedTitle')" type="error" :closable="false" show-icon style="margin-bottom:12px" />
+    <div class="g-flex-align-center g-flex-justify-between"><h3>{{ $t('store.goods.title') }}</h3><el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openAdd" :disabled="shopClosed">+ {{ $t('store.goods.addTitle') }}</el-button></div>
     <template v-if="list.length>0">
     <div class="g-responsive-table">
     <el-table :data="list" style="width:100%;margin-top:16px">
-      <el-table-column label="Product" min-width="200"><template #default="{row}"><div class="g-flex-align-center" style="gap:8px"><img :src="$imgUrl(row.images?.[0])" style="width:40px;height:40px;border-radius:4px;object-fit:cover" loading="lazy" @error="$imgFallback" /><span>{{ row.name }}</span></div></template></el-table-column>
-      <el-table-column prop="minPrice" label="Price" width="100" />
-      <el-table-column prop="salesCount" label="Sales" width="80" />
-      <el-table-column prop="status" label="Status" width="100"><template #default="{row}">{{ row.status===1?'Active':'Inactive' }}</template></el-table-column>
-      <el-table-column label="Actions" width="280">
+      <el-table-column :label="$t('store.goods.productLabel')" min-width="200"><template #default="{row}"><div class="g-flex-align-center" style="gap:8px"><img :src="$imgUrl(row.images?.[0])" style="width:40px;height:40px;border-radius:4px;object-fit:cover" loading="lazy" @error="$imgFallback" /><span>{{ row.name }}</span></div></template></el-table-column>
+      <el-table-column prop="minPrice" :label="$t('store.goods.priceLabel')" width="100" />
+      <el-table-column prop="salesCount" :label="$t('store.goods.salesLabel')" width="80" />
+      <el-table-column prop="status" :label="$t('store.goods.statusLabel')" width="100"><template #default="{row}">{{ row.status===1 ? $t('store.goods.active') : $t('store.goods.inactive') }}</template></el-table-column>
+      <el-table-column :label="$t('store.goods.actionsLabel')" width="280">
         <template #default="{row}">
-          <el-button size="small" @click="editItem=row;populateForm(row);showForm=true">Edit</el-button>
-          <el-button size="small" :type="row.status===1?'warning':'success'" @click="toggleStatus(row)">{{ row.status===1?'Deactivate':'Activate' }}</el-button>
+          <el-button size="small" @click="editItem=row;populateForm(row);showForm=true" :disabled="shopClosed">{{ $t('common.edit') }}</el-button>
+          <el-button size="small" :type="row.status===1?'warning':'success'" @click="toggleStatus(row)" :disabled="shopClosed">{{ row.status===1 ? $t('store.goods.deactivate') : $t('store.goods.activate') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
     </div>
     </template>
-    <div v-else class="c-no-list"><span class="c-no-list-text">No products</span></div>
-    <el-dialog v-model="showForm" :title="editItem?'Edit Product':'Add Product'" width="600px" @closed="resetForm">
+    <div v-else class="c-no-list"><span class="c-no-list-text">{{ $t('common.noProducts') }}</span></div>
+    <el-dialog v-model="showForm" :title="editItem ? $t('store.goods.editTitle') : $t('store.goods.addTitle')" width="600px" @closed="resetForm">
       <el-form :model="form" label-position="top">
-        <el-form-item label="Product Images">
+        <el-form-item :label="$t('store.goods.imagesLabel')">
           <div class="image-list" v-if="form.images.length > 0">
             <div class="image-item" v-for="(img, idx) in form.images" :key="idx">
               <img :src="$imgUrl(img)" @error="$imgFallback" />
@@ -28,22 +29,22 @@
             </div>
           </div>
           <el-upload class="image-upload-btn" :show-file-list="false" :before-upload="handleImageUpload" accept="image/*">
-            <el-button type="primary" size="small">+ Add Image</el-button>
+            <el-button type="primary" size="small">+ {{ $t('store.goods.addImage') }}</el-button>
           </el-upload>
         </el-form-item>
-        <el-form-item label="Name"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="Description"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
-        <el-form-item label="Category">
+        <el-form-item :label="$t('store.goods.nameLabel')"><el-input v-model="form.name" /></el-form-item>
+        <el-form-item :label="$t('store.goods.descriptionLabel')"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item :label="$t('store.goods.categoryLabel')">
           <el-select v-model="form.categoryId" style="width:100%">
             <el-option v-for="cat in categories" :key="cat._id" :label="cat.name" :value="cat._id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Price"><el-input-number v-model="form.price" :min="0" :precision="2" style="width:100%" /></el-form-item>
-        <el-form-item label="Stock"><el-input-number v-model="form.stock" :min="0" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('store.goods.priceLabel')"><el-input-number v-model="form.price" :min="0" :precision="2" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('store.goods.stockLabel')"><el-input-number v-model="form.stock" :min="0" style="width:100%" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showForm=false">Cancel</el-button>
-        <el-button type="primary" @click="saveProduct">Save</el-button>
+        <el-button @click="showForm=false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveProduct">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -59,6 +60,7 @@ const showForm = ref(false)
 const editItem = ref(null)
 const categories = ref([])
 const form = ref({ name: '', description: '', categoryId: '', price: 0, stock: 100, images: [] })
+const shopClosed = ref(false)
 
 const loadList = async () => { const res = await get('/home/userGoods/getList', { pageSize: 50 }); if (res?.data) list.value = res.data.list || [] }
 
@@ -105,8 +107,12 @@ const saveProduct = async () => {
 
 onMounted(async () => {
   await loadList()
-  const catRes = await get('/main/goodsCategory/getList')
+  const [catRes, shopRes] = await Promise.all([
+    get('/main/goodsCategory/getList'),
+    get('/home/userShop/getInfo'),
+  ])
   if (catRes?.data) categories.value = catRes.data
+  if (shopRes?.data) shopClosed.value = shopRes.data.status === 3
 })
 </script>
 

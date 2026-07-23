@@ -1,64 +1,64 @@
 <template>
   <div>
-    <h3>{{ isEditing ? 'Update Store Info' : 'Account Details' }}</h3>
-    <p style="color:var(--g-text-light);margin-bottom:16px">{{ isEditing ? 'Edit your store information below' : 'Create your secure merchant store account' }}</p>
+    <h3>{{ isEditing ? $t('store.apply.updateInfo') : $t('store.apply.accountDetails') }}</h3>
+    <p style="color:var(--g-text-light);margin-bottom:16px">{{ isEditing ? $t('store.apply.editInfo') : $t('store.apply.createAccount') }}</p>
 
     <div v-if="loadingInfo" v-loading="loadingInfo" style="height:200px"></div>
 
     <el-form v-else ref="formRef" :model="form" :rules="computedRules" label-position="top" style="max-width:600px;margin-top:16px">
-      <el-form-item label="Store Logo">
+      <el-form-item :label="$t('store.apply.logoLabel')">
         <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="handleLogoUpload" accept="image/*">
           <img v-if="form.storeLogo" :src="$imgUrl(form.storeLogo)" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="Full Name" prop="fullName">
-        <el-input v-model="form.fullName" placeholder="Full Name" />
+      <el-form-item :label="$t('store.apply.fullNameLabel')" prop="fullName">
+        <el-input v-model="form.fullName" :placeholder="$t('store.apply.fullNameLabel')" />
       </el-form-item>
-      <el-form-item label="Store Name" prop="name">
-        <el-input v-model="form.name" placeholder="Store Name" />
+      <el-form-item :label="$t('store.apply.storeNameLabel')" prop="name">
+        <el-input v-model="form.name" :placeholder="$t('store.apply.storeNameLabel')" />
       </el-form-item>
-      <el-form-item label="Address" prop="address">
-        <el-input v-model="form.address" placeholder="Address" />
+      <el-form-item :label="$t('store.apply.addressLabel')" prop="address">
+        <el-input v-model="form.address" :placeholder="$t('store.apply.addressLabel')" />
       </el-form-item>
-      <el-form-item label="ID Front" prop="idFrontImage">
+      <el-form-item :label="$t('store.apply.idFrontLabel')" prop="idFrontImage">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleIdFrontUpload" accept="image/*" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
-          <el-button type="primary">Upload ID Front</el-button>
+          <el-button type="primary">{{ $t('store.apply.uploadIdFront') }}</el-button>
         </el-upload>
-        <div v-if="form.idFrontImage" class="upload-hint">Uploaded: {{ form.idFrontImage.split('/').pop() }}</div>
+        <div v-if="form.idFrontImage" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.idFrontImage.split('/').pop() }}</div>
       </el-form-item>
-      <el-form-item label="ID Back" prop="idBackImage">
+      <el-form-item :label="$t('store.apply.idBackLabel')" prop="idBackImage">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleIdBackUpload" accept="image/*" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
-          <el-button type="primary">Upload ID Back</el-button>
+          <el-button type="primary">{{ $t('store.apply.uploadIdBack') }}</el-button>
         </el-upload>
-        <div v-if="form.idBackImage" class="upload-hint">Uploaded: {{ form.idBackImage.split('/').pop() }}</div>
+        <div v-if="form.idBackImage" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.idBackImage.split('/').pop() }}</div>
       </el-form-item>
-      <el-form-item label="Social Security Number / ID Number" prop="idNumber">
-        <el-input v-model="form.idNumber" placeholder="Social Security Number / ID Number" />
+      <el-form-item :label="$t('store.apply.idNumberLabel')" prop="idNumber">
+        <el-input v-model="form.idNumber" :placeholder="$t('store.apply.idNumberLabel')" />
       </el-form-item>
-      <el-form-item label="Invitation Code" prop="invitationCode">
-        <el-input v-model="form.invitationCode" placeholder="Enter your invitation code" />
+      <el-form-item :label="$t('store.apply.inviteCodeLabel')" prop="invitationCode">
+        <el-input v-model="form.invitationCode" :placeholder="$t('store.apply.inviteCodePlaceholder')" />
       </el-form-item>
-      <el-form-item label="Upload Utility Bills" prop="utilityBill">
+      <el-form-item :label="$t('store.apply.utilityLabel')" prop="utilityBill">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
-          <el-button type="primary">Upload Utility Bill</el-button>
+          <el-button type="primary">{{ $t('store.apply.uploadUtility') }}</el-button>
         </el-upload>
-        <div v-if="form.utilityBill" class="upload-hint">Uploaded: {{ form.utilityBill.split('/').pop() }}</div>
+        <div v-if="form.utilityBill" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.utilityBill.split('/').pop() }}</div>
       </el-form-item>
-      <el-form-item label="Email Address" prop="email">
-        <el-input v-model="form.email" placeholder="Email Address" />
+      <el-form-item :label="$t('store.apply.emailLabel')" prop="email">
+        <el-input v-model="form.email" :placeholder="$t('store.apply.emailLabel')" />
       </el-form-item>
-      <el-form-item label="Phone Number" prop="phone">
-        <el-input v-model="form.phone" placeholder="Phone Number" />
+      <el-form-item :label="$t('store.apply.phoneLabel')" prop="phone">
+        <el-input v-model="form.phone" :placeholder="$t('store.apply.phoneLabel')" />
       </el-form-item>
-      <el-form-item v-if="!isEditing" label="Transaction Password" prop="password">
-        <el-input v-model="form.password" type="password" placeholder="Transaction password for payments (min 8 chars)" show-password />
+      <el-form-item v-if="!isEditing" :label="$t('store.apply.txPasswordLabel')" prop="password">
+        <el-input v-model="form.password" type="password" :placeholder="$t('store.apply.txPasswordPlaceholder')" show-password />
       </el-form-item>
-      <el-form-item v-if="!isEditing" label="Confirm Transaction Password" prop="confirmPassword">
-        <el-input v-model="form.confirmPassword" type="password" placeholder="Repeat transaction password" show-password />
+      <el-form-item v-if="!isEditing" :label="$t('store.apply.confirmTxPasswordLabel')" prop="confirmPassword">
+        <el-input v-model="form.confirmPassword" type="password" :placeholder="$t('store.apply.confirmTxPasswordPlaceholder')" show-password />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" :loading="submitting" @click="submit">{{ isEditing ? 'Update Store' : 'Submit Application' }}</el-button>
+        <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" :loading="submitting" @click="submit">{{ isEditing ? $t('store.apply.updateStore') : $t('store.apply.submitApplication') }}</el-button>
       </el-form-item>
     </el-form>
   </div>

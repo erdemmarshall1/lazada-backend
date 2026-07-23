@@ -29,16 +29,18 @@
       <el-table-column prop="email" label="Email" />
       <el-table-column label="Status" width="110">
         <template #default="{row}">
-          <el-tag :type="row.status === 1 ? 'success' : row.status === 2 ? 'danger' : 'warning'">
-            {{ row.status === 1 ? 'Approved' : row.status === 2 ? 'Rejected' : 'Pending' }}
+          <el-tag :type="row.status === 1 ? 'success' : row.status === 2 ? 'danger' : row.status === 3 ? 'danger' : 'warning'">
+            {{ row.status === 1 ? 'Approved' : row.status === 2 ? 'Rejected' : row.status === 3 ? 'Closed' : 'Pending' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Action" width="400">
+      <el-table-column label="Action" width="520">
         <template #default="{row}">
           <el-button type="primary" size="small" @click="$router.push('/admin-shop-detail/' + row._id)">View</el-button>
           <el-button type="success" size="small" @click="approve(row._id)" :disabled="row.status === 1">Approve</el-button>
-          <el-button type="danger" size="small" @click="reject(row._id)" :disabled="row.status === 2">Reject</el-button>
+          <el-button type="danger" size="small" @click="reject(row._id)" :disabled="row.status === 2 || row.status === 3">Reject</el-button>
+          <el-button v-if="row.status === 1" type="warning" size="small" @click="closeShop(row)">Close Store</el-button>
+          <el-button v-if="row.status === 3" type="success" size="small" @click="openShop(row)">Open Store</el-button>
           <el-button v-if="row.status === 1 && !row.userId?.sellerId" type="warning" size="small" @click="generateSellerId(row)">Generate ID</el-button>
           <el-button v-if="row.status === 1 && row.userId?.sellerId" type="info" size="small" @click="loginAsSeller(row)">Login as Seller</el-button>
         </template>
@@ -91,6 +93,16 @@ const migrateSellerIds = async () => {
     await ElMessageBox.confirm('Assign seller IDs to all approved sellers missing them?', 'Migrate Seller IDs', { confirmButtonText: 'Migrate', cancelButtonText: 'Cancel', type: 'warning' })
   } catch { return }
   const res = await qe(post('/home/admin/migrate-seller-ids'))
+  if (res) { ElMessage.success(res.msg); fetchShops() }
+}
+const closeShop = async (row) => {
+  try { await ElMessageBox.confirm(`Close store "${row.name}"? The seller will lose access to order processing.`, 'Close Store', { confirmButtonText: 'Close', cancelButtonText: 'Cancel', type: 'warning' }) } catch { return }
+  const res = await qe(post('/home/admin/close-shop', { id: row._id, reason: 'Closed by admin' }))
+  if (res) { ElMessage.success(res.msg); fetchShops() }
+}
+const openShop = async (row) => {
+  try { await ElMessageBox.confirm(`Reopen store "${row.name}"?`, 'Open Store', { confirmButtonText: 'Open', cancelButtonText: 'Cancel', type: 'info' }) } catch { return }
+  const res = await qe(post('/home/admin/open-shop', { id: row._id }))
   if (res) { ElMessage.success(res.msg); fetchShops() }
 }
 const generateSellerId = async (row) => {

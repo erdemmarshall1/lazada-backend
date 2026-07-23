@@ -6,7 +6,7 @@
           v-model="keyword"
           :fetch-suggestions="querySuggestions"
           :trigger-on-focus="false"
-          placeholder="Search products..."
+          :placeholder="$t('search.goods.searchPlaceholder')"
           size="large"
           style="width:400px"
           clearable
@@ -24,27 +24,27 @@
             </div>
           </template>
         </el-autocomplete>
-        <el-select v-model="sortBy" placeholder="Sort" size="large" style="width:140px" @change="doSearch">
-          <el-option label="Relevance" value="relevance" />
-          <el-option label="Default" value="" />
-          <el-option label="Price: Low to High" value="price_asc" />
-          <el-option label="Price: High to Low" value="price_desc" />
-          <el-option label="Best Selling" value="sales" />
-          <el-option label="Newest" value="new" />
+        <el-select v-model="sortBy" :placeholder="$t('search.goods.sortPlaceholder')" size="large" style="width:140px" @change="doSearch">
+          <el-option :label="$t('wholesale.center.relevance')" value="relevance" />
+          <el-option :label="$t('search.goods.sortDefault')" value="" />
+          <el-option :label="$t('wholesale.center.priceLowHigh')" value="price_asc" />
+          <el-option :label="$t('wholesale.center.priceHighLow')" value="price_desc" />
+          <el-option :label="$t('search.goods.bestSelling')" value="sales" />
+          <el-option :label="$t('wholesale.center.newest')" value="new" />
         </el-select>
-        <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="doSearch">Search</el-button>
+        <el-button type="primary" size="large" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="doSearch">{{ $t('common.search') }}</el-button>
       </div>
-      <div v-if="!loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">No products found</span></div>
+      <div v-if="!loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('search.goods.empty') }}</span></div>
       <div class="product-grid" v-if="products.length > 0">
         <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('search.goods.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
             <div class="product-price"><span class="price-current">${{ item.minPrice }}</span></div>
-            <div class="product-meta"><span>Sold {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
+            <div class="product-meta"><span>{{ $t('search.goods.sold') }} {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="shopjie-view">
     <div class="shopjie-container">
-      <h2 class="shopjie-title">🛍️ Shop Street</h2>
+      <h2 class="shopjie-title">{{ $t('store.shopJie.title') }}</h2>
       <div class="store-list">
         <div class="store-card g-flex-align-center" v-for="store in stores" :key="store._id" @click="$router.push(`/storedetail?id=${store._id}`)">
           <div class="store-logo"><img :src="$imgUrl(store.logo)" @error="$imgFallback" /></div>
@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div v-if="stores.length === 0" class="c-no-list"><span class="c-no-list-text">No stores yet</span></div>
+      <div v-if="stores.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('store.shopJie.empty') }}</span></div>
     </div>
   </div>
 </template>

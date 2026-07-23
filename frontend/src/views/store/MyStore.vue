@@ -1,10 +1,10 @@
 ﻿<template>
   <div class="seller-dashboard">
     <div class="dashboard-header">
-      <h3>My Store Dashboard</h3>
+      <h3>{{ $t('store.myStore.title') }}</h3>
       <div class="dashboard-header-actions">
         <el-button size="small" type="primary" @click="goToOrders">
-          Orders
+          {{ $t('store.myStore.viewOrders') }}
           <span v-if="store.newOrderCount > 0" class="notif-badge">{{ store.newOrderCount }}</span>
         </el-button>
       </div>
@@ -14,64 +14,72 @@
       <i class="iconfont icon-tixing"></i>
       <span>You have <strong>{{ store.newOrderCount }}</strong> new order{{ store.newOrderCount > 1 ? 's' : '' }} waiting!</span>
       <div class="new-order-actions">
-        <el-button size="small" type="primary" @click="goToOrders">View Orders</el-button>
-        <el-button size="small" @click="store.resetNewOrderCount()">Dismiss</el-button>
+        <el-button size="small" type="primary" @click="goToOrders">{{ $t('store.myStore.viewOrders') }}</el-button>
+        <el-button size="small" @click="store.resetNewOrderCount()">{{ $t('store.myStore.dismiss') }}</el-button>
       </div>
     </div>
 
     <div v-if="!shop" class="empty-state">
-      <span class="empty-text">You don't have a store yet</span>
-      <el-button type="primary" @click="$router.push('/applystore')">Apply Now</el-button>
+      <span class="empty-text">{{ $t('store.myStore.noStore') }}</span>
+      <el-button type="primary" @click="$router.push('/applystore')">{{ $t('store.myStore.applyButton') }}</el-button>
     </div>
 
     <div v-else-if="shop.status === 0" class="status-awaiting-review">
       <div class="status-icon-wrapper">
         <span class="status-icon-text">&#9203;</span>
       </div>
-      <h4>Application Under Review</h4>
-      <p>Your store application has been submitted and is currently under review. You will be notified once it is approved.</p>
+      <h4>{{ $t('store.myStore.underReview') }}</h4>
+      <p>{{ $t('store.myStore.reviewDescription') }}</p>
       <div class="status-actions">
-        <el-button type="primary" @click="$router.push('/applyconfirm')">View Application Status</el-button>
+        <el-button type="primary" @click="$router.push('/applyconfirm')">{{ $t('store.myStore.viewStatus') }}</el-button>
       </div>
+    </div>
+
+    <div v-else-if="shop.status === 3" class="status-closed">
+      <div class="status-icon-wrapper">
+        <span class="status-icon-text">&#128274;</span>
+      </div>
+      <h4>{{ $t('store.myStore.storeClosed') }}</h4>
+      <p>{{ $t('store.myStore.closedDescription') }}</p>
     </div>
 
     <div v-else>
       <div class="shop-details-card">
-        <h4 class="section-title">SHOP DETAILS</h4>
+        <h4 class="section-title">{{ $t('store.myStore.shopDetails') }}</h4>
         <div class="shop-details-grid">
           <div class="shop-detail-item">
-            <span class="detail-label">Store Name</span>
+            <span class="detail-label">{{ $t('store.myStore.storeName') }}</span>
             <span class="detail-value">{{ shop.name }}</span>
           </div>
           <div class="shop-detail-item">
-            <span class="detail-label">Store #</span>
-            <span class="detail-value">{{ shop.storeNumber || 'Pending' }}</span>
+            <span class="detail-label">{{ $t('store.myStore.storeHash') }}</span>
+            <span class="detail-value">{{ shop.storeNumber || $t('store.myStore.pending') }}</span>
           </div>
           <div class="shop-detail-item">
-            <span class="detail-label">Shop Level</span>
+            <span class="detail-label">{{ $t('store.myStore.shopLevel') }}</span>
             <span class="detail-value level-value">{{ shopLevel }}</span>
           </div>
           <div class="shop-detail-item">
-            <span class="detail-label">Account Balance</span>
+            <span class="detail-label">{{ $t('store.myStore.accountBalance') }}</span>
             <span class="detail-value balance-value">${{ store.walletBalance.toFixed(2) }}</span>
           </div>
           <div class="shop-detail-item">
-            <span class="detail-label">Store Rating</span>
+            <span class="detail-label">{{ $t('store.myStore.storeRating') }}</span>
             <span class="detail-value rating-value">5.0 <span class="rating-total">/ 5.0</span></span>
           </div>
         </div>
       </div>
 
       <div class="store-info-card">
-        <img :src="$imgUrl(shop.logo)" alt="store logo" class="store-logo" @error="$imgFallback" />
+        <img :src="$imgUrl(shop.logo)" :alt="$t('store.myStore.logoAlt')" class="store-logo" @error="$imgFallback" />
         <div class="store-info-body">
           <h4>{{ shop.name }}</h4>
           <p class="store-desc">{{ shop.description }}</p>
         </div>
         <div class="store-info-actions">
-          <el-button size="small" type="primary" @click="$router.push('/storegoodcontrol')">Products</el-button>
+          <el-button size="small" type="primary" @click="$router.push('/storegoodcontrol')">{{ $t('store.myStore.products') }}</el-button>
           <el-button size="small" @click="goToOrders">
-            Orders
+            {{ $t('store.myStore.viewOrders') }}
             <span v-if="store.newOrderCount > 0" class="notif-badge-sm">{{ store.newOrderCount }}</span>
           </el-button>
         </div>
@@ -87,7 +95,7 @@
             </svg>
           </div>
           <div class="dc-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
-          <div class="dc-label">Total Revenue</div>
+          <div class="dc-label">{{ $t('store.myStore.totalRevenue') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -99,7 +107,7 @@
             </svg>
           </div>
           <div class="dc-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
-          <div class="dc-label">Total Profit</div>
+          <div class="dc-label">{{ $t('store.myStore.totalProfit') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -110,7 +118,7 @@
             </svg>
           </div>
           <div class="dc-value">{{ totalInfo.orderCount || 0 }}</div>
-          <div class="dc-label">Total Orders</div>
+          <div class="dc-label">{{ $t('store.myStore.totalOrders') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -121,7 +129,7 @@
             </svg>
           </div>
           <div class="dc-value">{{ totalInfo.todayOrderCount || 0 }}</div>
-          <div class="dc-label">Today's Orders</div>
+          <div class="dc-label">{{ $t('store.myStore.todayOrders') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -132,7 +140,7 @@
             </svg>
           </div>
           <div class="dc-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
-          <div class="dc-label">Today's Revenue</div>
+          <div class="dc-label">{{ $t('store.myStore.todayRevenue') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -144,7 +152,7 @@
             </svg>
           </div>
           <div class="dc-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
-          <div class="dc-label">Pending Shipment</div>
+          <div class="dc-label">{{ $t('store.myStore.pendingShipment') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -154,7 +162,7 @@
             </svg>
           </div>
           <div class="dc-value">{{ totalInfo.refundRequestCount || 0 }}</div>
-          <div class="dc-label">Refund Requests</div>
+          <div class="dc-label">{{ $t('store.myStore.refundRequests') }}</div>
         </div>
         <div class="store-metric-card" @click="$router.push('/storeordercontrol')">
           <div class="dash-illustration">
@@ -166,13 +174,13 @@
             </svg>
           </div>
           <div class="dc-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
-          <div class="dc-label">Today's Profit</div>
+          <div class="dc-label">{{ $t('store.myStore.todayProfit') }}</div>
         </div>
       </div>
 
       <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
-          <h4>Orders by Status</h4>
+          <h4>{{ $t('store.myStore.ordersByStatus') }}</h4>
           <div class="bar-chart">
             <div class="bar-row" v-for="item in orderStatusBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
@@ -184,7 +192,7 @@
           </div>
         </div>
         <div class="chart-box">
-          <h4>Monthly Revenue</h4>
+          <h4>{{ $t('store.myStore.monthlyRevenue') }}</h4>
           <div class="bar-chart">
             <div class="bar-row" v-for="item in monthlyBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
@@ -194,13 +202,13 @@
               <span class="bar-value">${{ item.value }}</span>
             </div>
           </div>
-          <div v-if="monthlyBars.length === 0" class="chart-empty">No revenue data yet</div>
+          <div v-if="monthlyBars.length === 0" class="chart-empty">{{ $t('store.myStore.noRevenueData') }}</div>
         </div>
       </div>
 
       <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
-          <h4>Monthly Profits</h4>
+          <h4>{{ $t('store.myStore.monthlyProfits') }}</h4>
           <div class="bar-chart">
             <div class="bar-row" v-for="item in monthlyProfitBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
@@ -210,10 +218,10 @@
               <span class="bar-value">${{ item.value }}</span>
             </div>
           </div>
-          <div v-if="monthlyProfitBars.length === 0" class="chart-empty">No profit data yet</div>
+          <div v-if="monthlyProfitBars.length === 0" class="chart-empty">{{ $t('store.myStore.noProfitData') }}</div>
         </div>
         <div class="chart-box">
-          <h4>Monthly Orders</h4>
+          <h4>{{ $t('store.myStore.monthlyOrders') }}</h4>
           <div class="bar-chart">
             <div class="bar-row" v-for="item in monthlyOrderBars" :key="item.label">
               <span class="bar-label">{{ item.label }}</span>
@@ -223,17 +231,17 @@
               <span class="bar-value">{{ item.count }}</span>
             </div>
           </div>
-          <div v-if="monthlyOrderBars.length === 0" class="chart-empty">No monthly order data yet</div>
+          <div v-if="monthlyOrderBars.length === 0" class="chart-empty">{{ $t('store.myStore.noOrderData') }}</div>
         </div>
       </div>
 
       <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
-          <h4>Credit Score</h4>
+          <h4>{{ $t('store.myStore.creditScore') }}</h4>
           <div class="credit-score-display">
             <div class="score-circle">
               <span class="score-number">{{ totalInfo.creditScore ?? 100 }}</span>
-              <span class="score-unit">/100</span>
+              <span class="score-unit">{{ $t('store.myStore.scoreOutOf') }}</span>
             </div>
             <div class="score-track">
               <div class="score-fill" :style="{ width: (totalInfo.creditScore ?? 100) + '%', background: scoreColor }"></div>
@@ -244,7 +252,7 @@
 
       <div class="charts-row" v-if="totalInfo">
         <div class="chart-box">
-          <h4>Shipping Status</h4>
+          <h4>{{ $t('store.myStore.shippingStatus') }}</h4>
           <div class="bar-chart">
             <div class="bar-row" v-for="(count, status) in shippingStats.stats" :key="status">
               <span class="bar-label">{{ shippingStats.labels[status] }}</span>
@@ -256,20 +264,20 @@
           </div>
         </div>
         <div class="chart-box">
-          <h4>Orders Over Time</h4>
+          <h4>{{ $t('store.myStore.ordersOverTime') }}</h4>
           <SellerOrderChart :data="totalInfo?.monthlyOrders || []" />
-          <div v-if="!totalInfo?.monthlyOrders?.length" class="chart-empty">No order data yet</div>
+          <div v-if="!totalInfo?.monthlyOrders?.length" class="chart-empty">{{ $t('common.noData') }}</div>
         </div>
       </div>
 
       <div class="quick-links">
-        <el-button @click="$router.push('/storegoodcontrol')">Manage Goods ({{ totalInfo?.productCount || 0 }})</el-button>
+        <el-button @click="$router.push('/storegoodcontrol')">{{ $t('store.myStore.products') }} ({{ totalInfo?.productCount || 0 }})</el-button>
         <el-button @click="goToOrders">
-          Manage Orders
+          {{ $t('store.myStore.viewOrders') }}
           <span v-if="store.newOrderCount > 0" class="notif-badge-sm">{{ store.newOrderCount }}</span>
         </el-button>
-        <el-button v-if="store.isAdmin" type="success" @click="$router.push('/seller-logistics')">Logistics Center</el-button>
-        <el-button @click="$router.push('/applystore')">Update Store Info</el-button>
+        <el-button v-if="store.isAdmin" type="success" @click="$router.push('/seller-logistics')">{{ $t('store.orders.logisticsCenter') }}</el-button>
+        <el-button @click="$router.push('/applystore')">{{ $t('store.apply.updateInfo') }}</el-button>
       </div>
     </div>
   </div>
@@ -437,6 +445,12 @@ onBeforeUnmount(() => {
 .status-awaiting-review .status-icon-text { font-size: 48px; }
 .status-awaiting-review h4 { font-size: 20px; margin: 0 0 8px; color: var(--g-text); }
 .status-awaiting-review p { font-size: 14px; color: var(--g-text-light); margin: 0 0 24px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+
+.status-closed { text-align: center; padding: 80px 20px; }
+.status-closed .status-icon-wrapper { margin-bottom: 16px; }
+.status-closed .status-icon-text { font-size: 56px; }
+.status-closed h4 { font-size: 24px; margin: 0 0 12px; color: #f56c6c; }
+.status-closed p { font-size: 15px; color: var(--g-text-light); margin: 0 auto; max-width: 460px; line-height: 1.7; }
 
 .shop-details-card { background: var(--g-white); border-radius: 8px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--g-border); border-left: 4px solid var(--g-main_color); transition: all 0.3s; }
 .shop-details-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }

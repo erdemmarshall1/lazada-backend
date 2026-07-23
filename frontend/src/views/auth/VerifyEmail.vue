@@ -1,11 +1,11 @@
 <template>
   <div class="verify-view">
     <div class="verify-box">
-      <h2 class="verify-title">Email Verified</h2>
-      <p class="verify-subtitle">Your email has been automatically verified.</p>
-      <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" @click="$router.push('/myaccount')">Go to My Account</el-button>
+      <h2 class="verify-title">{{ $t('auth.verifyEmail.title') }}</h2>
+      <p class="verify-subtitle">{{ $t('auth.verifyEmail.description') }}</p>
+      <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" @click="$router.push('/myaccount')">{{ $t('auth.verifyEmail.goToAccount') }}</el-button>
       <div class="verify-links">
-        <span class="link" @click="$router.push('/main')">Back to Home</span>
+        <span class="link" @click="$router.push('/main')">{{ $t('auth.verifyEmail.backToHome') }}</span>
       </div>
     </div>
   </div>

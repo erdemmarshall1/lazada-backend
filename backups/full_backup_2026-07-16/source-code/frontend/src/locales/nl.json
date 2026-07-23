@@ -1,0 +1,28 @@
+{
+  "mainLayoutHeader": {
+    "dengluText": "Inloggen",
+    "registerText": "Registreren",
+    "myorderText": "Mijn bestellingen",
+    "gouwucheText": "Winkelwagen",
+    "shouyeText": "Voorpagina",
+    "mymessageText": "Mijn berichten",
+    "dianpuxiaoxiText": "Winkelnieuws",
+    "zhanneiXinText": "Sitebericht",
+    "searchTipsText": "Zoek producten...",
+    "guanjianziText": "Voer trefwoorden in",
+    "soushangpingText": "Producten",
+    "soudianpuText": "Winkels",
+    "languageLabel": "Taal"
+  },
+  "gongyong": {
+    "wodexiaoxiText": "Mijn berichten",
+    "shoudaoxiaoxiText": "Ontvangen berichten",
+    "dianpuxiaoxiTipsText": "Winkelbericht tips"
+  },
+  "nolist": {
+    "nolist": "Geen gegevens"
+  },
+  "jsLanguage": {
+    "copySuccessText": "Succesvol gekopieerd"
+  }
+}

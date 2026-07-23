@@ -1,18 +1,24 @@
 services:
   - type: web
-    name: lazada-backend
-    env: node
+    name: supportive-delight
+    runtime: node
+    repo: https://github.com/erdemmarshall1/lazada-backend
+    branch: master
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 3000
-      - key: MONGODB_URI
-        sync: false
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: UPLOAD_PATH
         value: ./uploads
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

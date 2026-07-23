@@ -1,0 +1,11 @@
+Remote:
+origin	https://github.com/erdemmarshall1/lazada-backend.git (fetch)
+origin	https://github.com/erdemmarshall1/lazada-backend.git (push)
+
+
+Recent commits:
+4b7dedf Switch to history mode, admin login at /admin, Cloudflare Pages SPA fallback
+30cc444 Add update record file
+3654235 Fix avatar upload, add 6 missing API routes, add Railway env vars, create update record
+21b2be4 Backup: add Method D (fast JSON dump without uploads)
+74f5b62 Backup: add all 43 collections to full backup endpoint

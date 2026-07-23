@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h3>My Consultations</h3>
-    <p style="color:var(--g-text-light);margin-bottom:16px;font-size:13px">Product inquiries and buyer consultations about your store</p>
+    <h3>{{ $t('user.myConsultations.title') }}</h3>
+    <p style="color:var(--g-text-light);margin-bottom:16px;font-size:13px">{{ $t('user.myConsultations.description') }}</p>
 
     <div v-if="loading" v-loading="loading" style="height:200px"></div>
 
     <div v-else-if="consultations.length === 0" class="c-no-list">
-      <span class="c-no-list-text">No consultations yet</span>
+      <span class="c-no-list-text">{{ $t('user.myConsultations.empty') }}</span>
     </div>
 
     <div v-else class="consultation-list">
@@ -22,10 +22,10 @@
         </div>
         <div class="consultation-body">
           <div class="consultation-header">
-            <span class="consultation-name">{{ item.username || 'Buyer' }}</span>
+            <span class="consultation-name">{{ item.username || $t('user.myConsultations.buyer') }}</span>
             <span class="consultation-time">{{ formatTime(item.updatedAt || item.lastMessageTime) }}</span>
           </div>
-          <div class="consultation-preview">{{ item.lastMessage || item.preview || 'No messages yet' }}</div>
+          <div class="consultation-preview">{{ item.lastMessage || item.preview || $t('user.myConsultations.noMessages') }}</div>
           <div class="consultation-product" v-if="item.productName">
             <i class="iconfont icon-shangpin"></i> {{ item.productName }}
           </div>

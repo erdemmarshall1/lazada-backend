@@ -2162,18 +2162,6 @@
                                  "markAllRead":  "Mark all read",
                                  "empty":  "No notifications"
                              },
-        "tawkto":  {
-                       "chatAria":  "Chat",
-                       "needHelp":  "Need help?",
-                       "supportReady":  "Our support team is ready to assist you",
-                       "liveChat":  "Live Chat",
-                       "chatRealTime":  "Chat with us in real-time",
-                       "whatsapp":  "WhatsApp",
-                       "chatWhatsapp":  "Chat with us on WhatsApp",
-                       "inAppChat":  "In-App Chat",
-                       "sendMessage":  "Send us a message",
-                       "typicalReply":  "Typically replies within 1 hour"
-                   },
 "liveChat":  {
                          "needHelp":  "Need help?",
                          "supportReady":  "Our support team is ready to assist you",
@@ -3394,18 +3382,6 @@
                                                    "markAllRead":  "Mark all read",
                                                    "empty":  "No notifications"
                                                },
-                          "tawkto":  {
-                                         "chatAria":  "Chat",
-                                         "needHelp":  "Need help?",
-                                         "supportReady":  "Our support team is ready to assist you",
-                                         "liveChat":  "Live Chat",
-                                         "chatRealTime":  "Chat with us in real-time",
-                                         "whatsapp":  "WhatsApp",
-                                         "chatWhatsapp":  "Chat with us on WhatsApp",
-                                         "inAppChat":  "In-App Chat",
-                                         "sendMessage":  "Send us a message",
-                                         "typicalReply":  "Typically replies within 1 hour"
-                                     },
 "liveChat":  {
                                            "needHelp":  "Need help?",
                                            "supportReady":  "Our support team is ready to assist you",

@@ -11,8 +11,8 @@
           <div class="summary-left">
             <h3>{{ shop.name }}</h3>
             <div class="summary-tags">
-              <el-tag :type="shop.status === 1 ? 'success' : shop.status === 2 ? 'danger' : 'warning'" size="large">
-                {{ shop.status === 1 ? 'Approved' : shop.status === 2 ? 'Rejected' : 'Pending' }}
+              <el-tag :type="shop.status === 1 ? 'success' : shop.status === 2 ? 'danger' : shop.status === 3 ? 'danger' : 'warning'" size="large">
+                {{ shop.status === 1 ? 'Approved' : shop.status === 2 ? 'Rejected' : shop.status === 3 ? 'Closed' : 'Pending' }}
               </el-tag>
               <el-tag v-if="shop.storeNumber" type="info" size="large">Store #{{ shop.storeNumber }}</el-tag>
               <el-tag v-if="shop.userId?.sellerId" type="info" size="large">Seller ID: {{ shop.userId?.sellerId }}</el-tag>
@@ -21,6 +21,12 @@
           <div class="summary-right">
             <el-button v-if="shop.status === 0" type="success" :loading="approving" @click="handleApprove" size="large">Approve</el-button>
             <el-button v-if="shop.status === 0" type="danger" :loading="rejecting" @click="handleReject" size="large">Reject</el-button>
+            <el-button v-if="shop.status === 1" type="warning" size="large" :loading="closing" @click="handleCloseShop">
+              Close Store
+            </el-button>
+            <el-button v-if="shop.status === 3" type="success" size="large" :loading="opening" @click="handleOpenShop">
+              Open Store
+            </el-button>
             <el-button v-if="shop.status === 1 && !shop.userId?.sellerId" type="warning" size="large" :loading="generating" @click="handleGenerateSellerId">
               <i class="iconfont icon-anquan"></i> Generate Seller ID
             </el-button>
@@ -45,6 +51,8 @@
               <el-descriptions-item label="Store Description" :span="2">{{ shop.description || '—' }}</el-descriptions-item>
               <el-descriptions-item label="Created">{{ formatDate(shop.createdAt) }}</el-descriptions-item>
               <el-descriptions-item label="Updated">{{ formatDate(shop.updatedAt) }}</el-descriptions-item>
+              <el-descriptions-item v-if="shop.status === 3" label="Closed Date">{{ formatDate(shop.closedAt) }}</el-descriptions-item>
+              <el-descriptions-item v-if="shop.status === 3" label="Close Reason" :span="2">{{ shop.closedReason || '—' }}</el-descriptions-item>
             </el-descriptions>
           </div>
 
@@ -97,7 +105,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { get, post, qe } from '@/api/request'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
@@ -106,6 +114,8 @@ const loading = ref(false)
 const approving = ref(false)
 const rejecting = ref(false)
 const generating = ref(false)
+const closing = ref(false)
+const opening = ref(false)
 const previewVisible = ref(false)
 const previewUrl = ref('')
 const previewTitle = ref('')
@@ -133,6 +143,20 @@ const handleReject = async () => {
   if (res) { ElMessage.success(res.msg); fetchDetail() }
 }
 
+const handleCloseShop = async () => {
+  try { await ElMessageBox.confirm(`Close "${shop.value.name}"? The seller won't be able to process orders.`, 'Close Store', { confirmButtonText: 'Close', cancelButtonText: 'Cancel', type: 'warning' }) } catch { return }
+  closing.value = true
+  const res = await qe(post('/home/admin/close-shop', { id: shop.value._id, reason: 'Closed by admin' }))
+  closing.value = false
+  if (res) { ElMessage.success(res.msg); fetchDetail() }
+}
+const handleOpenShop = async () => {
+  try { await ElMessageBox.confirm(`Reopen "${shop.value.name}"? The seller will regain access.`, 'Open Store', { confirmButtonText: 'Open', cancelButtonText: 'Cancel', type: 'info' }) } catch { return }
+  opening.value = true
+  const res = await qe(post('/home/admin/open-shop', { id: shop.value._id }))
+  opening.value = false
+  if (res) { ElMessage.success(res.msg); fetchDetail() }
+}
 const handleGenerateSellerId = async () => {
   generating.value = true
   const res = await qe(post('/home/admin/generate-seller-id', { id: shop.value._id }))

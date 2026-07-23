@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>Wholesale Detail</h3>
+    <h3>{{ $t('wholesale.detail.title') }}</h3>
       <div v-if="product" class="detail-main g-flex" style="gap:24px;margin-top:16px">
         <div class="detail-img-wrap">
           <img :src="$imgUrl(product.images?.[0])" style="width:400px;height:400px;object-fit:cover;border-radius:8px" loading="lazy" @error="$imgFallback" />
@@ -8,9 +8,9 @@
       <div style="flex:1">
         <h2>{{ product.name }}</h2>
         <div class="product-price" style="font-size:24px;font-weight:700;color:var(--g-main_color);margin:16px 0">${{ product.minPrice }}</div>
-        <div v-if="product.profitPercentage" style="font-size:14px;color:#e6a23c;margin-bottom:8px">Profit {{ product.profitPercentage }}% → Retail Price: ${{ (product.minPrice * (1 + product.profitPercentage/100)).toFixed(2) }}</div>
+        <div v-if="product.profitPercentage" style="font-size:14px;color:#e6a23c;margin-bottom:8px">{{ $t('wholesale.detail.profitLabel', { percentage: product.profitPercentage, retailPrice: '$' + (product.minPrice * (1 + product.profitPercentage/100)).toFixed(2) }) }}</div>
         <p style="color:#666;margin-bottom:16px">{{ product.description }}</p>
-        <el-button v-if="store.isSeller" type="danger" size="large" @click="openDistribute">Distribute to My Store</el-button>
+        <el-button v-if="store.isSeller" type="danger" size="large" @click="openDistribute">{{ $t('wholesale.detail.distribute') }}</el-button>
       </div>
     </div>
 

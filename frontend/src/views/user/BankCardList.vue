@@ -1,15 +1,15 @@
 <template>
   <div>
-    <div class="g-flex-align-center g-flex-justify-between"><h3>Bank Cards</h3><el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDialog=true">+ Add</el-button></div>
-    <div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">No cards</span></div>
-    <div class="card-item" v-for="card in list" :key="card._id">{{ card.bankName }} - ****{{ card.cardNumber.slice(-4) }} <el-button link type="danger" size="small" @click="delCard(card._id)">Delete</el-button></div>
-    <el-dialog v-model="showDialog" title="Add Card" width="400px">
+    <div class="g-flex-align-center g-flex-justify-between"><h3>{{ $t('user.bankCard.title') }}</h3><el-button type="primary" size="small" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDialog=true">{{ $t('user.bankCard.add') }}</el-button></div>
+    <div v-if="list.length===0" class="c-no-list"><span class="c-no-list-text">{{ $t('user.bankCard.empty') }}</span></div>
+    <div class="card-item" v-for="card in list" :key="card._id">{{ card.bankName }} - ****{{ card.cardNumber.slice(-4) }} <el-button link type="danger" size="small" @click="delCard(card._id)">{{ $t('user.bankCard.delete') }}</el-button></div>
+    <el-dialog v-model="showDialog" :title="$t('user.bankCard.addCardTitle')" width="400px">
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Bank Name" prop="bankName"><el-input v-model="form.bankName" /></el-form-item>
-        <el-form-item label="Card Number" prop="cardNumber"><el-input v-model="form.cardNumber" /></el-form-item>
-        <el-form-item label="Card Holder" prop="cardHolder"><el-input v-model="form.cardHolder" /></el-form-item>
+        <el-form-item :label="$t('user.bankCard.bankNameLabel')" prop="bankName"><el-input v-model="form.bankName" /></el-form-item>
+        <el-form-item :label="$t('user.bankCard.cardNumberLabel')" prop="cardNumber"><el-input v-model="form.cardNumber" /></el-form-item>
+        <el-form-item :label="$t('user.bankCard.cardHolderLabel')" prop="cardHolder"><el-input v-model="form.cardHolder" /></el-form-item>
       </el-form>
-      <template #footer><el-button @click="showDialog=false">Cancel</el-button><el-button type="primary" @click="addCard">Save</el-button></template>
+      <template #footer><el-button @click="showDialog=false">{{ $t('user.bankCard.cancel') }}</el-button><el-button type="primary" @click="addCard">{{ $t('user.bankCard.save') }}</el-button></template>
     </el-dialog>
   </div>
 </template>

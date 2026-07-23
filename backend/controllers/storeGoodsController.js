@@ -36,6 +36,7 @@ exports.add = async (req, res) => {
   try {
     const shop = await Shop.findOne({ userId: req.user._id });
     if (!shop) return res.json(fail('No shop found'));
+    if (shop.status === 3) return res.json(fail('Your store has been closed, kindly contact the customer support'));
     const data = { ...req.body, shopId: shop._id };
     if (data.skus && data.skus.length > 0) {
       const prices = data.skus.map(s => s.price);
@@ -54,6 +55,7 @@ exports.edit = async (req, res) => {
   try {
     const shop = await Shop.findOne({ userId: req.user._id });
     if (!shop) return res.json(fail('No shop found'));
+    if (shop.status === 3) return res.json(fail('Your store has been closed, kindly contact the customer support'));
     const { id, ...data } = req.body;
     if (data.skus && data.skus.length > 0) {
       const prices = data.skus.map(s => s.price);

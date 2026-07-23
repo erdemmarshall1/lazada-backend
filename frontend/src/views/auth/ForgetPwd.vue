@@ -1,37 +1,37 @@
 <template>
   <div class="forget-view">
     <div class="forget-box">
-      <h2 class="forget-title">Forgot Password</h2>
+      <h2 class="forget-title">{{ $t('auth.forgotPassword.title') }}</h2>
 
       <template v-if="step === 'email'">
-        <p class="forget-subtitle">Enter your email to receive a reset code.</p>
+        <p class="forget-subtitle">{{ $t('auth.forgotPassword.description') }}</p>
         <el-form :model="form" :rules="rules" ref="formRef" label-position="top" @submit.prevent="handleSendCode">
-          <el-form-item label="Email" prop="email">
-            <el-input v-model="form.email" placeholder="Enter your email" size="large" />
+          <el-form-item :label="$t('auth.forgotPassword.emailLabel')" prop="email">
+            <el-input v-model="form.email" :placeholder="$t('auth.forgotPassword.emailPlaceholder')" size="large" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="sending" @click="handleSendCode">Send Reset Code</el-button>
+            <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="sending" @click="handleSendCode">{{ $t('auth.forgotPassword.sendCode') }}</el-button>
           </el-form-item>
         </el-form>
       </template>
 
       <template v-else>
-        <p class="forget-subtitle">A 6-digit code was sent to <strong>{{ form.email }}</strong>. Enter it below along with your new password.</p>
+        <p class="forget-subtitle">{{ $t('auth.forgotPassword.codeSent') }} <strong>{{ form.email }}</strong></p>
         <el-form :model="form" :rules="resetRules" ref="resetFormRef" label-position="top" @submit.prevent="handleReset">
-          <el-form-item label="Reset Code" prop="code">
-            <el-input v-model="form.code" placeholder="Enter 6-digit code" size="large" maxlength="6" style="text-align:center;font-size:20px;letter-spacing:6px;font-weight:600" />
+          <el-form-item :label="$t('auth.forgotPassword.codeLabel')" prop="code">
+            <el-input v-model="form.code" :placeholder="$t('auth.forgotPassword.codePlaceholder')" size="large" maxlength="6" style="text-align:center;font-size:20px;letter-spacing:6px;font-weight:600" />
           </el-form-item>
-          <el-form-item label="New Password" prop="password">
-            <el-input v-model="form.password" type="password" show-password placeholder="At least 6 characters" size="large" />
+          <el-form-item :label="$t('auth.forgotPassword.passwordLabel')" prop="password">
+            <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.forgotPassword.passwordPlaceholder')" size="large" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleReset">Reset Password</el-button>
+            <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleReset">{{ $t('auth.forgotPassword.resetButton') }}</el-button>
           </el-form-item>
         </el-form>
       </template>
 
       <div class="forget-links g-flex-align-center g-flex-justify-center">
-        <span class="link" @click="$router.push('/login')">Back to Login</span>
+        <span class="link" @click="$router.push('/login')">{{ $t('auth.forgotPassword.backToLogin') }}</span>
       </div>
     </div>
   </div>

@@ -2,27 +2,27 @@
   <div class="admin-login-page">
     <div class="admin-login-card">
       <div class="admin-login-logo">A</div>
-      <h2>Admin Login</h2>
-      <p>Administrator Portal</p>
+      <h2>{{ $t('auth.adminLogin.title') }}</h2>
+      <p>{{ $t('auth.adminLogin.portal') }}</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Username / Email" prop="username">
-          <el-input v-model="form.username" placeholder="Enter username or email" size="large" />
+        <el-form-item :label="$t('auth.adminLogin.usernameLabel')" prop="username">
+          <el-input v-model="form.username" :placeholder="$t('auth.adminLogin.usernamePlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Password" prop="password" v-if="!twoFactorRequired">
-          <el-input v-model="form.password" type="password" show-password placeholder="Enter password" size="large" />
+        <el-form-item :label="$t('auth.adminLogin.passwordLabel')" prop="password" v-if="!twoFactorRequired">
+          <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.adminLogin.passwordPlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Authentication Code" prop="twoFactorCode" v-if="twoFactorRequired">
-          <el-input v-model="form.twoFactorCode" placeholder="Enter 6-digit code" size="large" maxlength="6" />
+        <el-form-item :label="$t('auth.adminLogin.codeLabel')" prop="twoFactorCode" v-if="twoFactorRequired">
+          <el-input v-model="form.twoFactorCode" :placeholder="$t('auth.adminLogin.codePlaceholder')" size="large" maxlength="6" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" :loading="loading" @click="handleLogin">
-            {{ twoFactorRequired ? 'Verify' : 'Login' }}
+            {{ twoFactorRequired ? $t('common.confirm') : $t('auth.adminLogin.title') }}
           </el-button>
         </el-form-item>
       </el-form>
       <div class="admin-login-footer">
-        <span class="link" @click="$router.push('/admin/forgetpwd')">Forgot password?</span>
-        <span class="link" @click="$router.push('/main')">&larr; Back to main site</span>
+        <span class="link" @click="$router.push('/admin/forgetpwd')">{{ $t('auth.adminLogin.forgotPassword') }}</span>
+        <span class="link" @click="$router.push('/main')">{{ $t('auth.adminLogin.backToMain') }}</span>
       </div>
     </div>
   </div>

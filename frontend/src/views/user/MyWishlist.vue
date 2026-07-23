@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h3>My Wishlist</h3>
-    <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">Your wishlist is empty</span></div>
+    <h3>{{ $t('user.myWishlist.title') }}</h3>
+    <div v-if="products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('user.myWishlist.empty') }}</span></div>
     <div class="product-grid" v-else>
       <div class="product-card" v-for="p in products" :key="p._id" @click="$router.push(`/gooddetail?id=${p._id}`)">
         <div class="product-img">
           <img :src="$imgUrl(p.images?.[0])" loading="lazy" @error="$imgFallback" />
-          <div class="qv-overlay" @click.stop="openQuickView(p._id)"><span>Quick View</span></div>
+          <div class="qv-overlay" @click.stop="openQuickView(p._id)"><span>{{ $t('user.myWishlist.quickView') }}</span></div>
         </div>
         <div class="product-info">
           <h4>{{ p.name }}</h4>

@@ -69,12 +69,7 @@ export const useAppStore = defineStore('app', {
     newOrderCount: 0,
     refundRequestCount: 0,
     walletBalance: 0,
-    tawkTo: {
-      enabled: false,
-      widgetId: '',
-      widgetPosition: 'bottom-right',
-      widgetColor: '#ff6600'
-    },
+
   }),
 
   getters: {
@@ -178,18 +173,6 @@ export const useAppStore = defineStore('app', {
     resetRefundRequestCount() {
       this.refundRequestCount = 0
     },
-    async fetchTawkToSettings() {
-      try {
-        const res = await get('/main/tawkto-settings')
-        if (res?.code === 0 && res?.data) {
-          this.tawkTo.enabled = !!res.data.enabled
-          this.tawkTo.widgetId = res.data.widgetId || ''
-          this.tawkTo.widgetPosition = res.data.widgetPosition || 'bottom-right'
-          this.tawkTo.widgetColor = res.data.widgetColor || '#ff6600'
-        }
-      } catch (error) {
-        console.error('Failed to fetch Tawk.to settings:', error)
-      }
-    },
+
   },
 })

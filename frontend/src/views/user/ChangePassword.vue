@@ -1,18 +1,18 @@
 <template>
   <div class="change-password">
-    <h3 class="page-title">Change Password</h3>
+    <h3 class="page-title">{{ $t('user.changePassword.title') }}</h3>
     <el-form :model="form" :rules="rules" ref="formRef" label-position="top" class="pwd-form">
-      <el-form-item label="Current Password" prop="oldPassword">
-        <el-input v-model="form.oldPassword" type="password" show-password placeholder="Enter current password" />
+      <el-form-item :label="$t('user.changePassword.currentLabel')" prop="oldPassword">
+        <el-input v-model="form.oldPassword" type="password" show-password :placeholder="$t('user.changePassword.currentPlaceholder')" />
       </el-form-item>
-      <el-form-item label="New Password" prop="newPassword">
-        <el-input v-model="form.newPassword" type="password" show-password placeholder="Enter new password" />
+      <el-form-item :label="$t('user.changePassword.newLabel')" prop="newPassword">
+        <el-input v-model="form.newPassword" type="password" show-password :placeholder="$t('user.changePassword.newPlaceholder')" />
       </el-form-item>
-      <el-form-item label="Confirm New Password" prop="confirmPassword">
-        <el-input v-model="form.confirmPassword" type="password" show-password placeholder="Re-enter new password" />
+      <el-form-item :label="$t('user.changePassword.confirmLabel')" prop="confirmPassword">
+        <el-input v-model="form.confirmPassword" type="password" show-password :placeholder="$t('user.changePassword.confirmPlaceholder')" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" :loading="loading" @click="handleSubmit" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)">Update Password</el-button>
+        <el-button type="primary" :loading="loading" @click="handleSubmit" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)">{{ $t('user.changePassword.updateButton') }}</el-button>
       </el-form-item>
     </el-form>
   </div>

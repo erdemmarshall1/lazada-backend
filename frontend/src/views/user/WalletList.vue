@@ -2,71 +2,71 @@
   <div class="wallet-page" v-loading="loading">
     <div class="balance-section">
       <div class="balance-card">
-        <div class="balance-label">Account Balance</div>
+        <div class="balance-label">{{ $t('user.wallet.title') }}</div>
         <div class="balance-amount">${{ balance.toFixed(2) }}</div>
       </div>
     </div>
 
     <div class="methods-section">
-      <div class="methods-header">Accepted Withdrawal Methods</div>
+      <div class="methods-header">{{ $t('user.wallet.acceptedMethods') }}</div>
       <div class="methods-list">
-        <span class="method-badge method-usdt">USDT TRC-20</span>
-        <span class="method-badge method-btc">Bitcoin</span>
-        <span class="method-badge method-eth">Ethereum</span>
-        <span class="method-badge method-paypal">PayPal</span>
+        <span class="method-badge method-usdt">{{ $t('user.wallet.usdt') }}</span>
+        <span class="method-badge method-btc">{{ $t('user.wallet.bitcoin') }}</span>
+        <span class="method-badge method-eth">{{ $t('user.wallet.ethereum') }}</span>
+        <span class="method-badge method-paypal">{{ $t('user.wallet.paypal') }}</span>
       </div>
     </div>
 
     <div class="address-section">
       <div class="address-header">
-        <h3>Wallet Addresses</h3>
-        <el-button type="primary" size="small" @click="openAdd">+ Add Wallet</el-button>
+        <h3>{{ $t('user.wallet.walletAddresses') }}</h3>
+        <el-button type="primary" size="small" @click="openAdd">{{ $t('user.wallet.addWallet') }}</el-button>
       </div>
 
       <div v-if="addresses.length === 0" class="empty-state">
-        <span>No wallet addresses added</span>
+        <span>{{ $t('user.wallet.empty') }}</span>
       </div>
 
       <div v-for="w in addresses" :key="w._id" class="address-card">
         <div class="address-info">
           <div class="address-row">
             <span class="address-label">{{ w.label }}</span>
-            <span v-if="w.isDefault" class="badge-default">Default</span>
+            <span v-if="w.isDefault" class="badge-default">{{ $t('user.wallet.default') }}</span>
           </div>
           <div class="address-value">{{ w.address }}</div>
           <div class="address-type">{{ typeLabel(w.type) }}</div>
         </div>
         <div class="address-actions">
-          <el-button link type="primary" size="small" @click="openEdit(w)">Edit</el-button>
-          <el-button link type="danger" size="small" @click="delWallet(w._id)">Delete</el-button>
+          <el-button link type="primary" size="small" @click="openEdit(w)">{{ $t('user.wallet.edit') }}</el-button>
+          <el-button link type="danger" size="small" @click="delWallet(w._id)">{{ $t('user.wallet.delete') }}</el-button>
         </div>
       </div>
     </div>
 
-    <el-dialog v-model="showDialog" :title="editing ? 'Edit Wallet' : 'Add Wallet'" width="420px">
+    <el-dialog v-model="showDialog" :title="editing ? $t('user.wallet.editTitle') : $t('user.wallet.addTitle')" width="420px">
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Label" prop="label">
-          <el-input v-model="form.label" placeholder="e.g. My BTC Wallet" />
+        <el-form-item :label="$t('user.wallet.labelLabel')" prop="label">
+          <el-input v-model="form.label" :placeholder="$t('user.wallet.labelPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Address" prop="address">
-          <el-input v-model="form.address" placeholder="Wallet address" />
+        <el-form-item :label="$t('user.wallet.addressLabel')" prop="address">
+          <el-input v-model="form.address" :placeholder="$t('user.wallet.addressPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Type">
+        <el-form-item :label="$t('user.wallet.typeLabel')">
           <el-select v-model="form.type" style="width:100%">
-            <el-option label="USDT TRC-20" value="usdt_trc20" />
-            <el-option label="Bitcoin" value="bitcoin" />
-            <el-option label="Ethereum" value="ethereum" />
-            <el-option label="PayPal" value="paypal" />
-            <el-option label="Other" value="other" />
+            <el-option :label="$t('user.wallet.usdt')" value="usdt_trc20" />
+            <el-option :label="$t('user.wallet.bitcoin')" value="bitcoin" />
+            <el-option :label="$t('user.wallet.ethereum')" value="ethereum" />
+            <el-option :label="$t('user.wallet.paypal')" value="paypal" />
+            <el-option :label="$t('user.wallet.otherOption')" value="other" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Set as default">
+        <el-form-item :label="$t('user.wallet.setDefaultLabel')">
           <el-checkbox v-model="form.isDefault" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="saveWallet">Save</el-button>
+        <el-button @click="showDialog = false">{{ $t('user.wallet.cancel') }}</el-button>
+        <el-button type="primary" @click="saveWallet">{{ $t('user.wallet.save') }}</el-button>
       </template>
     </el-dialog>
   </div>

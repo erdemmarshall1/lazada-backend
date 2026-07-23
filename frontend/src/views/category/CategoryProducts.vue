@@ -6,14 +6,14 @@
         <p class="list-subtitle">{{ categorySubtitle }}</p>
       </div>
       <div class="sub-nav" v-if="subCategories.length > 0">
-        <span class="sub-nav-item" :class="{ active: !activeSub }" @click="filterSub(null)">All {{ categoryTitle }}</span>
+        <span class="sub-nav-item" :class="{ active: !activeSub }" @click="filterSub(null)">{{ $t('category.products.allTitle', { categoryTitle: categoryTitle }) }}</span>
         <span class="sub-nav-item" v-for="sub in subCategories" :key="sub._id" :class="{ active: activeSub === sub._id }" @click="filterSub(sub._id)">{{ sub.name }}</span>
       </div>
       <div class="product-grid">
         <div class="product-card" v-for="item in products" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('category.products.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
@@ -21,12 +21,12 @@
               <span class="price-current">${{ item.minPrice }}</span>
               <span class="price-original" v-if="item.maxPrice > item.minPrice">${{ item.maxPrice }}</span>
             </div>
-            <div class="product-meta"><span>Sold {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
+            <div class="product-meta"><span>{{ $t('common.sold') }} {{ item.salesCount || 0 }}</span><span>⭐ {{ item.rating || 5 }}</span></div>
           </div>
         </div>
       </div>
-      <div v-if="loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">Loading...</span></div>
-      <div v-if="!loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">No products found in {{ categoryTitle }}</span></div>
+      <div v-if="loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('category.products.loading') }}</span></div>
+      <div v-if="!loading && products.length === 0" class="c-no-list"><span class="c-no-list-text">{{ $t('category.products.empty', { categoryTitle: categoryTitle }) }}</span></div>
       <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>

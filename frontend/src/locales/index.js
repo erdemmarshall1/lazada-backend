@@ -51,9 +51,13 @@ const safeStorageGet = (key, fallback = '') => {
   }
 }
 
+export const supportedCodes = Object.keys(messages)
+export const isValidLang = (code) => supportedCodes.includes(code)
+
 const savedLang = safeStorageGet('theoutnet_lang')
 const browserLang = typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'en'
-const defaultLang = savedLang || (messages[browserLang] ? browserLang : 'en')
+const browserLangShort = typeof navigator !== 'undefined' && navigator.language ? navigator.language.split('-')[0] : 'en'
+const defaultLang = savedLang || (messages[browserLang] ? browserLang : (messages[browserLangShort] ? browserLangShort : 'en'))
 
 const i18n = createI18n({
   legacy: false,

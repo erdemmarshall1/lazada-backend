@@ -11,7 +11,7 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src/pwa',
       filename: 'sw.js',
-      injectManifest: { injectionPoint: 'self.__WB_MANIFEST' },
+      injectManifest: { injectionPoint: 'self.__WB_MANIFEST', maximumFileSizeToCacheInBytes: 8388608 },
       includeAssets: ['font/*.ttf', 'font/*.woff', 'font/*.woff2', 'font/*.png', 'img/*.svg', 'img/*.png'],
       manifest: {
         name: 'THE OUTNET WHOLESALE',

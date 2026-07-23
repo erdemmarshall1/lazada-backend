@@ -1,13 +1,13 @@
 <template>
   <div class="list-view">
     <div class="list-container">
-      <h2 class="list-title">⚡ Flash Sale</h2>
+      <h2 class="list-title">{{ $t('product.flashSale.title') }}</h2>
       <div class="product-grid" v-loading="loading">
         <div class="product-card" v-for="item in list" :key="item._id" @click="$router.push(`/gooddetail?id=${item._id}`)">
-          <div class="flash-badge">FLASH</div>
+          <div class="flash-badge">{{ $t('product.flashSale.flash') }}</div>
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
-            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>Quick View</span></div>
+            <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('product.flashSale.quickView') }}</span></div>
           </div>
           <div class="product-info">
             <h4 class="product-name g-text-ellipsis">{{ item.name }}</h4>
@@ -18,7 +18,7 @@
           </div>
         </div>
       </div>
-      <div v-if="list.length === 0 && !loading" class="c-no-list"><span class="c-no-list-text">No flash sales</span></div>
+      <div v-if="list.length === 0 && !loading" class="c-no-list"><span class="c-no-list-text">{{ $t('product.flashSale.empty') }}</span></div>
       <div class="pagination-wrap g-flex-center" v-if="totalPages > 1">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
       </div>

@@ -1,80 +1,82 @@
 <template>
   <div>
+    <el-alert v-if="shopClosed" :title="$t('store.orders.storeClosedTitle')" type="error" :closable="false" show-icon style="margin-bottom:12px" />
+
     <div class="g-flex-align-center g-flex-justify-between" style="margin-bottom:12px">
-      <h3>Store Order Management</h3>
-      <el-button size="small" @click="$router.push('/seller-logistics')">Logistics Center</el-button>
+      <h3>{{ $t('store.orders.title') }}</h3>
+      <el-button size="small" @click="$router.push('/seller-logistics')">{{ $t('store.orders.logisticsCenter') }}</el-button>
     </div>
 
     <div v-if="store.newOrderCount > 0" class="new-order-alert">
       <i class="iconfont icon-tixing" style="margin-right:8px"></i>
       <span>You have <strong>{{ store.newOrderCount }}</strong> new order{{ store.newOrderCount > 1 ? 's' : '' }}!</span>
-      <el-button size="small" type="primary" style="margin-left:auto" @click="dismissNotif">Refresh & Dismiss</el-button>
-      <el-button size="small" @click="dismissNotif">Dismiss</el-button>
+      <el-button size="small" type="primary" style="margin-left:auto" @click="dismissNotif">{{ $t('store.orders.refreshDismiss') }}</el-button>
+      <el-button size="small" @click="dismissNotif">{{ $t('store.orders.dismiss') }}</el-button>
     </div>
 
     <div class="stats-row" v-if="totalInfo">
       <div class="stat-card stat-daily">
-        <div class="stat-label">Today's Orders</div>
+        <div class="stat-label">{{ $t('store.orders.todayOrders') }}</div>
         <div class="stat-value">{{ totalInfo.todayOrderCount || 0 }}</div>
       </div>
       <div class="stat-card stat-daily">
-        <div class="stat-label">Today's Revenue</div>
+        <div class="stat-label">{{ $t('store.orders.todayRevenue') }}</div>
         <div class="stat-value">${{ (totalInfo.todayRevenue || 0).toFixed(2) }}</div>
       </div>
       <div class="stat-card stat-profit">
-        <div class="stat-label">Today's Profit</div>
+        <div class="stat-label">{{ $t('store.orders.todayProfit') }}</div>
         <div class="stat-value">${{ (totalInfo.todayProfit || 0).toFixed(2) }}</div>
       </div>
       <div class="stat-card stat-profit">
-        <div class="stat-label">Total Profit</div>
+        <div class="stat-label">{{ $t('store.orders.totalProfit') }}</div>
         <div class="stat-value">${{ (totalInfo.totalProfit || 0).toFixed(2) }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Total Orders</div>
+        <div class="stat-label">{{ $t('store.orders.totalOrders') }}</div>
         <div class="stat-value">{{ totalInfo.orderCount || 0 }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Total Revenue</div>
+        <div class="stat-label">{{ $t('store.orders.totalRevenue') }}</div>
         <div class="stat-value">${{ (totalInfo.totalSales || 0).toFixed(2) }}</div>
       </div>
       <div class="stat-card stat-highlight">
-        <div class="stat-label">Pending Shipment</div>
+        <div class="stat-label">{{ $t('store.orders.pendingShipment') }}</div>
         <div class="stat-value">{{ totalInfo.pendingShipmentCount || 0 }}</div>
       </div>
       <div class="stat-card stat-warning">
-        <div class="stat-label">Refund Requests</div>
+        <div class="stat-label">{{ $t('store.orders.refundRequests') }}</div>
         <div class="stat-value">{{ totalInfo.refundRequestCount || 0 }}</div>
       </div>
       <div class="stat-card stat-credit">
-        <div class="stat-label">Store Credit Score</div>
+        <div class="stat-label">{{ $t('store.orders.creditScore') }}</div>
         <div class="stat-value">{{ totalInfo.creditScore || 100 }}%</div>
         <div class="credit-bar"><div class="credit-fill" :style="{ width: (totalInfo.creditScore || 100) + '%' }"></div></div>
       </div>
     </div>
 
     <div class="g-flex" style="gap:8px;margin:12px 0;flex-wrap:wrap">
-      <el-button :type="activeStatus === '' ? 'primary' : 'default'" size="small" @click="filterByStatus('')">All</el-button>
-      <el-button :type="activeStatus === '0' ? 'primary' : 'default'" size="small" @click="filterByStatus('0')">Pending</el-button>
-      <el-button :type="activeStatus === '1' ? 'primary' : 'default'" size="small" @click="filterByStatus('1')">Paid</el-button>
-      <el-button :type="activeStatus === '2' ? 'primary' : 'default'" size="small" @click="filterByStatus('2')">Shipped</el-button>
-      <el-button :type="activeStatus === '3' ? 'primary' : 'default'" size="small" @click="filterByStatus('3')">Completed</el-button>
-      <el-button :type="activeStatus === '6' ? 'primary' : 'default'" size="small" @click="filterByStatus('6')">Cancelled</el-button>
-      <el-button :type="activeStatus === 'refund' ? 'primary' : 'default'" size="small" @click="filterByStatus('refund')">Refunds</el-button>
+      <el-button :type="activeStatus === '' ? 'primary' : 'default'" size="small" @click="filterByStatus('')">{{ $t('store.orders.all') }}</el-button>
+      <el-button :type="activeStatus === '0' ? 'primary' : 'default'" size="small" @click="filterByStatus('0')">{{ $t('store.orders.pending') }}</el-button>
+      <el-button :type="activeStatus === '1' ? 'primary' : 'default'" size="small" @click="filterByStatus('1')">{{ $t('store.orders.paid') }}</el-button>
+      <el-button :type="activeStatus === '2' ? 'primary' : 'default'" size="small" @click="filterByStatus('2')">{{ $t('store.orders.shipped') }}</el-button>
+      <el-button :type="activeStatus === '3' ? 'primary' : 'default'" size="small" @click="filterByStatus('3')">{{ $t('store.orders.completed') }}</el-button>
+      <el-button :type="activeStatus === '6' ? 'primary' : 'default'" size="small" @click="filterByStatus('6')">{{ $t('store.orders.cancelled') }}</el-button>
+      <el-button :type="activeStatus === 'refund' ? 'primary' : 'default'" size="small" @click="filterByStatus('refund')">{{ $t('store.orders.refunds') }}</el-button>
     </div>
 
     <template v-if="orders.length > 0">
       <div class="g-responsive-table">
-        <el-table :data="orders" style="width:100%" v-loading="loading" empty-text="No orders found">
-          <el-table-column label="Order No" width="170">
+        <el-table :data="orders" style="width:100%" v-loading="loading" :empty-text="$t('store.orders.empty')">
+          <el-table-column :label="$t('store.orders.orderNoLabel')" width="170">
             <template #default="{row}"><span style="font-size:12px;font-family:monospace">{{ row.orderNo }}</span></template>
           </el-table-column>
-          <el-table-column label="Date" width="140">
+          <el-table-column :label="$t('store.orders.dateLabel')" width="140">
             <template #default="{row}">{{ new Date(row.createdAt).toLocaleDateString() }}<br><small style="color:#999">{{ new Date(row.createdAt).toLocaleTimeString() }}</small></template>
           </el-table-column>
-          <el-table-column label="Customer" width="130">
+          <el-table-column :label="$t('store.orders.customerLabel')" width="130">
             <template #default="{row}"><small style="color:#999">{{ row.shippingAddress?.name || 'N/A' }}</small></template>
           </el-table-column>
-          <el-table-column label="Items" min-width="180">
+          <el-table-column :label="$t('store.orders.itemsLabel')" min-width="180">
             <template #default="{row}">
               <div v-for="item in (row.items||[]).slice(0,2)" :key="item.skuId" class="item-cell">
                 <span>{{ item.productName }} x{{ item.quantity }}</span>
@@ -82,21 +84,21 @@
               <span v-if="(row.items||[]).length > 2" style="color:#999;font-size:12px">+{{ row.items.length - 2 }} more</span>
             </template>
           </el-table-column>
-          <el-table-column label="Amount" width="100" align="right">
+          <el-table-column :label="$t('store.orders.amountLabel')" width="100" align="right">
             <template #default="{row}">${{ (row.finalAmount || 0).toFixed(2) }}</template>
           </el-table-column>
-          <el-table-column label="Status" width="110">
+          <el-table-column :label="$t('store.orders.statusLabel')" width="110">
             <template #default="{row}">
               <el-tag :type="statusTagType(row)" size="small">{{ statusLabel(row) }}</el-tag>
-              <el-tag v-if="row.refundStatus === 1" type="warning" size="small" style="margin-left:4px">Refund</el-tag>
+              <el-tag v-if="row.refundStatus === 1" type="warning" size="small" style="margin-left:4px">{{ $t('store.orders.refunds') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="Actions" width="220">
+          <el-table-column :label="$t('store.orders.actionsLabel')" width="220">
             <template #default="{row}">
-              <el-button v-if="row.status===1" size="small" type="primary" @click="openShipDialog(row)">Ship</el-button>
-              <el-button v-if="row.status===2" size="small" @click="$router.push(`/sellerlogistics`)">Track</el-button>
-              <el-button v-if="row.refundStatus===1" size="small" type="success" @click="handleRefund(row,'agree')">Approve</el-button>
-              <el-button v-if="row.refundStatus===1" size="small" type="danger" @click="handleRefund(row,'reject')">Reject</el-button>
+              <el-button v-if="row.status===1" size="small" type="primary" @click="openShipDialog(row)" :disabled="shopClosed">{{ $t('store.orders.ship') }}</el-button>
+              <el-button v-if="row.status===2" size="small" @click="$router.push(`/sellerlogistics`)">{{ $t('store.orders.track') }}</el-button>
+              <el-button v-if="row.refundStatus===1" size="small" type="success" @click="handleRefund(row,'agree')" :disabled="shopClosed">{{ $t('store.orders.approve') }}</el-button>
+              <el-button v-if="row.refundStatus===1" size="small" type="danger" @click="handleRefund(row,'reject')" :disabled="shopClosed">{{ $t('store.orders.reject') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -105,51 +107,51 @@
         <el-pagination background layout="prev,pager,next" :total="total" :page-size="pageSize" :current-page="currentPage" @current-change="changePage" />
       </div>
     </template>
-    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">No orders found</span></div>
+    <div v-else-if="!loading" class="c-no-list"><span class="c-no-list-text">{{ $t('store.orders.empty') }}</span></div>
 
-    <el-dialog v-model="shipDialogVisible" title="Ship Order" width="550px">
+    <el-dialog v-model="shipDialogVisible" :title="$t('store.orders.shipTitle')" width="550px">
       <el-form :model="shipForm" label-position="top" v-if="selectedOrder">
         <p style="margin-bottom:16px">
-          <strong>Order:</strong> {{ selectedOrder.orderNo }} |
-          <strong>Total:</strong> ${{ selectedOrder.finalAmount?.toFixed(2) }}
+          <strong>{{ $t('store.orders.orderLabel') }}</strong> {{ selectedOrder.orderNo }} |
+          <strong>{{ $t('store.orders.totalLabel') }}</strong> ${{ selectedOrder.finalAmount?.toFixed(2) }}
         </p>
         <el-alert type="warning" :closable="false" show-icon style="margin-bottom:16px">
           <template #title>
-            Wholesale cost will be auto-deducted from your wallet upon shipping
+            {{ $t('store.orders.autoDeductMessage') }}
           </template>
         </el-alert>
-        <el-form-item label="Carrier">
-          <el-select v-model="shipForm.carrier" placeholder="Select carrier" style="width:100%">
+        <el-form-item :label="$t('store.orders.carrierLabel')">
+          <el-select v-model="shipForm.carrier" :placeholder="$t('store.orders.carrierPlaceholder')" style="width:100%">
             <el-option v-for="c in carriers" :key="c.id" :label="c.name" :value="c.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Tracking Number (leave empty to auto-generate)">
-          <el-input v-model="shipForm.trackingNo" placeholder="Auto-generate if empty" />
+        <el-form-item :label="$t('store.orders.trackingNoLabel')">
+          <el-input v-model="shipForm.trackingNo" :placeholder="$t('store.orders.trackingNoPlaceholder')" />
         </el-form-item>
         <div class="g-flex" style="gap:12px">
-          <el-form-item label="Shipping Cost ($)">
+          <el-form-item :label="$t('store.orders.shippingCostLabel')">
             <el-input-number v-model="shipForm.shippingCost" :min="0" :step="0.5" :precision="2" style="width:120px" />
           </el-form-item>
-          <el-form-item label="Weight (kg)">
+          <el-form-item :label="$t('store.orders.weightLabel')">
             <el-input-number v-model="shipForm.packageWeight" :min="0" :step="0.1" style="width:120px" />
           </el-form-item>
-          <el-form-item label="Length (cm)">
+          <el-form-item :label="$t('store.orders.lengthLabel')">
             <el-input-number v-model="shipForm.packageLength" :min="0" style="width:120px" />
           </el-form-item>
-          <el-form-item label="Width (cm)">
+          <el-form-item :label="$t('store.orders.widthLabel')">
             <el-input-number v-model="shipForm.packageWidth" :min="0" style="width:120px" />
           </el-form-item>
-          <el-form-item label="Height (cm)">
+          <el-form-item :label="$t('store.orders.heightLabel')">
             <el-input-number v-model="shipForm.packageHeight" :min="0" style="width:120px" />
           </el-form-item>
         </div>
-        <el-form-item label="Notes">
-          <el-input v-model="shipForm.notes" type="textarea" :rows="2" placeholder="Optional notes" />
+        <el-form-item :label="$t('store.orders.notesLabel')">
+          <el-input v-model="shipForm.notes" type="textarea" :rows="2" :placeholder="$t('store.orders.notesPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="shipDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" :loading="shipping" @click="submitShip">Confirm Ship</el-button>
+        <el-button @click="shipDialogVisible = false">{{ $t('store.orders.cancel') }}</el-button>
+        <el-button type="primary" :loading="shipping" @click="submitShip">{{ $t('store.orders.confirmShip') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -169,6 +171,7 @@ const store = useAppStore()
 const orders = ref([])
 const loading = ref(false)
 const totalInfo = ref(null)
+const shopClosed = ref(false)
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
@@ -214,15 +217,17 @@ const loadOrders = async () => {
   const params = { page: currentPage.value, pageSize }
   if (activeStatus.value === 'refund') params.refundStatus = 1
   else if (activeStatus.value) params.status = activeStatus.value
-  const [orderRes, statsRes] = await Promise.all([
+  const [orderRes, statsRes, shopRes] = await Promise.all([
     get('/home/userOrder/getShopOrderList', params),
     get('/home/userShop/getTotalInfo'),
+    get('/home/userShop/getInfo'),
   ])
   if (orderRes?.data) {
     orders.value = orderRes.data.list || []
     total.value = orderRes.data.total || 0
   }
   if (statsRes?.data) totalInfo.value = statsRes.data
+  if (shopRes?.data) shopClosed.value = shopRes.data.status === 3
   loading.value = false
 }
 

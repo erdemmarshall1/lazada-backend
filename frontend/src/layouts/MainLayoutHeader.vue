@@ -136,21 +136,13 @@ const searchMobile = () => {
   }
 }
 
-const openTawkto = () => {
-  if (window.Tawk_API && store.tawkTo.enabled) {
-    window.Tawk_API.maximize()
-  }
-}
-
 const openCustomerCare = () => {
   router.push('/contact-us')
-  setTimeout(() => openTawkto(), 500)
 }
 
 const openCustomerCareMobile = () => {
   mobileMenuOpen.value = false
   router.push('/contact-us')
-  setTimeout(() => openTawkto(), 500)
 }
 
 const handleLogout = async () => {

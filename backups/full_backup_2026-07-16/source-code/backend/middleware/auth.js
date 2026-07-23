@@ -1,0 +1,99 @@
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { JWT_SECRET, JWT_REFRESH_SECRET } = require('../config/app');
+const { hasPermission, ROLES } = require('../config/roles');
+
+const auth = async (req, res, next) => {
+  let token = null;
+
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.headers.token) {
+    token = req.headers.token;
+  } else if (req.headers['x-access-token']) {
+    token = req.headers['x-access-token'];
+  }
+
+  if (!token) {
+    return res.json({ code: -1, msg: 'Not authorized, no token' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.type === 'refresh') {
+      return res.json({ code: -1, msg: 'Invalid token type' });
+    }
+    req.user = await User.findById(decoded.id).select('-password');
+    if (!req.user) {
+      return res.json({ code: -1, msg: 'User not found' });
+    }
+    next();
+  } catch (error) {
+    return res.json({ code: -1, msg: 'Token expired or invalid' });
+  }
+};
+
+const verifyRefreshToken = (token) => {
+  try {
+    return jwt.verify(token, JWT_REFRESH_SECRET);
+  } catch {
+    return null;
+  }
+};
+
+const requireRole = (...roles) => {
+  return (req, res, next) => {
+    auth(req, res, () => {
+      if (req.user && roles.includes(req.user.role)) {
+        next();
+      } else {
+        return res.json({ code: -2, msg: 'Access denied. Insufficient role.' });
+      }
+    });
+  };
+};
+
+const requirePermission = (permission) => {
+  return (req, res, next) => {
+    auth(req, res, () => {
+      if (req.user && hasPermission(req.user, permission)) {
+        next();
+      } else {
+        return res.json({ code: -2, msg: 'Access denied. Permission required.' });
+      }
+    });
+  };
+};
+
+const adminAuth = (req, res, next) => {
+  auth(req, res, () => {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'super_admin')) {
+      next();
+    } else {
+      return res.json({ code: -2, msg: 'Admin access required' });
+    }
+  });
+};
+
+const sellerAuth = (req, res, next) => {
+  auth(req, res, () => {
+    if (req.user && (req.user.role === 'seller' || req.user.role === 'admin' || req.user.role === 'super_admin')) {
+      next();
+    } else {
+      return res.json({ code: -2, msg: 'Seller access required' });
+    }
+  });
+};
+
+const superAdminAuth = (req, res, next) => {
+  auth(req, res, () => {
+    if (req.user && req.user.role === 'super_admin') {
+      next();
+    } else {
+      return res.json({ code: -2, msg: 'Super admin access required' });
+    }
+  });
+};
+
+module.exports = { auth, adminAuth, sellerAuth, superAdminAuth, requireRole, requirePermission, verifyRefreshToken };

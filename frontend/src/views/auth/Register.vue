@@ -1,31 +1,31 @@
 <template>
   <div class="register-view">
     <div class="register-box">
-      <h2 class="register-title">Create Account</h2>
-      <p class="register-subtitle">Register for a new user account</p>
+      <h2 class="register-title">{{ $t('auth.register.title') }}</h2>
+      <p class="register-subtitle">{{ $t('auth.register.subtitle') }}</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-        <el-form-item label="Username" prop="username">
-          <el-input v-model="form.username" placeholder="Choose a username" size="large" />
+        <el-form-item :label="$t('auth.register.usernameLabel')" prop="username">
+          <el-input v-model="form.username" :placeholder="$t('auth.register.usernamePlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Email Address" prop="email">
-          <el-input v-model="form.email" placeholder="Enter your email" size="large" />
+        <el-form-item :label="$t('auth.register.emailLabel')" prop="email">
+          <el-input v-model="form.email" :placeholder="$t('auth.register.emailPlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Phone Number" prop="phone">
-          <el-input v-model="form.phone" placeholder="Enter your phone number" size="large" />
+        <el-form-item :label="$t('auth.register.phoneLabel')" prop="phone">
+          <el-input v-model="form.phone" :placeholder="$t('auth.register.phonePlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input v-model="form.password" type="password" show-password placeholder="At least 8 characters" size="large" />
+        <el-form-item :label="$t('auth.register.passwordLabel')" prop="password">
+          <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.register.passwordPlaceholder')" size="large" />
         </el-form-item>
-        <el-form-item label="Confirm Password" prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" show-password placeholder="Repeat password" size="large" />
+        <el-form-item :label="$t('auth.register.confirmLabel')" prop="confirmPassword">
+          <el-input v-model="form.confirmPassword" type="password" show-password :placeholder="$t('auth.register.confirmPlaceholder')" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleRegister">Register</el-button>
+          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleRegister">{{ $t('auth.register.register') }}</el-button>
         </el-form-item>
       </el-form>
       <div class="register-links g-flex-align-center g-flex-justify-between">
-        <span class="link" @click="$router.push('/login')">Already have account? Login</span>
-        <span class="link" v-if="!store.isSeller" @click="$router.push('/applystore')">Apply for Merchant Account</span>
+        <span class="link" @click="$router.push('/login')">{{ $t('auth.register.loginLink') }}</span>
+        <span class="link" v-if="!store.isSeller" @click="$router.push('/applystore')">{{ $t('auth.register.applyMerchant') }}</span>
       </div>
     </div>
   </div>
@@ -36,6 +36,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { post } from '@/api/request'
+import { t } from '@/locales'
 import { useAppStore } from '@/stores/app'
 
 const router = useRouter()
@@ -76,7 +77,7 @@ const handleRegister = async () => {
     store.setToken(data.token)
     store.setRefreshToken(data.refreshToken)
     store.setUserInfo(data.userInfo)
-    ElMessage.success('Registration successful!')
+    ElMessage.success(t('auth.register.successMessage'))
     router.push('/myaccount')
   } else {
     ElMessage.error(res?.msg || 'Registration failed')
