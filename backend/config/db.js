@@ -394,49 +394,57 @@ const seedScrapedProducts = async () => {
   }
   if (findCount) console.log(`Seeded ${findCount} find scraped products`);
 
-  // Bulk Import 26,399 Scraped Products (memory-safe: process one chunk at a time)
+  // Bulk Import 26,399 Scraped Products
   const scrapeCatMap = {
     13: 'Boys', 14: 'Girls', 15: 'Accessories',
     16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
     20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
     23: 'Lifestyle', 24: 'Global Purchase',
   };
-  const chunksDir = path.join(__dirname, '..', 'scripts', 'chunks');
   const scrapedDetailsFile = path.join(__dirname, '..', 'scripts', 'scraped_details.json');
-
-  const chunkFiles = fs.existsSync(chunksDir)
-    ? fs.readdirSync(chunksDir).filter(f => f.startsWith('scraped_chunk_')).sort()
-    : [];
 
   let imported = 0, bulkErrors = 0;
 
-  if (chunkFiles.length > 0) {
-    console.log(`Found ${chunkFiles.length} chunks for processing`);
-    for (const chunkFile of chunkFiles) {
-      const chunkPath = path.join(chunksDir, chunkFile);
-      try {
-        if (!fs.existsSync(chunkPath)) { console.log(`  ${chunkFile} already processed, skipping`); continue; }
-        const chunk = JSON.parse(fs.readFileSync(chunkPath, 'utf8'));
-        console.log(`  Processing ${chunkFile} (${chunk.length} products)`);
+  if (fs.existsSync(scrapedDetailsFile)) {
+    console.log('Reading scraped_details.json...');
+    const raw = fs.readFileSync(scrapedDetailsFile, 'utf8');
+    const allDetails = JSON.parse(raw);
+    console.log(`Loaded ${allDetails.length} products from file`);
 
-        const result = await importScrapedBatch(chunk, scrapeCatMap, scrapedCatMap, scrapedShop._id);
-        imported += result.imported;
-        bulkErrors += result.errors;
-
-        try { fs.unlinkSync(chunkPath); } catch (e) { /* another instance already removed it */ }
-        console.log(`  ${chunkFile} done: imported=${result.imported}, skipped=${result.skipped}, errors=${result.errors}`);
-      } catch (e) {
-        console.error(`  ${chunkFile} failed: ${e.message}`);
-        bulkErrors += 2700;
+    const batchSize = 100;
+    let batch = [];
+    for (let i = 0; i < allDetails.length; i++) {
+      const p = allDetails[i];
+      const origId = `${p.mer_id || '0'}_${p.product_id}`;
+      if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { continue; }
+      const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
+      const catId = scrapedCatMap[catName];
+      if (!catId) { bulkErrors++; continue; }
+      const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+      const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
+      const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
+      batch.push({
+        name: p.title, description: p.content || p.title, images,
+        categoryId: catId, shopId: scrapedShop._id,
+        skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
+        salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
+        minPrice: price, maxPrice: price, originalPrice: marketPrice,
+        originalId: origId,
+        tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
+      });
+      if (batch.length >= batchSize || i === allDetails.length - 1) {
+        try {
+          await Product.insertMany(batch, { ordered: false });
+          imported += batch.length;
+        } catch (e) {
+          bulkErrors += batch.length;
+        }
+        batch = [];
+        if ((i + 1) % 2000 === 0 || i === allDetails.length - 1) {
+          console.log(`  Progress: ${i + 1}/${allDetails.length} (imported: ${imported}, errors: ${bulkErrors}, heap: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB)`);
+        }
       }
     }
-  } else if (fs.existsSync(scrapedDetailsFile)) {
-    console.log('No chunks found, reading single scraped_details.json');
-    const allDetails = JSON.parse(fs.readFileSync(scrapedDetailsFile, 'utf8'));
-    console.log(`Importing ${allDetails.length} scraped products from single file...`);
-    const result = await importScrapedBatch(allDetails, scrapeCatMap, scrapedCatMap, scrapedShop._id);
-    imported = result.imported;
-    bulkErrors = result.errors;
   } else {
     console.log('scraped_details.json not found, skipping bulk import');
   }
@@ -445,42 +453,6 @@ const seedScrapedProducts = async () => {
   await Shop.findByIdAndUpdate(scrapedShop._id, { productCount: totalScraped });
   console.log(`Scraped import done: imported=${imported}, errors=${bulkErrors}`);
   console.log(`Total products in THE OUTNET CN shop: ${totalScraped}`);
-
-  async function importScrapedBatch(details, catMap, nameToIdMap, shopId) {
-    const batchSize = 100;
-    let imported = 0, skipped = 0, errors = 0;
-    let batch = [];
-    for (let i = 0; i < details.length; i++) {
-      const p = details[i];
-      const origId = `${p.mer_id || '0'}_${p.product_id}`;
-      if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { skipped++; continue; }
-      const catName = catMap[p.category_id] || 'Uncategorized';
-      const catId = nameToIdMap[catName];
-      if (!catId) { errors++; continue; }
-      const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
-      const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
-      const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
-      batch.push({
-        name: p.title, description: p.content || p.title, images,
-        categoryId: catId, shopId,
-        skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
-        salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
-        minPrice: price, maxPrice: price, originalPrice: marketPrice,
-        originalId: origId,
-        tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
-      });
-      if (batch.length >= batchSize || i === details.length - 1) {
-        try {
-          await Product.insertMany(batch, { ordered: false });
-          imported += batch.length;
-        } catch (e) {
-          errors += batch.length;
-        }
-        batch = [];
-      }
-    }
-    return { imported, skipped, errors };
-  }
 };
 
 module.exports = connectDB;
