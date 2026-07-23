@@ -1,0 +1,115 @@
+<template>
+  <div class="register-view">
+    <div class="register-box">
+      <h2 class="register-title">{{ $t('auth.register.title') }}</h2>
+      <p class="register-subtitle">{{ $t('auth.register.subtitle') }}</p>
+      <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
+        <el-form-item :label="$t('auth.register.usernameLabel')" prop="username">
+          <el-input v-model="form.username" :placeholder="$t('auth.register.usernamePlaceholder')" size="large" />
+        </el-form-item>
+        <el-form-item :label="$t('auth.register.emailLabel')" prop="email">
+          <el-input v-model="form.email" :placeholder="$t('auth.register.emailPlaceholder')" size="large" />
+        </el-form-item>
+        <el-form-item :label="$t('auth.register.phoneLabel')" prop="phone">
+          <el-input v-model="form.phone" :placeholder="$t('auth.register.phonePlaceholder')" size="large" />
+        </el-form-item>
+        <el-form-item :label="$t('auth.register.passwordLabel')" prop="password">
+          <el-input v-model="form.password" type="password" show-password :placeholder="$t('auth.register.passwordPlaceholder')" size="large" />
+        </el-form-item>
+        <el-form-item :label="$t('auth.register.confirmLabel')" prop="confirmPassword">
+          <el-input v-model="form.confirmPassword" type="password" show-password :placeholder="$t('auth.register.confirmPlaceholder')" size="large" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" size="large" style="width:100%;background:var(--g-main_color);border-color:var(--g-main_color)" :loading="loading" @click="handleRegister">{{ $t('auth.register.register') }}</el-button>
+        </el-form-item>
+      </el-form>
+      <div class="register-links g-flex-align-center g-flex-justify-between">
+        <span class="link" @click="$router.push('/login')">{{ $t('auth.register.loginLink') }}</span>
+        <span class="link" v-if="!store.isSeller" @click="$router.push('/applystore')">{{ $t('auth.register.applyMerchant') }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { post } from '@/api/request'
+import { t } from '@/locales'
+import { useAppStore } from '@/stores/app'
+
+const router = useRouter()
+const store = useAppStore()
+const formRef = ref(null)
+const loading = ref(false)
+
+const form = reactive({
+  username: '', email: '', phone: '', password: '', confirmPassword: '',
+})
+
+const validatePass = (rule, value, callback) => {
+  if (value !== form.password) callback(new Error('Passwords do not match'))
+  else callback()
+}
+
+const rules = {
+  username: [{ required: true, message: 'Please enter a username', trigger: 'blur' }],
+  email: [{ required: true, type: 'email', message: 'Please enter valid email', trigger: 'blur' }],
+  phone: [{ required: true, message: 'Please enter your phone number', trigger: 'blur' }],
+  password: [{ required: true, min: 8, message: 'Password must be at least 8 characters', trigger: 'blur' }],
+  confirmPassword: [{ required: true, validator: validatePass, trigger: 'blur' }],
+}
+
+const handleRegister = async () => {
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) return
+  loading.value = true
+  const res = await post('/main/user/reg', {
+    username: form.username,
+    email: form.email,
+    phone: form.phone,
+    password: form.password,
+  })
+  loading.value = false
+  const data = res?.data
+  if (res?.code === 0 && data?.token) {
+    store.setToken(data.token)
+    store.setRefreshToken(data.refreshToken)
+    store.setUserInfo(data.userInfo)
+    ElMessage.success(t('auth.register.successMessage'))
+    router.push('/myaccount')
+  } else {
+    ElMessage.error(res?.msg || 'Registration failed')
+  }
+}
+</script>
+
+<style scoped>
+.register-view { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 0; background: var(--g-bg); }
+.register-box { width: 480px; background: var(--g-white); border-radius: 10px; padding: 40px 45px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.register-title { text-align: center; margin-bottom: 4px; font-size: 24px; color: #242424; }
+.register-subtitle { text-align: center; color: var(--g-text-light); font-size: 14px; margin-bottom: 30px; }
+.register-links { margin-top: 16px; }
+.link { color: var(--g-main_color); cursor: pointer; font-size: 13px; }
+.link:hover { text-decoration: underline; }
+.register-view :deep(.el-button--primary) {
+  background: linear-gradient(90deg, #0a68ff, #ff3333);
+  border-color: transparent;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.register-view :deep(.el-button--primary:hover) {
+  background: linear-gradient(90deg, #0957e0, #e62e2e);
+  border-color: transparent;
+}
+.register-view :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  background: #f4f6fa;
+}
+@media (max-width: 768px) {
+  .register-view { padding: 16px; min-height: calc(100vh - 120px); }
+  .register-box { width: 100%; padding: 24px 20px; }
+  .register-title { font-size: 20px; }
+}
+</style>

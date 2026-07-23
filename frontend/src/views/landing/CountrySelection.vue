@@ -82,7 +82,7 @@ const selectCountry = (country) => {
     store.setLanguage(country.lang)
     i18n.global.locale.value = country.lang
   }
-  router.push('/main')
+  window.location.reload()
 }
 </script>
 

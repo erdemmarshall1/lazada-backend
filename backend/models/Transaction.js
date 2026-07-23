@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  type: { type: String, enum: ['recharge', 'withdraw', 'payment', 'refund', 'admin', 'distribution', 'wholesale_purchase', 'payout'], required: true },
+  type: { type: String, enum: ['recharge', 'withdraw', 'payment', 'refund', 'admin', 'distribution', 'wholesale_purchase', 'payout', 'profit'], required: true },
   amount: { type: Number, required: true },
   balanceBefore: { type: Number, default: 0 },
   balanceAfter: { type: Number, default: 0 },

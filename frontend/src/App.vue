@@ -17,6 +17,7 @@ import { ref, watch, onMounted, onBeforeUnmount, onErrorCaptured } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
+import { setDocumentLang } from '@/locales'
 import SwUpdateBanner from '@/components/SwUpdateBanner.vue'
 
 const router = useRouter()
@@ -25,6 +26,10 @@ const audioPlay = ref(null)
 const audioSrc = ref('')
 const isOffline = ref(typeof navigator !== 'undefined' && !navigator.onLine)
 const routeLoading = ref(false)
+
+watch(() => store.lang, (lang) => {
+  setDocumentLang(lang)
+})
 
 let removeBeforeEach = null
 let removeAfterEach = null

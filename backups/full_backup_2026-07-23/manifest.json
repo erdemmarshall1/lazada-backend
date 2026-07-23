@@ -1,0 +1,19 @@
+{
+  "date": "2026-07-23T11:38:42.551Z",
+  "source": "The Outnet Wholesale - Full Backup",
+  "git_commit": "608bb147cc25be4e581a945430005386c9f93c4f",
+  "api_url": "https://lazada-backend-1.onrender.com",
+  "contents_zip": "C:\\Users\\Tron\\Documents\\The Outnet\\Lazada\\Lazada\\backups\\full_backup_2026-07-23.zip - all MongoDB collections + env",
+  "contents_folder": "C:\\Users\\Tron\\Documents\\The Outnet\\Lazada\\Lazada\\backups\\full_backup_2026-07-23",
+  "folder_size_mb": "991.12",
+  "cloudinary_backup": "https://res.cloudinary.com/u7xxu5dq/raw/upload/v1/backups/",
+  "includes": [
+    "MongoDB database dump (all 43 collections) via Railway API",
+    "Backend source code (no node_modules)",
+    "Frontend source code (no node_modules, no dist)",
+    "Environment files (.env, .env.production)",
+    "Uploaded images and assets",
+    "Git info and recent commits",
+    "Data JSON exports"
+  ]
+}

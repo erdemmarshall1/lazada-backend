@@ -282,6 +282,7 @@ exports.confirmArrival = async (req, res) => {
     if (!sellerWallet) {
       sellerWallet = await Wallet.create({ userId: shop.userId, balance: 0 });
     }
+    const profit = Math.max(0, order.finalAmount - order.totalCost);
     sellerWallet.balance += order.finalAmount;
     sellerWallet.totalEarned += order.finalAmount;
     await sellerWallet.save();
@@ -296,6 +297,15 @@ exports.confirmArrival = async (req, res) => {
       orderId: order._id, description: `Payout for order ${order.orderNo}`,
     });
 
+    if (profit > 0) {
+      await Transaction.create({
+        userId: shop.userId, type: 'profit', amount: profit,
+        balanceBefore: sellerWallet.balance, balanceAfter: sellerWallet.balance,
+        orderId: order._id, description: `Profit for order ${order.orderNo}`,
+      });
+    }
+
+    order.profit = profit;
     order.status = 3;
     order.confirmTime = new Date();
     await order.save();
@@ -468,6 +478,7 @@ exports.ship = async (req, res) => {
       });
     }
 
+    order.totalCost = totalCost;
     order.status = 2;
     order.trackingNo = trackingNo || '';
     order.shippingTime = new Date();

@@ -66,5 +66,20 @@ const i18n = createI18n({
   messages,
 })
 
+const rtlCodes = ['ar']
+
+export function setDocumentLang(locale) {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale || 'en'
+    document.documentElement.dir = rtlCodes.includes(locale) ? 'rtl' : 'ltr'
+  }
+}
+
+if (typeof document !== 'undefined') {
+  setDocumentLang(defaultLang)
+}
+
 export default i18n
 export const t = (key) => i18n.global.t(key)
+export const isRtl = (locale) => rtlCodes.includes(locale)
+export { rtlCodes }

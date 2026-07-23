@@ -1,0 +1,41 @@
+{
+  "totalNeeded": 1403,
+  "found": 3,
+  "skipped": 1400,
+  "generatedAt": "2026-07-07T20:12:58.805Z",
+  "updates": [
+    {
+      "productId": "6a4b5d0e507b0208132abf4d",
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/e/ec/Jordan_Davis_icon.png"
+      ],
+      "name": "Michael Jordan 23 By Michael Jordan For Men. Cologne Spray 3.4 Ounces",
+      "shopId": {
+        "_id": "6a4b5d0d507b0208132aac67",
+        "name": "THE OUTNET CN"
+      }
+    },
+    {
+      "productId": "6a4b5d0e507b0208132ab947",
+      "images": [
+        "https://live.staticflickr.com/8227/8350341050_87af05d946_b.jpg"
+      ],
+      "name": "ชุดแปรงแต่งหน้า แปรงรองพื้น แปรงอายแชโดว์ แปรงคาบูกิ ขนปุยนุ่ม 13 ชิ้น",
+      "shopId": {
+        "_id": "6a4b5d0d507b0208132aac67",
+        "name": "THE OUTNET CN"
+      }
+    },
+    {
+      "productId": "6a4b5d0e507b0208132ab60f",
+      "images": [
+        "https://live.staticflickr.com/65535/49077811772_91b9e235d0.jpg"
+      ],
+      "name": "Women Long Sleeve Snaps Button Down V Neck Cute Knit Sweater Cardigan",
+      "shopId": {
+        "_id": "6a4b5d0d507b0208132aac67",
+        "name": "THE OUTNET CN"
+      }
+    }
+  ]
+}

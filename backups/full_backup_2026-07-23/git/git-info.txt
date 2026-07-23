@@ -1,0 +1,11 @@
+Remote:
+origin	https://github.com/erdemmarshall1/lazada-backend.git (fetch)
+origin	https://github.com/erdemmarshall1/lazada-backend.git (push)
+
+
+Recent commits:
+608bb14 Fix admin dashboard rendering bugs and edit user 404 navigation
+651b534 Fix _redirects to serve sw.js directly, bump SW to v3
+29baae3 Bump SW cache version to v3 to force re-cache and clear stale JS
+1e1d5c0 Remove hardcoded Cloudinary credentials from all utility scripts, fix .env.example
+55413af Remove hardcoded secret fallbacks from app.js, add JWT_REFRESH_SECRET to render.yaml, gitignore .env files

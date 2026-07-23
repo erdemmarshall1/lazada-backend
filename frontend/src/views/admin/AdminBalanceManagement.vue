@@ -1,24 +1,24 @@
 <template>
   <div class="admin-page admin-balance">
-    <h2>Balance Management</h2>
+    <h2>{{ $t('admin.balancePage.title') }}</h2>
 
     <el-card class="search-card" shadow="never">
       <div class="g-flex" style="gap:12px;flex-wrap:wrap">
-        <el-input v-model="keyword" placeholder="Search by username or email" style="width:300px" clearable @keyup.enter="searchUsers" />
-        <el-button type="primary" @click="searchUsers">Search</el-button>
-        <el-button @click="keyword = ''; users = []; selectedUser = null">Clear</el-button>
+        <el-input v-model="keyword" :placeholder="$t('admin.balancePage.searchPlaceholder')" style="width:300px" clearable @keyup.enter="searchUsers" />
+        <el-button type="primary" @click="searchUsers">{{ $t('admin.balancePage.search') }}</el-button>
+        <el-button @click="keyword = ''; users = []; selectedUser = null">{{ $t('admin.balancePage.clear') }}</el-button>
       </div>
       <div class="g-responsive-table" style="margin-top:12px" v-if="users.length > 0">
         <el-table :data="users" highlight-current-row @current-change="onUserSelect" style="width:100%">
-          <el-table-column prop="username" label="Username" />
-          <el-table-column prop="email" label="Email" />
-          <el-table-column prop="role" label="Role" />
-          <el-table-column label="Balance">
+          <el-table-column prop="username" :label="$t('admin.balancePage.username')" />
+          <el-table-column prop="email" :label="$t('admin.balancePage.email')" />
+          <el-table-column prop="role" :label="$t('admin.balancePage.role')" />
+          <el-table-column :label="$t('admin.balancePage.balance')">
             <template #default="{row}">${{ row.balance.toFixed(2) }}</template>
           </el-table-column>
-          <el-table-column label="Action" width="120">
+          <el-table-column :label="$t('admin.balancePage.action')" width="120">
             <template #default="{row}">
-              <el-button size="small" type="primary" plain @click="selectUser(row)">Select</el-button>
+              <el-button size="small" type="primary" plain @click="selectUser(row)">{{ $t('admin.balancePage.select') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -32,73 +32,73 @@
       <el-card class="user-info-card" shadow="never">
         <div class="user-info-bar g-flex-align-center" style="gap:16px;flex-wrap:wrap">
           <div><strong>{{ selectedUser.username }}</strong> — <span class="text-muted">{{ selectedUser.email }}</span></div>
-          <div class="balance-badge">Current Balance: <strong>${{ selectedUser.balance.toFixed(2) }}</strong></div>
+          <div class="balance-badge">{{ $t('admin.balancePage.currentBalance') }}: <strong>${{ selectedUser.balance.toFixed(2) }}</strong></div>
         </div>
       </el-card>
 
       <div class="action-cards g-flex" style="gap:16px;flex-wrap:wrap">
         <el-card class="action-card" shadow="never">
-          <h3>Credit (Add Funds)</h3>
+          <h3>{{ $t('admin.balancePage.creditTitle') }}</h3>
           <el-form label-position="top" style="margin-top:12px">
-            <el-form-item label="Amount (USD)">
+            <el-form-item :label="$t('admin.balancePage.amountUSD')">
               <el-input-number v-model="creditAmount" :min="0.01" :max="1000000" :precision="2" :step="10" style="width:100%" />
             </el-form-item>
-            <el-form-item label="Description / Reason">
-              <el-input v-model="creditDescription" type="textarea" :rows="2" placeholder="Reason for crediting this user..." />
+            <el-form-item :label="$t('admin.balancePage.description')">
+              <el-input v-model="creditDescription" type="textarea" :rows="2" />
             </el-form-item>
-            <el-button type="success" :loading="crediting" @click="doCredit" :disabled="creditAmount <= 0">Credit ${{ creditAmount }}</el-button>
+            <el-button type="success" :loading="crediting" @click="doCredit" :disabled="creditAmount <= 0">{{ $t('admin.balancePage.creditButton') }} ${{ creditAmount }}</el-button>
           </el-form>
         </el-card>
 
         <el-card class="action-card" shadow="never">
-          <h3>Debit (Deduct Funds)</h3>
+          <h3>{{ $t('admin.balancePage.debitTitle') }}</h3>
           <el-form label-position="top" style="margin-top:12px">
-            <el-form-item label="Amount (USD)">
+            <el-form-item :label="$t('admin.balancePage.amountUSD')">
               <el-input-number v-model="debitAmount" :min="0.01" :max="selectedUser.balance" :precision="2" :step="10" style="width:100%" />
             </el-form-item>
-            <el-form-item label="Description / Reason">
-              <el-input v-model="debitDescription" type="textarea" :rows="2" placeholder="Reason for debiting this user..." />
+            <el-form-item :label="$t('admin.balancePage.description')">
+              <el-input v-model="debitDescription" type="textarea" :rows="2" />
             </el-form-item>
-            <el-button type="danger" :loading="debiting" @click="doDebit" :disabled="debitAmount <= 0 || debitAmount > selectedUser.balance">Debit ${{ debitAmount }}</el-button>
+            <el-button type="danger" :loading="debiting" @click="doDebit" :disabled="debitAmount <= 0 || debitAmount > selectedUser.balance">{{ $t('admin.balancePage.debitButton') }} ${{ debitAmount }}</el-button>
           </el-form>
         </el-card>
       </div>
 
       <div style="margin-top:12px;color:var(--g-text-light);font-size:13px" v-if="lastActionMsg">
-        Last action: {{ lastActionMsg }}
+        {{ $t('admin.balancePage.lastAction') }}: {{ lastActionMsg }}
       </div>
     </template>
 
     <el-card class="history-card" shadow="never" style="margin-top:16px">
-      <h3>Adjustment History</h3>
+      <h3>{{ $t('admin.balancePage.adjustmentHistory') }}</h3>
       <div class="g-responsive-table" style="margin-top:12px">
         <el-table :data="history" v-loading="loadingHistory" style="width:100%">
-          <el-table-column prop="_id" label="ID" width="200" />
-          <el-table-column label="User">
-            <template #default="{row}">{{ row.userId?.username || row.userId?.email || 'Deleted' }}</template>
+          <el-table-column prop="_id" :label="$t('admin.balancePage.id')" width="200" />
+          <el-table-column :label="$t('admin.balancePage.user')">
+            <template #default="{row}">{{ row.userId?.username || row.userId?.email || '-' }}</template>
           </el-table-column>
-          <el-table-column label="Type" width="100">
+          <el-table-column :label="$t('admin.balancePage.type')" width="100">
             <template #default="{row}">
-              <el-tag :type="row.amount > 0 ? 'success' : 'danger'">{{ row.amount > 0 ? 'Credit' : 'Debit' }}</el-tag>
+              <el-tag :type="row.amount > 0 ? 'success' : 'danger'">{{ row.amount > 0 ? $t('admin.balancePage.credit') : $t('admin.balancePage.debit') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="Amount">
+          <el-table-column :label="$t('admin.balancePage.amount')">
             <template #default="{row}">
               <span :style="{ color: row.amount > 0 ? 'var(--g-success, #67c23a)' : 'var(--g-danger, #f56c6c)' }">
                 ${{ Math.abs(row.amount).toFixed(2) }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="Balance Before">
+          <el-table-column :label="$t('admin.balancePage.balanceBefore')">
             <template #default="{row}">${{ row.balanceBefore?.toFixed(2) }}</template>
           </el-table-column>
-          <el-table-column label="Balance After">
+          <el-table-column :label="$t('admin.balancePage.balanceAfter')">
             <template #default="{row}">${{ row.balanceAfter?.toFixed(2) }}</template>
           </el-table-column>
-          <el-table-column label="Description" min-width="200">
+          <el-table-column :label="$t('admin.balancePage.descriptionLabel')" min-width="200">
             <template #default="{row}">{{ row.description || '-' }}</template>
           </el-table-column>
-          <el-table-column label="Date" width="180">
+          <el-table-column :label="$t('admin.balancePage.date')" width="180">
             <template #default="{row}">{{ new Date(row.createdAt).toLocaleString() }}</template>
           </el-table-column>
         </el-table>
@@ -112,8 +112,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
+
+const { t } = useI18n()
 
 const keyword = ref('')
 const users = ref([])
@@ -162,7 +165,7 @@ const doCredit = async () => {
   }))
   crediting.value = false
   if (res) {
-    ElMessage.success(res.msg || 'Credit successful')
+    ElMessage.success(res.msg || t('admin.balancePage.creditSuccess'))
     selectedUser.value.balance = (selectedUser.value.balance || 0) + Number(creditAmount.value)
     lastActionMsg.value = `${new Date().toLocaleString()} — Credited $${creditAmount.value} (${creditDescription.value || 'no description'})`
     creditAmount.value = 100
@@ -174,7 +177,7 @@ const doCredit = async () => {
 const doDebit = async () => {
   if (!selectedUser.value || debitAmount.value <= 0) return
   if (debitAmount.value > selectedUser.value.balance) {
-    ElMessage.warning('Debit amount exceeds user balance')
+    ElMessage.warning(t('admin.balancePage.debitExceeds'))
     return
   }
   debiting.value = true
@@ -185,7 +188,7 @@ const doDebit = async () => {
   }))
   debiting.value = false
   if (res) {
-    ElMessage.success(res.msg || 'Debit successful')
+    ElMessage.success(res.msg || t('admin.balancePage.debitSuccess'))
     selectedUser.value.balance = (selectedUser.value.balance || 0) - Number(debitAmount.value)
     lastActionMsg.value = `${new Date().toLocaleString()} — Debited $${debitAmount.value} (${debitDescription.value || 'no description'})`
     debitAmount.value = 50

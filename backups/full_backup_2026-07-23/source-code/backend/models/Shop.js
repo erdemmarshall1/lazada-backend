@@ -1,0 +1,41 @@
+const mongoose = require('mongoose');
+
+const shopSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  name: { type: String, required: true },
+  logo: { type: String, default: '' },
+  banner: { type: String, default: '' },
+  description: { type: String, default: '' },
+  phone: { type: String, default: '' },
+  address: { type: String, default: '' },
+  fullName: { type: String, default: '' },
+  email: { type: String, default: '' },
+  idFrontImage: { type: String, default: '' },
+  idBackImage: { type: String, default: '' },
+  utilityBill: { type: String, default: '' },
+  idNumber: { type: String, default: '' },
+  invitationCode: { type: String, default: '' },
+  storeNumber: { type: String, unique: true, sparse: true },
+  status: { type: Number, enum: [0, 1, 2, 3], default: 0 },
+  closedAt: { type: Date },
+  closedReason: { type: String, default: '' },
+  rating: { type: Number, default: 5, min: 0, max: 5 },
+  salesCount: { type: Number, default: 0 },
+  productCount: { type: Number, default: 0 },
+  followerCount: { type: Number, default: 0 },
+}, { timestamps: true });
+
+shopSchema.pre('save', async function(next) {
+  if (this.isNew && this.status === 1 && !this.storeNumber) {
+    const Counter = mongoose.model('Counter');
+    const counter = await Counter.findOneAndUpdate(
+      { name: 'storeNumber' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.storeNumber = `${counter.seq}`;
+  }
+  next();
+});
+
+module.exports = mongoose.model('Shop', shopSchema);

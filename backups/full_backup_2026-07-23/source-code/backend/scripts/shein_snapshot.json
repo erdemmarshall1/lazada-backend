@@ -1,0 +1,59 @@
+{
+  "url": "https://us.shein.com/?cdn_rsite=cf&ref=www&rep=dir&ret=us",
+  "scrapedAt": "2026-06-25T01:09:53.286Z",
+  "totalProducts": 8,
+  "highPricedProducts": 1,
+  "minPriceThreshold": 50,
+  "products": [
+    {
+      "id": "0-461479365",
+      "name": "Nike Mind 001 Men's Comfort-Fitting Enclosed Toe Outdoor Sports Slides (Optimized) HQ4307",
+      "price": 181.5,
+      "originalPrice": 235.95000000000002,
+      "image": "https://img.ltwebstatic.com/v4/p/spmp/2026/05/07/f4/1778137886849a7eb6068fedf6a9836e09db1ad86e_squfix_thumbnail_405x552.png",
+      "link": "",
+      "rating": 4.5,
+      "salesCount": 668,
+      "categoryName": "Men Clothing"
+    }
+  ],
+  "banners": [
+    {
+      "image": "https://img.ltwebstatic.com/v4/j/ccc/2026/06/17/fe/17816819408310e6896cfe4ed3eae4d677bcf5bfa2_thumbnail_1575x.webp"
+    },
+    {
+      "image": "https://img.ltwebstatic.com/v4/j/spmp/2026/06/03/42/1780469011d5ca4de75eff4e3a178a55f7255ee780_thumbnail_405x552.webp"
+    },
+    {
+      "image": "https://img.ltwebstatic.com/v4/j/pi/2026/06/08/cd/1780911261eb2748fb4216cace525e4993433d9d07_thumbnail_405x552.webp"
+    }
+  ],
+  "categories": [
+    "Curve",
+    "New In",
+    "Sale",
+    "Women Clothing",
+    "Beachwear",
+    "Men Clothing",
+    "Kids",
+    "Shoes",
+    "Underwear & Sleepwear",
+    "Home & Living",
+    "Jewelry & Accessories",
+    "Beauty & health",
+    "Baby & Maternity",
+    "Bags & Luggage",
+    "Sports & Outdoors",
+    "Home Textiles",
+    "Cell Phones & Accessories",
+    "Electronics",
+    "Toys & Games",
+    "Tools & Home Improvement",
+    "Office & School Supplies",
+    "Pet Supplies",
+    "Appliances",
+    "Automotive",
+    "Books & Magazine",
+    "Food & Beverages"
+  ]
+}

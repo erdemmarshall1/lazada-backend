@@ -1,0 +1,7 @@
+node_modules
+# uploads — needed at runtime for multer file storage
+.git
+*.log
+.env.local
+.env.development
+scraped_images

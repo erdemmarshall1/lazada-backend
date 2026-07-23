@@ -43,10 +43,12 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { get, imgUrl } from '@/api/request'
 const store = useAppStore()
 const isAdmin = computed(() => store.isAdmin)
+const { t } = useI18n()
 const router = useRouter()
 const sidebarOpen = ref(false)
 const shopLogo = ref('')
@@ -68,21 +70,21 @@ const handleMenuClick = (item) => {
 
 const flatMenu = computed(() => {
   const items = [
-    { label: 'My Account', path: '/myaccount' },
-    { label: 'Current Balance', path: '/balance' },
-    { label: 'My Orders', path: '/myorder' },
-    { label: 'Order Management', path: '/storeordercontrol', hidden: !store.isSeller },
-    { label: 'Billing Records', path: '/mybill' },
-    { label: 'Recharge Record', path: '/rechargehistory' },
-    { label: 'Withdrawal Record', path: '/cashouthistory' },
-    { label: 'Wallet Management', path: '/walletlist' },
-    { label: 'Delivery Address', path: '/addresslist' },
-    { label: 'Internal Message', path: '/internalmsg' },
-    { label: 'My Consultations', path: '/myconsultations' },
-    { label: 'Wholesale Management', path: '/sourcegoods' },
-    { label: store.isSeller ? 'Shop Details' : 'Apply for Merchant', path: store.isSeller ? '/storesettings' : '/applystore' },
-    { label: 'Product Management', path: '/storegoodcontrol' },
-    { label: 'Logistics Management', path: '/seller-logistics', hidden: !store.isSeller },
+    { label: t('user.myCenter.myAccount'), path: '/myaccount' },
+    { label: t('user.myCenter.currentBalance'), path: '/balance' },
+    { label: t('user.myCenter.myOrders'), path: '/myorder' },
+    { label: t('user.myCenter.orderManagement'), path: '/storeordercontrol', hidden: !store.isSeller },
+    { label: t('user.myCenter.billingRecords'), path: '/mybill' },
+    { label: t('user.myCenter.rechargeRecord'), path: '/rechargehistory' },
+    { label: t('user.myCenter.withdrawalRecord'), path: '/cashouthistory' },
+    { label: t('user.myCenter.walletManagement'), path: '/walletlist' },
+    { label: t('user.myCenter.deliveryAddress'), path: '/addresslist' },
+    { label: t('user.myCenter.internalMessage'), path: '/internalmsg' },
+    { label: t('user.myCenter.myConsultations'), path: '/myconsultations' },
+    { label: t('user.myCenter.wholesaleManagement'), path: '/sourcegoods' },
+    { label: store.isSeller ? t('user.myCenter.shopDetails') : t('user.myCenter.applyForMerchant'), path: store.isSeller ? '/storesettings' : '/applystore' },
+    { label: t('user.myCenter.productManagement'), path: '/storegoodcontrol' },
+    { label: t('user.myCenter.logisticsManagement'), path: '/seller-logistics', hidden: !store.isSeller },
   ]
 
   return items.filter(i => !i.hidden)

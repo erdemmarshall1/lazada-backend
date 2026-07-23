@@ -18,23 +18,25 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const currentPath = computed(() => route.path)
 
-const navItems = [
-  { label: 'Just In', path: '/just-in' },
-  { label: 'Designers', path: '/designers' },
-  { label: 'Clothing', path: '/categories/clothing' },
-  { label: 'Shoes', path: '/categories/shoes' },
-  { label: 'Bags', path: '/categories/bags' },
-  { label: 'Accessories', path: '/categories/accessories' },
-  { label: 'Bestsellers', path: '/remenglist' },
-  { label: 'Recommended', path: '/tuijianlist' },
-  { label: 'Shop Street', path: '/shopjie' },
-  { label: 'Flash Deals', path: '/miaoshalist' },
-]
+const navItems = computed(() => [
+  { label: t('layout.header.justIn'), path: '/just-in' },
+  { label: t('layout.header.designers'), path: '/designers' },
+  { label: t('layout.header.clothing'), path: '/categories/clothing' },
+  { label: t('layout.header.shoes'), path: '/categories/shoes' },
+  { label: t('layout.header.bags'), path: '/categories/bags' },
+  { label: t('layout.header.accessories'), path: '/categories/accessories' },
+  { label: t('layout.header.bestsellers'), path: '/remenglist' },
+  { label: t('layout.header.recommended'), path: '/tuijianlist' },
+  { label: t('layout.header.shopStreet'), path: '/shopjie' },
+  { label: t('layout.header.flashDeals'), path: '/miaoshalist' },
+])
 
 const goNav = (path) => { router.push(path) }
 </script>

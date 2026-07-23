@@ -1,0 +1,256 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+
+const connectDB = require('./config/db');
+const { seedAll } = require('./config/db');
+const { PORT } = require('./config/app');
+require('./config/cloudinary');
+
+const app = express();
+
+app.set('trust proxy', 1);
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { code: -2, msg: 'Too many attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/main/sendMsg', authLimiter);
+app.use('/main/user/login', authLimiter);
+app.use('/main/user/reg', authLimiter);
+app.use('/main/user/forgot', authLimiter);
+app.use('/main/user/sendResetCode', authLimiter);
+app.use('/home/admin/auth/login', authLimiter);
+app.use('/home/admin/auth/login/2fa', authLimiter);
+
+// Stripe webhook needs raw body — mount before JSON middleware
+app.use('/home/payment/webhook', express.raw({ type: 'application/json' }), require('./routes/payment'));
+
+// Static file serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Conditionally serve frontend static files if the dist directory exists
+const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+}
+
+// Mount all routes
+app.use(require('./routes'));
+
+// Swagger API docs
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+
+const themeController = require('./controllers/themeController');
+app.get('/home/settings/theme', themeController.getTheme);
+
+// Bulk import from client (POST with products array, avoids server-side file parsing)
+const scrapeCatMap = {
+  13: 'Boys', 14: 'Girls', 15: 'Accessories',
+  16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
+  20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
+  23: 'Lifestyle', 24: 'Global Purchase',
+};
+app.post('/api/bulk-import', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  const { products } = req.body;
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ message: 'Invalid products array' });
+  }
+  try {
+    const Product = require('./models/Product');
+    const Shop = require('./models/Shop');
+    const shop = await Shop.findOne({ name: 'THE OUTNET CN' });
+    if (!shop) return res.status(500).json({ message: 'THE OUTNET CN shop not found. Run reimport first.' });
+    const Category = require('./models/Category');
+    const scrapedCatMap = {};
+    const names = ['Lifestyle','Men Shoes','Women Shoes','Accessories','Men Clothing','Women Bags','Men Bags','Women Clothing','Girls','Boys','Global Purchase'];
+    for (const n of names) {
+      let cat = await Category.findOne({ name: n });
+      if (!cat) cat = await Category.create({ name: n, level: 1, status: 1, sort: 99 });
+      scrapedCatMap[n] = cat._id;
+    }
+    const batchSize = 100;
+    let totalImported = 0, totalErrors = 0;
+    for (let i = 0; i < products.length; i += batchSize) {
+      const batch = products.slice(i, Math.min(i + batchSize, products.length));
+      const docs = [];
+      for (const p of batch) {
+        const origId = `${p.mer_id || '0'}_${p.product_id}`;
+        const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
+        const catId = scrapedCatMap[catName];
+        if (!catId) { totalErrors++; continue; }
+        const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+        const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
+        const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
+        docs.push({
+          name: p.title, description: p.content || p.title, images,
+          categoryId: catId, shopId: shop._id,
+          skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
+          salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
+          minPrice: price, maxPrice: price, originalPrice: marketPrice,
+          originalId: origId,
+          tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
+        });
+      }
+      try {
+        await Product.insertMany(docs, { ordered: false });
+        totalImported += docs.length;
+      } catch (e) {
+        totalErrors += docs.length;
+      }
+    }
+    const total = await Product.countDocuments({ shopId: shop._id });
+    await Shop.findByIdAndUpdate(shop._id, { productCount: total });
+    res.json({ imported: totalImported, errors: totalErrors, total });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Reimport trigger (protected by REIMPORT_SECRET)
+let reimportInProgress = false;
+app.get('/api/reimport', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (reimportInProgress) {
+    return res.json({ message: 'Reimport already in progress' });
+  }
+  reimportInProgress = true;
+  res.json({ message: 'Reimport started' });
+  try {
+    await require('./config/db').seedScrapedProducts();
+  } catch (e) {
+    console.error('Reimport error:', e.message);
+  } finally {
+    reimportInProgress = false;
+  }
+});
+
+// Reseed: delete scraped data, then run full seed (creates admin/shops/802 products/banners)
+let reseedInProgress = false;
+app.get('/api/reseed', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (reseedInProgress) return res.json({ message: 'Reseed already in progress' });
+  reseedInProgress = true;
+  res.json({ message: 'Reseed started (will delete ALL scraped products + shop first)' });
+  try {
+    const mongoose = require('mongoose');
+    const Product = require('./models/Product');
+    const Shop = require('./models/Shop');
+    // Delete THE OUTNET CN shop and its products
+    const shop = await Shop.findOne({ name: 'THE OUTNET CN' });
+    if (shop) {
+      await Product.deleteMany({ shopId: shop._id });
+      await Shop.findByIdAndDelete(shop._id);
+      console.log('Deleted THE OUTNET CN shop and its products');
+    }
+    // Run full seed to create admin user, regular shops, 802 products, banners, themes
+    const { seedFullData } = require('./config/db');
+    await seedFullData();
+    console.log('Reseed complete — admin user, shops, 802 products, banners created');
+  } catch (e) {
+    console.error('Reseed error:', e.message);
+  } finally {
+    reseedInProgress = false;
+  }
+});
+
+const errorHandler = require('./middleware/errorHandler');
+
+// Error handling middleware
+app.use(errorHandler);
+
+// Health check endpoint - define ONCE before SPA fallback
+let dbReady = false;
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
+});
+
+// SPA fallback - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  const apiPatterns = ['/main/', '/home/', '/api/', '/uploads/'];
+  const isApi = apiPatterns.some(p => req.path.startsWith(p));
+  if (isApi) return res.json({ message: 'API route not found' });
+  if (fs.existsSync(frontendDist)) {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  } else {
+    res.json({ message: 'Backend API is running' });
+  }
+});
+
+const startServer = (dbConnected) => {
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT} (MongoDB: ${dbConnected ? 'connected' : 'disconnected'})`);
+  });
+
+  const io = require('./sockets/chat')(server);
+  global.io = io;
+  app.set('io', io);
+
+  const Wallet = require('./models/Wallet');
+  Wallet.setIO(io);
+
+  if (dbConnected) {
+    const escrowService = require('./services/escrowService');
+    escrowService.start();
+    const autoClosureService = require('./services/autoClosureService');
+    autoClosureService.start();
+  }
+
+  // Self-ping to prevent Railway free tier sleep (every 10 minutes)
+  const SELF_URL = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.SELF_URL;
+  if (SELF_URL) {
+    const http = require('http');
+    const pingInterval = setInterval(() => {
+      const url = `http://${SELF_URL}/health`;
+      http.get(url, (res) => {
+        console.log(`[keep-alive] Self-ping: ${res.statusCode}`);
+      }).on('error', (err) => {
+        console.log(`[keep-alive] Self-ping error: ${err.message}`);
+      });
+    }, 10 * 60 * 1000);
+    console.log(`[keep-alive] Self-ping enabled every 10 min -> ${SELF_URL}`);
+  }
+};
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message, err.stack);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+startServer(false);
+connectDB().then(connected => {
+  dbReady = connected;
+  if (connected) {
+    seedAll();
+  }
+}).catch(err => {
+  console.error('MongoDB connection error:', err.message);
+});

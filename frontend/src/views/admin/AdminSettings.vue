@@ -1,134 +1,121 @@
 <template>
   <div class="admin-page admin-settings">
-    <h2>Settings</h2>
+    <h2>{{ $t('admin.settingsPage.title') }}</h2>
     <el-tabs v-model="activeTab">
-      <!-- General Settings -->
-      <el-tab-pane label="General" name="general">
+      <el-tab-pane :label="$t('admin.settingsPage.general')" name="general">
         <div class="settings-section">
           <el-form label-position="top" style="max-width:500px">
-            <el-form-item label="Store Name">
-              <el-input v-model="gen.siteName" placeholder="Your store name" />
+            <el-form-item :label="$t('admin.settingsPage.storeName')">
+              <el-input v-model="gen.siteName" />
             </el-form-item>
-            <el-form-item label="Store Description">
+            <el-form-item :label="$t('admin.settingsPage.storeDescription')">
               <el-input v-model="gen.siteDescription" type="textarea" :rows="3" />
             </el-form-item>
-            <el-form-item label="Support Email">
-              <el-input v-model="gen.supportEmail" placeholder="support@example.com" />
+            <el-form-item :label="$t('admin.settingsPage.supportEmail')">
+              <el-input v-model="gen.supportEmail" />
             </el-form-item>
-            <el-form-item label="Support Phone">
-              <el-input v-model="gen.supportPhone" placeholder="+1 234 567 8900" />
+            <el-form-item :label="$t('admin.settingsPage.supportPhone')">
+              <el-input v-model="gen.supportPhone" />
             </el-form-item>
-            <el-form-item label="Default Timezone">
+            <el-form-item :label="$t('admin.settingsPage.defaultTimezone')">
               <el-select v-model="gen.timezone" style="width:100%">
                 <el-option v-for="tz in timezones" :key="tz" :label="tz" :value="tz" />
               </el-select>
             </el-form-item>
-            <el-form-item label="Default Language">
+            <el-form-item :label="$t('admin.settingsPage.defaultLanguage')">
               <el-select v-model="gen.defaultLang" style="width:100%">
-                <el-option label="English" value="en" />
-                <el-option label="Chinese (Simplified)" value="zh-cn" />
-                <el-option label="Chinese (Traditional)" value="zh-tw" />
-                <el-option label="Japanese" value="ja" />
-                <el-option label="Korean" value="ko" />
-                <el-option label="Spanish" value="es" />
-                <el-option label="French" value="fr" />
-                <el-option label="German" value="de" />
-                <el-option label="Portuguese" value="pt" />
-                <el-option label="Arabic" value="ar" />
+                <el-option v-for="l in langOptions" :key="l.value" :label="l.label" :value="l.value" />
               </el-select>
             </el-form-item>
-            <el-form-item label="Items Per Page">
+            <el-form-item :label="$t('admin.settingsPage.itemsPerPage')">
               <el-input-number v-model="gen.itemsPerPage" :min="10" :max="100" />
             </el-form-item>
-            <el-form-item label="Maintenance Mode">
+            <el-form-item :label="$t('admin.settingsPage.maintenanceMode')">
               <el-switch v-model="gen.maintenanceMode" :active-value="1" :inactive-value="0" />
             </el-form-item>
-            <el-button type="primary" @click="saveGeneral" :loading="genLoading">Save General Settings</el-button>
+            <el-button type="primary" @click="saveGeneral" :loading="genLoading">{{ $t('admin.settingsPage.saveGeneral') }}</el-button>
           </el-form>
         </div>
       </el-tab-pane>
 
-      <!-- Tax Rates -->
-      <el-tab-pane label="Tax" name="tax">
+      <el-tab-pane :label="$t('admin.settingsPage.tax')" name="tax">
         <div class="admin-cms-header">
-          <h3>Tax Rates</h3>
-          <el-button type="primary" size="small" @click="showTaxForm(null)">+ Add Tax Rate</el-button>
+          <h3>{{ $t('admin.settingsPage.taxRates') }}</h3>
+          <el-button type="primary" size="small" @click="showTaxForm(null)">{{ $t('admin.settingsPage.addTaxRate') }}</el-button>
         </div>
         <div class="g-responsive-table">
           <el-table :data="taxRates" stripe v-loading="taxLoading">
-            <el-table-column prop="name" label="Name" />
-            <el-table-column label="Rate">
+            <el-table-column prop="name" :label="$t('admin.settingsPage.name')" />
+            <el-table-column :label="$t('admin.settingsPage.rate')">
               <template #default="{row}">{{ row.type === 'percentage' ? row.rate + '%' : '$' + row.rate }}</template>
             </el-table-column>
-            <el-table-column prop="type" label="Type" width="100" />
-            <el-table-column prop="region" label="Region" />
-            <el-table-column label="Default" width="70">
-              <template #default="{row}"><el-tag v-if="row.isDefault" type="success" size="small">Default</el-tag></template>
+            <el-table-column prop="type" :label="$t('admin.settingsPage.type')" width="100" />
+            <el-table-column prop="region" :label="$t('admin.settingsPage.region')" />
+            <el-table-column :label="$t('admin.settingsPage.default')" width="70">
+              <template #default="{row}"><el-tag v-if="row.isDefault" type="success" size="small">{{ $t('admin.settingsPage.default') }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="Status" width="70">
-              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? 'Active' : 'Inactive' }}</el-tag></template>
+            <el-table-column :label="$t('admin.settingsPage.status')" width="70">
+              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? $t('admin.settingsPage.active') : $t('admin.settingsPage.inactive') }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="Actions" width="150">
+            <el-table-column :label="$t('admin.settingsPage.actions')" width="150">
               <template #default="{row}">
-                <el-button size="small" @click="showTaxForm(row)">Edit</el-button>
-                <el-button size="small" type="danger" @click="delTax(row)">Delete</el-button>
+                <el-button size="small" @click="showTaxForm(row)">{{ $t('admin.settingsPage.edit') }}</el-button>
+                <el-button size="small" type="danger" @click="delTax(row)">{{ $t('admin.settingsPage.delete') }}</el-button>
               </template>
             </el-table-column>
           </el-table>
         </div>
       </el-tab-pane>
 
-      <!-- Currencies -->
-      <el-tab-pane label="Currencies" name="currencies">
+      <el-tab-pane :label="$t('admin.settingsPage.currencies')" name="currencies">
         <div class="admin-cms-header">
-          <h3>Currencies</h3>
-          <el-button type="primary" size="small" @click="showCurrencyForm(null)">+ Add Currency</el-button>
+          <h3>{{ $t('admin.settingsPage.currencies') }}</h3>
+          <el-button type="primary" size="small" @click="showCurrencyForm(null)">{{ $t('admin.settingsPage.addCurrency') }}</el-button>
         </div>
         <div class="g-responsive-table">
           <el-table :data="currencies" stripe v-loading="curLoading">
-            <el-table-column prop="code" label="Code" width="80" />
-            <el-table-column prop="name" label="Name" />
-            <el-table-column prop="symbol" label="Symbol" width="60" />
-            <el-table-column label="Exchange Rate" width="120">
+            <el-table-column prop="code" :label="$t('admin.settingsPage.code')" width="80" />
+            <el-table-column prop="name" :label="$t('admin.settingsPage.name')" />
+            <el-table-column prop="symbol" :label="$t('admin.settingsPage.symbol')" width="60" />
+            <el-table-column :label="$t('admin.settingsPage.exchangeRate')" width="120">
               <template #default="{row}">{{ row.exchangeRate }}</template>
             </el-table-column>
-            <el-table-column label="Default" width="70">
-              <template #default="{row}"><el-tag v-if="row.isDefault" type="success" size="small">Default</el-tag></template>
+            <el-table-column :label="$t('admin.settingsPage.default')" width="70">
+              <template #default="{row}"><el-tag v-if="row.isDefault" type="success" size="small">{{ $t('admin.settingsPage.default') }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="Status" width="70">
-              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? 'Active' : 'Inactive' }}</el-tag></template>
+            <el-table-column :label="$t('admin.settingsPage.status')" width="70">
+              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? $t('admin.settingsPage.active') : $t('admin.settingsPage.inactive') }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="Actions" width="150">
+            <el-table-column :label="$t('admin.settingsPage.actions')" width="150">
               <template #default="{row}">
-                <el-button size="small" @click="showCurrencyForm(row)">Edit</el-button>
-                <el-button size="small" type="danger" @click="delCurrency(row)">Delete</el-button>
+                <el-button size="small" @click="showCurrencyForm(row)">{{ $t('admin.settingsPage.edit') }}</el-button>
+                <el-button size="small" type="danger" @click="delCurrency(row)">{{ $t('admin.settingsPage.delete') }}</el-button>
               </template>
             </el-table-column>
           </el-table>
         </div>
       </el-tab-pane>
 
-      <!-- Shipping Methods -->
-      <el-tab-pane label="Shipping" name="shipping">
+      <el-tab-pane :label="$t('admin.settingsPage.shipping')" name="shipping">
         <div class="admin-cms-header">
-          <h3>Shipping Methods</h3>
-          <el-button type="primary" size="small" @click="showShippingForm(null)">+ Add Method</el-button>
+          <h3>{{ $t('admin.settingsPage.shippingMethods') }}</h3>
+          <el-button type="primary" size="small" @click="showShippingForm(null)">{{ $t('admin.settingsPage.addMethod') }}</el-button>
         </div>
         <div class="g-responsive-table">
           <el-table :data="shippingMethods" stripe v-loading="shipLoading">
-            <el-table-column prop="name" label="Name" />
-            <el-table-column prop="carrier" label="Carrier" />
-            <el-table-column prop="type" label="Type" width="110" />
-            <el-table-column label="Rate" width="80"><template #default="{row}">${{ row.rate }}</template></el-table-column>
-            <el-table-column label="Free Threshold" width="120"><template #default="{row}">${{ row.freeShippingThreshold }}</template></el-table-column>
-            <el-table-column label="Est. Days" width="80"><template #default="{row}">{{ row.estimatedDays }}</template></el-table-column>
-            <el-table-column label="Status" width="70">
-              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? 'Active' : 'Inactive' }}</el-tag></template>
+            <el-table-column prop="name" :label="$t('admin.settingsPage.name')" />
+            <el-table-column prop="carrier" :label="$t('admin.settingsPage.carrier')" />
+            <el-table-column prop="type" :label="$t('admin.settingsPage.type')" width="110" />
+            <el-table-column :label="$t('admin.settingsPage.rate')" width="80"><template #default="{row}">${{ row.rate }}</template></el-table-column>
+            <el-table-column :label="$t('admin.settingsPage.freeThreshold')" width="120"><template #default="{row}">${{ row.freeShippingThreshold }}</template></el-table-column>
+            <el-table-column :label="$t('admin.settingsPage.estimatedDays')" width="80"><template #default="{row}">{{ row.estimatedDays }}</template></el-table-column>
+            <el-table-column :label="$t('admin.settingsPage.status')" width="70">
+              <template #default="{row}"><el-tag :type="row.status ? 'success' : 'info'" size="small">{{ row.status ? $t('admin.settingsPage.active') : $t('admin.settingsPage.inactive') }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="Actions" width="150">
+            <el-table-column :label="$t('admin.settingsPage.actions')" width="150">
               <template #default="{row}">
-                <el-button size="small" @click="showShippingForm(row)">Edit</el-button>
-                <el-button size="small" type="danger" @click="delShipping(row)">Delete</el-button>
+                <el-button size="small" @click="showShippingForm(row)">{{ $t('admin.settingsPage.edit') }}</el-button>
+                <el-button size="small" type="danger" @click="delShipping(row)">{{ $t('admin.settingsPage.delete') }}</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -136,51 +123,63 @@
       </el-tab-pane>
     </el-tabs>
 
-    <!-- Tax Dialog -->
-    <el-dialog v-model="taxDialog" :title="editingTax ? 'Edit Tax Rate' : 'Add Tax Rate'" width="450px">
+    <el-dialog v-model="taxDialog" :title="editingTax ? $t('admin.settingsPage.editTaxRate') : $t('admin.settingsPage.addTaxRateTitle')" width="450px">
       <el-form :model="taxForm" label-position="top">
-        <el-form-item label="Name" required><el-input v-model="taxForm.name" /></el-form-item>
-        <el-form-item label="Rate" required><el-input-number v-model="taxForm.rate" :min="0" :max="100" :precision="2" style="width:100%" /></el-form-item>
-        <el-form-item label="Type"><el-select v-model="taxForm.type" style="width:100%"><el-option label="Percentage" value="percentage" /><el-option label="Fixed" value="fixed" /></el-select></el-form-item>
-        <el-form-item label="Region"><el-input v-model="taxForm.region" placeholder="e.g. US, EU, Global" /></el-form-item>
-        <el-form-item label="Default"><el-switch v-model="taxForm.isDefault" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.name')" required><el-input v-model="taxForm.name" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.rate')" required><el-input-number v-model="taxForm.rate" :min="0" :max="100" :precision="2" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.type')"><el-select v-model="taxForm.type" style="width:100%"><el-option :label="$t('admin.settingsPage.percentage')" value="percentage" /><el-option :label="$t('admin.settingsPage.fixed')" value="fixed" /></el-select></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.region')"><el-input v-model="taxForm.region" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.default')"><el-switch v-model="taxForm.isDefault" /></el-form-item>
       </el-form>
-      <template #footer><el-button @click="taxDialog=false">Cancel</el-button><el-button type="primary" @click="saveTax" :loading="taxSaving">Save</el-button></template>
+      <template #footer><el-button @click="taxDialog=false">{{ $t('admin.settingsPage.cancel') }}</el-button><el-button type="primary" @click="saveTax" :loading="taxSaving">{{ $t('admin.settingsPage.save') }}</el-button></template>
     </el-dialog>
 
-    <!-- Currency Dialog -->
-    <el-dialog v-model="curDialog" :title="editingCur ? 'Edit Currency' : 'Add Currency'" width="450px">
+    <el-dialog v-model="curDialog" :title="editingCur ? $t('admin.settingsPage.editCurrency') : $t('admin.settingsPage.addCurrencyTitle')" width="450px">
       <el-form :model="curForm" label-position="top">
-        <el-form-item label="Code" required><el-input v-model="curForm.code" placeholder="USD" :disabled="!!editingCur" /></el-form-item>
-        <el-form-item label="Name" required><el-input v-model="curForm.name" placeholder="US Dollar" /></el-form-item>
-        <el-form-item label="Symbol" required><el-input v-model="curForm.symbol" placeholder="$" /></el-form-item>
-        <el-form-item label="Exchange Rate (vs default)"><el-input-number v-model="curForm.exchangeRate" :min="0.0001" :precision="4" style="width:100%" /></el-form-item>
-        <el-form-item label="Default"><el-switch v-model="curForm.isDefault" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.code')" required><el-input v-model="curForm.code" :disabled="!!editingCur" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.name')" required><el-input v-model="curForm.name" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.symbol')" required><el-input v-model="curForm.symbol" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.exchangeRate')"><el-input-number v-model="curForm.exchangeRate" :min="0.0001" :precision="4" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.default')"><el-switch v-model="curForm.isDefault" /></el-form-item>
       </el-form>
-      <template #footer><el-button @click="curDialog=false">Cancel</el-button><el-button type="primary" @click="saveCurrency" :loading="curSaving">Save</el-button></template>
+      <template #footer><el-button @click="curDialog=false">{{ $t('admin.settingsPage.cancel') }}</el-button><el-button type="primary" @click="saveCurrency" :loading="curSaving">{{ $t('admin.settingsPage.save') }}</el-button></template>
     </el-dialog>
 
-    <!-- Shipping Dialog -->
-    <el-dialog v-model="shipDialog" :title="editingShip ? 'Edit Shipping Method' : 'Add Shipping Method'" width="500px">
+    <el-dialog v-model="shipDialog" :title="editingShip ? $t('admin.settingsPage.editShipping') : $t('admin.settingsPage.addShippingTitle')" width="500px">
       <el-form :model="shipForm" label-position="top">
-        <el-form-item label="Name" required><el-input v-model="shipForm.name" /></el-form-item>
-        <el-form-item label="Carrier"><el-input v-model="shipForm.carrier" placeholder="e.g. FedEx, DHL" /></el-form-item>
-        <el-form-item label="Type"><el-select v-model="shipForm.type" style="width:100%"><el-option label="Flat Rate" value="flat" /><el-option label="Free Shipping" value="free" /></el-select></el-form-item>
-        <el-form-item label="Rate ($)" v-if="shipForm.type !== 'free'"><el-input-number v-model="shipForm.rate" :min="0" :precision="2" style="width:100%" /></el-form-item>
-        <el-form-item label="Free Shipping Threshold ($)"><el-input-number v-model="shipForm.freeShippingThreshold" :min="0" :precision="2" style="width:100%" /></el-form-item>
-        <el-form-item label="Estimated Delivery"><el-input v-model="shipForm.estimatedDays" placeholder="3-7" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.name')" required><el-input v-model="shipForm.name" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.carrier')"><el-input v-model="shipForm.carrier" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.type')"><el-select v-model="shipForm.type" style="width:100%"><el-option :label="$t('admin.settingsPage.flatRate')" value="flat" /><el-option :label="$t('admin.settingsPage.freeShipping')" value="free" /></el-select></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.rate') + ' ($)'" v-if="shipForm.type !== 'free'"><el-input-number v-model="shipForm.rate" :min="0" :precision="2" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.freeThreshold') + ' ($)'"><el-input-number v-model="shipForm.freeShippingThreshold" :min="0" :precision="2" style="width:100%" /></el-form-item>
+        <el-form-item :label="$t('admin.settingsPage.estimatedDays')"><el-input v-model="shipForm.estimatedDays" /></el-form-item>
       </el-form>
-      <template #footer><el-button @click="shipDialog=false">Cancel</el-button><el-button type="primary" @click="saveShipping" :loading="shipSaving">Save</el-button></template>
+      <template #footer><el-button @click="shipDialog=false">{{ $t('admin.settingsPage.cancel') }}</el-button><el-button type="primary" @click="saveShipping" :loading="shipSaving">{{ $t('admin.settingsPage.save') }}</el-button></template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { get, post, put, del } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+const { t } = useI18n()
 const activeTab = ref('general')
+
+const langOptions = [
+  { label: 'English', value: 'en' },
+  { label: 'Chinese (Simplified)', value: 'zh-cn' },
+  { label: 'Chinese (Traditional)', value: 'zh-tw' },
+  { label: 'Japanese', value: 'ja' },
+  { label: 'Korean', value: 'ko' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'French', value: 'fr' },
+  { label: 'German', value: 'de' },
+  { label: 'Portuguese', value: 'pt' },
+  { label: 'Arabic', value: 'ar' },
+]
 
 // General settings
 const gen = reactive({
@@ -211,8 +210,8 @@ const saveGeneral = async () => {
   const settings = Object.entries(gen).map(([key, value]) => ({ key, value }))
   const res = await post('/home/admin/settings/settings/bulk', { settings })
   genLoading.value = false
-  if (res?.code === 0) ElMessage.success('Settings saved')
-  else ElMessage.error(res?.msg || 'Save failed')
+  if (res?.code === 0) ElMessage.success(t('admin.settingsPage.saved'))
+  else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
 }
 
 // Tax
@@ -237,20 +236,20 @@ const showTaxForm = (row) => {
 }
 
 const saveTax = async () => {
-  if (!taxForm.value.name) { ElMessage.warning('Name required'); return }
+  if (!taxForm.value.name) { ElMessage.warning(t('admin.settingsPage.nameRequired')); return }
   taxSaving.value = true
   let res
   if (editingTax.value) res = await put(`/home/admin/settings/tax-rates/${editingTax.value}`, taxForm.value)
   else res = await post('/home/admin/settings/tax-rates', taxForm.value)
   taxSaving.value = false
-  if (res?.code === 0) { ElMessage.success(res.msg || 'Saved'); taxDialog.value = false; loadTax() }
-  else ElMessage.error(res?.msg || 'Save failed')
+  if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); taxDialog.value = false; loadTax() }
+  else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
 }
 
 const delTax = async (row) => {
-  try { await ElMessageBox.confirm(`Delete "${row.name}"?`, 'Confirm', { type: 'warning' })
+  try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
     const res = await del(`/home/admin/settings/tax-rates/${row._id}`)
-    if (res?.code === 0) { ElMessage.success('Deleted'); loadTax() }
+    if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadTax() }
   } catch {}
 }
 
@@ -276,20 +275,20 @@ const showCurrencyForm = (row) => {
 }
 
 const saveCurrency = async () => {
-  if (!curForm.value.code || !curForm.value.name || !curForm.value.symbol) { ElMessage.warning('All fields required'); return }
+  if (!curForm.value.code || !curForm.value.name || !curForm.value.symbol) { ElMessage.warning(t('admin.settingsPage.allFieldsRequired')); return }
   curSaving.value = true
   let res
   if (editingCur.value) res = await put(`/home/admin/settings/currencies/${editingCur.value}`, curForm.value)
   else res = await post('/home/admin/settings/currencies', curForm.value)
   curSaving.value = false
-  if (res?.code === 0) { ElMessage.success(res.msg || 'Saved'); curDialog.value = false; loadCurrencies() }
-  else ElMessage.error(res?.msg || 'Save failed')
+  if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); curDialog.value = false; loadCurrencies() }
+  else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
 }
 
 const delCurrency = async (row) => {
-  try { await ElMessageBox.confirm(`Delete "${row.code}"?`, 'Confirm', { type: 'warning' })
+  try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
     const res = await del(`/home/admin/settings/currencies/${row._id}`)
-    if (res?.code === 0) { ElMessage.success('Deleted'); loadCurrencies() }
+    if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadCurrencies() }
   } catch {}
 }
 
@@ -315,20 +314,20 @@ const showShippingForm = (row) => {
 }
 
 const saveShipping = async () => {
-  if (!shipForm.value.name) { ElMessage.warning('Name required'); return }
+  if (!shipForm.value.name) { ElMessage.warning(t('admin.settingsPage.nameRequired')); return }
   shipSaving.value = true
   let res
   if (editingShip.value) res = await put(`/home/admin/settings/shipping-methods/${editingShip.value}`, shipForm.value)
   else res = await post('/home/admin/settings/shipping-methods', shipForm.value)
   shipSaving.value = false
-  if (res?.code === 0) { ElMessage.success(res.msg || 'Saved'); shipDialog.value = false; loadShipping() }
-  else ElMessage.error(res?.msg || 'Save failed')
+  if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); shipDialog.value = false; loadShipping() }
+  else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
 }
 
 const delShipping = async (row) => {
-  try { await ElMessageBox.confirm(`Delete "${row.name}"?`, 'Confirm', { type: 'warning' })
+  try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
     const res = await del(`/home/admin/settings/shipping-methods/${row._id}`)
-    if (res?.code === 0) { ElMessage.success('Deleted'); loadShipping() }
+    if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadShipping() }
   } catch {}
 }
 
