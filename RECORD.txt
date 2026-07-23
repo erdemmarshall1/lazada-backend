@@ -182,6 +182,26 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
       and use const txId = id || transactionId
     - Files modified: backend/controllers/walletController.js
 
+21. Fixed userInfo undefined crash + Tawk.to widget responsiveness
+    - Root cause: store.userInfo can be null (corrupted localStorage) → accessing .username/._id threw TypeError
+    - Fix: Added optional chaining (?.) or || {} fallback at 10 access sites:
+      - MainLayoutHeader.vue (2): store.userInfo?.username
+      - MyCenter.vue (2): store.userInfo?.username
+      - MyAccount.vue (2): spread fallback + optional chaining on avatar
+      - AdminLayout.vue: adminStore.userInfo?._id
+      - NotificationBell.vue: store.userInfo?._id
+      - socket/index.js: store.userInfo?._id
+    - Tawk.to fixes:
+      - store.tawktoActive → store.tawkTo.enabled (MainView.vue ×2, MainLayoutHeader.vue)
+      - Removed duplicate .kefu button from MainLayout.vue (conflicted with TawkToWidget)
+      - Dynamic script loading from store.tawkTo.widgetId (removed hardcoded ID from index.html)
+      - widgetPosition/widgetColor now applied from store settings
+      - All English strings replaced with $t() i18n keys
+      - z-index normalized to 999 (was 9999, conflicts with overlays)
+      - Watches both enabled and widgetId changes
+    - Build: npm run build (2250 modules, 0 errors)
+    - Commit: 647b0f4, pushed to master and preview branches
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git
