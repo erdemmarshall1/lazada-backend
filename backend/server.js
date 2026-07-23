@@ -83,15 +83,22 @@ app.get('/api/debug-files', (req, res) => {
 });
 
 // Reimport trigger (protected by REIMPORT_SECRET)
+let reimportInProgress = false;
 app.get('/api/reimport', async (req, res) => {
   if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+  if (reimportInProgress) {
+    return res.json({ message: 'Reimport already in progress' });
+  }
+  reimportInProgress = true;
   res.json({ message: 'Reimport started' });
   try {
     await require('./config/db').seedScrapedProducts();
   } catch (e) {
     console.error('Reimport error:', e.message);
+  } finally {
+    reimportInProgress = false;
   }
 });
 

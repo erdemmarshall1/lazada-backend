@@ -408,23 +408,27 @@ const seedScrapedProducts = async () => {
     ? fs.readdirSync(chunksDir).filter(f => f.startsWith('scraped_chunk_')).sort()
     : [];
 
-  const totalExisting = await Product.countDocuments({ originalId: { $ne: '' } });
   let imported = 0, bulkErrors = 0;
 
   if (chunkFiles.length > 0) {
     console.log(`Found ${chunkFiles.length} chunks for processing`);
     for (const chunkFile of chunkFiles) {
       const chunkPath = path.join(chunksDir, chunkFile);
-      const chunk = JSON.parse(fs.readFileSync(chunkPath, 'utf8'));
-      console.log(`  Processing ${chunkFile} (${chunk.length} products, ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB heap)`);
+      try {
+        if (!fs.existsSync(chunkPath)) { console.log(`  ${chunkFile} already processed, skipping`); continue; }
+        const chunk = JSON.parse(fs.readFileSync(chunkPath, 'utf8'));
+        console.log(`  Processing ${chunkFile} (${chunk.length} products)`);
 
-      const result = await importScrapedBatch(chunk, scrapeCatMap, scrapedCatMap, scrapedShop._id);
-      imported += result.imported;
-      bulkErrors += result.errors;
+        const result = await importScrapedBatch(chunk, scrapeCatMap, scrapedCatMap, scrapedShop._id);
+        imported += result.imported;
+        bulkErrors += result.errors;
 
-      // Free memory
-      fs.unlinkSync(chunkPath);
-      console.log(`  ${chunkFile} done: imported=${result.imported}, skipped=${result.skipped}, errors=${result.errors}`);
+        try { fs.unlinkSync(chunkPath); } catch (e) { /* another instance already removed it */ }
+        console.log(`  ${chunkFile} done: imported=${result.imported}, skipped=${result.skipped}, errors=${result.errors}`);
+      } catch (e) {
+        console.error(`  ${chunkFile} failed: ${e.message}`);
+        bulkErrors += 2700;
+      }
     }
   } else if (fs.existsSync(scrapedDetailsFile)) {
     console.log('No chunks found, reading single scraped_details.json');
