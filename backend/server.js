@@ -147,6 +147,37 @@ app.get('/api/reimport', async (req, res) => {
   }
 });
 
+// Reseed: delete scraped data, then run full seed (creates admin/shops/802 products/banners)
+let reseedInProgress = false;
+app.get('/api/reseed', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (reseedInProgress) return res.json({ message: 'Reseed already in progress' });
+  reseedInProgress = true;
+  res.json({ message: 'Reseed started (will delete ALL scraped products + shop first)' });
+  try {
+    const mongoose = require('mongoose');
+    const Product = require('./models/Product');
+    const Shop = require('./models/Shop');
+    // Delete THE OUTNET CN shop and its products
+    const shop = await Shop.findOne({ name: 'THE OUTNET CN' });
+    if (shop) {
+      await Product.deleteMany({ shopId: shop._id });
+      await Shop.findByIdAndDelete(shop._id);
+      console.log('Deleted THE OUTNET CN shop and its products');
+    }
+    // Run full seed to create admin user, regular shops, 802 products, banners, themes
+    const { seedFullData } = require('./config/db');
+    await seedFullData();
+    console.log('Reseed complete — admin user, shops, 802 products, banners created');
+  } catch (e) {
+    console.error('Reseed error:', e.message);
+  } finally {
+    reseedInProgress = false;
+  }
+});
+
 const errorHandler = require('./middleware/errorHandler');
 
 // Error handling middleware

@@ -406,4 +406,5 @@ const seedScrapedProducts = async () => {
 
 module.exports = connectDB;
 module.exports.seedAll = seedAll;
+module.exports.seedFullData = seedFullData;
 module.exports.seedScrapedProducts = seedScrapedProducts;
