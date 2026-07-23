@@ -29,11 +29,17 @@ const connectDB = async () => {
 
 const DB = { mongoose };
 
+let seedInProgress = false;
+
 const seedAll = async () => {
+  if (seedInProgress) { console.log('Seed already in progress, skipping'); return; }
+  seedInProgress = true;
   try {
     await seedFullData();
   } catch (err) {
     console.error('Seed error:', err.message);
+  } finally {
+    seedInProgress = false;
   }
 };
 
