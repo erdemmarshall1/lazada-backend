@@ -394,68 +394,88 @@ const seedScrapedProducts = async () => {
   }
   if (findCount) console.log(`Seeded ${findCount} find scraped products`);
 
-  // Bulk Import 26,399 Scraped Products
+  // Bulk Import 26,399 Scraped Products (memory-safe: process one chunk at a time)
+  const scrapeCatMap = {
+    13: 'Boys', 14: 'Girls', 15: 'Accessories',
+    16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
+    20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
+    23: 'Lifestyle', 24: 'Global Purchase',
+  };
+  const chunksDir = path.join(__dirname, '..', 'scripts', 'chunks');
   const scrapedDetailsFile = path.join(__dirname, '..', 'scripts', 'scraped_details.json');
-  const scrapedImageMapFile = path.join(__dirname, '..', 'scripts', 'scraped_image_map.json');
-  if (fs.existsSync(scrapedDetailsFile)) {
-    const scrapeCatMap = {
-      13: 'Boys', 14: 'Girls', 15: 'Accessories',
-      16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
-      20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
-      23: 'Lifestyle', 24: 'Global Purchase',
-    };
-    let imageMap = {};
-    if (fs.existsSync(scrapedImageMapFile)) {
-      imageMap = JSON.parse(fs.readFileSync(scrapedImageMapFile, 'utf8'));
+
+  const chunkFiles = fs.existsSync(chunksDir)
+    ? fs.readdirSync(chunksDir).filter(f => f.startsWith('scraped_chunk_')).sort()
+    : [];
+
+  const totalExisting = await Product.countDocuments({ originalId: { $ne: '' } });
+  let imported = 0, bulkErrors = 0;
+
+  if (chunkFiles.length > 0) {
+    console.log(`Found ${chunkFiles.length} chunks for processing`);
+    for (const chunkFile of chunkFiles) {
+      const chunkPath = path.join(chunksDir, chunkFile);
+      const chunk = JSON.parse(fs.readFileSync(chunkPath, 'utf8'));
+      console.log(`  Processing ${chunkFile} (${chunk.length} products, ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB heap)`);
+
+      const result = await importScrapedBatch(chunk, scrapeCatMap, scrapedCatMap, scrapedShop._id);
+      imported += result.imported;
+      bulkErrors += result.errors;
+
+      // Free memory
+      fs.unlinkSync(chunkPath);
+      console.log(`  ${chunkFile} done: imported=${result.imported}, skipped=${result.skipped}, errors=${result.errors}`);
     }
+  } else if (fs.existsSync(scrapedDetailsFile)) {
+    console.log('No chunks found, reading single scraped_details.json');
     const allDetails = JSON.parse(fs.readFileSync(scrapedDetailsFile, 'utf8'));
-    console.log(`\nImporting ${allDetails.length} scraped products from details file...`);
+    console.log(`Importing ${allDetails.length} scraped products from single file...`);
+    const result = await importScrapedBatch(allDetails, scrapeCatMap, scrapedCatMap, scrapedShop._id);
+    imported = result.imported;
+    bulkErrors = result.errors;
+  } else {
+    console.log('scraped_details.json not found, skipping bulk import');
+  }
 
-    const allOrigIds = allDetails.map(p => `${p.mer_id || '0'}_${p.product_id}`);
-    const existingDocs = await Product.find({ originalId: { $in: allOrigIds } }).select('originalId').lean();
-    const existingSet = new Set(existingDocs.map(d => d.originalId));
-    console.log(`  Existing products found: ${existingSet.size}`);
+  const totalScraped = await Product.countDocuments({ shopId: scrapedShop._id });
+  await Shop.findByIdAndUpdate(scrapedShop._id, { productCount: totalScraped });
+  console.log(`Scraped import done: imported=${imported}, errors=${bulkErrors}`);
+  console.log(`Total products in THE OUTNET CN shop: ${totalScraped}`);
 
-    let imported = 0, skipped = existingSet.size, bulkErrors = 0;
-    const bulkBatchSize = 100;
-    let bulkBatch = [];
-    for (let i = 0; i < allDetails.length; i++) {
-      const p = allDetails[i];
-      const origId = allOrigIds[i];
+  async function importScrapedBatch(details, catMap, nameToIdMap, shopId) {
+    const batchSize = 100;
+    let imported = 0, skipped = 0, errors = 0;
+    let batch = [];
+    for (let i = 0; i < details.length; i++) {
+      const p = details[i];
+      const origId = `${p.mer_id || '0'}_${p.product_id}`;
       if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { skipped++; continue; }
-      if (existingSet.has(origId)) continue;
-      const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
-      const catId = scrapedCatMap[catName];
-      if (!catId) { bulkErrors++; continue; }
+      const catName = catMap[p.category_id] || 'Uncategorized';
+      const catId = nameToIdMap[catName];
+      if (!catId) { errors++; continue; }
       const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
       const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
       const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
-      bulkBatch.push({
+      batch.push({
         name: p.title, description: p.content || p.title, images,
-        categoryId: catId, shopId: scrapedShop._id,
+        categoryId: catId, shopId,
         skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
         salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
         minPrice: price, maxPrice: price, originalPrice: marketPrice,
         originalId: origId,
         tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
       });
-      if (bulkBatch.length >= bulkBatchSize || i === allDetails.length - 1) {
+      if (batch.length >= batchSize || i === details.length - 1) {
         try {
-          await Product.insertMany(bulkBatch);
-          imported += bulkBatch.length;
+          await Product.insertMany(batch, { ordered: false });
+          imported += batch.length;
         } catch (e) {
-          bulkErrors += bulkBatch.length;
+          errors += batch.length;
         }
-        bulkBatch = [];
-        if ((i + 1) % 2000 === 0) console.log(`  Scraped import: ${i + 1}/${allDetails.length} (imported: ${imported}, skipped: ${skipped}, errors: ${bulkErrors})`);
+        batch = [];
       }
     }
-    const totalScraped = await Product.countDocuments({ shopId: scrapedShop._id });
-    await Shop.findByIdAndUpdate(scrapedShop._id, { productCount: totalScraped });
-    console.log(`Scraped import done: imported=${imported}, skipped=${skipped}, errors=${bulkErrors}`);
-    console.log(`Total products in THE OUTNET CN shop: ${totalScraped}`);
-  } else {
-    console.log('scraped_details.json not found, skipping bulk import');
+    return { imported, skipped, errors };
   }
 };
 
