@@ -79,9 +79,10 @@ const errorHandler = require('./middleware/errorHandler');
 // Error handling middleware
 app.use(errorHandler);
 
-// Health check endpoint
+// Health check endpoint - define ONCE before SPA fallback
+let dbReady = false;
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
 });
 
 // SPA fallback - serve index.html for all non-API routes
@@ -130,11 +131,6 @@ const startServer = (dbConnected) => {
     console.log(`[keep-alive] Self-ping enabled every 10 min -> ${SELF_URL}`);
   }
 };
-
-let dbReady = false;
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
-});
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err.message, err.stack);
