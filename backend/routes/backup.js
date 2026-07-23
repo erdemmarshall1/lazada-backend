@@ -4,6 +4,7 @@ const archiver = require('archiver');
 const path = require('path');
 const fs = require('fs');
 const { adminAuth } = require('../middleware/auth');
+const { fail } = require('../utils/response');
 
 const BACKUP_ROOT = path.join(__dirname, '..', '..', 'Full Backup');
 
@@ -111,7 +112,7 @@ router.post('/backup', adminAuth, async (req, res) => {
     archive.append(JSON.stringify(buildManifest('endpoint_download'), null, 2), { name: 'manifest.json' });
     archive.finalize();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json(fail(err.message));
   }
 });
 
@@ -121,7 +122,7 @@ router.post('/backup/d', adminAuth, async (req, res) => {
     const data = await dumpAllCollections();
     res.json({ success: true, data, manifest: buildManifest('json_dump') });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json(fail(err.message));
   }
 });
 
@@ -150,7 +151,7 @@ router.post('/backup/b', adminAuth, async (req, res) => {
 
     res.json({ success: true, path: dest, note: `Backup saved to ${dest}` });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json(fail(err.message));
   }
 });
 

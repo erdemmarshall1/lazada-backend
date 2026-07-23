@@ -149,6 +149,7 @@ const routes = [
       { path: 'email-settings', name: 'admin-email-settings', component: () => import('@/views/admin/AdminEmailSettings.vue'), meta: { title: 'Email Settings', requiresAuth: true, adminLayout: true } },
       { path: 'theme-settings', name: 'admin-theme-settings', component: () => import('@/views/admin/AdminThemeSettings.vue'), meta: { title: 'Theme Settings', requiresAuth: true, adminLayout: true } },
       { path: 'balance', name: 'admin-balance', component: () => import('@/views/admin/AdminBalanceManagement.vue'), meta: { title: 'Balance Management', requiresAuth: true, adminLayout: true } },
+      { path: 'orders', name: 'admin-orders', component: () => import('@/views/admin/AdminOrders.vue'), meta: { title: 'Orders', requiresAuth: true, adminLayout: true } },
       { path: 'platform-wallet', name: 'admin-platform-wallet', component: () => import('@/views/admin/AdminPlatformWallet.vue'), meta: { title: 'Platform Wallet', requiresAuth: true, adminLayout: true } },
       { path: 'sessions-audit', name: 'admin-sessions-audit', component: () => import('@/views/admin/AdminSessionsAudit.vue'), meta: { title: 'Sessions & Audit', requiresAuth: true, adminLayout: true } },
       { path: 'settings', name: 'admin-settings', component: () => import('@/views/admin/AdminSettings.vue'), meta: { title: 'Settings', requiresAuth: true, adminLayout: true } },
@@ -189,6 +190,10 @@ const adminPathMap = {
   '/admin-logistics': '/admin/logistics',
   '/superadmin-dashboard': '/admin/superadmin-dashboard',
   '/admin-user-edit/:id': '/admin/users/edit/:id',
+  '/admin-user-privacy/:id': '/admin/users/edit/:id',
+  '/admin-user-detail/:id': '/admin/users/edit/:id',
+  '/admin-shop-detail/:id': '/admin/users/edit/:id',
+  '/admin-orders': '/admin/orders',
   '/admin/login': '/admin',
 }
 
@@ -234,8 +239,15 @@ router.beforeEach((to, from, next) => {
 
   if (to.path.startsWith('/admin') && to.name !== 'admin-login') {
     if (!adminStore.isLogin || isTokenExpired(adminStore.token)) {
-      next({ name: 'admin-login' })
-      return
+      const mainStore = useAppStore()
+      if (mainStore.isAdmin && !isTokenExpired(mainStore.token)) {
+        adminStore.setToken(mainStore.token)
+        adminStore.setRefreshToken(mainStore.refreshToken)
+        adminStore.setUserInfo(mainStore.userInfo)
+      } else {
+        next({ name: 'admin-login' })
+        return
+      }
     }
   } else if (to.matched.some(r => r.meta.requiresAuth) && (!store.isLogin || isTokenExpired(store.token))) {
     next({ name: 'login', query: { redirect: to.fullPath } })

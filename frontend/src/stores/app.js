@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { disconnectSocket } from '@/socket'
+import { get } from '@/api/request'
 
 const safeStorageGet = (key, fallback = '') => {
   try {

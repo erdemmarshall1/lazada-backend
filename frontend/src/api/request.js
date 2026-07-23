@@ -59,7 +59,7 @@ export const imgUrl = (path) => {
 
 service.interceptors.request.use((config) => {
   const store = useAppStore()
-  const token = store.token || localStorage.getItem('theoutnet_token') || localStorage.getItem('seller_temp_token')
+  const token = store.token || localStorage.getItem('theoutnet_token') || localStorage.getItem('seller_temp_token') || localStorage.getItem('theoutnet_admin_token')
   if (token) {
     config.headers.token = token
     config.headers.Authorization = `Bearer ${token}`
@@ -82,8 +82,12 @@ service.interceptors.response.use(
   (response) => {
     const data = response?.data
     const msg = data?.msg || data?.message || ''
+    if (data?.code === -2) {
+      return data
+    }
+
     const isAuthError = data?.code === -1 || data?.code === 401 || data?.code === 403 ||
-      (data?.code !== 0 && data?.code !== 1 && /token|expired|authorized|login|not logged|invalid/i.test(msg))
+      (data?.code !== 0 && data?.code !== 1 && /not authorized|token expired|invalid token|not logged in|please login|token required|refresh token/i.test(msg))
 
     if (isAuthError) {
       const store = useAppStore()
@@ -138,17 +142,13 @@ service.interceptors.response.use(
       return Promise.reject(data)
     }
 
-    if (data?.code === -2) {
-      return data
-    }
-
     return data
   },
   (error) => {
     const data = error?.response?.data
     const msg = data?.msg || data?.message || error?.message || 'Network error'
     const isAuthError = error?.response?.status === 401 || error?.response?.status === 403 ||
-      /token|expired|authorized|login|not logged|invalid/i.test(msg)
+      /not authorized|token expired|invalid token|not logged in|please login|token required|refresh token/i.test(msg)
 
     if (isAuthError) {
       const store = useAppStore()

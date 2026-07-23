@@ -37,6 +37,8 @@ app.use('/main/user/login', authLimiter);
 app.use('/main/user/reg', authLimiter);
 app.use('/main/user/forgot', authLimiter);
 app.use('/main/user/sendResetCode', authLimiter);
+app.use('/home/admin/auth/login', authLimiter);
+app.use('/home/admin/auth/login/2fa', authLimiter);
 
 // Stripe webhook needs raw body — mount before JSON middleware
 app.use('/home/payment/webhook', express.raw({ type: 'application/json' }), require('./routes/payment'));

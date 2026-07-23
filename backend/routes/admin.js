@@ -298,6 +298,37 @@ router.post('/reject-shop', adminAuth, async (req, res) => {
   }
 });
 
+router.post('/close-shop', adminAuth, async (req, res) => {
+  try {
+    const { id, reason } = req.body;
+    if (!id) return res.json(fail('Shop id is required'));
+    const shop = await Shop.findByIdAndUpdate(id, {
+      status: 3,
+      closedAt: new Date(),
+      closedReason: reason || 'Closed by admin',
+    }, { new: true });
+    if (!shop) return res.json(fail('Shop not found'));
+    res.json(success(shop, 'Shop closed'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/open-shop', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.json(fail('Shop id is required'));
+    const shop = await Shop.findByIdAndUpdate(id, {
+      status: 1,
+      $unset: { closedAt: '', closedReason: '' },
+    }, { new: true });
+    if (!shop) return res.json(fail('Shop not found'));
+    res.json(success(shop, 'Shop reopened'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 router.post('/generate-seller-id', adminAuth, async (req, res) => {
   try {
     const Counter = require('../models/Counter');
@@ -620,29 +651,6 @@ router.post('/fix-images', adminAuth, async (req, res) => {
   }
 });
 
-// ---- Batch-update product images (from scraper script output) ----
-router.post('/batch-update-images', adminAuth, async (req, res) => {
-  try {
-    const { updates } = req.body;
-    if (!Array.isArray(updates) || updates.length === 0) {
-      return res.json(fail('updates must be a non-empty array of { productId, images }'));
-    }
-    let ok = 0, failCount = 0;
-    for (const u of updates) {
-      if (!u.productId || !Array.isArray(u.images)) { failCount++; continue; }
-      const r = await Product.findByIdAndUpdate(
-        u.productId,
-        { $set: { images: u.images } },
-        { new: false }
-      );
-      if (r) ok++; else failCount++;
-    }
-    res.json(success({ total: updates.length, ok, fail: failCount }, `Updated ${ok} products`));
-  } catch (error) {
-    res.json(fail(error.message));
-  }
-});
-
 // ---- Set profit percentage on all wholesale products ----
 router.post('/set-profit-percentage', adminAuth, async (req, res) => {
   try {
@@ -859,6 +867,62 @@ router.post('/add-category', adminAuth, async (req, res) => {
       status: 1,
     });
     res.json(success(cat, 'Category created'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/update-category/:id', adminAuth, async (req, res) => {
+  try {
+    const { name, parentId, level, icon, image, sort, status } = req.body;
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (parentId !== undefined) updates.parentId = parentId;
+    if (level !== undefined) updates.level = level;
+    if (icon !== undefined) updates.icon = icon;
+    if (image !== undefined) updates.image = image;
+    if (sort !== undefined) updates.sort = sort;
+    if (status !== undefined) updates.status = status;
+    const cat = await Category.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true });
+    if (!cat) return res.json(fail('Category not found'));
+    res.json(success(cat, 'Category updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/delete-category/:id', adminAuth, async (req, res) => {
+  try {
+    const cat = await Category.findByIdAndDelete(req.params.id);
+    if (!cat) return res.json(fail('Category not found'));
+    await Category.updateMany({ parentId: req.params.id }, { $set: { parentId: null } });
+    res.json(success(null, 'Category deleted'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Orders (admin list all) ----
+router.get('/orders', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps, status, search, startDate, endDate } = req.query;
+    const { skip, limit, page, pageSize } = paginate(p, ps);
+    const query = {};
+    if (status !== undefined && status !== '') query.status = Number(status);
+    if (search) {
+      const re = new RegExp(search, 'i');
+      query.$or = [{ orderNo: re }];
+    }
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+    const [list, total] = await Promise.all([
+      Order.find(query).populate('userId', 'username email').populate('shopId', 'name').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.countDocuments(query),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }
