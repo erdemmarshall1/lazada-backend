@@ -82,6 +82,49 @@ app.get('/api/debug-files', (req, res) => {
   });
 });
 
+// Debug: test import first chunk
+app.get('/api/test-import', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  const fs = require('fs');
+  const path = require('path');
+  const chunksDir = path.join(__dirname, 'scripts', 'chunks');
+  const firstChunk = path.join(chunksDir, 'scraped_chunk_0.json');
+  if (!fs.existsSync(firstChunk)) {
+    return res.json({ error: 'First chunk not found' });
+  }
+  try {
+    const chunk = JSON.parse(fs.readFileSync(firstChunk, 'utf8'));
+    const sample = chunk[0];
+    const Product = require('./models/Product');
+    const Category = require('./models/Category');
+    const Shop = require('./models/Shop');
+    const scrapedCatMap = {};
+    const names = ['Lifestyle','Men Shoes','Women Shoes','Accessories','Men Clothing','Women Bags','Men Bags','Women Clothing','Girls','Boys','Global Purchase'];
+    for (const n of names) {
+      let cat = await Category.findOne({ name: n });
+      if (!cat) cat = await Category.create({ name: n, level: 1, status: 1, sort: 99 });
+      scrapedCatMap[n] = cat._id;
+    }
+    const scrapeCatMap = {13:'Boys',14:'Girls',15:'Accessories',16:'Men Bags',17:'Men Clothing',18:'Men Shoes',20:'Women Bags',21:'Women Clothing',22:'Women Shoes',23:'Lifestyle',24:'Global Purchase'};
+    const catName = scrapeCatMap[sample.category_id] || 'Uncategorized';
+    const catId = scrapedCatMap[catName];
+    res.json({
+      chunkLength: chunk.length,
+      sampleKeys: Object.keys(sample),
+      sampleCategoryId: sample.category_id,
+      sampleCategoryIdType: typeof sample.category_id,
+      catName,
+      catId: catId ? catId.toString() : null,
+      catIdExists: !!catId,
+      allCategoryIds: [...new Set(chunk.map(p => p.category_id))].slice(0, 20),
+    });
+  } catch (e) {
+    res.json({ error: e.message, stack: e.stack });
+  }
+});
+
 // Reimport trigger (protected by REIMPORT_SECRET)
 let reimportInProgress = false;
 app.get('/api/reimport', async (req, res) => {
