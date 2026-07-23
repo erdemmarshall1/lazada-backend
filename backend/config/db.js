@@ -394,7 +394,7 @@ const seedScrapedProducts = async () => {
   }
   if (findCount) console.log(`Seeded ${findCount} find scraped products`);
 
-  // Bulk Import 26,399 Scraped Products
+  // Bulk Import 26,399 Scraped Products (streaming: never load full file)
   const scrapeCatMap = {
     13: 'Boys', 14: 'Girls', 15: 'Accessories',
     16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
@@ -403,48 +403,81 @@ const seedScrapedProducts = async () => {
   };
   const scrapedDetailsFile = path.join(__dirname, '..', 'scripts', 'scraped_details.json');
 
-  let imported = 0, bulkErrors = 0;
+  let imported = 0, bulkErrors = 0, streamTotal = 0;
 
   if (fs.existsSync(scrapedDetailsFile)) {
-    console.log('Reading scraped_details.json...');
-    const raw = fs.readFileSync(scrapedDetailsFile, 'utf8');
-    const allDetails = JSON.parse(raw);
-    console.log(`Loaded ${allDetails.length} products from file`);
-
+    console.log('Stream-importing scraped_details.json...');
+    const stream = fs.createReadStream(scrapedDetailsFile, { encoding: 'utf8', highWaterMark: 65536 });
     const batchSize = 100;
     let batch = [];
-    for (let i = 0; i < allDetails.length; i++) {
-      const p = allDetails[i];
-      const origId = `${p.mer_id || '0'}_${p.product_id}`;
-      if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { continue; }
-      const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
-      const catId = scrapedCatMap[catName];
-      if (!catId) { bulkErrors++; continue; }
-      const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
-      const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
-      const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
-      batch.push({
-        name: p.title, description: p.content || p.title, images,
-        categoryId: catId, shopId: scrapedShop._id,
-        skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
-        salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
-        minPrice: price, maxPrice: price, originalPrice: marketPrice,
-        originalId: origId,
-        tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
-      });
-      if (batch.length >= batchSize || i === allDetails.length - 1) {
-        try {
-          await Product.insertMany(batch, { ordered: false });
-          imported += batch.length;
-        } catch (e) {
-          bulkErrors += batch.length;
+    let objBuf = '';
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+
+    for await (const chunk of stream) {
+      for (let i = 0; i < chunk.length; i++) {
+        const c = chunk[i];
+        if (esc) { esc = false; objBuf += c; continue; }
+        if (inStr) {
+          if (c === '\\') { esc = true; }
+          else if (c === '"') { inStr = false; }
+          objBuf += c;
+          continue;
         }
-        batch = [];
-        if ((i + 1) % 2000 === 0 || i === allDetails.length - 1) {
-          console.log(`  Progress: ${i + 1}/${allDetails.length} (imported: ${imported}, errors: ${bulkErrors}, heap: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB)`);
+        if (c === '"') { inStr = true; objBuf += c; continue; }
+        if (c === '{') {
+          if (depth === 0) objBuf = c;
+          else objBuf += c;
+          depth++;
+        } else if (c === '}') {
+          depth--;
+          objBuf += c;
+          if (depth === 0 && objBuf) {
+            streamTotal++;
+            try {
+              const p = JSON.parse(objBuf);
+              const origId = `${p.mer_id || '0'}_${p.product_id}`;
+              if (p.title && (p.title.includes('REDMAGIC') || p.title.includes('Luxury Car Seat Cover'))) { continue; }
+              const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
+              const catId = scrapedCatMap[catName];
+              if (!catId) { bulkErrors++; continue; }
+              const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+              const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
+              const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
+              batch.push({
+                name: p.title, description: p.content || p.title, images,
+                categoryId: catId, shopId: scrapedShop._id,
+                skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
+                salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
+                minPrice: price, maxPrice: price, originalPrice: marketPrice,
+                originalId: origId,
+                tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
+              });
+            } catch (e) { bulkErrors++; }
+            objBuf = '';
+            if (batch.length >= batchSize) {
+              try {
+                await Product.insertMany(batch, { ordered: false });
+                imported += batch.length;
+              } catch (e) { bulkErrors += batch.length; }
+              batch = [];
+              if (streamTotal % 2000 === 0) console.log(`  Stream progress: ${streamTotal} objects (imported: ${imported}, errors: ${bulkErrors}, heap: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB)`);
+            }
+          }
+        } else if (c === ',' || c === '[' || c === ']' || c === '\n' || c === '\r' || c === ' ' || c === '\t') {
+          // skip delimiters and whitespace outside objects
+        } else if (depth > 0) {
+          objBuf += c;
         }
       }
     }
+    // flush remaining batch
+    if (batch.length > 0) {
+      try { await Product.insertMany(batch, { ordered: false }); imported += batch.length; }
+      catch (e) { bulkErrors += batch.length; }
+    }
+    console.log(`Stream import done: total=${streamTotal}, imported=${imported}, errors=${bulkErrors}, heap: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`);
   } else {
     console.log('scraped_details.json not found, skipping bulk import');
   }
