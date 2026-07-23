@@ -9,6 +9,7 @@ RUN wget -q https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian11-7.0.0
     mv /tmp/mongodb-linux-x86_64-debian11-7.0.0/bin/* /usr/local/bin/ && \
     rm -rf /tmp/mongodb-linux-x86_64-debian11-7.0.0 /tmp/mongo.tgz
 ENV MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod
+ENV MONGOMS_VERSION=7.0.0
 COPY . .
 EXPOSE 3000
 ENV NODE_ENV=production
