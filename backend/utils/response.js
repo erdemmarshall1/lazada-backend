@@ -1,9 +1,9 @@
 const CLOUDINARY_BASE = 'https://res.cloudinary.com/u7xxu5dq/image/upload';
-const DEAD_DOMAINS = ['s3.popularity1.shop', 'outnetsource.top', 's3.amazonaws.com'];
+const DEAD_DOMAINS = ['outnetsource.top', 's3.amazonaws.com'];
 
 const isDeadUrl = (url) => {
   if (!url) return false;
-  if (url.startsWith('/uploads/') || url.startsWith('/assets/')) return true;
+  if (url.startsWith('/uploads/') || url.startsWith('/assets/')) return false;
   try {
     const host = new URL(url).hostname;
     return DEAD_DOMAINS.some(d => host === d || host.endsWith('.' + d));

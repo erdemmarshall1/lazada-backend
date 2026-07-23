@@ -177,13 +177,14 @@ const seedFullData = async () => {
   };
 
   let seeded = 0;
+  const batchSize = 100;
+  let batch = [];
   for (let i = 0; i < rawProducts.length; i++) {
     const p = rawProducts[i];
     const catId = p.categoryId || '6a37c9f8dbe8962ad94592e0';
     let subCategory = catMap[catId] || subCats[0];
     const name = p.Name || '';
 
-    // Smart category assignment based on keywords
     if (name.match(/phone|smartphone|iphone|mobile|5g|galaxy/i)) subCategory = subCats[4];
     else if (name.match(/laptop|macbook|notebook|tablet|ipad/i)) subCategory = subCats[5];
     else if (name.match(/headphone|earphone|airpod|speaker|earbud|audio/i)) subCategory = subCats[6];
@@ -197,8 +198,6 @@ const seedFullData = async () => {
     else if (name.match(/gift card|voucher|spotify|itunes|google play|razer gold|giftcard/i)) subCategory = subCats[11];
 
     const shop = shops[i % shops.length];
-
-    // Assign images
     const productImages = [];
     const idx = i % allImages.length;
     productImages.push(allImages[idx]);
@@ -207,7 +206,6 @@ const seedFullData = async () => {
 
     const price = Math.round(p.Price * 100) / 100;
     const originalPrice = p.OriginalPrice > price ? Math.round(p.OriginalPrice * 100) / 100 : Math.round(price * 1.35 * 100) / 100;
-
     const skuCount = 2 + Math.floor(Math.random() * 2);
     const skus = [];
     for (let s = 0; s < skuCount; s++) {
@@ -222,7 +220,7 @@ const seedFullData = async () => {
       });
     }
 
-    await Product.create({
+    batch.push({
       name: p.Name,
       description: p.description || `High quality ${p.Name} at great price. Shop now!`,
       images: productImages,
@@ -238,7 +236,12 @@ const seedFullData = async () => {
       tags: name.toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
     });
     seeded++;
-    if ((i + 1) % 200 === 0) console.log(`  Seeded ${i + 1}/${rawProducts.length} products`);
+
+    if (batch.length >= batchSize || i === rawProducts.length - 1) {
+      await Product.insertMany(batch);
+      batch = [];
+      if ((i + 1) % 200 === 0 || i === rawProducts.length - 1) console.log(`  Seeded ${i + 1}/${rawProducts.length} products`);
+    }
   }
 
   await Shop.findByIdAndUpdate(shops[0]._id, { productCount: seeded });

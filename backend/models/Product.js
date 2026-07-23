@@ -41,6 +41,7 @@ productSchema.index({ categoryId: 1 });
 productSchema.index({ shopId: 1 });
 productSchema.index({ isHot: 1, isRecommended: 1 });
 productSchema.index({ minPrice: 1, maxPrice: 1 });
+productSchema.index({ originalId: 1 });
 
 productSchema.pre('save', function (next) {
   if (this.skus && this.skus.length > 0) {
