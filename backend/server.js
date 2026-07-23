@@ -131,6 +131,11 @@ const startServer = (dbConnected) => {
   }
 };
 
+let dbReady = false;
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now(), db: dbReady });
+});
+
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err.message, err.stack);
 });
@@ -138,9 +143,9 @@ process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);
 });
 
-connectDB().then(() => {
-  startServer(true);
+startServer(false);
+connectDB().then(connected => {
+  dbReady = connected;
 }).catch(err => {
-  console.error('MongoDB connection failed, starting without database:', err.message);
-  startServer(false);
+  console.error('MongoDB connection error:', err.message);
 });
