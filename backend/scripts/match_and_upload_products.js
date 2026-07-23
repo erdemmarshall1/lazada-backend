@@ -7,9 +7,9 @@ const ADMIN_API = 'https://supportive-delight-production-b90c.up.railway.app';
 const PRODUCTS_DIR = path.join(__dirname, '..', '..', 'Products');
 
 cloudinary.config({
-  cloud_name: 'u7xxu5dq',
-  api_key: '726627823236327',
-  api_secret: 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'u7xxu5dq',
+  api_key: process.env.CLOUDINARY_API_KEY || '726627823236327',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
 });
 
 const postJSON = (url, data, token) => new Promise((resolve, reject) => {

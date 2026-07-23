@@ -3,14 +3,14 @@ const path = require('path')
 const https = require('https')
 const { execSync } = require('child_process')
 
-const API = 'https://supportive-delight-production-b90c.up.railway.app'
+const API = process.env.BACKUP_API_URL || 'https://lazada-backend-1.onrender.com'
 const CLOUDINARY = {
-  cloud_name: 'u7xxu5dq',
-  api_key: '726627823236327',
-  api_secret: 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'u7xxu5dq',
+  api_key: process.env.CLOUDINARY_API_KEY || '726627823236327',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
 }
-const ADMIN_USER = 'admin_wholesale'
-const ADMIN_PASS = 'Admin@MQQYYI6G'
+const ADMIN_USER = process.env.ADMIN_USER || 'admin_wholesale'
+const ADMIN_PASS = process.env.ADMIN_PASS || 'Admin@MQQYYI6G'
 
 const ROOT = path.resolve(__dirname, '..')
 const cloudinary = require(path.join(ROOT, 'backend', 'node_modules', 'cloudinary')).v2

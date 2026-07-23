@@ -1,9 +1,9 @@
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
-  cloud_name: 'u7xxu5dq',
-  api_key: '726627823236327',
-  api_secret: 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'u7xxu5dq',
+  api_key: process.env.CLOUDINARY_API_KEY || '726627823236327',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
 });
 
 const merchProdUrls = [
