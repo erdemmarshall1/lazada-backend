@@ -1,7 +1,7 @@
 module.exports = {
-  JWT_SECRET: process.env.JWT_SECRET || 'shopify_wholesale_jwt_secret_2026',
+  JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
-  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'shopify_wholesale_refresh_secret_2026',
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   UPLOAD_PATH: process.env.UPLOAD_PATH || './uploads',
   PORT: process.env.PORT || 3000,
@@ -28,7 +28,7 @@ module.exports = {
   PUSH_SUBJECT: process.env.PUSH_SUBJECT || 'mailto:noreply@shopifywholesale.com',
 
   // Cloudinary
-  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'u7xxu5dq',
-  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '726627823236327',
-  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || 'qJmfLkCQ-wvbAhx6RQcf4MCVBUE',
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 };

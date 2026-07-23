@@ -26,6 +26,7 @@ Products/
 .env
 backend/.env
 frontend/.env
+*.env
 
 # Other root files
 revert_cdn_updates.js
