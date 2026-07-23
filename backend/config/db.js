@@ -37,10 +37,6 @@ const seedAll = async () => {
   }
 };
 
-module.exports = connectDB;
-module.exports.seedAll = seedAll;
-module.exports.seedScrapedProducts = seedScrapedProducts;
-
 const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
 const colors = ['Black', 'White', 'Blue', 'Red', 'Green', 'Navy', 'Gray', 'Beige', 'Pink', 'Brown'];
 
@@ -464,3 +460,5 @@ const seedScrapedProducts = async () => {
 };
 
 module.exports = connectDB;
+module.exports.seedAll = seedAll;
+module.exports.seedScrapedProducts = seedScrapedProducts;
