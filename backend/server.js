@@ -82,22 +82,27 @@ app.get('/api/debug-files', (req, res) => {
   });
 });
 
-// Debug: test insert one product
-app.get('/api/test-insert', async (req, res) => {
+// Bulk import from client (POST with products array, avoids server-side file parsing)
+const scrapeCatMap = {
+  13: 'Boys', 14: 'Girls', 15: 'Accessories',
+  16: 'Men Bags', 17: 'Men Clothing', 18: 'Men Shoes',
+  20: 'Women Bags', 21: 'Women Clothing', 22: 'Women Shoes',
+  23: 'Lifestyle', 24: 'Global Purchase',
+};
+app.post('/api/bulk-import', async (req, res) => {
   if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
-  const fs = require('fs');
-  const path = require('path');
-  const filePath = path.join(__dirname, 'scripts', 'scraped_details.json');
-  if (!fs.existsSync(filePath)) return res.json({ error: 'File not found' });
+  const { products } = req.body;
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ message: 'Invalid products array' });
+  }
   try {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const all = JSON.parse(raw);
-    const p = all[0];
     const Product = require('./models/Product');
-    const Category = require('./models/Category');
     const Shop = require('./models/Shop');
+    const shop = await Shop.findOne({ name: 'THE OUTNET CN' });
+    if (!shop) return res.status(500).json({ message: 'THE OUTNET CN shop not found. Run reimport first.' });
+    const Category = require('./models/Category');
     const scrapedCatMap = {};
     const names = ['Lifestyle','Men Shoes','Women Shoes','Accessories','Men Clothing','Women Bags','Men Bags','Women Clothing','Girls','Boys','Global Purchase'];
     for (const n of names) {
@@ -105,39 +110,41 @@ app.get('/api/test-insert', async (req, res) => {
       if (!cat) cat = await Category.create({ name: n, level: 1, status: 1, sort: 99 });
       scrapedCatMap[n] = cat._id;
     }
-    const scrapeCatMap = {13:'Boys',14:'Girls',15:'Accessories',16:'Men Bags',17:'Men Clothing',18:'Men Shoes',20:'Women Bags',21:'Women Clothing',22:'Women Shoes',23:'Lifestyle',24:'Global Purchase'};
-    const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
-    const catId = scrapedCatMap[catName];
-    if (!catId) return res.json({ error: 'No category ID for ' + catName });
-    let shop = await Shop.findOne({ name: 'THE OUTNET CN' });
-    if (!shop) {
-      const User = require('./models/User');
-      let u = await User.findOne({ username: 'outnet' });
-      if (!u) u = await User.create({ username: 'outnet', email: 'outnet@shopifywholesale.com', password: 'seller123', role: 'seller' });
-      shop = await Shop.create({ userId: u._id, name: 'THE OUTNET CN', description: 'Test', status: 1, rating: 4.5, salesCount: 50000 });
-    }
-    const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
-    const doc = {
-      name: p.title, description: p.content || p.title,
-      images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'],
-      categoryId: catId, shopId: shop._id,
-      skus: [{ price, originalPrice: Math.round(price * 1.3 * 100) / 100, stock: p.stock || 999 }],
-      salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
-      minPrice: price, maxPrice: price, originalPrice: Math.round(price * 1.3 * 100) / 100,
-      originalId: `${p.mer_id || '0'}_${p.product_id}`,
-    };
-    try {
-      const result = await Product.insertMany([doc]);
-      if (result && result.length > 0) {
-        res.json({ success: true, id: result[0]._id.toString(), name: result[0].name });
-      } else {
-        res.json({ error: 'InsertMany returned empty result', docKeys: Object.keys(doc), categoryId: doc.categoryId ? doc.categoryId.toString() : null });
+    const batchSize = 100;
+    let totalImported = 0, totalErrors = 0;
+    for (let i = 0; i < products.length; i += batchSize) {
+      const batch = products.slice(i, Math.min(i + batchSize, products.length));
+      const docs = [];
+      for (const p of batch) {
+        const origId = `${p.mer_id || '0'}_${p.product_id}`;
+        const catName = scrapeCatMap[p.category_id] || 'Uncategorized';
+        const catId = scrapedCatMap[catName];
+        if (!catId) { totalErrors++; continue; }
+        const price = parseFloat(String(p.sales_price || '0').replace(/,/g, '')) || 0;
+        const marketPrice = parseFloat(String(p.market_price || '0').replace(/,/g, '')) || Math.round(price * 1.3 * 100) / 100;
+        const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/uploads/product.png'];
+        docs.push({
+          name: p.title, description: p.content || p.title, images,
+          categoryId: catId, shopId: shop._id,
+          skus: [{ price, originalPrice: marketPrice, stock: p.stock || 999 }],
+          salesCount: p.sales || 0, status: 1, isHot: false, isRecommended: false,
+          minPrice: price, maxPrice: price, originalPrice: marketPrice,
+          originalId: origId,
+          tags: (p.title || '').toLowerCase().split(' ').filter(w => w.length > 3).slice(0, 5),
+        });
       }
-    } catch (insertErr) {
-      res.json({ error: 'InsertMany failed: ' + insertErr.message, stack: insertErr.stack, name: insertErr.name });
+      try {
+        await Product.insertMany(docs, { ordered: false });
+        totalImported += docs.length;
+      } catch (e) {
+        totalErrors += docs.length;
+      }
     }
+    const total = await Product.countDocuments({ shopId: shop._id });
+    await Shop.findByIdAndUpdate(shop._id, { productCount: total });
+    res.json({ imported: totalImported, errors: totalErrors, total });
   } catch (e) {
-    res.json({ error: e.message, stack: e.stack });
+    res.status(500).json({ error: e.message });
   }
 });
 
