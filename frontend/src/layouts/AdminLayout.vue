@@ -72,16 +72,7 @@
           <div class="topbar-notif">
             <NotificationBell />
           </div>
-          <el-dropdown trigger="click" class="topbar-lang-btn" @command="handleLangChange">
-            <div class="topbar-lang-trigger" :title="currentLangName" :aria-label="$t('layout.admin.languageAria')">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-for="l in appStore.langList" :key="l.code" :command="l.code" :class="{ active: appStore.lang === l.code }">{{ l.name }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <LanguageSwitcher :admin="true" />
           <el-dropdown trigger="click">
             <div class="topbar-user">
               <span class="user-avatar-small">{{ adminStore.userInfo?.username?.charAt(0)?.toUpperCase() || 'A' }}</span>
@@ -116,12 +107,12 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAdminAppStore } from '@/stores/adminApp'
 import { useAppStore } from '@/stores/app'
 import { adminPost } from '@/api/adminRequest'
-import i18n, { isValidLang } from '@/locales'
 import { connectSocket, joinUser } from '@/socket'
 
 import NotificationBell from '@/components/NotificationBell.vue'
 import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
 import PwaInstallTour from '@/components/PwaInstallTour.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -133,19 +124,6 @@ const mobileSidebarOpen = ref(false)
 const searchQuery = ref('')
 const collapsedGroups = ref(new Set())
 const tourRef = ref(null)
-
-const currentLangName = computed(() => {
-  const lang = appStore.langList?.find(l => l.code === appStore.lang)
-  return lang?.name || 'English'
-})
-
-const handleLangChange = (code) => {
-  if (code === appStore.lang) return
-  if (!isValidLang(code)) return
-  appStore.setLanguage(code)
-  i18n.global.locale.value = code
-  window.location.reload()
-}
 
 const toggleGroup = (title) => {
   if (collapsedGroups.value.has(title)) {

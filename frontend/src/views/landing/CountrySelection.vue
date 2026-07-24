@@ -40,8 +40,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useAppStore } from '@/stores/app'
-import i18n, { isValidLang } from '@/locales'
+import { useLanguage } from '@/composables/useLanguage'
 
 const router = useRouter()
 
@@ -76,13 +75,12 @@ const services = [
   { titleKey: 'country.apiTitle', icon: 'https://placehold.co/60x60/eee/333?text=🔗', color: '#f84a2f', descKey: 'country.apiDesc' },
 ]
 
-const selectCountry = (country) => {
-  if (country.lang && isValidLang(country.lang)) {
-    const store = useAppStore()
-    store.setLanguage(country.lang)
-    i18n.global.locale.value = country.lang
+const { changeLanguage } = useLanguage()
+
+const selectCountry = async (country) => {
+  if (country.lang) {
+    await changeLanguage(country.lang)
   }
-  window.location.reload()
 }
 </script>
 

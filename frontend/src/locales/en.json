@@ -1338,5 +1338,17 @@
     "refresh": {
       "message": "Refreshing..."
     }
+  },
+  "language": {
+    "searchPlaceholder": "Search languages...",
+    "all": "All",
+    "europe": "Europe",
+    "asia": "Asia",
+    "middleEast": "Middle East",
+    "other": "Other",
+    "recent": "Recent",
+    "allLanguages": "All Languages",
+    "detected": "Detected",
+    "noResults": "No languages found"
   }
 }

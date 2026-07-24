@@ -68,6 +68,48 @@ const i18n = createI18n({
 
 const rtlCodes = ['ar']
 
+const elLocaleMap = {
+  'en': () => import('element-plus/dist/locale/en.mjs'),
+  'zh-CN': () => import('element-plus/dist/locale/zh-cn.mjs'),
+  'zh-TW': () => import('element-plus/dist/locale/zh-tw.mjs'),
+  'vi': () => import('element-plus/dist/locale/vi.mjs'),
+  'de': () => import('element-plus/dist/locale/de.mjs'),
+  'fr': () => import('element-plus/dist/locale/fr.mjs'),
+  'ja': () => import('element-plus/dist/locale/ja.mjs'),
+  'es': () => import('element-plus/dist/locale/es.mjs'),
+  'ko': () => import('element-plus/dist/locale/ko.mjs'),
+  'pt': () => import('element-plus/dist/locale/pt-br.mjs'),
+  'ru': () => import('element-plus/dist/locale/ru.mjs'),
+  'it': () => import('element-plus/dist/locale/it.mjs'),
+  'th': () => import('element-plus/dist/locale/th.mjs'),
+  'ar': () => import('element-plus/dist/locale/ar.mjs'),
+  'tr': () => import('element-plus/dist/locale/tr.mjs'),
+  'nl': () => import('element-plus/dist/locale/nl.mjs'),
+  'pl': () => import('element-plus/dist/locale/pl.mjs'),
+  'hi': () => import('element-plus/dist/locale/hi.mjs'),
+  'id': () => import('element-plus/dist/locale/id.mjs'),
+  'ms': () => import('element-plus/dist/locale/ms.mjs'),
+}
+
+const elLocaleCache = {}
+let _app = null
+
+function setAppInstance(app) {
+  _app = app
+}
+
+async function switchLocale(code) {
+  if (!code || !messages[code]) return
+  i18n.global.locale.value = code
+  setDocumentLang(code)
+  if (_app && elLocaleMap[code]) {
+    if (!elLocaleCache[code]) {
+      elLocaleCache[code] = (await elLocaleMap[code]()).default
+    }
+    _app.config.globalProperties.$ELEMENT = { locale: elLocaleCache[code] }
+  }
+}
+
 export function setDocumentLang(locale) {
   if (typeof document !== 'undefined') {
     document.documentElement.lang = locale || 'en'
@@ -82,4 +124,4 @@ if (typeof document !== 'undefined') {
 export default i18n
 export const t = (key) => i18n.global.t(key)
 export const isRtl = (locale) => rtlCodes.includes(locale)
-export { rtlCodes }
+export { rtlCodes, elLocaleMap, elLocaleCache, switchLocale, setAppInstance }

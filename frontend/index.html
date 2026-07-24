@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
   <meta charset="UTF-8" />
@@ -106,6 +106,29 @@
     .app-loading-text { opacity: 0.5; line-height: 1.2; }
   </style>
   <script type="text/javascript">
+    // Pre-stub $_Tawk.i18next so Tawk internal parseVisitorName() never throws
+    // "i18next is not a function" before the chunk script defines it.
+    // Tawk setVisitorInformation -> parseVisitorName calls $_Tawk.i18next(...)
+    // which is undefined if the chunk that defines it has not loaded yet.
+    // Identity stub: returns the input string unchanged. Tawk real i18next
+    // replaces this once its chunk arrives, so behavior is preserved.
+    window.$_Tawk = window.$_Tawk || {};
+    if (typeof window.$_Tawk.i18next !== 'function') {
+      window.$_Tawk.i18next = function (s) { return s; };
+    }
+    // Keep the shim in place even if Tawk chunk resets $_Tawk during init.
+    (function patchTawkI18n() {
+      var iv = setInterval(function () {
+        if (window.$_Tawk && typeof window.$_Tawk.i18next !== 'function') {
+          window.$_Tawk.i18next = function (s) { return s; };
+        }
+        if (window.Tawk_API && typeof window.Tawk_API.onLoad === 'function') {
+          clearInterval(iv);
+        }
+      }, 200);
+      setTimeout(function () { clearInterval(iv); }, 30000);
+    })();
+
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
       var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];

@@ -2,10 +2,9 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-import elEn from 'element-plus/dist/locale/en.mjs'
 import App from './App.vue'
 import router from './router'
-import i18n, { setDocumentLang } from './locales'
+import i18n, { setDocumentLang, setAppInstance } from './locales'
 import './assets/styles/tailwind.css';
 import './assets/styles/global.css';
 import './assets/styles/iconfont.css'
@@ -76,8 +75,9 @@ app.config.globalProperties.$imgFallback = function (e) {
   handleFallback(filename);
 };
 app.use(createPinia())
+setAppInstance(app)
 app.use(router)
-app.use(ElementPlus, { locale: elEn })
+app.use(ElementPlus)
 app.use(i18n)
 app.mount('#app')
 const loading = document.getElementById('app-loading')

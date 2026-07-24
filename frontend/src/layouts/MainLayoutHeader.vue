@@ -53,16 +53,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span class="ton-header-cart-count" v-if="store.carNum > 0">{{ store.carNum }}</span>
           </button>
-          <el-dropdown trigger="click" class="ton-header-lang-btn" @command="handleLangChange">
-            <button class="ton-header-icon" :aria-label="$t('layout.header.languageAria')">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            </button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-for="l in store.langList" :key="l.code" :command="l.code" :class="{ active: store.lang === l.code }">{{ l.name }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <LanguageSwitcher />
         </div>
       </div>
     </div>
@@ -103,31 +94,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { get, post, qe } from '@/api/request'
 import { ElMessage } from 'element-plus'
-import i18n, { isValidLang, t } from '@/locales'
+import { t } from '@/locales'
 import NotificationBell from '@/components/NotificationBell.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const store = useAppStore()
 const mobileMenuOpen = ref(false)
 const keyword = ref('')
-
-const currentLangName = computed(() => {
-  const lang = store.langList?.find(l => l.code === store.lang)
-  return lang?.name || 'English'
-})
-
-const handleLangChange = (code) => {
-  if (code === store.lang) return
-  if (!isValidLang(code)) return
-  store.setLanguage(code)
-  i18n.global.locale.value = code
-  window.location.reload()
-}
 
 const searchMobile = () => {
   if (keyword.value.trim()) {
@@ -151,10 +130,6 @@ const handleLogout = async () => {
   ElMessage.success(t('layout.header.logout'))
   router.push('/main')
 }
-
-watch(() => store.lang, () => {
-  window.location.reload()
-})
 
 watch(mobileMenuOpen, (val) => {
   document.body.style.overflow = val ? 'hidden' : ''
