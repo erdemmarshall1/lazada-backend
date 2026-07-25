@@ -2,14 +2,25 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
 const { success, fail, paginate, rewriteProductImages } = require('../utils/response');
+const { getLang, applyTranslation, applyTranslationTags, applyTranslationSkuAttrs } = require('../utils/translate');
+
+function translateProduct(p, lang) {
+  if (!p || lang === 'en') return p
+  let r = applyTranslation(p, lang, ['name', 'description'])
+  r = applyTranslationTags(r, lang, 'tags')
+  r = applyTranslationSkuAttrs(r, lang)
+  return r
+}
 
 exports.getInfo = async (req, res) => {
   try {
-    const product = await Product.findById(req.query.id).populate('shopId', 'name logo rating');
+    const lang = getLang(req);
+    let product = await Product.findById(req.query.id).populate('shopId', 'name logo rating');
     if (!product) return res.json(fail('Product not found'));
     product.salesCount += 1;
     await product.save();
     rewriteProductImages(product);
+    product = translateProduct(product, lang);
     res.json(success(product));
   } catch (error) {
     res.json(fail(error.message));
@@ -55,7 +66,8 @@ exports.getSearchList = async (req, res) => {
       Product.countDocuments(query),
     ]);
     list.forEach(rewriteProductImages);
-    res.json(success({ list, total, page, pageSize }));
+    const lang = getLang(req);
+    res.json(success({ list: list.map(p => translateProduct(p, lang)), total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -63,11 +75,12 @@ exports.getSearchList = async (req, res) => {
 
 exports.getRandList = async (req, res) => {
   try {
+    const lang = getLang(req);
     const count = await Product.countDocuments({ status: 1 });
     const random = Math.max(1, Math.floor(Math.random() * count));
     const list = await Product.find({ status: 1 }).skip(random).limit(20).populate('shopId', 'name');
     list.forEach(rewriteProductImages);
-    res.json(success(list));
+    res.json(success(list.map(p => translateProduct(p, lang))));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -75,12 +88,13 @@ exports.getRandList = async (req, res) => {
 
 exports.getData = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { ids } = req.query;
     if (!ids) return res.json(fail('Ids required'));
     const idArr = ids.split(',');
     const products = await Product.find({ _id: { $in: idArr } });
     products.forEach(rewriteProductImages);
-    res.json(success(products));
+    res.json(success(products.map(p => translateProduct(p, lang))));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -88,10 +102,11 @@ exports.getData = async (req, res) => {
 
 exports.getHotList = async (req, res) => {
   try {
+    const lang = getLang(req);
     const list = await Product.find({ status: 1, isHot: true })
       .sort({ salesCount: -1 }).limit(20).populate('shopId', 'name');
     list.forEach(rewriteProductImages);
-    res.json(success(list));
+    res.json(success(list.map(p => translateProduct(p, lang))));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -114,8 +129,9 @@ exports.getReviewsList = async (req, res) => {
 
 exports.getCategoryList = async (req, res) => {
   try {
+    const lang = getLang(req);
     const list = await Category.find({ status: 1 }).sort({ sort: 1 });
-    res.json(success(list));
+    res.json(success(list.map(c => applyTranslation(c, lang, ['name']))));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -123,6 +139,7 @@ exports.getCategoryList = async (req, res) => {
 
 exports.getSuggestions = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { keyword } = req.query;
     if (!keyword || keyword.length < 2) return res.json(success([]));
     const suggestions = await Product.find(
@@ -130,7 +147,7 @@ exports.getSuggestions = async (req, res) => {
       { score: { $meta: 'textScore' } }
     ).sort({ score: { $meta: 'textScore' } }).limit(10).select('name minPrice images');
     suggestions.forEach(rewriteProductImages);
-    res.json(success(suggestions));
+    res.json(success(suggestions.map(p => translateProduct(p, lang))));
   } catch (error) {
     res.json(fail(error.message));
   }

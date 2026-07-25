@@ -8,6 +8,10 @@ const notificationSchema = new mongoose.Schema({
   data: { type: mongoose.Schema.Types.Mixed },
   isRead: { type: Boolean, default: false },
   link: { type: String, default: '' },
+  translations: {
+    title: { type: Map, of: String, default: {} },
+    message: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 notificationSchema.index({ userId: 1, createdAt: -1 });

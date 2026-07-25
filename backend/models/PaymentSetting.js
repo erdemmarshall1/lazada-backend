@@ -6,6 +6,9 @@ const paymentSettingSchema = new mongoose.Schema({
   walletAddress: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
   sort: { type: Number, default: 0 },
+  translations: {
+    label: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('PaymentSetting', paymentSettingSchema);

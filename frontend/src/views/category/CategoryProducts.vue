@@ -38,10 +38,12 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { get } from '@/api/request'
 import QuickViewDialog from '@/components/QuickViewDialog.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const categories = ref([])
 const subCategories = ref([])
@@ -57,10 +59,10 @@ const quickViewProductId = ref('')
 
 const categorySlug = computed(() => route.params.slug || '')
 const categoryTitle = computed(() => {
-  const titles = { clothing: 'Clothing', shoes: 'Shoes', bags: 'Bags', accessories: 'Accessories' }
-  return titles[categorySlug.value] || categorySlug.value.charAt(0).toUpperCase() + categorySlug.value.slice(1)
+  const translated = t(`layout.header.${categorySlug.value}`)
+  return translated !== `layout.header.${categorySlug.value}` ? translated : (categorySlug.value.charAt(0).toUpperCase() + categorySlug.value.slice(1))
 })
-const categorySubtitle = computed(() => `Shop our curated selection of ${categorySlug.value}`)
+const categorySubtitle = computed(() => t('category.products.subtitle', { category: categoryTitle.value }))
 
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 

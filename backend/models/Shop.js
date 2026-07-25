@@ -23,6 +23,12 @@ const shopSchema = new mongoose.Schema({
   salesCount: { type: Number, default: 0 },
   productCount: { type: Number, default: 0 },
   followerCount: { type: Number, default: 0 },
+  translations: {
+    name: { type: Map, of: String, default: {} },
+    description: { type: Map, of: String, default: {} },
+    address: { type: Map, of: String, default: {} },
+    closedReason: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 shopSchema.pre('save', async function(next) {

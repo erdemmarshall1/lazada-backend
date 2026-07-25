@@ -1193,6 +1193,7 @@
   "category": {
     "products": {
       "allTitle": "All {categoryTitle}",
+      "subtitle": "Shop our curated selection of {category}",
       "quickView": "Quick View",
       "loading": "Loading...",
       "empty": "No products found in {categoryTitle}",

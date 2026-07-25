@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate:lang": "node scripts/validate-translations.cjs",
+    "restructure:lang": "node scripts/restructure-locales.cjs",
+    "translate:lang": "node scripts/translate-locales.cjs",
+    "generate:lang": "node scripts/generate-translations.cjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.8.0",
@@ -15,6 +19,7 @@
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.7",
     "element-plus": "^2.3.2",
+    "google-translate-api-x": "^10.7.3",
     "pinia": "^2.0.33",
     "qrcode": "^1.5.4",
     "qs": "^6.11.1",

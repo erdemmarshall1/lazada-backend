@@ -40,6 +40,7 @@ const imageProxy = require('./imageProxy');
 const backup = require('./backup');
 const report = require('./report');
 const settings = require('./settings');
+const translate = require('./translate');
 const session = require('./session');
 const submission = require('./submission');
 
@@ -86,6 +87,7 @@ router.use('/home/payment', payment);
 router.use('/home/payment-settings', paymentSettings);
 router.use('/home/image', imageProxy);
 router.use('/home/admin', backup);
+router.use('/home/admin', translate);
 router.use('/home/report', report);
 router.use('/home/admin/settings', settings);
 router.use('/home/session', session);

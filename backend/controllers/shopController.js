@@ -4,9 +4,19 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const InvitationCode = require('../models/InvitationCode');
 const { success, fail, paginate } = require('../utils/response');
+const { getLang, applyTranslation, applyTranslationTags, applyTranslationSkuAttrs } = require('../utils/translate');
+
+function translateShopProduct(p, lang) {
+  if (!p || lang === 'en') return p
+  let r = applyTranslation(p, lang, ['name', 'description'])
+  r = applyTranslationTags(r, lang, 'tags')
+  r = applyTranslationSkuAttrs(r, lang)
+  return r
+}
 
 exports.getList = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { page: p, pageSize: ps, keyword } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const query = { status: 1 };
@@ -20,7 +30,7 @@ exports.getList = async (req, res) => {
       Shop.find(query).sort({ salesCount: -1 }).skip(skip).limit(limit),
       Shop.countDocuments(query),
     ]);
-    res.json(success({ list, total, page, pageSize }));
+    res.json(success({ list: list.map(s => applyTranslation(s, lang, ['name', 'description', 'address'])), total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -28,10 +38,11 @@ exports.getList = async (req, res) => {
 
 exports.getInfo = async (req, res) => {
   try {
+    const lang = getLang(req);
     const shop = await Shop.findById(req.query.id).populate('userId', 'username');
     if (!shop) return res.json(fail('Shop not found'));
     if (shop.logo && shop.logo.startsWith('/uploads/')) shop.logo = DEFAULT_STORE_LOGO
-    res.json(success(shop));
+    res.json(success(applyTranslation(shop, lang, ['name', 'description', 'address', 'closedReason'])));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -39,6 +50,7 @@ exports.getInfo = async (req, res) => {
 
 exports.getGoodsList = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { shopId, page: p, pageSize: ps } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const query = { shopId, status: 1 };
@@ -46,7 +58,7 @@ exports.getGoodsList = async (req, res) => {
       Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Product.countDocuments(query),
     ]);
-    res.json(success({ list, total, page, pageSize }));
+    res.json(success({ list: list.map(p => translateShopProduct(p, lang)), total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }

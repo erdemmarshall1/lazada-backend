@@ -1,8 +1,10 @@
 const Notification = require('../models/Notification');
 const { success, fail, paginate } = require('../utils/response');
+const { getLang, applyTranslation } = require('../utils/translate');
 
 exports.list = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { page: p, pageSize: ps, unread } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps || 20);
     const filter = { userId: req.user._id };
@@ -12,7 +14,7 @@ exports.list = async (req, res) => {
       Notification.countDocuments(filter),
       Notification.countDocuments({ userId: req.user._id, isRead: false }),
     ]);
-    res.json(success({ list, total, unreadCount, page, pageSize }));
+    res.json(success({ list: list.map(n => applyTranslation(n, lang, ['title', 'message'])), total, unreadCount, page, pageSize }));
   } catch (error) { res.json(fail(error.message)); }
 };
 

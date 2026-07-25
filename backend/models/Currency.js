@@ -8,6 +8,9 @@ const currencySchema = new mongoose.Schema({
   isDefault: { type: Boolean, default: false },
   status: { type: Number, enum: [0, 1], default: 1 },
   sort: { type: Number, default: 0 },
+  translations: {
+    name: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Currency', currencySchema);

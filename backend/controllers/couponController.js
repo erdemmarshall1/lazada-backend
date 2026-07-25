@@ -1,6 +1,7 @@
 const Coupon = require('../models/Coupon');
 const Order = require('../models/Order');
 const { success, fail, paginate } = require('../utils/response');
+const { getLang, applyTranslation } = require('../utils/translate');
 
 exports.create = async (req, res) => {
   try {
@@ -24,6 +25,7 @@ exports.create = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { page: p, pageSize: ps, status } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const query = {};
@@ -32,7 +34,7 @@ exports.list = async (req, res) => {
       Coupon.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Coupon.countDocuments(query),
     ]);
-    res.json(success({ list, total, page, pageSize }));
+    res.json(success({ list: list.map(c => applyTranslation(c, lang, ['description'])), total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }
@@ -62,6 +64,7 @@ exports.remove = async (req, res) => {
 
 exports.validate = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { code, orderAmount } = req.body;
     if (!code) return res.json(fail('Coupon code is required'));
 
@@ -85,10 +88,11 @@ exports.validate = async (req, res) => {
       }
     }
 
+    const translated = applyTranslation(coupon, lang, ['description']);
     res.json(success({
       coupon: {
         _id: coupon._id, code: coupon.code, type: coupon.type,
-        value: coupon.value, description: coupon.description,
+        value: coupon.value, description: translated.description,
       },
       discount,
       finalAmount: Math.max(0, (orderAmount || 0) - discount),

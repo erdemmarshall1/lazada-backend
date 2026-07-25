@@ -7,6 +7,9 @@ const bannerSchema = new mongoose.Schema({
   sort: { type: Number, default: 0 },
   position: { type: String, enum: ['home', 'category'], default: 'home' },
   status: { type: Number, enum: [0, 1], default: 1 },
+  translations: {
+    title: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 bannerSchema.index({ position: 1, sort: 1 });

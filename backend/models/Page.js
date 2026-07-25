@@ -10,6 +10,13 @@ const pageSchema = new mongoose.Schema({
   metaTitle: { type: String, default: '' },
   metaDescription: { type: String, default: '' },
   sort: { type: Number, default: 0 },
+  translations: {
+    title: { type: Map, of: String, default: {} },
+    content: { type: Map, of: String, default: {} },
+    summary: { type: Map, of: String, default: {} },
+    metaTitle: { type: Map, of: String, default: {} },
+    metaDescription: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 pageSchema.index({ slug: 1 });

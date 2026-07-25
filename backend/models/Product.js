@@ -34,6 +34,13 @@ const productSchema = new mongoose.Schema({
   flashSaleStock: { type: Number, default: 0 },
   profitPercentage: { type: Number, default: 20, min: 0, max: 1000 },
   originalId: { type: String, default: '' },
+  translations: {
+    name: { type: Map, of: String, default: {} },
+    description: { type: Map, of: String, default: {} },
+    tags: { type: Map, of: String, default: {} },
+    skuAttrNames: { type: Map, of: String, default: {} },
+    skuAttrValues: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 productSchema.index({ name: 'text', description: 'text' });

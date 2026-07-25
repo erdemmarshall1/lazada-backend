@@ -13,6 +13,9 @@ const menuSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true, lowercase: true, trim: true },
   items: [menuItemSchema],
   status: { type: Number, enum: [0, 1], default: 1 },
+  translations: {
+    labels: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Menu', menuSchema);

@@ -6,6 +6,11 @@ const faqSchema = new mongoose.Schema({
   category: { type: String, default: '' },
   status: { type: Number, enum: [0, 1], default: 1 },
   sort: { type: Number, default: 0 },
+  translations: {
+    question: { type: Map, of: String, default: {} },
+    answer: { type: Map, of: String, default: {} },
+    category: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 faqSchema.index({ status: 1, sort: 1, category: 1 });

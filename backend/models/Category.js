@@ -8,6 +8,9 @@ const categorySchema = new mongoose.Schema({
   image: { type: String, default: '' },
   sort: { type: Number, default: 0 },
   status: { type: Number, enum: [0, 1], default: 1 },
+  translations: {
+    name: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 categorySchema.index({ parentId: 1 });

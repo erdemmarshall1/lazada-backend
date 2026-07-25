@@ -4,10 +4,14 @@ const Faq = require('../models/Faq');
 const Menu = require('../models/Menu');
 const HomepageSection = require('../models/HomepageSection');
 const { success, fail, paginate } = require('../utils/response');
+const { getLang, applyTranslation, applyTranslationTags, applyTranslationMenu, applyTranslationNested } = require('../utils/translate');
 
 // ---- Pages ----
+const PAGE_FIELDS = ['title', 'content', 'summary', 'metaTitle', 'metaDescription']
+
 exports.getPages = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { page: p, pageSize: ps, status } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const filter = {};
@@ -16,23 +20,25 @@ exports.getPages = async (req, res) => {
       Page.find(filter).sort({ sort: -1, createdAt: -1 }).skip(skip).limit(limit),
       Page.countDocuments(filter),
     ]);
-    res.json(success({ list, total, page, pageSize }));
+    res.json(success({ list: list.map(p => applyTranslation(p, lang, PAGE_FIELDS)), total, page, pageSize }));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getPageById = async (req, res) => {
   try {
+    const lang = getLang(req);
     const page = await Page.findById(req.params.id);
     if (!page) return res.json(fail('Page not found'));
-    res.json(success(page));
+    res.json(success(applyTranslation(page, lang, PAGE_FIELDS)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getPageBySlug = async (req, res) => {
   try {
+    const lang = getLang(req);
     const page = await Page.findOne({ slug: req.params.slug, status: 1 });
     if (!page) return res.json(fail('Page not found'));
-    res.json(success(page));
+    res.json(success(applyTranslation(page, lang, PAGE_FIELDS)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
@@ -64,8 +70,16 @@ exports.deletePage = async (req, res) => {
 };
 
 // ---- Blogs ----
+function translateBlog(blog, lang) {
+  if (!blog || lang === 'en') return blog
+  let r = applyTranslation(blog, lang, ['title', 'content', 'summary', 'category', 'author'])
+  r = applyTranslationTags(r, lang, 'tags')
+  return r
+}
+
 exports.getBlogs = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { page: p, pageSize: ps, status, category } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
     const filter = {};
@@ -75,23 +89,25 @@ exports.getBlogs = async (req, res) => {
       Blog.find(filter).sort({ publishedAt: -1, createdAt: -1 }).skip(skip).limit(limit),
       Blog.countDocuments(filter),
     ]);
-    res.json(success({ list, total, page, pageSize }));
+    res.json(success({ list: list.map(b => translateBlog(b, lang)), total, page, pageSize }));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getBlogById = async (req, res) => {
   try {
+    const lang = getLang(req);
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.json(fail('Blog not found'));
-    res.json(success(blog));
+    res.json(success(translateBlog(blog, lang)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getBlogBySlug = async (req, res) => {
   try {
+    const lang = getLang(req);
     const blog = await Blog.findOne({ slug: req.params.slug, status: 1 });
     if (!blog) return res.json(fail('Blog not found'));
-    res.json(success(blog));
+    res.json(success(translateBlog(blog, lang)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
@@ -129,22 +145,26 @@ exports.deleteBlog = async (req, res) => {
 };
 
 // ---- FAQs ----
+const FAQ_FIELDS = ['question', 'answer', 'category']
+
 exports.getFaqs = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { status, category } = req.query;
     const filter = {};
     if (status !== undefined) filter.status = parseInt(status);
     if (category) filter.category = category;
     const list = await Faq.find(filter).sort({ sort: 1, createdAt: -1 });
-    res.json(success(list));
+    res.json(success(list.map(f => applyTranslation(f, lang, FAQ_FIELDS))));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getFaqById = async (req, res) => {
   try {
+    const lang = getLang(req);
     const faq = await Faq.findById(req.params.id);
     if (!faq) return res.json(fail('FAQ not found'));
-    res.json(success(faq));
+    res.json(success(applyTranslation(faq, lang, FAQ_FIELDS)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
@@ -176,16 +196,18 @@ exports.deleteFaq = async (req, res) => {
 // ---- Menus ----
 exports.getMenus = async (req, res) => {
   try {
+    const lang = getLang(req);
     const menus = await Menu.find().sort({ createdAt: -1 });
-    res.json(success(menus));
+    res.json(success(menus.map(m => applyTranslationMenu(m, lang))));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getMenuByKey = async (req, res) => {
   try {
+    const lang = getLang(req);
     const menu = await Menu.findOne({ key: req.params.key, status: 1 });
     if (!menu) return res.json(fail('Menu not found'));
-    res.json(success(menu));
+    res.json(success(applyTranslationMenu(menu, lang)));
   } catch (error) { res.json(fail(error.message)); }
 };
 
@@ -217,20 +239,29 @@ exports.deleteMenu = async (req, res) => {
 };
 
 // ---- Homepage Sections ----
+function translateHomepageSection(section, lang) {
+  if (!section || lang === 'en') return section
+  let r = applyTranslation(section, lang, ['title', 'subtitle'])
+  r = applyTranslationNested(r, lang, 'config', ['text', 'html'])
+  return r
+}
+
 exports.getHomepageSections = async (req, res) => {
   try {
+    const lang = getLang(req);
     const { status } = req.query;
     const filter = {};
     if (status !== undefined) filter.status = parseInt(status);
     const sections = await HomepageSection.find(filter).sort({ sort: 1, createdAt: -1 });
-    res.json(success(sections));
+    res.json(success(sections.map(s => translateHomepageSection(s, lang))));
   } catch (error) { res.json(fail(error.message)); }
 };
 
 exports.getActiveHomepageSections = async (req, res) => {
   try {
+    const lang = getLang(req);
     const sections = await HomepageSection.find({ status: 1 }).sort({ sort: 1 });
-    res.json(success(sections));
+    res.json(success(sections.map(s => translateHomepageSection(s, lang))));
   } catch (error) { res.json(fail(error.message)); }
 };
 

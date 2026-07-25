@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PaymentSetting = require('../models/PaymentSetting');
 const { success, fail } = require('../utils/response');
+const { getLang, applyTranslation } = require('../utils/translate');
 
 const DEFAULTS = [
   { method: 'USDT_TRC20', label: 'USDT TRC20', walletAddress: 'TXxMu8nG3Tyokqq7td8phfjNPPEUybicyV', isActive: true, sort: 1 },
@@ -15,12 +16,13 @@ const DEFAULTS = [
 // Public: get all active payment settings (auto-seeds defaults on first call)
 router.get('/', async (req, res) => {
   try {
+    const lang = getLang(req);
     const count = await PaymentSetting.countDocuments();
     if (count === 0) {
       await PaymentSetting.insertMany(DEFAULTS);
     }
     const list = await PaymentSetting.find({ isActive: true }).sort({ sort: 1, createdAt: -1 });
-    res.json(success(list));
+    res.json(success(list.map(p => applyTranslation(p, lang, ['label']))));
   } catch (error) {
     res.json(fail(error.message));
   }

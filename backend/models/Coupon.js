@@ -11,6 +11,9 @@ const couponSchema = new mongoose.Schema({
   expiresAt: { type: Date },
   status: { type: Number, enum: [0, 1], default: 1 },
   description: { type: String, default: '' },
+  translations: {
+    description: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 couponSchema.index({ code: 1 });

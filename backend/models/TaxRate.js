@@ -7,6 +7,10 @@ const taxRateSchema = new mongoose.Schema({
   region: { type: String, default: '' },
   isDefault: { type: Boolean, default: false },
   status: { type: Number, enum: [0, 1], default: 1 },
+  translations: {
+    name: { type: Map, of: String, default: {} },
+    region: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('TaxRate', taxRateSchema);

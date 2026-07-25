@@ -11,6 +11,14 @@ const blogSchema = new mongoose.Schema({
   author: { type: String, default: '' },
   status: { type: Number, enum: [0, 1], default: 1 },
   publishedAt: { type: Date, default: null },
+  translations: {
+    title: { type: Map, of: String, default: {} },
+    content: { type: Map, of: String, default: {} },
+    summary: { type: Map, of: String, default: {} },
+    category: { type: Map, of: String, default: {} },
+    tags: { type: Map, of: String, default: {} },
+    author: { type: Map, of: String, default: {} },
+  },
 }, { timestamps: true });
 
 blogSchema.index({ slug: 1 });
