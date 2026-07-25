@@ -180,6 +180,34 @@ app.get('/api/reseed', async (req, res) => {
   }
 });
 
+// Translate content trigger (protected by REIMPORT_SECRET)
+let translateInProgress = false;
+app.get('/api/translate', async (req, res) => {
+  if (req.query.secret !== (process.env.REIMPORT_SECRET || 'reimport123')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (translateInProgress) {
+    return res.json({ message: 'Translate already in progress' });
+  }
+  translateInProgress = true;
+  res.json({ message: 'Translate started' });
+  try {
+    const { fork } = require('child_process');
+    const child = fork(require('path').join(__dirname, 'scripts/translate-content.cjs'), ['--resume=' + require('path').join(__dirname, 'scripts/checkpoint.json')], { stdio: 'inherit' });
+    child.on('exit', (code) => {
+      console.log('Translate script exited with code', code);
+      translateInProgress = false;
+    });
+    child.on('error', (err) => {
+      console.error('Translate script error:', err.message);
+      translateInProgress = false;
+    });
+  } catch (e) {
+    console.error('Translate error:', e.message);
+    translateInProgress = false;
+  }
+});
+
 const errorHandler = require('./middleware/errorHandler');
 
 // Error handling middleware
