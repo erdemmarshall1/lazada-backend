@@ -102,11 +102,11 @@ async function translateGeneral(name, Model, fields, fieldConfigs, options = {})
   if (SKIP_LIST.includes(name)) { console.log(`Skipping ${name}...`); return }
 
   console.log(`\n=== Translating ${name} ===`);
-  const query = { $or: [{ translations: { $exists: false } }, { translations: null }] };
+  const query = {};
   if (checkpoint[name]) query._id = { $gt: checkpoint[name] };
   const total = await Model.countDocuments(query);
-  if (total === 0) { console.log(`All ${name} already have translations.`); return }
-  console.log(`${name} to translate: ${total}`);
+  if (total === 0) { console.log(`No ${name} found.`); return }
+  console.log(`${name} to process: ${total}`);
 
   const cursor = Model.find(query).sort({ _id: 1 }).cursor();
   let count = 0;
@@ -217,7 +217,7 @@ async function translateCategories(Category) {
   if (TYPE_FILTER && TYPE_FILTER !== 'Category') return
   if (SKIP_LIST.includes('Category')) { console.log('Skipping Category...'); return }
   console.log('\n=== Translating Categories ===');
-  const query = { $or: [{ translations: { $exists: false } }, { translations: null }] };
+  const query = {};
   if (checkpoint.Category) query._id = { $gt: checkpoint.Category };
   const total = await Category.countDocuments(query);
   if (total === 0) { console.log('All categories already have translations.'); return }

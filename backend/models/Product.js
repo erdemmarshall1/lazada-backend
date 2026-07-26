@@ -61,4 +61,9 @@ productSchema.pre('save', function (next) {
   next();
 });
 
+productSchema.post('save', function (doc) {
+  const { autoTranslateDocument } = require('../services/autoTranslate');
+  autoTranslateDocument(doc, ['name', 'description', 'tags']);
+});
+
 module.exports = mongoose.model('Product', productSchema);
