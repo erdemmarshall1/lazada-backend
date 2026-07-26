@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const speakeasy = require('speakeasy');
 const { adminAuth } = require('../middleware/auth');
 const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
@@ -21,8 +22,8 @@ const privacyController = require('../controllers/privacyController');
 const upload = require('../middleware/upload');
 
 // ---- Admin Authentication ----
-const adminGenerateToken = (id) => {
-  return jwt.sign({ id, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const adminGenerateToken = (id, tokenVersion) => {
+  return jwt.sign({ id, type: 'access', version: tokenVersion || '' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 const adminGenerateRefreshToken = (user) => {
@@ -31,7 +32,7 @@ const adminGenerateRefreshToken = (user) => {
 };
 
 const adminIssueTokens = (user) => {
-  const token = adminGenerateToken(user._id);
+  const token = adminGenerateToken(user._id, user.tokenVersion);
   const refreshToken = adminGenerateRefreshToken(user);
   return { token, refreshToken };
 };
@@ -75,6 +76,8 @@ router.post('/auth/login', async (req, res) => {
       return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
     }
     adminRecordLogin(user._id, req, 'password', true);
+    user.tokenVersion = crypto.randomBytes(8).toString('hex');
+    await user.save();
     const tokens = adminIssueTokens(user);
     const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
     res.json(success({ ...tokens, userInfo: user, ...extra }, 'Login successful'));
@@ -110,6 +113,8 @@ router.post('/auth/login/2fa', async (req, res) => {
     });
     if (verified) {
       adminRecordLogin(user._id, req, '2fa', true);
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
       const tokens = adminIssueTokens(user);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful'));
     }
@@ -118,6 +123,8 @@ router.post('/auth/login/2fa', async (req, res) => {
       user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
       await user.save();
       adminRecordLogin(user._id, req, 'backup_code', true);
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
       const tokens = adminIssueTokens(user);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful (backup code used)'));
     }

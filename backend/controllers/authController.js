@@ -22,8 +22,8 @@ const recordLogin = (userId, req, method = 'password', success = true) => {
   }).catch(() => {});
 };
 
-const generateToken = (id) => {
-  return jwt.sign({ id, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const generateToken = (id, tokenVersion) => {
+  return jwt.sign({ id, type: 'access', version: tokenVersion || '' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 const generateRefreshToken = (user) => {
@@ -37,7 +37,7 @@ const sendVerificationEmail = async (user) => {
 };
 
 const issueTokens = (user) => {
-  const token = generateToken(user._id);
+  const token = generateToken(user._id, user.tokenVersion);
   const refreshToken = generateRefreshToken(user);
   return { token, refreshToken };
 };
@@ -67,6 +67,8 @@ exports.login = async (req, res) => {
       return res.json(success({ twoFactorRequired: true, tempToken, method: user.twoFactorMethod }, '2FA verification required'));
     }
     recordLogin(user._id, req, 'password', true);
+    user.tokenVersion = crypto.randomBytes(8).toString('hex');
+    await user.save();
     const tokens = issueTokens(user);
     const extra = user.needsPasswordSetup ? { needsPasswordSetup: true } : {};
     recordSessionActivity(user._id, req);
@@ -103,6 +105,8 @@ exports.login2fa = async (req, res) => {
     });
     if (verified) {
       recordLogin(user._id, req, '2fa', true);
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
       const tokens = issueTokens(user);
       recordSessionActivity(user._id, req);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful'));
@@ -112,6 +116,8 @@ exports.login2fa = async (req, res) => {
       user.backupCodes = user.backupCodes.filter(c => c !== isBackup);
       await user.save();
       recordLogin(user._id, req, 'backup_code', true);
+      user.tokenVersion = crypto.randomBytes(8).toString('hex');
+      await user.save();
       const tokens = issueTokens(user);
       recordSessionActivity(user._id, req);
       return res.json(success({ ...tokens, userInfo: user }, 'Login successful (backup code used)'));
@@ -133,7 +139,8 @@ exports.register = async (req, res) => {
     if (exists) {
       return res.json(fail('Username or email already exists'));
     }
-    const user = await User.create({ username, email, password, phone });
+    const tokenVersion = crypto.randomBytes(8).toString('hex');
+    const user = await User.create({ username, email, password, phone, tokenVersion });
     await Cart.create({ userId: user._id, items: [] });
     await Wallet.create({ userId: user._id });
     recordLogin(user._id, req, 'register', true);
@@ -215,6 +222,7 @@ exports.setupPassword = async (req, res) => {
     }
     user.password = password;
     user.needsPasswordSetup = false;
+    user.tokenVersion = crypto.randomBytes(8).toString('hex');
     await user.save();
     res.json(success(null, 'Password set successfully. Please login with your new password.'));
   } catch (error) {
