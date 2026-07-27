@@ -10,7 +10,7 @@
       <div class="hp-banner" v-if="section.type === 'banner' && images(section).length">
         <Swiper :modules="[SwiperAutoplay]" :slides-per-view="1" :loop="images(section).length > 1" :autoplay="{ delay: 5000 }">
           <SwiperSlide v-for="(img, i) in images(section)" :key="i">
-            <img class="hp-banner-img" :src="$imgUrl(img)" alt="" @error="$imgFallback" />
+            <img class="hp-banner-img" :src="$imgUrl(img)" alt="" loading="lazy" @error="$imgFallback" />
           </SwiperSlide>
         </Swiper>
       </div>
@@ -19,7 +19,7 @@
       <div class="hp-product-grid" v-if="section.type === 'product_grid' && sectionProducts(section._id).length">
         <div class="home-goods-content" style="grid-template-columns: repeat(5, 1fr);">
           <div class="home-hots-item" v-for="item in sectionProducts(section._id)" :key="item._id" @click="$router.push('/gooddetail?id=' + item._id)">
-            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
+            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" loading="lazy" @error="$imgFallback" />
             <div class="home-hots-text">{{ item.name }}</div>
             <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
           </div>
@@ -40,7 +40,7 @@
       <div class="hp-featured" v-if="section.type === 'featured' && sectionProducts(section._id).length">
         <div class="home-goods-content" style="grid-template-columns: repeat(5, 1fr);">
           <div class="home-hots-item" v-for="item in sectionProducts(section._id).slice(0, 10)" :key="item._id" @click="$router.push('/gooddetail?id=' + item._id)">
-            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" @error="$imgFallback" />
+            <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" alt="" loading="lazy" @error="$imgFallback" />
             <div class="home-hots-text">{{ item.name }}</div>
             <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
           </div>

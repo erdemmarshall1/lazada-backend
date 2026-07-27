@@ -72,6 +72,7 @@ const flatMenu = computed(() => {
   const items = [
     { label: t('user.myCenter.myAccount'), path: '/myaccount' },
     { label: t('user.myCenter.currentBalance'), path: '/balance' },
+    { label: store.isSeller ? t('user.myCenter.shopDetails') : t('user.myCenter.applyForMerchant'), path: store.isSeller ? '/storesettings' : '/applystore' },
     { label: t('user.myCenter.myOrders'), path: '/myorder' },
     { label: t('user.myCenter.orderManagement'), path: '/storeordercontrol', hidden: !store.isSeller },
     { label: t('user.myCenter.billingRecords'), path: '/mybill' },
@@ -82,7 +83,6 @@ const flatMenu = computed(() => {
     { label: t('user.myCenter.internalMessage'), path: '/internalmsg' },
     { label: t('user.myCenter.myConsultations'), path: '/myconsultations' },
     { label: t('user.myCenter.wholesaleManagement'), path: '/sourcegoods' },
-    { label: store.isSeller ? t('user.myCenter.shopDetails') : t('user.myCenter.applyForMerchant'), path: store.isSeller ? '/storesettings' : '/applystore' },
     { label: t('user.myCenter.productManagement'), path: '/storegoodcontrol' },
     { label: t('user.myCenter.logisticsManagement'), path: '/seller-logistics', hidden: !store.isSeller },
   ]

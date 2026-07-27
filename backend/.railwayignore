@@ -1,7 +1,8 @@
 node_modules
-uploads
 .git
+.gitignore
 *.log
 .env.local
 .env.development
 scraped_images
+uploads

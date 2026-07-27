@@ -1,21 +1,22 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import App from './App.vue'
 import router from './router'
 import i18n, { setDocumentLang, setAppInstance } from './locales'
-import './assets/styles/tailwind.css';
-import './assets/styles/global.css';
+import './assets/styles/tailwind.css'
+import './assets/styles/global.css'
 import './assets/styles/iconfont.css'
 import { useAppStore } from '@/stores/app'
 import { connectSocket, getSocket } from '@/socket'
 import { initPush } from '@/composables/usePush'
 import { usePwa } from '@/pwa/usePwa'
 import { imgUrl as _imgUrl, API_BASE } from '@/api/request'
+import lazyImg from '@/directives/lazyImg'
 
 const app = createApp(App)
 app.config.globalProperties.$imgUrl = _imgUrl
+app.directive('lazy-img', lazyImg)
 
 const IMG_CDN = 'https://res.cloudinary.com/u7xxu5dq/image/upload'
 
@@ -43,13 +44,6 @@ app.config.globalProperties.$imgFallback = function (e) {
     img.dataset.errored = '1';
   };
 
-  if (src.includes('res.cloudinary.com')) {
-    handleFallback('Product');
-    return;
-  }
-
-  const path = src.startsWith(API_BASE) ? src.slice(API_BASE.length) : (src.startsWith('http') ? '' : src);
-  const filename = getFilename(path || src);
   const tryUrl = (url, flag) => {
     if (img.dataset[flag]) return false;
     if (url && url !== src) {
@@ -62,22 +56,34 @@ app.config.globalProperties.$imgFallback = function (e) {
     return false;
   };
 
+  const withAuto = (cdnPath) => `${IMG_CDN}/f_auto,q_auto${cdnPath.startsWith('/') ? cdnPath : `/${cdnPath}`}`;
+
+  if (src.includes('res.cloudinary.com')) {
+    const m = src.match(/\/image\/upload\/(?:[^/]+\/)*(.+)$/);
+    const pathPart = m ? m[1] : '';
+    if (pathPart && tryUrl(`${API_BASE}/${pathPart}`, 'backendTried')) return;
+    handleFallback('Product');
+    return;
+  }
+
+  const path = src.startsWith(API_BASE) ? src.slice(API_BASE.length) : (src.startsWith('http') ? '' : src);
+  const filename = getFilename(path || src);
+
   if (path.startsWith('/home/image/proxy') || path.startsWith('/home/image/placeholder')) {
     handleFallback(filename);
     return;
   }
 
-  if (path && tryUrl(`${IMG_CDN}${path.startsWith('/') ? path : `/${path}`}`, 'cdnTried')) return;
-  if (filename && !path.includes('/product_images/') && tryUrl(`${IMG_CDN}/uploads/product_images/${filename}`, 'productImagesTried')) return;
-  if (filename && tryUrl(`${IMG_CDN}/${filename}`, 'filenameTried')) return;
-  if (filename && tryUrl(`${IMG_CDN}/products/${filename}`, 'productsTried')) return;
+  if (path && tryUrl(withAuto(path), 'cdnTried')) return;
+  if (filename && !path.includes('/product_images/') && tryUrl(withAuto(`/uploads/product_images/${filename}`), 'productImagesTried')) return;
+  if (filename && tryUrl(withAuto(`/${filename}`), 'filenameTried')) return;
+  if (filename && tryUrl(withAuto(`/products/${filename}`), 'productsTried')) return;
 
   handleFallback(filename);
 };
 app.use(createPinia())
 setAppInstance(app)
 app.use(router)
-app.use(ElementPlus)
 app.use(i18n)
 app.mount('#app')
 const loading = document.getElementById('app-loading')

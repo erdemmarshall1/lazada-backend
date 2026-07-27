@@ -33,6 +33,7 @@ const productSchema = new mongoose.Schema({
   flashSaleEnd: { type: Date },
   flashSaleStock: { type: Number, default: 0 },
   profitPercentage: { type: Number, default: 20, min: 0, max: 1000 },
+  isDistributed: { type: Boolean, default: false },
   originalId: { type: String, default: '' },
   translations: {
     name: { type: Map, of: String, default: {} },

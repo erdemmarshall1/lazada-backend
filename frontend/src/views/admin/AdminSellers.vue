@@ -15,6 +15,22 @@
       <el-table-column prop="_id" label="ID" width="200" />
       <el-table-column prop="storeNumber" label="Store #" width="100" />
       <el-table-column prop="name" label="Store Name" />
+      <el-table-column label="Level" width="110">
+        <template #default="{row}">
+          <el-select v-model="row.level" size="small" @change="updateLevel(row)" placeholder="Set level" style="width:100px">
+            <el-option label="—" value="" />
+            <el-option label="Bronze" value="bronze" />
+            <el-option label="Silver" value="silver" />
+            <el-option label="Gold" value="gold" />
+            <el-option label="Platinum" value="platinum" />
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column label="Credit Score" width="130">
+        <template #default="{row}">
+          <el-input-number v-model="row.creditScore" :min="0" :max="1000" size="small" controls-position="right" style="width:110px" @change="updateCreditScore(row)" />
+        </template>
+      </el-table-column>
       <el-table-column label="Seller ID" width="120">
         <template #default="{row}">{{ row.userId?.sellerId || '—' }}</template>
       </el-table-column>
@@ -56,7 +72,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, qe } from '@/api/request'
+import { get, post, put, qe } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const shops = ref([])
@@ -115,6 +131,14 @@ const loginAsSeller = async (row) => {
     localStorage.setItem('seller_temp_token', res.data.token)
     window.open(`/mystore?temp_token=${res.data.token}`, '_blank')
   }
+}
+const updateLevel = async (row) => {
+  const res = await qe(put(`/home/admin/shops/${row._id}/level`, { level: row.level }))
+  if (res) ElMessage.success(res.msg)
+}
+const updateCreditScore = async (row) => {
+  const res = await qe(put(`/home/admin/shops/${row._id}/credit-score`, { creditScore: row.creditScore }))
+  if (res) ElMessage.success(res.msg)
 }
 
 onMounted(fetchShops)

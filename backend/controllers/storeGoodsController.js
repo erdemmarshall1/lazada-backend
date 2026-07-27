@@ -129,6 +129,7 @@ exports.distribute = async (req, res) => {
     });
 
     await Shop.findByIdAndUpdate(shop._id, { $inc: { productCount: 1 } });
+    await Product.findByIdAndUpdate(productId, { isDistributed: true });
 
     res.json(success({
       product: newProduct,

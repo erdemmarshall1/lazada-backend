@@ -7,6 +7,8 @@ const API_CACHE = 'theoutnet-wholesale-api-v3';
 const OFFLINE_URL = '/offline.html';
 const MANIFEST = self.__WB_MANIFEST || [];
 
+const IMAGE_CACHE_BUDGET = 50 * 1024 * 1024;
+
 const PRODUCT_PATTERN = /\/(goods-detail|searchgoods|store-detail|main)\//;
 const IMAGE_PATTERN = /\.(png|jpg|jpeg|gif|svg|webp|avif|ico)(\?.*)?$/;
 const FONT_PATTERN = /\.(woff2?|ttf|otf|eot)(\?.*)?$/;
@@ -151,11 +153,28 @@ function imageStrategy(req) {
       return fetch(req).then((res) => {
         if (res && res.status === 200) {
           cache.put(req, res.clone());
+          enforceImageCacheBudget(cache);
         }
         return res;
       }).catch(() => {
         return caches.match(OFFLINE_URL);
       });
+    });
+  });
+}
+
+function enforceImageCacheBudget(cache) {
+  cache.keys().then((keys) => {
+    if (keys.length <= 50) return;
+    Promise.all(keys.map((k) => cache.match(k))).then((responses) => {
+      const entries = keys.map((k, i) => ({ key: k, size: responses[i] ? responses[i].headers.get('content-length') || 0 : 0 }));
+      entries.sort((a, b) => b.size - a.size);
+      let total = entries.reduce((s, e) => s + Number(e.size), 0);
+      while (total > IMAGE_CACHE_BUDGET && entries.length > 10) {
+        const entry = entries.pop();
+        total -= Number(entry.size);
+        cache.delete(entry.key);
+      }
     });
   });
 }

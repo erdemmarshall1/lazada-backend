@@ -20,6 +20,8 @@ const shopSchema = new mongoose.Schema({
   closedAt: { type: Date },
   closedReason: { type: String, default: '' },
   rating: { type: Number, default: 5, min: 0, max: 5 },
+  level: { type: String, enum: ['bronze', 'silver', 'gold', 'platinum', ''], default: '' },
+  creditScore: { type: Number, default: 100, min: 0, max: 1000 },
   salesCount: { type: Number, default: 0 },
   productCount: { type: Number, default: 0 },
   followerCount: { type: Number, default: 0 },

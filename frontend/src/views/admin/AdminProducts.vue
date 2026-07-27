@@ -39,6 +39,12 @@
           <el-tag v-else size="small" type="danger">None</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="Distributed" width="100" align="center">
+        <template #default="{row}">
+          <el-tag v-if="row.isDistributed" size="small" type="success">Distributed</el-tag>
+          <el-tag v-else size="small" type="info">Source</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="Status" width="100">
         <template #default="{row}">{{ row.status === 1 ? 'Active' : 'Inactive' }}</template>
       </el-table-column>

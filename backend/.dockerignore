@@ -1,7 +1,9 @@
 node_modules
-# uploads — needed at runtime for multer file storage
+uploads
 .git
 *.log
+.env
 .env.local
 .env.development
 scraped_images
+.railwayignore

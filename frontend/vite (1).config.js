@@ -2,32 +2,12 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'url'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import ElementPlus from 'unplugin-element-plus/vite'
 
 export default defineConfig({
   plugins: [
     vue(),
-    AutoImport({
-      resolvers: [ElementPlusResolver()],
-      imports: ['vue', 'vue-router', 'pinia'],
-      dts: false,
-    }),
-    Components({
-      resolvers: [ElementPlusResolver()],
-      dts: false,
-    }),
-    ElementPlus({
-      useSource: false,
-    }),
     VitePWA({
       registerType: 'autoUpdate',
-      strategies: 'injectManifest',
-      srcDir: 'src/pwa',
-      filename: 'sw.js',
-      injectManifest: { injectionPoint: 'self.__WB_MANIFEST', maximumFileSizeToCacheInBytes: 8388608 },
       includeAssets: ['font/*.ttf', 'font/*.woff', 'font/*.woff2', 'font/*.png', 'img/*.svg', 'img/*.png'],
       manifest: {
         name: 'THE OUTNET WHOLESALE',
@@ -35,8 +15,8 @@ export default defineConfig({
         description: 'Wholesale luxury fashion marketplace — premium designer brands at wholesale prices',
         start_url: '/',
         display: 'standalone',
-        background_color: '#121212',
-        theme_color: '#121212',
+        background_color: '#ffffff',
+        theme_color: '#000000',
         orientation: 'portrait-primary',
         categories: ['shopping', 'fashion', 'lifestyle'],
         screenshots: [
@@ -45,30 +25,35 @@ export default defineConfig({
         icons: [
           { src: '/img/outnet-logo.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: '/img/outnet-logo.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/img/outnet-logo.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-          { src: '/img/outnet-logo.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ttf,woff,woff2,png,svg,ico}'],
+        navigateFallback: '/offline.html',
+        navigateFallbackAllowlist: [/^\/[^.]*$/],
+        navigateFallbackDenylist: [/\/main\//, /\/home\//, /\/api\//, /\/uploads\//],
+        runtimeCaching: [
+          {
+            urlPattern: /\/main\/|\/home\/|\/api\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'theoutnet-wholesale-api',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'theoutnet-wholesale-images',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
       },
     }),
   ],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-          'vendor-ui': ['element-plus', '@element-plus/icons-vue'],
-          'vendor-axios': ['axios', 'qs'],
-          'vendor-socket': ['socket.io-client'],
-          'vendor-swiper': ['swiper'],
-        },
-      },
-    },
-    reportCompressedSize: false,
-    chunkSizeWarningLimit: 500,
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

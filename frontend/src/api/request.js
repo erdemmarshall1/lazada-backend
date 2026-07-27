@@ -47,13 +47,21 @@ const needsProxy = (url) => {
   } catch { return false }
 }
 
-export const imgUrl = (path) => {
+const IMG_CDN = 'https://res.cloudinary.com/u7xxu5dq/image/upload'
+
+export const imgUrl = (path, options = {}) => {
   if (!path) return TRANSPARENT_PIXEL
   if (path.startsWith('http://') || path.startsWith('https://')) {
     if (needsProxy(path)) return `${API_BASE}/home/image/proxy?url=${encodeURIComponent(path)}`
     return path
   }
-  if (path.startsWith('/')) return `${API_BASE}${path}`
+  if (path.startsWith('/')) {
+    const transforms = ['f_auto', 'q_auto']
+    if (options.w) transforms.unshift(`w_${options.w}`)
+    if (options.h) transforms.unshift(`h_${options.h}`)
+    if (options.c) transforms.unshift(`c_${options.c}`)
+    return `${IMG_CDN}/${transforms.join(',')}${path}`
+  }
   return path
 }
 
