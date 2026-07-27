@@ -92,6 +92,7 @@ exports.distribute = async (req, res) => {
     const srcProduct = await Product.findById(productId);
     if (!srcProduct) return res.json(fail('Source product not found'));
     if (srcProduct.status !== 1) return res.json(fail('Source product is not active'));
+    if (srcProduct.isDistributed) return res.json(fail('This product has already been distributed'));
 
     const shop = await Shop.findOne({ userId: req.user._id, status: 1 });
     if (!shop) return res.json(fail('You need an approved store to distribute products'));
