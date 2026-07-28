@@ -162,7 +162,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t } = useI18n()
@@ -190,7 +190,7 @@ const genLoading = ref(false)
 const timezones = Intl.supportedValuesOf?.('timeZone') || ['UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Shanghai', 'Asia/Tokyo', 'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland']
 
 const loadGeneral = async () => {
-  const res = await get('/home/admin/settings/settings')
+  const res = await adminGet('/home/admin/settings/settings')
   if (res?.code === 0 && res?.data) {
     const map = {}
     res.data.forEach(s => { map[s.key] = s.value })
@@ -208,7 +208,7 @@ const loadGeneral = async () => {
 const saveGeneral = async () => {
   genLoading.value = true
   const settings = Object.entries(gen).map(([key, value]) => ({ key, value }))
-  const res = await post('/home/admin/settings/settings/bulk', { settings })
+  const res = await adminPost('/home/admin/settings/settings/bulk', { settings })
   genLoading.value = false
   if (res?.code === 0) ElMessage.success(t('admin.settingsPage.saved'))
   else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
@@ -224,7 +224,7 @@ const taxSaving = ref(false)
 
 const loadTax = async () => {
   taxLoading.value = true
-  const res = await get('/home/admin/settings/tax-rates')
+  const res = await adminGet('/home/admin/settings/tax-rates')
   if (res?.code === 0) taxRates.value = res.data || []
   taxLoading.value = false
 }
@@ -239,8 +239,8 @@ const saveTax = async () => {
   if (!taxForm.value.name) { ElMessage.warning(t('admin.settingsPage.nameRequired')); return }
   taxSaving.value = true
   let res
-  if (editingTax.value) res = await put(`/home/admin/settings/tax-rates/${editingTax.value}`, taxForm.value)
-  else res = await post('/home/admin/settings/tax-rates', taxForm.value)
+  if (editingTax.value) res = await adminPut(`/home/admin/settings/tax-rates/${editingTax.value}`, taxForm.value)
+  else res = await adminPost('/home/admin/settings/tax-rates', taxForm.value)
   taxSaving.value = false
   if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); taxDialog.value = false; loadTax() }
   else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
@@ -248,7 +248,7 @@ const saveTax = async () => {
 
 const delTax = async (row) => {
   try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
-    const res = await del(`/home/admin/settings/tax-rates/${row._id}`)
+    const res = await adminDel(`/home/admin/settings/tax-rates/${row._id}`)
     if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadTax() }
   } catch {}
 }
@@ -263,7 +263,7 @@ const curSaving = ref(false)
 
 const loadCurrencies = async () => {
   curLoading.value = true
-  const res = await get('/home/admin/settings/currencies')
+  const res = await adminGet('/home/admin/settings/currencies')
   if (res?.code === 0) currencies.value = res.data || []
   curLoading.value = false
 }
@@ -278,8 +278,8 @@ const saveCurrency = async () => {
   if (!curForm.value.code || !curForm.value.name || !curForm.value.symbol) { ElMessage.warning(t('admin.settingsPage.allFieldsRequired')); return }
   curSaving.value = true
   let res
-  if (editingCur.value) res = await put(`/home/admin/settings/currencies/${editingCur.value}`, curForm.value)
-  else res = await post('/home/admin/settings/currencies', curForm.value)
+  if (editingCur.value) res = await adminPut(`/home/admin/settings/currencies/${editingCur.value}`, curForm.value)
+  else res = await adminPost('/home/admin/settings/currencies', curForm.value)
   curSaving.value = false
   if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); curDialog.value = false; loadCurrencies() }
   else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
@@ -287,7 +287,7 @@ const saveCurrency = async () => {
 
 const delCurrency = async (row) => {
   try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
-    const res = await del(`/home/admin/settings/currencies/${row._id}`)
+    const res = await adminDel(`/home/admin/settings/currencies/${row._id}`)
     if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadCurrencies() }
   } catch {}
 }
@@ -302,7 +302,7 @@ const shipSaving = ref(false)
 
 const loadShipping = async () => {
   shipLoading.value = true
-  const res = await get('/home/admin/settings/shipping-methods')
+  const res = await adminGet('/home/admin/settings/shipping-methods')
   if (res?.code === 0) shippingMethods.value = res.data || []
   shipLoading.value = false
 }
@@ -317,8 +317,8 @@ const saveShipping = async () => {
   if (!shipForm.value.name) { ElMessage.warning(t('admin.settingsPage.nameRequired')); return }
   shipSaving.value = true
   let res
-  if (editingShip.value) res = await put(`/home/admin/settings/shipping-methods/${editingShip.value}`, shipForm.value)
-  else res = await post('/home/admin/settings/shipping-methods', shipForm.value)
+  if (editingShip.value) res = await adminPut(`/home/admin/settings/shipping-methods/${editingShip.value}`, shipForm.value)
+  else res = await adminPost('/home/admin/settings/shipping-methods', shipForm.value)
   shipSaving.value = false
   if (res?.code === 0) { ElMessage.success(res.msg || t('admin.settingsPage.saved')); shipDialog.value = false; loadShipping() }
   else ElMessage.error(res?.msg || t('admin.settingsPage.saveFailed'))
@@ -326,7 +326,7 @@ const saveShipping = async () => {
 
 const delShipping = async (row) => {
   try { await ElMessageBox.confirm(t('admin.settingsPage.deleteConfirm'), t('admin.settingsPage.confirmTitle'), { type: 'warning' })
-    const res = await del(`/home/admin/settings/shipping-methods/${row._id}`)
+    const res = await adminDel(`/home/admin/settings/shipping-methods/${row._id}`)
     if (res?.code === 0) { ElMessage.success(t('admin.settingsPage.deleted')); loadShipping() }
   } catch {}
 }

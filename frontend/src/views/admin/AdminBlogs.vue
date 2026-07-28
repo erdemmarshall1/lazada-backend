@@ -88,7 +88,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const blogs = ref([])
@@ -107,7 +107,7 @@ watch(() => dialog.visible, (v) => { if (v) tagsStr.value = (dialog.form.tags ||
 
 const loadData = async () => {
   loading.value = true
-  const res = await get('/home/cms/admin/blogs', { page: page.value, pageSize })
+  const res = await adminGet('/home/cms/admin/blogs', { page: page.value, pageSize })
   loading.value = false
   if (res?.code === 0 && res?.data) {
     blogs.value = res.data.list || []
@@ -131,7 +131,7 @@ const openDialog = (row) => {
 const save = async () => {
   const payload = { ...dialog.form, tags: tagsStr.value.split(',').map(t => t.trim()).filter(Boolean) }
   dialog.loading = true
-  const fn = dialog.isEdit ? put(`/home/cms/admin/blogs/${dialog.form._id}`) : post('/home/cms/admin/blogs')
+  const fn = dialog.isEdit ? adminPut(`/home/cms/admin/blogs/${dialog.form._id}`) : adminPost('/home/cms/admin/blogs')
   const res = await fn(payload)
   dialog.loading = false
   if (res?.code === 0) {
@@ -145,7 +145,7 @@ const save = async () => {
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(`Delete "${row.title}"?`, 'Confirm', { type: 'warning' }).then(async () => {
-    const res = await del(`/home/cms/admin/blogs/${row._id}`)
+    const res = await adminDel(`/home/cms/admin/blogs/${row._id}`)
     if (res?.code === 0) { ElMessage.success('Deleted'); loadData() }
   }).catch(() => {})
 }

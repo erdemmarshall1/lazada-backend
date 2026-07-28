@@ -43,7 +43,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get } from '@/api/request'
+import { adminGet } from '@/api/adminRequest'
 
 const activeTab = ref('devices')
 const summary = ref({ os: [], browsers: [], devices: [], locations: [] })
@@ -53,13 +53,13 @@ const regPage = ref(1)
 const regTotal = ref(0)
 
 const fetchSummary = async () => {
-  const res = await get('/home/admin/geo-devices/summary')
+  const res = await adminGet('/home/admin/geo-devices/summary')
   if (res?.code === 0) summary.value = res.data
 }
 
 const fetchRegUsers = async () => {
   regLoading.value = true
-  const res = await get('/home/admin/users', { page: regPage.value, pageSize: 50 })
+  const res = await adminGet('/home/admin/users', { page: regPage.value, pageSize: 50 })
   if (res?.code === 0 && res?.data) {
     regUsers.value = (res.data.list || []).filter(u => u.registrationIP)
     regTotal.value = res.data.total || 0

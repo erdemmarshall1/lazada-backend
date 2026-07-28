@@ -68,7 +68,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { get, post, qe } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 
 const route = useRoute()
 const user = ref(null)
@@ -80,8 +80,8 @@ const historyLoading = ref(false)
 const toggleStatus = async () => {
   toggling.value = true
   const newStatus = user.value.status === 1 ? 0 : 1
-  const res = await qe(post(`/home/admin/users/${route.params.id}/toggle-status`, { status: newStatus }))
-  if (res?.data) {
+  const res = await adminPost(`/home/admin/users/${route.params.id}/toggle-status`, { status: newStatus })
+  if (res?.code === 0) {
     user.value.status = res.data.status
     ElMessage.success(newStatus === 1 ? 'User enabled' : 'User disabled')
   }
@@ -89,13 +89,13 @@ const toggleStatus = async () => {
 }
 
 onMounted(async () => {
-  const res = await qe(get(`/home/admin/users/${route.params.id}/privacy`))
-  if (res?.data) user.value = res.data
+  const res = await adminGet(`/home/admin/users/${route.params.id}/privacy`)
+  if (res?.code === 0) user.value = res.data
   loading.value = false
 
   historyLoading.value = true
-  const histRes = await qe(get(`/home/admin/audit-log?userId=${route.params.id}`))
-  if (histRes?.data) loginHistory.value = histRes.data.list || []
+  const histRes = await adminGet(`/home/admin/audit-log?userId=${route.params.id}`)
+  if (histRes?.code === 0) loginHistory.value = histRes.data.list || []
   historyLoading.value = false
 })
 </script>

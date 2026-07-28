@@ -82,7 +82,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const sections = ref([])
@@ -102,7 +102,7 @@ const typeTag = (t) => {
 
 const load = async () => {
   loading.value = true
-  const res = await get('/home/cms/admin/homepage-sections')
+  const res = await adminGet('/home/cms/admin/homepage-sections')
   if (res?.code === 0 && res?.data) sections.value = res.data
   loading.value = false
 }
@@ -135,9 +135,9 @@ const doSave = async () => {
   delete payload.configStr
   let res
   if (editing.value) {
-    res = await put(`/home/cms/admin/homepage-sections/${editing.value}`, payload)
+    res = await adminPut(`/home/cms/admin/homepage-sections/${editing.value}`, payload)
   } else {
-    res = await post('/home/cms/admin/homepage-sections', payload)
+    res = await adminPost('/home/cms/admin/homepage-sections', payload)
   }
   saving.value = false
   if (res?.code === 0) {
@@ -152,7 +152,7 @@ const doSave = async () => {
 const doDelete = async (section) => {
   try {
     await ElMessageBox.confirm(`Delete "${section.name}"?`, 'Confirm', { type: 'warning' })
-    const res = await del(`/home/cms/admin/homepage-sections/${section._id}`)
+    const res = await adminDel(`/home/cms/admin/homepage-sections/${section._id}`)
     if (res?.code === 0) {
       ElMessage.success(res.msg || 'Deleted')
       load()
@@ -165,7 +165,7 @@ const moveUp = async (idx) => {
   const arr = [...sections.value]
   ;[arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]]
   sections.value = arr
-  await post('/home/cms/admin/homepage-sections/reorder', { ids: arr.map(s => s._id) })
+  await adminPost('/home/cms/admin/homepage-sections/reorder', { ids: arr.map(s => s._id) })
 }
 
 const moveDown = async (idx) => {
@@ -173,7 +173,7 @@ const moveDown = async (idx) => {
   const arr = [...sections.value]
   ;[arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]]
   sections.value = arr
-  await post('/home/cms/admin/homepage-sections/reorder', { ids: arr.map(s => s._id) })
+  await adminPost('/home/cms/admin/homepage-sections/reorder', { ids: arr.map(s => s._id) })
 }
 
 onMounted(load)

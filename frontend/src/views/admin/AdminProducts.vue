@@ -127,7 +127,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { get, post, qe, uploadFile } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
+import { get as publicGet, uploadFile, qe } from '@/api/request'
 
 const products = ref([])
 const loading = ref(false)
@@ -170,8 +171,8 @@ const filteredProducts = computed(() => {
 
 const fetch = async () => {
   loading.value = true
-  const res = await qe(get(`/home/admin/products?page=${page.value}&pageSize=${pageSize.value}`))
-  if (res) { products.value = res.data?.list || []; total.value = res.data?.total || 0 }
+  const res = await adminGet('/home/admin/products', { page: page.value, pageSize: pageSize.value })
+  if (res?.code === 0) { products.value = res.data?.list || []; total.value = res.data?.total || 0 }
   loading.value = false
 }
 
@@ -197,7 +198,7 @@ const openAdd = () => {
 }
 
 const toggleStatus = async (row) => {
-  await qe(post('/home/admin/toggle-product-status', { productId: row._id, status: row.status === 1 ? 0 : 1 }))
+  await adminPost('/home/admin/toggle-product-status', { productId: row._id, status: row.status === 1 ? 0 : 1 })
   ElMessage.success('Status updated')
   await fetch()
 }
@@ -226,25 +227,25 @@ const saveProduct = async () => {
   let res
   if (editItem.value) {
     payload.id = editItem.value._id
-    res = await qe(post('/home/admin/update-product', payload))
+    res = await adminPost('/home/admin/update-product', payload)
   } else {
     payload.shopId = editForm.value.shopId
-    res = await qe(post('/home/admin/add-product', payload))
+    res = await adminPost('/home/admin/add-product', payload)
   }
   saving.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(editItem.value ? 'Product updated!' : 'Product added!')
     showEdit.value = false
     await fetch()
-  }
+  } else if (res?.msg) ElMessage.error(res.msg)
 }
 
 onMounted(async () => {
   await fetch()
-  const catRes = await get('/main/goodsCategory/getList')
+  const catRes = await publicGet('/main/goodsCategory/getList')
   if (catRes?.data) categories.value = catRes.data
-  const shopRes = await get('/home/admin/shops', { pageSize: 100 })
-  if (shopRes?.data?.list) shops.value = shopRes.data.list
+  const shopRes = await adminGet('/home/admin/shops', { pageSize: 100 })
+  if (shopRes?.code === 0 && shopRes.data?.list) shops.value = shopRes.data.list
 })
 </script>
 

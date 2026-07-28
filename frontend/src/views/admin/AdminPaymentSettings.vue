@@ -81,7 +81,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { get, post, $http } from '@/api/request'
+import { adminGet, adminPost, adminRequest } from '@/api/adminRequest'
 
 const list = ref([])
 const loading = ref(false)
@@ -113,7 +113,7 @@ const formRules = {
 
 const loadList = async () => {
   loading.value = true
-  const res = await get('/home/admin/payment-settings', { page: 1, pageSize: 100 })
+  const res = await adminGet('/home/admin/payment-settings', { page: 1, pageSize: 100 })
   if (res?.code === 0) list.value = res.data.list || []
   loading.value = false
 }
@@ -150,9 +150,9 @@ const handleSave = async () => {
     : '/home/admin/payment-settings'
   let res
   if (isEdit.value) {
-    res = await $http.put(url, form)
+    res = await adminRequest.put(url, form)
   } else {
-    res = await post(url, form)
+    res = await adminPost(url, form)
   }
   saving.value = false
   if (res?.code === 0) {
@@ -165,7 +165,7 @@ const handleSave = async () => {
 }
 
 const toggleActive = async (row) => {
-  const res = await $http.put(`/home/admin/payment-settings/${row._id}`, { isActive: !row.isActive })
+  const res = await adminRequest.put(`/home/admin/payment-settings/${row._id}`, { isActive: !row.isActive })
   if (res?.code === 0) {
     row.isActive = !row.isActive
     ElMessage.success('Updated')
@@ -178,7 +178,7 @@ const handleDelete = async (id) => {
   try {
     await ElMessageBox.confirm('Are you sure?', 'Confirm', { type: 'warning' })
   } catch { return }
-  const res = await $http.delete(`/home/admin/payment-settings/${id}`)
+  const res = await adminRequest.delete(`/home/admin/payment-settings/${id}`)
   if (res?.code === 0) {
     ElMessage.success('Deleted')
     await loadList()
@@ -188,7 +188,7 @@ const handleDelete = async (id) => {
 }
 
 const loadApprovalSettings = async () => {
-  const res = await get('/home/admin/payment-approval-settings')
+  const res = await adminGet('/home/admin/payment-approval-settings')
   if (res?.code === 0 && res.data) {
     approvalSettings.autoApprove = !!res.data.autoApprove
     approvalSettings.autoApproveAmount = Number(res.data.autoApproveAmount) || 0
@@ -198,7 +198,7 @@ const loadApprovalSettings = async () => {
 
 const saveApprovalSettings = async () => {
   savingApproval.value = true
-  const res = await $http.put('/home/admin/payment-approval-settings', {
+  const res = await adminRequest.put('/home/admin/payment-approval-settings', {
     autoApprove: approvalSettings.autoApprove,
     autoApproveAmount: approvalSettings.autoApproveAmount,
     notifyOnSubmit: approvalSettings.notifyOnSubmit,

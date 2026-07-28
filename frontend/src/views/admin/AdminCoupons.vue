@@ -87,7 +87,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, del, qe } from '@/api/request'
+import { adminGet, adminPost, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const coupons = ref([])
@@ -98,35 +98,35 @@ const form = ref({ code: '', type: 'percentage', value: 10, minOrderAmount: 0, m
 
 const fetchCoupons = async () => {
   loading.value = true
-  const res = await qe(get('/home/admin/coupons/list'))
-  if (res?.data) coupons.value = res.data.list || []
+  const res = await adminGet('/home/admin/coupons/list')
+  if (res?.code === 0) coupons.value = res.data?.list || []
   loading.value = false
 }
 
 const toggleStatus = async (id) => {
-  const res = await qe(post(`/home/admin/coupons/${id}/toggle`))
-  if (res) { ElMessage.success(res.msg); fetchCoupons() }
+  const res = await adminPost(`/home/admin/coupons/${id}/toggle`)
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchCoupons() } else if (res?.msg) ElMessage.error(res.msg)
 }
 
 const removeCoupon = async (id) => {
   try {
     await ElMessageBox.confirm('Delete this coupon?', 'Confirm', { type: 'warning' })
-    const res = await qe(del(`/home/admin/coupons/${id}`))
-    if (res) { ElMessage.success(res.msg); fetchCoupons() }
+    const res = await adminDel(`/home/admin/coupons/${id}`)
+    if (res?.code === 0) { ElMessage.success(res.msg); fetchCoupons() } else if (res?.msg) ElMessage.error(res.msg)
   } catch {}
 }
 
 const createCoupon = async () => {
   if (!form.value.code) return ElMessage.warning('Code is required')
   creating.value = true
-  const res = await qe(post('/home/admin/coupons/create', form.value))
+  const res = await adminPost('/home/admin/coupons/create', form.value)
   creating.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg)
     showCreate.value = false
     form.value = { code: '', type: 'percentage', value: 10, minOrderAmount: 0, maxDiscount: 0, maxUses: 0, expiresAt: null, description: '' }
     fetchCoupons()
-  }
+  } else if (res?.msg) ElMessage.error(res.msg)
 }
 
 onMounted(fetchCoupons)

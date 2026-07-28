@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, patch, qe } from '@/api/request'
+import { adminGet, adminPost, adminRequest } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const codes = ref([])
@@ -54,30 +54,32 @@ const generating = ref(false)
 
 const fetchCodes = async () => {
   loading.value = true
-  const res = await get('/home/admin/invitation-codes')
-  if (res?.data?.list) codes.value = res.data.list
-  else if (res?.data) codes.value = Array.isArray(res.data) ? res.data : []
+  const res = await adminGet('/home/admin/invitation-codes')
+  if (res?.code === 0) {
+    if (res.data?.list) codes.value = res.data.list
+    else if (res.data) codes.value = Array.isArray(res.data) ? res.data : []
+  }
   loading.value = false
 }
 
 const generateCode = async () => {
   generating.value = true
-  const res = await post('/home/admin/invitation-codes/generate')
+  const res = await adminPost('/home/admin/invitation-codes/generate')
   generating.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg || 'Code generated')
     fetchCodes()
-  }
+  } else if (res?.msg) ElMessage.error(res.msg)
 }
 
 const deactivate = async (id) => {
   try {
     await ElMessageBox.confirm('Deactivate this invitation code?', 'Confirm', { type: 'warning' })
-    const res = await qe(patch(`/home/admin/invitation-codes/${id}/deactivate`))
-    if (res) {
+    const res = await adminRequest.patch(`/home/admin/invitation-codes/${id}/deactivate`)
+    if (res?.code === 0) {
       ElMessage.success(res.msg || 'Code deactivated')
       fetchCodes()
-    }
+    } else if (res?.msg) ElMessage.error(res.msg)
   } catch {}
 }
 

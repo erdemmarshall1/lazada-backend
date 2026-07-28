@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { get, put, post } from '@/api/request'
+import { adminGet, adminPut, adminPost } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -98,7 +98,7 @@ const form = ref({
 const fetchUser = async () => {
   loading.value = true
   try {
-    const res = await get(`/home/admin/users/${userId}/detail`)
+    const res = await adminGet(`/home/admin/users/${userId}/detail`)
     if (res?.code === 0) {
       user.value = res.data
       form.value = {
@@ -119,7 +119,7 @@ const fetchUser = async () => {
 const save = async () => {
   saving.value = true
   try {
-    const res = await put(`/home/admin/users/${userId}`, {
+    const res = await adminPut(`/home/admin/users/${userId}`, {
       username: form.value.username,
       email: form.value.email,
       phone: form.value.phone,
@@ -144,7 +144,7 @@ const resetPassword = async () => {
   }
   resetting.value = true
   try {
-    const res = await post(`/home/admin/users/${userId}/reset-password`, { password: newPassword.value })
+    const res = await adminPost(`/home/admin/users/${userId}/reset-password`, { password: newPassword.value })
     if (res?.code === 0) {
       ElMessage.success('Password reset successfully')
       newPassword.value = ''
@@ -155,7 +155,7 @@ const resetPassword = async () => {
 const loginAsUser = async () => {
   logining.value = true
   try {
-    const res = await post(`/home/admin/login-as-user/${userId}`)
+    const res = await adminPost(`/home/admin/login-as-user/${userId}`)
     if (res?.code === 0) {
       localStorage.setItem('seller_temp_token', res.data.token)
       ElMessage.success(`Logged in as ${res.data.username}`)

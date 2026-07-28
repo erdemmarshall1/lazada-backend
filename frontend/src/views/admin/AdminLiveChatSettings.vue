@@ -59,7 +59,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { get, $http } from '@/api/request'
+import { adminGet, adminRequest } from '@/api/adminRequest'
 import { Check } from '@element-plus/icons-vue'
 
 const formRef = ref(null)
@@ -80,7 +80,7 @@ const form = reactive({
 
 const loadSettings = async () => {
   loading.value = true
-  const res = await get('/home/admin/live-chat-settings')
+  const res = await adminGet('/home/admin/live-chat-settings')
   if (res?.code === 0 && res?.data) {
     const s = res.data
     form.enabled = !!s.enabled
@@ -96,7 +96,7 @@ const loadSettings = async () => {
 
 const loadAdminUsers = async () => {
   try {
-    const res = await get('/home/admin/users', { params: { pageSize: 200 } })
+    const res = await adminGet('/home/admin/users', { pageSize: 200 })
     if (res?.code === 0 && res?.data?.list) {
       adminUsers.value = res.data.list.filter(u => u.role === 'admin')
     }
@@ -109,7 +109,7 @@ const handleSave = async () => {
   if (!valid) return
   saving.value = true
   saved.value = false
-  const res = await $http.put('/home/admin/live-chat-settings', form)
+  const res = await adminRequest.put('/home/admin/live-chat-settings', form)
   saving.value = false
   if (res?.code === 0) {
     ElMessage.success('Live chat settings saved')

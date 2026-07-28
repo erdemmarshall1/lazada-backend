@@ -29,7 +29,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, qe } from '@/api/request'
+import { adminGet } from '@/api/adminRequest'
 
 const orders = ref([])
 const loading = ref(false)
@@ -42,7 +42,7 @@ const statusType = (s) => ['warning', 'primary', 'info', '', 'success', 'danger'
 
 const fetch = async () => {
   loading.value = true
-  const res = await qe(get(`/home/admin/orders?page=${page.value}&pageSize=${pageSize.value}`))
+  const res = await adminGet('/home/admin/orders', { page: page.value, pageSize: pageSize.value })
   if (res) { orders.value = res.data?.list || []; total.value = res.data?.total || 0 }
   loading.value = false
 }

@@ -132,6 +132,9 @@ const routes = [
       { path: 'dashboard', name: 'admin-dashboard', component: () => import('@/views/admin/AdminDashboard.vue'), meta: { title: 'Admin Dashboard', requiresAuth: true, adminLayout: true } },
       { path: 'users', name: 'admin-users', component: () => import('@/views/admin/AdminUsers.vue'), meta: { title: 'Users', requiresAuth: true, adminLayout: true } },
       { path: 'users/edit/:id', name: 'admin-user-edit', component: () => import('@/views/admin/AdminUserEdit.vue'), meta: { title: 'Edit User', requiresAuth: true, adminLayout: true } },
+      { path: 'users/detail/:id', name: 'admin-user-detail', component: () => import('@/views/admin/AdminUserDetail.vue'), meta: { title: 'User Detail', requiresAuth: true, adminLayout: true } },
+      { path: 'users/privacy/:id', name: 'admin-user-privacy', component: () => import('@/views/admin/AdminUserPrivacy.vue'), meta: { title: 'User Privacy', requiresAuth: true, adminLayout: true } },
+      { path: 'shop-detail/:id', name: 'admin-shop-detail', component: () => import('@/views/admin/AdminShopDetail.vue'), meta: { title: 'Shop Detail', requiresAuth: true, adminLayout: true } },
       { path: 'sellers', name: 'admin-sellers', component: () => import('@/views/admin/AdminSellers.vue'), meta: { title: 'Sellers', requiresAuth: true, adminLayout: true } },
       { path: 'products', name: 'admin-products', component: () => import('@/views/admin/AdminProducts.vue'), meta: { title: 'Products', requiresAuth: true, adminLayout: true } },
       { path: 'transactions', name: 'admin-transactions', component: () => import('@/views/admin/AdminTransactions.vue'), meta: { title: 'Transactions', requiresAuth: true, adminLayout: true } },
@@ -173,28 +176,43 @@ const router = createRouter({
   routes,
 })
 
-const adminPathMap = {
-  '/admin-dashboard': '/admin/dashboard', '/admin-users': '/admin/users', '/admin-sellers': '/admin/sellers',
-  '/admin-products': '/admin/products', '/admin-transactions': '/admin/transactions', '/admin-coupons': '/admin/coupons',
-  '/admin-banners': '/admin/banners', '/admin-invitation-codes': '/admin/invitation-codes', '/admin-reviews': '/admin/reviews',
-  '/admin-roles': '/admin/roles', '/admin-cms-pages': '/admin/cms-pages', '/admin-cms-blogs': '/admin/cms-blogs',
-  '/admin-cms-faqs': '/admin/cms-faqs', '/admin-cms-menus': '/admin/cms-menus', '/admin-reports': '/admin/reports',
-  '/admin-payment-settings': '/admin/payment-settings', '/admin-email-settings': '/admin/email-settings',
-  '/admin-theme-settings': '/admin/theme-settings', '/admin-balance': '/admin/balance',
-  '/admin-platform-wallet': '/admin/platform-wallet', '/admin-sessions-audit': '/admin/sessions-audit',
-  '/admin-settings': '/admin/settings', '/admin-homepage-sections': '/admin/homepage-sections',
-  '/admin-submissions': '/admin/submissions',
-  '/admin-livechat-inbox': '/admin/livechat-inbox', '/admin-livechat-settings': '/admin/livechat-settings',
-  '/admin-seller-id-settings': '/admin/seller-id-settings',
-  '/admin-logistics': '/admin/logistics',
-  '/superadmin-dashboard': '/admin/superadmin-dashboard',
-  '/admin-user-edit/:id': '/admin/users/edit/:id',
-  '/admin-user-privacy/:id': '/admin/users/edit/:id',
-  '/admin-user-detail/:id': '/admin/users/edit/:id',
-  '/admin-shop-detail/:id': '/admin/users/edit/:id',
-  '/admin-orders': '/admin/orders',
-  '/admin/login': '/admin',
-}
+const adminPathRules = [
+  { pattern: /^\/admin-dashboard$/, redirect: '/admin/dashboard' },
+  { pattern: /^\/admin-users$/, redirect: '/admin/users' },
+  { pattern: /^\/admin-sellers$/, redirect: '/admin/sellers' },
+  { pattern: /^\/admin-products$/, redirect: '/admin/products' },
+  { pattern: /^\/admin-transactions$/, redirect: '/admin/transactions' },
+  { pattern: /^\/admin-coupons$/, redirect: '/admin/coupons' },
+  { pattern: /^\/admin-banners$/, redirect: '/admin/banners' },
+  { pattern: /^\/admin-invitation-codes$/, redirect: '/admin/invitation-codes' },
+  { pattern: /^\/admin-reviews$/, redirect: '/admin/reviews' },
+  { pattern: /^\/admin-roles$/, redirect: '/admin/roles' },
+  { pattern: /^\/admin-cms-pages$/, redirect: '/admin/cms-pages' },
+  { pattern: /^\/admin-cms-blogs$/, redirect: '/admin/cms-blogs' },
+  { pattern: /^\/admin-cms-faqs$/, redirect: '/admin/cms-faqs' },
+  { pattern: /^\/admin-cms-menus$/, redirect: '/admin/cms-menus' },
+  { pattern: /^\/admin-reports$/, redirect: '/admin/reports' },
+  { pattern: /^\/admin-payment-settings$/, redirect: '/admin/payment-settings' },
+  { pattern: /^\/admin-email-settings$/, redirect: '/admin/email-settings' },
+  { pattern: /^\/admin-theme-settings$/, redirect: '/admin/theme-settings' },
+  { pattern: /^\/admin-balance$/, redirect: '/admin/balance' },
+  { pattern: /^\/admin-platform-wallet$/, redirect: '/admin/platform-wallet' },
+  { pattern: /^\/admin-sessions-audit$/, redirect: '/admin/sessions-audit' },
+  { pattern: /^\/admin-settings$/, redirect: '/admin/settings' },
+  { pattern: /^\/admin-homepage-sections$/, redirect: '/admin/homepage-sections' },
+  { pattern: /^\/admin-submissions$/, redirect: '/admin/submissions' },
+  { pattern: /^\/admin-livechat-inbox$/, redirect: '/admin/livechat-inbox' },
+  { pattern: /^\/admin-livechat-settings$/, redirect: '/admin/livechat-settings' },
+  { pattern: /^\/admin-seller-id-settings$/, redirect: '/admin/seller-id-settings' },
+  { pattern: /^\/admin-logistics$/, redirect: '/admin/logistics' },
+  { pattern: /^\/superadmin-dashboard$/, redirect: '/admin/superadmin-dashboard' },
+  { pattern: /^\/admin-orders$/, redirect: '/admin/orders' },
+  { pattern: /^\/admin\/login$/, redirect: '/admin' },
+  { pattern: /^\/admin-user-edit\/(.+)$/, redirect: (m) => `/admin/users/edit/${m[1]}` },
+  { pattern: /^\/admin-user-privacy\/(.+)$/, redirect: (m) => `/admin/users/privacy/${m[1]}` },
+  { pattern: /^\/admin-user-detail\/(.+)$/, redirect: (m) => `/admin/users/detail/${m[1]}` },
+  { pattern: /^\/admin-shop-detail\/(.+)$/, redirect: (m) => `/admin/shop-detail/${m[1]}` },
+]
 
 const isTokenExpired = (token) => {
   if (!token) return true
@@ -218,10 +236,13 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  const redirectPath = adminPathMap[to.path]
-  if (redirectPath) {
-    next(redirectPath)
-    return
+  for (const rule of adminPathRules) {
+    const match = to.path.match(rule.pattern)
+    if (match) {
+      const redirectPath = typeof rule.redirect === 'function' ? rule.redirect(match) : rule.redirect
+      next(redirectPath)
+      return
+    }
   }
 
   window.scrollTo(0, 0)

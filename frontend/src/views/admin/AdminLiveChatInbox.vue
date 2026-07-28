@@ -61,7 +61,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { get, $http } from '@/api/request'
+import { adminGet, adminRequest } from '@/api/adminRequest'
 import { getSocket } from '@/socket'
 
 const store = useAppStore()
@@ -88,7 +88,7 @@ const formatTime = (t) => {
 const loadConversations = async () => {
   loading.value = true
   try {
-    const res = await get('/home/userKefu/admin/conversations')
+    const res = await adminGet('/home/userKefu/admin/conversations')
     if (res?.code === 0 && res?.data) {
       conversations.value = res.data.conversations || []
       agentOnline.value = res.data.agentOnline || false
@@ -109,7 +109,7 @@ const selectConversation = async (userId) => {
   }
   loadingMsg.value = true
   try {
-    const res = await get('/home/userKefu/admin/messages', { params: { userId } })
+    const res = await adminGet('/home/userKefu/admin/messages', { userId })
     if (res?.code === 0 && Array.isArray(res.data)) {
       chatMessages.value = res.data
     }
@@ -126,7 +126,7 @@ const sendReply = async () => {
   replying.value = true
   replyText.value = ''
   try {
-    const res = await $http.post('/home/userKefu/admin/sendReply', { toUserId: activeUserId.value, content: text })
+    const res = await adminRequest.post('/home/userKefu/admin/sendReply', { toUserId: activeUserId.value, content: text })
     if (res?.code === 0 && res?.data) {
       chatMessages.value.push(res.data)
     }

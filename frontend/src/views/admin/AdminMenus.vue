@@ -62,7 +62,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const menus = ref([])
@@ -74,7 +74,7 @@ const dialog = reactive({
 
 const loadData = async () => {
   loading.value = true
-  const res = await get('/home/cms/admin/menus')
+  const res = await adminGet('/home/cms/admin/menus')
   loading.value = false
   if (res?.code === 0) menus.value = res.data || []
 }
@@ -87,7 +87,7 @@ const openDialog = (row) => {
 
 const save = async () => {
   dialog.loading = true
-  const fn = dialog.isEdit ? put(`/home/cms/admin/menus/${dialog.form._id}`) : post('/home/cms/admin/menus')
+  const fn = dialog.isEdit ? adminPut(`/home/cms/admin/menus/${dialog.form._id}`) : adminPost('/home/cms/admin/menus')
   const res = await fn({ name: dialog.form.name, key: dialog.form.key, items: dialog.form.items, status: dialog.form.status })
   dialog.loading = false
   if (res?.code === 0) { ElMessage.success(dialog.isEdit ? 'Updated' : 'Created'); dialog.visible = false; loadData() }
@@ -96,7 +96,7 @@ const save = async () => {
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(`Delete menu "${row.name}"?`, 'Confirm', { type: 'warning' }).then(async () => {
-    const res = await del(`/home/cms/admin/menus/${row._id}`)
+    const res = await adminDel(`/home/cms/admin/menus/${row._id}`)
     if (res?.code === 0) { ElMessage.success('Deleted'); loadData() }
   }).catch(() => {})
 }

@@ -144,7 +144,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { get, post, qe, API_BASE } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
+import { get as publicGet, post as publicPost, API_BASE } from '@/api/request'
 import { useAppStore } from '@/stores/app'
 
 const store = useAppStore()
@@ -157,7 +158,7 @@ const prodWithoutImages = ref(0)
 const paymentMethods = ref([])
 const emailSettings = ref(null)
 
-const getToken = () => localStorage.getItem('theoutnet_token') || ''
+const getToken = () => localStorage.getItem('theoutnet_admin_token') || localStorage.getItem('theoutnet_token') || ''
 const uploadUrl = `${API_BASE}/home/upload/file`
 const uploadHeaders = computed(() => ({ token: getToken() }))
 
@@ -183,10 +184,10 @@ const stats = ref([
 
 const fetchStats = async () => {
   const [users, shops, products, transactions] = await Promise.all([
-    get('/home/admin/users?pageSize=1').catch(() => ({ data: { total: 0 } })),
-    get('/home/admin/shops?pageSize=1').catch(() => ({ data: { total: 0 } })),
-    get('/home/admin/products?pageSize=1').catch(() => ({ data: { total: 0 } })),
-    get('/home/admin/transactions?pageSize=1').catch(() => ({ data: { total: 0 } })),
+    adminGet('/home/admin/users', { pageSize: 1 }).catch(() => ({ data: { total: 0 } })),
+    adminGet('/home/admin/shops', { pageSize: 1 }).catch(() => ({ data: { total: 0 } })),
+    adminGet('/home/admin/products', { pageSize: 1 }).catch(() => ({ data: { total: 0 } })),
+    adminGet('/home/admin/transactions', { pageSize: 1 }).catch(() => ({ data: { total: 0 } })),
   ])
   stats.value = [
     { label: 'Users', value: users?.data?.total ?? '?' },
@@ -198,25 +199,25 @@ const fetchStats = async () => {
 }
 
 const fetchSettings = async () => {
-  const res = await get('/home/admin/settings/theme')
-  if (res?.data) {
+  const res = await adminGet('/home/admin/settings/theme')
+  if (res?.code === 0 && res.data) {
     Object.assign(settingsForm, res.data)
   }
 }
 
 const fetchPaymentMethods = async () => {
-  const res = await get('/home/admin/payment-settings')
-  if (res?.data) paymentMethods.value = Array.isArray(res.data) ? res.data : []
+  const res = await adminGet('/home/admin/payment-settings')
+  if (res?.code === 0 && res.data) paymentMethods.value = Array.isArray(res.data) ? res.data : []
 }
 
 const fetchEmailSettings = async () => {
-  const res = await get('/home/admin/email-settings')
-  if (res?.data) emailSettings.value = res.data
+  const res = await adminGet('/home/admin/email-settings')
+  if (res?.code === 0 && res.data) emailSettings.value = res.data
 }
 
 const refreshProdStats = async () => {
-  const res = await get('/home/admin/products?pageSize=5000')
-  if (res?.data?.list) {
+  const res = await adminGet('/home/admin/products', { pageSize: 5000 })
+  if (res?.code === 0 && res.data?.list) {
     const list = res.data.list
     const total = list.length
     const withImg = list.filter(p => p.images && p.images.length > 0 && p.images[0] && p.images[0] !== '').length
@@ -232,7 +233,7 @@ const runFixImages = async () => {
   const localPathRegex = /^\/uploads\/[0-9a-f-]+\.(png|jpg|jpeg|webp)$/
   let fixed = 0, total = 0, page = 1, pageSize = 100, labelIdx = 0
   do {
-    const res = await get(`/main/goods/getSearchList?page=${page}&pageSize=${pageSize}`)
+    const res = await publicGet(`/main/goods/getSearchList?page=${page}&pageSize=${pageSize}`)
     const list = res?.data?.list || []
     total = res?.data?.total || list.length
     if (list.length === 0) break
@@ -241,8 +242,8 @@ const runFixImages = async () => {
       if (!img || !localPathRegex.test(img)) continue
       const placeholderUrl = API_BASE + '/home/image/placeholder?text=' + encodeURIComponent(LABELS[labelIdx % LABELS.length])
       labelIdx++
-      const upd = await qe(post('/home/admin/update-product', { id: product._id, images: [placeholderUrl] }))
-      if (upd) fixed++
+      const upd = await adminPost('/home/admin/update-product', { id: product._id, images: [placeholderUrl] })
+      if (upd?.code === 0) fixed++
     }
     page++
   } while ((page - 1) * pageSize < total)
@@ -256,12 +257,12 @@ const runFixImages = async () => {
 
 const saveSettings = async () => {
   saving.value = true
-  const res = await qe(post('/home/admin/settings/theme', settingsForm))
+  const res = await adminPost('/home/admin/settings/theme', settingsForm)
   saving.value = false
-  if (res) {
+  if (res?.code === 0) {
     store.applyTheme({ ...settingsForm })
     ElMessage.success('Settings saved')
-  }
+  } else if (res?.msg) ElMessage.error(res.msg)
 }
 
 onMounted(() => {

@@ -113,7 +113,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { get, post, qe } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const { t } = useI18n()
@@ -140,8 +140,8 @@ const historyPageSize = ref(20)
 const historyTotal = ref(0)
 
 const searchUsers = async () => {
-  const res = await qe(get(`/home/admin/balance/users?keyword=${encodeURIComponent(keyword.value || '')}&page=${userPage.value}&pageSize=${userPageSize.value}`))
-  if (res) {
+  const res = await adminGet(`/home/admin/balance/users?keyword=${encodeURIComponent(keyword.value || '')}&page=${userPage.value}&pageSize=${userPageSize.value}`)
+  if (res?.code === 0) {
     users.value = res.data?.list || []
     userTotal.value = res.data?.total || 0
   }
@@ -158,13 +158,13 @@ const selectUser = (row) => {
 const doCredit = async () => {
   if (!selectedUser.value || creditAmount.value <= 0) return
   crediting.value = true
-  const res = await qe(post('/home/admin/balance/credit', {
+  const res = await adminPost('/home/admin/balance/credit', {
     userId: selectedUser.value._id,
     amount: creditAmount.value,
     description: creditDescription.value,
-  }))
+  })
   crediting.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg || t('admin.balancePage.creditSuccess'))
     selectedUser.value.balance = (selectedUser.value.balance || 0) + Number(creditAmount.value)
     lastActionMsg.value = `${new Date().toLocaleString()} — Credited $${creditAmount.value} (${creditDescription.value || 'no description'})`
@@ -181,13 +181,13 @@ const doDebit = async () => {
     return
   }
   debiting.value = true
-  const res = await qe(post('/home/admin/balance/debit', {
+  const res = await adminPost('/home/admin/balance/debit', {
     userId: selectedUser.value._id,
     amount: debitAmount.value,
     description: debitDescription.value,
-  }))
+  })
   debiting.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg || t('admin.balancePage.debitSuccess'))
     selectedUser.value.balance = (selectedUser.value.balance || 0) - Number(debitAmount.value)
     lastActionMsg.value = `${new Date().toLocaleString()} — Debited $${debitAmount.value} (${debitDescription.value || 'no description'})`
@@ -200,8 +200,8 @@ const doDebit = async () => {
 const fetchHistory = async (userId) => {
   loadingHistory.value = true
   const uid = userId || selectedUser.value?._id || ''
-  const res = await qe(get(`/home/admin/balance/history?userId=${uid}&page=${historyPage.value}&pageSize=${historyPageSize.value}`))
-  if (res) {
+  const res = await adminGet(`/home/admin/balance/history?userId=${uid}&page=${historyPage.value}&pageSize=${historyPageSize.value}`)
+  if (res?.code === 0) {
     history.value = res.data?.list || []
     historyTotal.value = res.data?.total || 0
   }

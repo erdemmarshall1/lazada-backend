@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const faqs = ref([])
@@ -75,7 +75,7 @@ const dialog = reactive({
 
 const loadData = async () => {
   loading.value = true
-  const res = await get('/home/cms/admin/faqs')
+  const res = await adminGet('/home/cms/admin/faqs')
   loading.value = false
   if (res?.code === 0) faqs.value = res.data || []
 }
@@ -88,7 +88,7 @@ const openDialog = (row) => {
 
 const save = async () => {
   dialog.loading = true
-  const fn = dialog.isEdit ? put(`/home/cms/admin/faqs/${dialog.form._id}`) : post('/home/cms/admin/faqs')
+  const fn = dialog.isEdit ? adminPut(`/home/cms/admin/faqs/${dialog.form._id}`) : adminPost('/home/cms/admin/faqs')
   const res = await fn(dialog.form)
   dialog.loading = false
   if (res?.code === 0) { ElMessage.success(dialog.isEdit ? 'Updated' : 'Created'); dialog.visible = false; loadData() }
@@ -97,7 +97,7 @@ const save = async () => {
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(`Delete "${row.question}"?`, 'Confirm', { type: 'warning' }).then(async () => {
-    const res = await del(`/home/cms/admin/faqs/${row._id}`)
+    const res = await adminDel(`/home/cms/admin/faqs/${row._id}`)
     if (res?.code === 0) { ElMessage.success('Deleted'); loadData() }
   }).catch(() => {})
 }

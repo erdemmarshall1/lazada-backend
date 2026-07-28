@@ -65,7 +65,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const activeTab = ref('sessions')
@@ -86,7 +86,7 @@ const auditDateRange = ref(null)
 
 const loadSessions = async () => {
   sessLoading.value = true
-  const res = await get('/home/session/admin/sessions', { page: sessPage.value, pageSize: sessPageSize })
+  const res = await adminGet('/home/session/admin/sessions', { page: sessPage.value, pageSize: sessPageSize })
   if (res?.code === 0 && res?.data) {
     sessions.value = res.data.list || []
     sessTotal.value = res.data.total || 0
@@ -97,7 +97,7 @@ const loadSessions = async () => {
 const revokeSession = async (row) => {
   try {
     await ElMessageBox.confirm(`Revoke this session for ${row.userId?.username || 'user'}?`, 'Confirm', { type: 'warning' })
-    const res = await post(`/home/session/admin/sessions/${row._id}/revoke`)
+    const res = await adminPost(`/home/session/admin/sessions/${row._id}/revoke`)
     if (res?.code === 0) { ElMessage.success('Session revoked'); loadSessions() }
   } catch {}
 }
@@ -110,7 +110,7 @@ const loadAudit = async () => {
     params.startDate = auditDateRange.value[0]
     params.endDate = auditDateRange.value[1]
   }
-  const res = await get('/home/session/admin/audit-logs', params)
+  const res = await adminGet('/home/session/admin/audit-logs', params)
   if (res?.code === 0 && res?.data) {
     auditLogs.value = res.data.list || []
     auditTotal.value = res.data.total || 0

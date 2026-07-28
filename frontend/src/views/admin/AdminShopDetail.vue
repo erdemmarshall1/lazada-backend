@@ -104,7 +104,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { get, post, qe } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
@@ -124,44 +124,44 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString() : ''
 
 const fetchDetail = async () => {
   loading.value = true
-  const res = await get(`/home/admin/shops/${route.params.id}`)
+  const res = await adminGet(`/home/admin/shops/${route.params.id}`)
   if (res?.code === 0) shop.value = res.data
   loading.value = false
 }
 
 const handleApprove = async () => {
   approving.value = true
-  const res = await qe(post('/home/admin/approve-shop', { id: shop.value._id }))
+  const res = await adminPost('/home/admin/approve-shop', { id: shop.value._id })
   approving.value = false
-  if (res) { ElMessage.success(res.msg); fetchDetail() }
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchDetail() }
 }
 
 const handleReject = async () => {
   rejecting.value = true
-  const res = await qe(post('/home/admin/reject-shop', { id: shop.value._id }))
+  const res = await adminPost('/home/admin/reject-shop', { id: shop.value._id })
   rejecting.value = false
-  if (res) { ElMessage.success(res.msg); fetchDetail() }
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchDetail() }
 }
 
 const handleCloseShop = async () => {
   try { await ElMessageBox.confirm(`Close "${shop.value.name}"? The seller won't be able to process orders.`, 'Close Store', { confirmButtonText: 'Close', cancelButtonText: 'Cancel', type: 'warning' }) } catch { return }
   closing.value = true
-  const res = await qe(post('/home/admin/close-shop', { id: shop.value._id, reason: 'Closed by admin' }))
+  const res = await adminPost('/home/admin/close-shop', { id: shop.value._id, reason: 'Closed by admin' })
   closing.value = false
-  if (res) { ElMessage.success(res.msg); fetchDetail() }
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchDetail() }
 }
 const handleOpenShop = async () => {
   try { await ElMessageBox.confirm(`Reopen "${shop.value.name}"? The seller will regain access.`, 'Open Store', { confirmButtonText: 'Open', cancelButtonText: 'Cancel', type: 'info' }) } catch { return }
   opening.value = true
-  const res = await qe(post('/home/admin/open-shop', { id: shop.value._id }))
+  const res = await adminPost('/home/admin/open-shop', { id: shop.value._id })
   opening.value = false
-  if (res) { ElMessage.success(res.msg); fetchDetail() }
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchDetail() }
 }
 const handleGenerateSellerId = async () => {
   generating.value = true
-  const res = await qe(post('/home/admin/generate-seller-id', { id: shop.value._id }))
+  const res = await adminPost('/home/admin/generate-seller-id', { id: shop.value._id })
   generating.value = false
-  if (res) { ElMessage.success(res.msg); fetchDetail() }
+  if (res?.code === 0) { ElMessage.success(res.msg); fetchDetail() }
 }
 
 const previewImage = (url) => {
@@ -173,7 +173,7 @@ const previewImage = (url) => {
 const loginAsSeller = async () => {
   const userId = shop.value.userId?._id
   if (!userId) { ElMessage.warning('No user associated with this shop'); return }
-  const res = await qe(post(`/home/admin/login-as-seller/${userId}`))
+  const res = await adminPost(`/home/admin/login-as-seller/${userId}`)
   if (res?.data?.token) {
     localStorage.setItem('seller_temp_token', res.data.token)
     window.open(`/mystore?temp_token=${res.data.token}`, '_blank')

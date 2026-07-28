@@ -138,7 +138,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get } from '@/api/request'
+import { adminGet } from '@/api/adminRequest'
 
 const activeTab = ref('overview')
 
@@ -161,7 +161,7 @@ const finDateRange = ref(null)
 const finData = ref({})
 
 const loadOverview = async () => {
-  const res = await get('/home/report/dashboard')
+  const res = await adminGet('/home/report/dashboard')
   if (res?.code === 0 && res?.data) overview.value = res.data
 }
 
@@ -171,7 +171,7 @@ const loadSales = async () => {
     params.startDate = salesDateRange.value[0]
     params.endDate = salesDateRange.value[1]
   }
-  const res = await get('/home/report/sales', params)
+  const res = await adminGet('/home/report/sales', params)
   if (res?.code === 0 && res?.data) salesData.value = res.data
 }
 
@@ -181,13 +181,13 @@ const loadCustomers = async () => {
     params.startDate = custDateRange.value[0]
     params.endDate = custDateRange.value[1]
   }
-  const res = await get('/home/report/customers', params)
+  const res = await adminGet('/home/report/customers', params)
   if (res?.code === 0 && res?.data) custData.value = res.data
 }
 
 const loadInventory = async () => {
   invLoading.value = true
-  const res = await get('/home/report/inventory', { page: invPage.value, pageSize, lowStock: lowStockThreshold.value })
+  const res = await adminGet('/home/report/inventory', { page: invPage.value, pageSize, lowStock: lowStockThreshold.value })
   if (res?.code === 0 && res?.data) invData.value = res.data
   invLoading.value = false
 }
@@ -198,7 +198,7 @@ const loadFinancial = async () => {
     params.startDate = finDateRange.value[0]
     params.endDate = finDateRange.value[1]
   }
-  const res = await get('/home/report/financial', params)
+  const res = await adminGet('/home/report/financial', params)
   if (res?.code === 0 && res?.data) finData.value = res.data
 }
 

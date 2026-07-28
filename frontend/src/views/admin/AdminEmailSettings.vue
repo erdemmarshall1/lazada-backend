@@ -60,7 +60,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { get, $http } from '@/api/request'
+import { adminGet, adminRequest } from '@/api/adminRequest'
 import { Check } from '@element-plus/icons-vue'
 
 const formRef = ref(null)
@@ -89,7 +89,7 @@ const formRules = {
 
 const loadSettings = async () => {
   loading.value = true
-  const res = await get('/home/admin/email-settings')
+  const res = await adminGet('/home/admin/email-settings')
   if (res?.code === 0 && res?.data) {
     const s = res.data
     form.host = s.host || 'smtp.ethereal.email'
@@ -112,7 +112,7 @@ const handleSave = async () => {
   if (!valid) return
   saving.value = true
   saved.value = false
-  const res = await $http.put('/home/admin/email-settings', form)
+  const res = await adminRequest.put('/home/admin/email-settings', form)
   saving.value = false
   if (res?.code === 0) {
     ElMessage.success('Email settings saved')

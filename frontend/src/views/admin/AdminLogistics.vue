@@ -199,7 +199,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, put, del, qe } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const activeTab = ref('shipments')
@@ -246,13 +246,13 @@ const formatDate = (d) => {
 }
 
 const fetchStats = async () => {
-  const res = await qe(get('/home/admin/logistics/stats'))
-  if (res?.data) stats.value = res.data
+  const res = await adminGet('/home/admin/logistics/stats')
+  if (res?.code === 0) stats.value = res.data
 }
 
 const fetchCarriers = async () => {
-  const res = await qe(get('/home/admin/logistics/carriers'))
-  if (res?.data) carriers.value = res.data
+  const res = await adminGet('/home/admin/logistics/carriers')
+  if (res?.code === 0) carriers.value = res.data
 }
 
 const fetchShipments = async () => {
@@ -261,8 +261,8 @@ const fetchShipments = async () => {
   if (filter.value.status !== '') params.status = filter.value.status
   if (filter.value.carrier) params.carrier = filter.value.carrier
   if (filter.value.search) params.search = filter.value.search
-  const res = await qe(get('/home/admin/logistics', params))
-  if (res?.data) {
+  const res = await adminGet('/home/admin/logistics', params)
+  if (res?.code === 0) {
     shipments.value = res.data.list || []
     total.value = res.data.total || 0
     page.value = res.data.page || 1
@@ -287,7 +287,7 @@ const updateTracking = async () => {
     return
   }
   updating.value = true
-  const res = await qe(put(`/home/admin/logistics/${selectedShipment.value._id}/tracking`, trackingForm.value))
+  const res = await adminPut(`/home/admin/logistics/${selectedShipment.value._id}/tracking`, trackingForm.value)
   if (res?.code === 0) {
     ElMessage.success('Tracking updated')
     trackingDialog.value = false
@@ -298,8 +298,8 @@ const updateTracking = async () => {
 }
 
 const viewDetail = async (row) => {
-  const res = await qe(get(`/home/admin/logistics/${row._id}`))
-  if (res?.data) {
+  const res = await adminGet(`/home/admin/logistics/${row._id}`)
+  if (res?.code === 0) {
     detailShipment.value = res.data
     detailDialog.value = true
   }
@@ -307,8 +307,8 @@ const viewDetail = async (row) => {
 
 const fetchMethods = async () => {
   methodsLoading.value = true
-  const res = await qe(get('/home/admin/logistics/shipping-methods'))
-  if (res?.data) methods.value = res.data
+  const res = await adminGet('/home/admin/logistics/shipping-methods')
+  if (res?.code === 0) methods.value = res.data
   methodsLoading.value = false
 }
 
@@ -331,9 +331,9 @@ const saveMethod = async () => {
   savingMethod.value = true
   let res
   if (editMethodId.value) {
-    res = await qe(put(`/home/admin/logistics/shipping-methods/${editMethodId.value}`, methodForm.value))
+    res = await adminPut(`/home/admin/logistics/shipping-methods/${editMethodId.value}`, methodForm.value)
   } else {
-    res = await qe(post('/home/admin/logistics/shipping-methods', methodForm.value))
+    res = await adminPost('/home/admin/logistics/shipping-methods', methodForm.value)
   }
   if (res?.code === 0) {
     ElMessage.success(editMethodId.value ? 'Method updated' : 'Method created')
@@ -346,7 +346,7 @@ const saveMethod = async () => {
 const deleteMethod = async (id) => {
   try {
     await ElMessageBox.confirm('Delete this shipping method?', 'Confirm', { type: 'warning' })
-    const res = await qe(del(`/home/admin/logistics/shipping-methods/${id}`))
+    const res = await adminDel(`/home/admin/logistics/shipping-methods/${id}`)
     if (res?.code === 0) {
       ElMessage.success('Method deleted')
       fetchMethods()

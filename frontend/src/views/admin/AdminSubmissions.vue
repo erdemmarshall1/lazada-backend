@@ -77,7 +77,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { get, put, del } from '@/api/request'
+import { adminGet, adminPut, adminDel } from '@/api/adminRequest'
 
 const list = ref([])
 const loading = ref(false)
@@ -103,7 +103,7 @@ const fetchList = async () => {
     if (statusFilter.value) url += `&status=${statusFilter.value}`
     if (categoryFilter.value) url += `&category=${categoryFilter.value}`
     if (search.value) url += `&search=${encodeURIComponent(search.value)}`
-    const res = await get(url)
+    const res = await adminGet(url)
     if (res?.code === 0 && res?.data) {
       list.value = res.data.list || []
       total.value = res.data.total || 0
@@ -113,7 +113,7 @@ const fetchList = async () => {
 
 const openDetail = async (row) => {
   try {
-    const res = await get(`/home/admin/submissions/${row._id}`)
+    const res = await adminGet(`/home/admin/submissions/${row._id}`)
     if (res?.code === 0 && res?.data) {
       view.value = res.data
       notes.value = res.data.adminNotes || ''
@@ -126,8 +126,8 @@ const openDetail = async (row) => {
 const saveChanges = async () => {
   saving.value = true
   try {
-    const statusRes = await put(`/home/admin/submissions/${view.value._id}/status`, { status: newStatus.value })
-    const notesRes = await put(`/home/admin/submissions/${view.value._id}/notes`, { adminNotes: notes.value })
+    const statusRes = await adminPut(`/home/admin/submissions/${view.value._id}/status`, { status: newStatus.value })
+    const notesRes = await adminPut(`/home/admin/submissions/${view.value._id}/notes`, { adminNotes: notes.value })
     if (statusRes?.code === 0 && notesRes?.code === 0) {
       ElMessage.success('Updated')
       dialogVisible.value = false
@@ -142,7 +142,7 @@ const handleDelete = async () => {
   try {
     await ElMessageBox.confirm('Delete this inquiry permanently?', 'Confirm', { type: 'warning' })
     deleting.value = true
-    const res = await del(`/home/admin/submissions/${view.value._id}`)
+    const res = await adminDel(`/home/admin/submissions/${view.value._id}`)
     if (res?.code === 0) {
       ElMessage.success('Deleted')
       dialogVisible.value = false

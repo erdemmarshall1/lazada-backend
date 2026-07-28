@@ -85,7 +85,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { get, post, put, del } from '@/api/request'
+import { adminGet, adminPost, adminPut, adminDel } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const pages = ref([])
@@ -100,7 +100,7 @@ const dialog = reactive({
 
 const loadData = async () => {
   loading.value = true
-  const res = await get('/home/cms/admin/pages', { page: page.value, pageSize })
+  const res = await adminGet('/home/cms/admin/pages', { page: page.value, pageSize })
   loading.value = false
   if (res?.code === 0 && res?.data) {
     pages.value = res.data.list || []
@@ -121,7 +121,7 @@ const openDialog = (row) => {
 
 const save = async () => {
   dialog.loading = true
-  const fn = dialog.isEdit ? put(`/home/cms/admin/pages/${dialog.form._id}`) : post('/home/cms/admin/pages')
+  const fn = dialog.isEdit ? adminPut(`/home/cms/admin/pages/${dialog.form._id}`) : adminPost('/home/cms/admin/pages')
   const res = await fn(dialog.form)
   dialog.loading = false
   if (res?.code === 0) {
@@ -135,7 +135,7 @@ const save = async () => {
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(`Delete page "${row.title}"?`, 'Confirm', { type: 'warning' }).then(async () => {
-    const res = await del(`/home/cms/admin/pages/${row._id}`)
+    const res = await adminDel(`/home/cms/admin/pages/${row._id}`)
     if (res?.code === 0) {
       ElMessage.success('Page deleted')
       loadData()

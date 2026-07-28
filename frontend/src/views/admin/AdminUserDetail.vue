@@ -75,7 +75,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { get, post } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -98,7 +98,7 @@ const logining = ref(false)
 const loginAsUser = async () => {
   logining.value = true
   try {
-    const res = await post(`/home/admin/login-as-user/${userId}`)
+    const res = await adminPost(`/home/admin/login-as-user/${userId}`)
     if (res?.code === 0) {
       localStorage.setItem('seller_temp_token', res.data.token)
       ElMessage.success(`Logged in as ${res.data.username}`)
@@ -110,7 +110,7 @@ const loginAsUser = async () => {
 const fetchUser = async () => {
   loading.value = true
   try {
-    const res = await get(`/home/admin/users/${userId}/detail`)
+    const res = await adminGet(`/home/admin/users/${userId}/detail`)
     if (res?.code === 0) user.value = res.data
   } catch {} finally { loading.value = false }
 }
@@ -118,7 +118,7 @@ const fetchUser = async () => {
 const fetchOrders = async () => {
   ordersLoading.value = true
   try {
-    const res = await get(`/home/admin/users/${userId}/orders?page=${orderPage.value}&pageSize=20`)
+    const res = await adminGet(`/home/admin/users/${userId}/orders?page=${orderPage.value}&pageSize=20`)
     if (res?.code === 0) {
       orders.value = res.data.list || []
       orderTotal.value = res.data.total || 0
@@ -129,7 +129,7 @@ const fetchOrders = async () => {
 const fetchSubmissions = async () => {
   subsLoading.value = true
   try {
-    const res = await get(`/home/admin/users/${userId}/submissions?page=${subPage.value}&pageSize=20`)
+    const res = await adminGet(`/home/admin/users/${userId}/submissions?page=${subPage.value}&pageSize=20`)
     if (res?.code === 0) {
       submissions.value = res.data.list || []
       subTotal.value = res.data.total || 0

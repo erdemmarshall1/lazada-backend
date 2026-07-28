@@ -273,12 +273,13 @@ process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);
 });
 
-startServer(false);
 connectDB().then(connected => {
   dbReady = connected;
+  startServer(connected);
   if (connected) {
     seedAll();
   }
 }).catch(err => {
   console.error('MongoDB connection error:', err.message);
+  startServer(false);
 });

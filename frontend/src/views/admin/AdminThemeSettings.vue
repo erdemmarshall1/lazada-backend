@@ -89,7 +89,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { get, post } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { useAppStore } from '@/stores/app'
 
 const store = useAppStore()
@@ -122,7 +122,7 @@ const previewStyle = computed(() => ({
 const handleSave = async () => {
   saving.value = true
   try {
-    const res = await post('/home/admin/settings/theme', form)
+    const res = await adminPost('/home/admin/settings/theme', form)
     if (res?.code === 0 || res?.code === 1 || res?.data) {
       ElMessage.success('Theme settings saved')
       store.applyTheme({ ...form })
@@ -138,7 +138,7 @@ const handleSave = async () => {
 
 onMounted(async () => {
   try {
-    const res = await get('/home/settings/theme')
+    const res = await adminGet('/home/settings/theme')
     if (res?.data) {
       Object.keys(form).forEach(key => {
         if (res.data[key] !== undefined && res.data[key] !== null) {

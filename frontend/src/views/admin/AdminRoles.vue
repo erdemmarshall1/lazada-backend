@@ -86,7 +86,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, post, put } from '@/api/request'
+import { adminGet, adminPost, adminPut } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const activeTab = ref('users')
@@ -108,7 +108,7 @@ const roleTagType = (role) => {
 
 const loadUsers = async () => {
   loadingUsers.value = true
-  const res = await get('/home/admin/users', { page: page.value, pageSize })
+  const res = await adminGet('/home/admin/users', { page: page.value, pageSize })
   loadingUsers.value = false
   if (res?.code === 0 && res?.data) {
     users.value = res.data.list || []
@@ -117,7 +117,7 @@ const loadUsers = async () => {
 }
 
 const loadRoles = async () => {
-  const res = await get('/home/admin/roles')
+  const res = await adminGet('/home/admin/roles')
   if (res?.code === 0 && res?.data) {
     roles.value = res.data.roles || []
     allRoles.value = res.data.roles?.map(r => r.role) || []
@@ -130,7 +130,7 @@ const openRoleDialog = (user) => {
 
 const saveRole = async () => {
   roleDialog.value.loading = true
-  const res = await post(`/home/admin/users/${roleDialog.value.user._id}/set-role`, { role: roleDialog.value.newRole })
+  const res = await adminPost(`/home/admin/users/${roleDialog.value.user._id}/set-role`, { role: roleDialog.value.newRole })
   roleDialog.value.loading = false
   if (res?.code === 0 && res?.data) {
     ElMessage.success('Role updated')
@@ -143,7 +143,7 @@ const saveRole = async () => {
 
 const openPermissionsDialog = async (user) => {
   permDialog.value = { visible: true, user, selected: [], allPermissions: [], isUsingDefaults: true, loading: false }
-  const res = await get(`/home/admin/users/${user._id}/permissions`)
+  const res = await adminGet(`/home/admin/users/${user._id}/permissions`)
   if (res?.code === 0 && res?.data) {
     permDialog.value.selected = [...(res.data.customPermissions || [])]
     permDialog.value.allPermissions = res.data.allPermissions || []
@@ -153,7 +153,7 @@ const openPermissionsDialog = async (user) => {
 
 const savePermissions = async () => {
   permDialog.value.loading = true
-  const res = await put(`/home/admin/users/${permDialog.value.user._id}/permissions`, { permissions: permDialog.value.selected })
+  const res = await adminPut(`/home/admin/users/${permDialog.value.user._id}/permissions`, { permissions: permDialog.value.selected })
   permDialog.value.loading = false
   if (res?.code === 0) {
     ElMessage.success('Permissions updated')
@@ -166,7 +166,7 @@ const savePermissions = async () => {
 
 const resetPermissions = async () => {
   permDialog.value.loading = true
-  const res = await put(`/home/admin/users/${permDialog.value.user._id}/permissions`, { permissions: [] })
+  const res = await adminPut(`/home/admin/users/${permDialog.value.user._id}/permissions`, { permissions: [] })
   permDialog.value.loading = false
   if (res?.code === 0) {
     ElMessage.success('Permissions reset to role defaults')

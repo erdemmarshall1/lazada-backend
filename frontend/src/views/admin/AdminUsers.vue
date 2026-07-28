@@ -15,7 +15,7 @@
       <el-table-column label="Registered"><template #default="{row}">{{ new Date(row.createdAt).toLocaleDateString() }}</template></el-table-column>
       <el-table-column label="Actions" width="220">
         <template #default="{row}">
-          <el-button size="small" @click="$router.push('/admin-user-privacy/' + row._id)">Privacy</el-button>
+          <el-button size="small" @click="$router.push('/admin/users/privacy/' + row._id)">Privacy</el-button>
           <el-button size="small" type="primary" @click="$router.push('/admin/users/edit/' + row._id)">Edit</el-button>
         </template>
       </el-table-column>
@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, qe } from '@/api/request'
+import { adminGet } from '@/api/adminRequest'
 
 const users = ref([])
 const loading = ref(false)
@@ -40,7 +40,7 @@ const total = ref(0)
 
 const fetch = async () => {
   loading.value = true
-  const res = await qe(get(`/home/admin/users?page=${page.value}&pageSize=${pageSize.value}`))
+  const res = await adminGet('/home/admin/users', { page: page.value, pageSize: pageSize.value })
   if (res) { users.value = res.data?.list || []; total.value = res.data?.total || 0 }
   loading.value = false
 }

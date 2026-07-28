@@ -149,7 +149,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { get, post, qe } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const pw = ref(null)
@@ -187,13 +187,13 @@ const maxCredit = computed(() => (pw.value?.balance || 0))
 const maxDebitSeller = computed(() => (selectedSeller.value?.balance || 0))
 
 const fetchPlatformWallet = async () => {
-  const res = await qe(get('/home/admin/platform-wallet'))
-  if (res?.data) pw.value = res.data
+  const res = await adminGet('/home/admin/platform-wallet')
+  if (res?.code === 0) pw.value = res.data
 }
 
 const searchSellers = async () => {
-  const res = await qe(get(`/home/admin/balance/users?keyword=${encodeURIComponent(keyword.value || '')}&page=${sellerPage.value}&pageSize=${sellerPageSize.value}`))
-  if (res) {
+  const res = await adminGet(`/home/admin/balance/users?keyword=${encodeURIComponent(keyword.value || '')}&page=${sellerPage.value}&pageSize=${sellerPageSize.value}`)
+  if (res?.code === 0) {
     sellers.value = res.data?.list || []
     sellerTotal.value = res.data?.total || 0
   } else {
@@ -220,14 +220,14 @@ const doCredit = async () => {
     return
   }
   crediting.value = true
-  const res = await qe(post('/home/admin/platform-wallet/credit', {
+  const res = await adminPost('/home/admin/platform-wallet/credit', {
     userId: selectedSeller.value._id,
     amount: creditAmount.value,
     title: creditTitle.value,
     description: creditDescription.value,
-  }))
+  })
   crediting.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg || 'Credit successful')
     selectedSeller.value.balance = (selectedSeller.value.balance || 0) + Number(creditAmount.value)
     const titleTag = creditTitle.value ? `[${creditTitle.value}] ` : ''
@@ -247,14 +247,14 @@ const doDebit = async () => {
     return
   }
   debiting.value = true
-  const res = await qe(post('/home/admin/platform-wallet/debit', {
+  const res = await adminPost('/home/admin/platform-wallet/debit', {
     userId: selectedSeller.value._id,
     amount: debitAmount.value,
     title: debitTitle.value,
     description: debitDescription.value,
-  }))
+  })
   debiting.value = false
-  if (res) {
+  if (res?.code === 0) {
     ElMessage.success(res.msg || 'Debit successful')
     selectedSeller.value.balance = (selectedSeller.value.balance || 0) - Number(debitAmount.value)
     const titleTag = debitTitle.value ? `[${debitTitle.value}] ` : ''
@@ -269,8 +269,8 @@ const doDebit = async () => {
 
 const fetchHistory = async () => {
   loadingHistory.value = true
-  const res = await qe(get(`/home/admin/platform-wallet/history?page=${historyPage.value}&pageSize=${historyPageSize.value}`))
-  if (res) {
+  const res = await adminGet(`/home/admin/platform-wallet/history?page=${historyPage.value}&pageSize=${historyPageSize.value}`)
+  if (res?.code === 0) {
     history.value = res.data?.list || []
     historyTotal.value = res.data?.total || 0
   }

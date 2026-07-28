@@ -71,7 +71,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { get, post as postReq, put as putReq } from '@/api/request'
+import { adminGet, adminPost, adminPut } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
@@ -87,7 +87,7 @@ const sellers = ref([])
 const fetchData = async () => {
   loading.value = true
   try {
-    const res = await get('/home/admin/seller-id-settings')
+    const res = await adminGet('/home/admin/seller-id-settings')
     if (res?.code === 0 && res?.data) {
       counter.seq = res.data.counter?.seq ?? 171910
       sellers.value = res.data.sellers || []
@@ -98,7 +98,7 @@ const fetchData = async () => {
 const saveCounter = async () => {
   savingCounter.value = true
   try {
-    const res = await putReq('/home/admin/seller-id-settings', { startingNumber: counter.seq })
+    const res = await adminPut('/home/admin/seller-id-settings', { startingNumber: counter.seq })
     if (res?.code === 0 || res?.data) {
       ElMessage.success(res.msg || 'Counter updated')
       await fetchData()
@@ -123,7 +123,7 @@ const doOverride = async () => {
   }
   savingOverride.value = true
   try {
-    const res = await postReq('/home/admin/seller-id-override', {
+    const res = await adminPost('/home/admin/seller-id-override', {
       userId: overrideUser.value._id,
       sellerId: overrideNewId.value.trim()
     })

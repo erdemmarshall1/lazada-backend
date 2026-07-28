@@ -55,7 +55,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { get, put } from '@/api/request'
+import { adminGet, adminPut } from '@/api/adminRequest'
 import { ElMessage } from 'element-plus'
 
 const reviews = ref([])
@@ -74,7 +74,7 @@ const loadData = async () => {
   loading.value = true
   const params = { page: page.value, pageSize }
   if (filterStatus.value) params.status = filterStatus.value
-  const res = await get('/home/goodsReviews/admin/list', params)
+  const res = await adminGet('/home/goodsReviews/admin/list', params)
   loading.value = false
   if (res?.code === 0 && res?.data) {
     reviews.value = res.data.list || []
@@ -83,7 +83,7 @@ const loadData = async () => {
 }
 
 const moderate = async (row, status) => {
-  const res = await put(`/home/goodsReviews/admin/${row._id}/moderate`, { status })
+  const res = await adminPut(`/home/goodsReviews/admin/${row._id}/moderate`, { status })
   if (res?.code === 0) {
     ElMessage.success(`Review ${status}`)
     loadData()

@@ -86,7 +86,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { get, post, qe, API_BASE } from '@/api/request'
+import { adminGet, adminPost } from '@/api/adminRequest'
+import { API_BASE } from '@/api/request'
 
 const loading = ref(false)
 const banners = ref([])
@@ -97,7 +98,7 @@ const saving = ref(false)
 
 const IMG_FALLBACK = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f4f2ee%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E'
 
-const getToken = () => localStorage.getItem('theoutnet_token') || ''
+const getToken = () => localStorage.getItem('theoutnet_admin_token') || localStorage.getItem('theoutnet_token') || ''
 const uploadUrl = `${API_BASE}/home/upload/file`
 const uploadHeaders = computed(() => ({ token: getToken() }))
 
@@ -117,16 +118,17 @@ const onEditUpload = (res) => { if (res.code === 0) editForm.image = res.data.ur
 
 const fetchBanners = async () => {
   loading.value = true
-  const res = await get('/home/admin/banners', { pageSize: 100 })
-  if (res?.data?.list) banners.value = res.data.list
+  const res = await adminGet('/home/admin/banners', { pageSize: 100 })
+  if (res?.code === 0 && res.data?.list) banners.value = res.data.list
   loading.value = false
 }
 
 const doAdd = async () => {
   if (!addForm.image) return ElMessage.warning('Please upload an image')
   adding.value = true
-  await qe(post('/home/admin/banners/add', { ...addForm }))
+  const res = await adminPost('/home/admin/banners/add', { ...addForm })
   adding.value = false
+  if (res?.code !== 0) { if (res?.msg) ElMessage.error(res.msg); return }
   showAdd.value = false
   addForm.image = ''; addForm.title = ''; addForm.link = ''; addForm.sort = 0
   ElMessage.success('Banner added')
@@ -144,8 +146,9 @@ const editBanner = (b) => {
 
 const doEdit = async () => {
   saving.value = true
-  await qe(post(`/home/admin/banners/update/${editForm._id}`, { ...editForm }))
+  const res = await adminPost(`/home/admin/banners/update/${editForm._id}`, { ...editForm })
   saving.value = false
+  if (res?.code !== 0) { if (res?.msg) ElMessage.error(res.msg); return }
   showEdit.value = false
   ElMessage.success('Banner updated')
   await fetchBanners()
@@ -153,14 +156,16 @@ const doEdit = async () => {
 
 const toggleStatus = async (b) => {
   const newStatus = b.status === 1 ? 0 : 1
-  await qe(post(`/home/admin/banners/update/${b._id}`, { status: newStatus }))
+  const res = await adminPost(`/home/admin/banners/update/${b._id}`, { status: newStatus })
+  if (res?.code !== 0) { if (res?.msg) ElMessage.error(res.msg); return }
   ElMessage.success(newStatus === 1 ? 'Activated' : 'Deactivated')
   await fetchBanners()
 }
 
 const deleteBanner = async (b) => {
   await ElMessageBox.confirm('Delete this banner?', 'Confirm', { type: 'warning' })
-  await qe(post(`/home/admin/banners/delete/${b._id}`))
+  const res = await adminPost(`/home/admin/banners/delete/${b._id}`)
+  if (res?.code !== 0) { if (res?.msg) ElMessage.error(res.msg); return }
   ElMessage.success('Deleted')
   await fetchBanners()
 }
