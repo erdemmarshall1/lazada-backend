@@ -37,7 +37,8 @@
         <el-input v-model="form.idNumber" :placeholder="$t('store.apply.idNumberLabel')" />
       </el-form-item>
       <el-form-item :label="$t('store.apply.inviteCodeLabel')" prop="invitationCode">
-        <el-input v-model="form.invitationCode" :placeholder="$t('store.apply.inviteCodePlaceholder')" />
+        <el-input v-model="form.invitationCode" :placeholder="$t('store.apply.inviteCodePlaceholder')" :disabled="true" />
+        <div style="font-size:12px;color:#999;margin-top:4px">8101081865</div>
       </el-form-item>
       <el-form-item :label="$t('store.apply.utilityLabel')" prop="utilityBill">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
@@ -85,7 +86,7 @@ const form = reactive({
   idFrontImage: '',
   idBackImage: '',
   idNumber: '',
-  invitationCode: '',
+  invitationCode: '8101081865',
   utilityBill: '',
   email: '',
   phone: '',

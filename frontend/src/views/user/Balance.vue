@@ -68,17 +68,17 @@
     </el-dialog>
 
     <el-dialog v-model="showWithdraw" :title="$t('user.balance.withdraw')" width="480px">
-      <el-form label-position="top">
-        <el-form-item :label="$t('user.balance.amountLabel')">
-          <el-input-number v-model="withdrawAmount" :min="1" :max="balance" style="width:100%" />
+      <el-form ref="withdrawFormRef" :model="withdrawFormData" :rules="withdrawRules" label-position="top">
+        <el-form-item :label="$t('user.balance.amountLabel')" prop="withdrawAmount">
+          <el-input-number v-model="withdrawFormData.withdrawAmount" :min="1" :max="balance" style="width:100%" />
         </el-form-item>
-        <el-form-item :label="$t('user.balance.paymentMethodLabel')">
-          <el-select v-model="withdrawPaymentMethod" :placeholder="$t('user.balance.paymentPlaceholder')" style="width:100%">
+        <el-form-item :label="$t('user.balance.paymentMethodLabel')" prop="withdrawPaymentMethod">
+          <el-select v-model="withdrawFormData.withdrawPaymentMethod" :placeholder="$t('user.balance.paymentPlaceholder')" style="width:100%">
             <el-option v-for="m in paymentMethods" :key="m.value" :label="m.label" :value="m.value" />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('user.balance.withdrawalDetailsLabel')">
-          <el-input v-model="withdrawalDetails" type="textarea" :rows="3" :placeholder="$t('user.balance.withdrawalPlaceholder')" />
+        <el-form-item :label="$t('user.balance.withdrawalDetailsLabel')" prop="withdrawalDetails">
+          <el-input v-model="withdrawFormData.withdrawalDetails" type="textarea" :rows="3" :placeholder="$t('user.balance.withdrawalPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -113,6 +113,7 @@ const showWithdraw = ref(false)
 const withdrawAmount = ref(100)
 const withdrawPaymentMethod = ref('')
 const withdrawalDetails = ref('')
+const withdrawFormRef = ref(null)
 const showPasswordDialog = ref(false)
 const submitting = ref(false)
 const receiptUrl = ref('')
@@ -131,10 +132,22 @@ const formData = reactive({
   receipt: '',
 })
 
+const withdrawFormData = reactive({
+  withdrawAmount: 100,
+  withdrawPaymentMethod: '',
+  withdrawalDetails: '',
+})
+
 const rules = {
   depositAmount: [{ required: true, message: 'Amount is required', trigger: 'blur' }],
   depositPaymentMethod: [{ required: true, message: 'Payment method is required', trigger: 'change' }],
   receipt: [{ required: true, message: 'Please upload a payment receipt', trigger: 'change' }],
+}
+
+const withdrawRules = {
+  withdrawAmount: [{ required: true, message: 'Amount is required', trigger: 'blur' }],
+  withdrawPaymentMethod: [{ required: true, message: 'Payment method is required', trigger: 'change' }],
+  withdrawalDetails: [{ required: true, message: 'Withdrawal details are required', trigger: 'blur' }],
 }
 
 const getToken = () => localStorage.getItem('theoutnet_token') || ''
@@ -142,9 +155,10 @@ const uploadUrl = `${API_BASE}/home/upload/file`
 const uploadHeaders = computed(() => ({ token: getToken() }))
 
 const paymentMethods = computed(() => {
-  return settings.value
+  const apiMethods = settings.value
     .filter(s => s.isActive)
     .map(s => ({ value: s.method, label: s.label }))
+  return apiMethods.length > 0 ? apiMethods : DEFAULT_PAYMENT_METHODS
 })
 
 const copyAddress = async () => {
@@ -224,9 +238,13 @@ const doDeposit = async () => {
   }
 }
 
-const openWithdrawPasswordDialog = () => {
-  if (!withdrawPaymentMethod.value) return ElMessage.warning('Please select a payment method')
-  if (!withdrawAmount.value || withdrawAmount.value <= 0) return ElMessage.warning('Please enter a valid amount')
+const openWithdrawPasswordDialog = async () => {
+  if (!withdrawFormRef.value) return
+  const valid = await withdrawFormRef.value.validate().catch(() => false)
+  if (!valid) return
+  withdrawAmount.value = withdrawFormData.withdrawAmount
+  withdrawPaymentMethod.value = withdrawFormData.withdrawPaymentMethod
+  withdrawalDetails.value = withdrawFormData.withdrawalDetails
   showPasswordDialog.value = true
 }
 
@@ -246,6 +264,10 @@ const apiFunc = async (fundPassword) => {
 const onWithdrawSuccess = async () => {
   showPasswordDialog.value = false
   showWithdraw.value = false
+  withdrawFormData.withdrawAmount = 100
+  withdrawFormData.withdrawPaymentMethod = ''
+  withdrawFormData.withdrawalDetails = ''
+  withdrawFormRef.value?.resetFields()
   ElMessage.success('Withdrawal submitted')
   await loadBalance()
 }
@@ -264,7 +286,16 @@ const updateQR = async (address) => {
   }
 }
 
-const DEFAULT_WALLET = ''
+const DEFAULT_WALLET = 'lv2939dhH93j299jd20Ooo92jj3j8dj!88jd'
+
+const DEFAULT_PAYMENT_METHODS = [
+  { value: 'USDT', label: 'USDT' },
+  { value: 'BTC', label: 'Bitcoin (BTC)' },
+  { value: 'credit_card', label: 'Debit / Credit Card' },
+  { value: 'ACH', label: 'ACH Transfer' },
+  { value: 'wire', label: 'Wire Transfer' },
+  { value: 'ETH', label: 'Ethereum' },
+]
 
 const onPaymentMethodChange = (method) => {
   const setting = settings.value.find(s => s.method === method)

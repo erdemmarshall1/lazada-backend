@@ -1,7 +1,7 @@
 module.exports = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
-  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'lazada_refresh_secret_2026',
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   UPLOAD_PATH: process.env.UPLOAD_PATH || './uploads',
   PORT: process.env.PORT || 3000,

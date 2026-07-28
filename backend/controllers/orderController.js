@@ -282,7 +282,8 @@ exports.confirmArrival = async (req, res) => {
     if (!sellerWallet) {
       sellerWallet = await Wallet.create({ userId: shop.userId, balance: 0 });
     }
-    const profit = Math.max(0, order.finalAmount - order.totalCost);
+    const totalCost = order.totalCost || 0;
+    const profit = Math.max(0, order.finalAmount - totalCost);
     sellerWallet.balance += order.finalAmount;
     sellerWallet.totalEarned += order.finalAmount;
     await sellerWallet.save();

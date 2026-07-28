@@ -10,6 +10,7 @@
       <router-view />
     </div>
     <SwUpdateBanner />
+    <LiveChatWidget />
     <audio ref="audioPlay" class="c_audio_play" :src="audioSrc" controls style="display:none"></audio>
     <el-backtop :right="24" :bottom="48" />
   </div>
@@ -22,6 +23,7 @@ import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { setDocumentLang } from '@/locales'
 import SwUpdateBanner from '@/components/SwUpdateBanner.vue'
+import LiveChatWidget from '@/components/LiveChatWidget.vue'
 
 const router = useRouter()
 const store = useAppStore()
