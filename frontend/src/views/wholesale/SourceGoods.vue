@@ -29,11 +29,13 @@
           <div class="product-img">
             <img :src="$imgUrl(item.images?.[0])" loading="lazy" @error="$imgFallback" />
             <div class="qv-overlay" @click.stop="openQuickView(item._id)"><span>{{ $t('wholesale.center.quickView') }}</span></div>
+            <div v-if="item.isDistributedByCurrentSeller" class="distributed-badge">Distributed</div>
           </div>
           <div class="product-info"><h4 class="g-text-ellipsis">{{ item.name }}</h4><div class="product-price">${{ item.minPrice }}</div><div class="product-profit" v-if="item.profitPercentage">{{ $t('wholesale.center.profitLabel', { percentage: item.profitPercentage, retailPrice: '$' + (item.minPrice * (1 + item.profitPercentage/100)).toFixed(2) }) }}</div></div>
         </div>
         <div class="product-actions" v-if="store.isSeller">
-          <el-button size="small" type="primary" plain @click.stop="openDistribute(item)">{{ $t('wholesale.center.distribute') }}</el-button>
+          <el-button v-if="!item.isDistributedByCurrentSeller" size="small" type="primary" plain @click.stop="openDistribute(item)">{{ $t('wholesale.center.distribute') }}</el-button>
+          <el-tag v-else type="success" size="small">Distributed</el-tag>
         </div>
       </div>
     </div>
@@ -43,7 +45,7 @@
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="page" @current-change="onPageChange" />
     </div>
 
-    <DistributionDialog :product="distProduct" :visible="distVisible" @close="distVisible = false" @success="distProduct = null" />
+    <DistributionDialog :product="distProduct" :visible="distVisible" @close="distVisible = false" @success="onDistributeSuccess" />
     <QuickViewDialog :visible="quickViewVisible" :product-id="quickViewProductId" @close="quickViewVisible = false" @added-to-cart="quickViewVisible = false" />
   </div>
 </template>
@@ -81,6 +83,13 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 const openDistribute = (item) => {
   distProduct.value = item
   distVisible.value = true
+}
+
+const onDistributeSuccess = () => {
+  if (distProduct.value) {
+    distProduct.value.isDistributedByCurrentSeller = true
+  }
+  distProduct.value = null
 }
 
 const onPageChange = (p) => {
@@ -152,6 +161,7 @@ onBeforeUnmount(() => {
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
 .qv-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: #fff; text-align: center; padding: 6px; font-size: 12px; opacity: 0; transition: opacity 0.2s; cursor: pointer; }
 .product-card:hover .qv-overlay { opacity: 1; }
+.distributed-badge { position: absolute; top: 8px; left: 8px; background: #52c41a; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; z-index: 2; }
 .product-info { padding: 8px; }
 .product-price { color: var(--g-main_color); font-weight: 600; }
 .product-profit { font-size: 11px; color: #e6a23c; margin-top: 4px; }

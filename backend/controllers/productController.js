@@ -1,6 +1,9 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
+const Shop = require('../models/Shop');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/app');
 const { success, fail, paginate, rewriteProductImages } = require('../utils/response');
 const { getLang, applyTranslation, applyTranslationTags, applyTranslationSkuAttrs } = require('../utils/translate');
 
@@ -21,6 +24,20 @@ exports.getInfo = async (req, res) => {
     await product.save();
     rewriteProductImages(product);
     product = translateProduct(product, lang);
+
+    // Check if requesting seller has distributed this product
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const shop = await Shop.findOne({ userId: decoded.id, status: 1 }).select('_id');
+        if (shop) {
+          product.isDistributedByCurrentSeller = (product.distributedBy || []).some(d => d.shopId && d.shopId.toString() === shop._id.toString());
+        }
+      } catch (e) {}
+    }
+
     res.json(success(product));
   } catch (error) {
     res.json(fail(error.message));
@@ -65,9 +82,29 @@ exports.getSearchList = async (req, res) => {
       Product.find(query).sort(sortObj).skip(skip).limit(limit).populate('shopId', 'name'),
       Product.countDocuments(query),
     ]);
+
+    // Check if requesting user is a seller to include distribution info
+    let sellerShopId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const shop = await Shop.findOne({ userId: decoded.id, status: 1 }).select('_id');
+        if (shop) sellerShopId = shop._id.toString();
+      } catch (e) {}
+    }
+
     list.forEach(rewriteProductImages);
     const lang = getLang(req);
-    res.json(success({ list: list.map(p => translateProduct(p, lang)), total, page, pageSize }));
+    const mapped = list.map(p => {
+      const product = translateProduct(p, lang);
+      if (sellerShopId) {
+        product.isDistributedByCurrentSeller = (p.distributedBy || []).some(d => d.shopId && d.shopId.toString() === sellerShopId);
+      }
+      return product;
+    });
+    res.json(success({ list: mapped, total, page, pageSize }));
   } catch (error) {
     res.json(fail(error.message));
   }

@@ -5,7 +5,7 @@
     <template v-if="list.length>0">
     <div class="g-responsive-table">
     <el-table :data="list" style="width:100%;margin-top:16px">
-      <el-table-column :label="$t('store.goods.productLabel')" min-width="200"><template #default="{row}"><div class="g-flex-align-center" style="gap:8px"><img :src="$imgUrl(row.images?.[0])" style="width:40px;height:40px;border-radius:4px;object-fit:cover" loading="lazy" @error="$imgFallback" /><span>{{ row.name }}</span></div></template></el-table-column>
+      <el-table-column :label="$t('store.goods.productLabel')" min-width="200"><template #default="{row}"><div class="g-flex-align-center" style="gap:8px"><img :src="$imgUrl(row.images?.[0])" style="width:40px;height:40px;border-radius:4px;object-fit:cover" loading="lazy" @error="$imgFallback" /><span>{{ row.name }}</span><el-tag v-if="row.originalId" type="success" size="small" style="margin-left:4px">Distributed</el-tag></div></template></el-table-column>
       <el-table-column prop="minPrice" :label="$t('store.goods.priceLabel')" width="100" />
       <el-table-column prop="salesCount" :label="$t('store.goods.salesLabel')" width="80" />
       <el-table-column prop="status" :label="$t('store.goods.statusLabel')" width="100"><template #default="{row}">{{ row.status===1 ? $t('store.goods.active') : $t('store.goods.inactive') }}</template></el-table-column>

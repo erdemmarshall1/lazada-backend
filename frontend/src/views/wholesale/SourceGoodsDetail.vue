@@ -10,11 +10,14 @@
         <div class="product-price" style="font-size:24px;font-weight:700;color:var(--g-main_color);margin:16px 0">${{ product.minPrice }}</div>
         <div v-if="product.profitPercentage" style="font-size:14px;color:#e6a23c;margin-bottom:8px">{{ $t('wholesale.detail.profitLabel', { percentage: product.profitPercentage, retailPrice: '$' + (product.minPrice * (1 + product.profitPercentage/100)).toFixed(2) }) }}</div>
         <p style="color:#666;margin-bottom:16px">{{ product.description }}</p>
-        <el-button v-if="store.isSeller" type="danger" size="large" @click="openDistribute">{{ $t('wholesale.detail.distribute') }}</el-button>
+        <div style="display:flex;align-items:center;gap:12px">
+          <el-button v-if="store.isSeller && !product.isDistributedByCurrentSeller" type="danger" size="large" @click="openDistribute">{{ $t('wholesale.detail.distribute') }}</el-button>
+          <el-tag v-if="product.isDistributedByCurrentSeller" type="success" size="large" style="font-size:14px;padding:8px 16px">Distributed</el-tag>
+        </div>
       </div>
     </div>
 
-    <DistributionDialog :product="distProduct" :visible="distVisible" @close="distVisible = false" @success="distProduct = null" />
+    <DistributionDialog :product="distProduct" :visible="distVisible" @close="distVisible = false" @success="onDistributeSuccess" />
   </div>
 </template>
 
@@ -33,6 +36,13 @@ const distVisible = ref(false)
 const distProduct = computed(() => product.value)
 
 const openDistribute = () => { distVisible.value = true }
+
+const onDistributeSuccess = () => {
+  if (product.value) {
+    product.value.isDistributedByCurrentSeller = true
+  }
+  distProduct.value = null
+}
 
 onMounted(async () => { const res = await get('/main/goods/getInfo', { id: route.query.id }); if (res?.data) product.value = res.data })
 </script>

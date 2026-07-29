@@ -96,6 +96,32 @@
         </div>
       </el-tab-pane>
 
+      <el-tab-pane label="Seller" name="seller">
+        <div class="settings-section">
+          <h3>Seller Level & Credit Score Settings</h3>
+          <el-form label-position="top" style="max-width:500px">
+            <el-form-item label="Default Credit Score">
+              <el-input-number v-model="seller.defaultCreditScore" :min="0" :max="1000" style="width:100%" />
+              <div style="font-size:12px;color:#999;margin-top:4px">Default credit score assigned to new sellers</div>
+            </el-form-item>
+            <el-form-item label="Auto Calculate Credit Score">
+              <el-switch v-model="seller.autoCreditScore" />
+              <div style="font-size:12px;color:#999;margin-top:4px">Automatically calculate credit score based on order completion rate</div>
+            </el-form-item>
+            <el-form-item label="Credit Score Level Thresholds">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%">
+                <div><label style="font-size:12px;color:#999">Bronze</label><el-input-number v-model="seller.levelThresholds.bronze" :min="0" :max="100" style="width:100%" /></div>
+                <div><label style="font-size:12px;color:#999">Silver</label><el-input-number v-model="seller.levelThresholds.silver" :min="0" :max="100" style="width:100%" /></div>
+                <div><label style="font-size:12px;color:#999">Gold</label><el-input-number v-model="seller.levelThresholds.gold" :min="0" :max="100" style="width:100%" /></div>
+                <div><label style="font-size:12px;color:#999">Platinum</label><el-input-number v-model="seller.levelThresholds.platinum" :min="0" :max="100" style="width:100%" /></div>
+              </div>
+              <div style="font-size:12px;color:#999;margin-top:4px">Minimum credit score required for each seller level</div>
+            </el-form-item>
+            <el-button type="primary" @click="saveSellerSettings" :loading="sellerLoading">Save Seller Settings</el-button>
+          </el-form>
+        </div>
+      </el-tab-pane>
+
       <el-tab-pane :label="$t('admin.settingsPage.shipping')" name="shipping">
         <div class="admin-cms-header">
           <h3>{{ $t('admin.settingsPage.shippingMethods') }}</h3>
@@ -188,6 +214,35 @@ const gen = reactive({
 })
 const genLoading = ref(false)
 const timezones = Intl.supportedValuesOf?.('timeZone') || ['UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Shanghai', 'Asia/Tokyo', 'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland']
+
+// Seller settings
+const seller = reactive({
+  defaultCreditScore: 100,
+  autoCreditScore: true,
+  levelThresholds: { bronze: 25, silver: 50, gold: 75, platinum: 100 },
+})
+const sellerLoading = ref(false)
+
+const loadSellerSettings = async () => {
+  const res = await adminGet('/home/admin/settings/seller')
+  if (res?.code === 0 && res?.data) {
+    seller.defaultCreditScore = res.data.defaultCreditScore ?? 100
+    seller.autoCreditScore = res.data.autoCreditScore ?? true
+    seller.levelThresholds = res.data.levelThresholds || { bronze: 25, silver: 50, gold: 75, platinum: 100 }
+  }
+}
+
+const saveSellerSettings = async () => {
+  sellerLoading.value = true
+  const res = await adminPut('/home/admin/settings/seller', {
+    defaultCreditScore: seller.defaultCreditScore,
+    autoCreditScore: seller.autoCreditScore,
+    levelThresholds: seller.levelThresholds,
+  })
+  sellerLoading.value = false
+  if (res?.code === 0) ElMessage.success('Seller settings saved')
+  else ElMessage.error(res?.msg || 'Failed to save seller settings')
+}
 
 const loadGeneral = async () => {
   const res = await adminGet('/home/admin/settings/settings')
@@ -336,6 +391,7 @@ onMounted(() => {
   loadTax()
   loadCurrencies()
   loadShipping()
+  loadSellerSettings()
 })
 </script>
 

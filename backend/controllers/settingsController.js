@@ -146,3 +146,44 @@ exports.deleteShippingMethod = async (req, res) => {
     res.json(success(null, 'Shipping method deleted'));
   } catch (error) { res.json(fail(error.message)); }
 };
+
+// ---- Seller Settings ----
+exports.getSellerSettings = async (req, res) => {
+  try {
+    const keys = ['seller_default_credit_score', 'seller_credit_score_auto', 'seller_level_thresholds'];
+    const settings = await Setting.find({ key: { $in: keys } }).sort({ key: 1 });
+    const map = {};
+    settings.forEach(s => { map[s.key] = s.value });
+    res.json(success({
+      defaultCreditScore: map.seller_default_credit_score ?? 100,
+      autoCreditScore: map.seller_credit_score_auto ?? true,
+      levelThresholds: map.seller_level_thresholds || { bronze: 25, silver: 50, gold: 75, platinum: 100 },
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+};
+
+exports.updateSellerSettings = async (req, res) => {
+  try {
+    const { defaultCreditScore, autoCreditScore, levelThresholds } = req.body;
+    const bulk = [];
+    if (defaultCreditScore !== undefined) {
+      const val = Number(defaultCreditScore);
+      if (isNaN(val) || val < 0 || val > 1000) return res.json(fail('Default credit score must be between 0 and 1000'));
+      bulk.push({ key: 'seller_default_credit_score', value: val });
+    }
+    if (autoCreditScore !== undefined) {
+      bulk.push({ key: 'seller_credit_score_auto', value: Boolean(autoCreditScore) });
+    }
+    if (levelThresholds !== undefined) {
+      const t = levelThresholds;
+      if (typeof t.bronze !== 'number' || typeof t.silver !== 'number' || typeof t.gold !== 'number' || typeof t.platinum !== 'number') {
+        return res.json(fail('Level thresholds must be numbers for bronze, silver, gold, platinum'));
+      }
+      bulk.push({ key: 'seller_level_thresholds', value: t });
+    }
+    for (const s of bulk) {
+      await Setting.findOneAndUpdate({ key: s.key }, { $set: { value: s.value } }, { upsert: true });
+    }
+    res.json(success(null, 'Seller settings saved'));
+  } catch (error) { res.json(fail(error.message)); }
+};

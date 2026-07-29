@@ -34,6 +34,7 @@ const productSchema = new mongoose.Schema({
   flashSaleStock: { type: Number, default: 0 },
   profitPercentage: { type: Number, default: 20, min: 0, max: 1000 },
   isDistributed: { type: Boolean, default: false },
+  distributedBy: [{ shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' }, distributedAt: { type: Date, default: Date.now } }],
   originalId: { type: String, default: '' },
   translations: {
     name: { type: Map, of: String, default: {} },

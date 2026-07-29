@@ -92,4 +92,8 @@ router.post('/shipping-methods', adminAuth, settings.createShippingMethod);
 router.put('/shipping-methods/:id', adminAuth, settings.updateShippingMethod);
 router.delete('/shipping-methods/:id', adminAuth, settings.deleteShippingMethod);
 
+// ---- Seller Settings ----
+router.get('/seller', adminAuth, settings.getSellerSettings);
+router.put('/seller', adminAuth, settings.updateSellerSettings);
+
 module.exports = router;

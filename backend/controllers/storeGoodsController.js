@@ -92,10 +92,12 @@ exports.distribute = async (req, res) => {
     const srcProduct = await Product.findById(productId);
     if (!srcProduct) return res.json(fail('Source product not found'));
     if (srcProduct.status !== 1) return res.json(fail('Source product is not active'));
-    if (srcProduct.isDistributed) return res.json(fail('This product has already been distributed'));
 
     const shop = await Shop.findOne({ userId: req.user._id, status: 1 });
     if (!shop) return res.json(fail('You need an approved store to distribute products'));
+
+    const alreadyDistributed = (srcProduct.distributedBy || []).some(d => d.shopId && d.shopId.toString() === shop._id.toString());
+    if (alreadyDistributed) return res.json(fail('You have already distributed this product'));
 
     const markup = Number(markupPercentage) || 20;
     const markupMultiplier = 1 + markup / 100;
@@ -127,10 +129,11 @@ exports.distribute = async (req, res) => {
       rating: 5,
       tags: srcProduct.tags || [],
       status: 1,
+      originalId: productId,
     });
 
     await Shop.findByIdAndUpdate(shop._id, { $inc: { productCount: 1 } });
-    await Product.findByIdAndUpdate(productId, { isDistributed: true });
+    await Product.findByIdAndUpdate(productId, { $push: { distributedBy: { shopId: shop._id, distributedAt: new Date() } } });
 
     res.json(success({
       product: newProduct,

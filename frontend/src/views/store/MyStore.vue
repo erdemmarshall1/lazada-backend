@@ -57,7 +57,7 @@
           </div>
           <div class="shop-detail-item">
             <span class="detail-label">{{ $t('store.myStore.shopLevel') }}</span>
-            <span class="detail-value level-value">{{ shopLevel }}</span>
+            <span class="detail-value level-value">{{ shop.level || 'Standard' }}</span>
           </div>
           <div class="shop-detail-item">
             <span class="detail-label">{{ $t('store.myStore.accountBalance') }}</span>

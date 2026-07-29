@@ -70,9 +70,9 @@ const handleMenuClick = (item) => {
 
 const flatMenu = computed(() => {
   const items = [
+    { label: store.isSeller ? t('user.myCenter.shopDetails') : t('user.myCenter.applyForMerchant'), path: store.isSeller ? '/storesettings' : '/applystore' },
     { label: t('user.myCenter.myAccount'), path: '/myaccount' },
     { label: t('user.myCenter.currentBalance'), path: '/balance' },
-    { label: store.isSeller ? t('user.myCenter.shopDetails') : t('user.myCenter.applyForMerchant'), path: store.isSeller ? '/storesettings' : '/applystore' },
     { label: t('user.myCenter.myOrders'), path: '/myorder' },
     { label: t('user.myCenter.orderManagement'), path: '/storeordercontrol', hidden: !store.isSeller },
     { label: t('user.myCenter.billingRecords'), path: '/mybill' },
