@@ -52,6 +52,9 @@ if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
 }
 
+// Maintenance mode guard (public pages/APIs blocked when enabled; /home/admin + /admin stay accessible)
+app.use(require('./middleware/maintenance').maintenanceMiddleware);
+
 // Mount all routes
 app.use(require('./routes'));
 

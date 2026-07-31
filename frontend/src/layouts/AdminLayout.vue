@@ -167,6 +167,7 @@ const breadcrumbs = computed(() => {
       'theme-settings': 'Theme Settings', balance: 'Balance Mgmt',
       'platform-wallet': 'Platform Wallet', 'sessions-audit': 'Sessions & Audit',
       settings: 'Settings', 'homepage-sections': 'Homepage Sections',
+      maintenance: 'Maintenance & Backup',
       submissions: 'Inquiries',
       'livechat-inbox': 'Live Chat Inbox', 'livechat-settings': 'Live Chat Settings',
       'user-privacy': 'User Privacy', 'user-detail': 'User Detail',
@@ -232,6 +233,7 @@ const menuGroups = computed(() => [
       { icon: 'iconfont icon-anquan', label: 'Roles & Permissions', path: '/admin/roles' },
       { icon: 'iconfont icon-anquan', label: 'Sessions & Audit', path: '/admin/sessions-audit' },
       { icon: 'iconfont icon-shezhi', label: 'General Settings', path: '/admin/settings' },
+      { icon: 'iconfont icon-anquan', label: 'Maintenance & Backup', path: '/admin/maintenance' },
       { icon: 'iconfont icon-anquan', label: 'Seller ID Settings', path: '/admin/seller-id-settings' },
       { icon: 'iconfont icon-dashboard', label: 'Super Admin', path: '/admin/superadmin-dashboard' },
     ]

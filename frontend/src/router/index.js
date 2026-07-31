@@ -156,6 +156,7 @@ const routes = [
       { path: 'platform-wallet', name: 'admin-platform-wallet', component: () => import('@/views/admin/AdminPlatformWallet.vue'), meta: { title: 'Platform Wallet', requiresAuth: true, adminLayout: true } },
       { path: 'sessions-audit', name: 'admin-sessions-audit', component: () => import('@/views/admin/AdminSessionsAudit.vue'), meta: { title: 'Sessions & Audit', requiresAuth: true, adminLayout: true } },
       { path: 'settings', name: 'admin-settings', component: () => import('@/views/admin/AdminSettings.vue'), meta: { title: 'Settings', requiresAuth: true, adminLayout: true } },
+      { path: 'maintenance', name: 'admin-maintenance', component: () => import('@/views/admin/AdminMaintenance.vue'), meta: { title: 'Maintenance & Backup', requiresAuth: true, adminLayout: true } },
       { path: 'homepage-sections', name: 'admin-homepage-sections', component: () => import('@/views/admin/AdminHomepageSections.vue'), meta: { title: 'Homepage Sections', requiresAuth: true, adminLayout: true } },
       { path: 'submissions', name: 'admin-submissions', component: () => import('@/views/admin/AdminSubmissions.vue'), meta: { title: 'Inquiries', requiresAuth: true, adminLayout: true } },
 
@@ -199,6 +200,7 @@ const adminPathRules = [
   { pattern: /^\/admin-platform-wallet$/, redirect: '/admin/platform-wallet' },
   { pattern: /^\/admin-sessions-audit$/, redirect: '/admin/sessions-audit' },
   { pattern: /^\/admin-settings$/, redirect: '/admin/settings' },
+  { pattern: /^\/admin-maintenance$/, redirect: '/admin/maintenance' },
   { pattern: /^\/admin-homepage-sections$/, redirect: '/admin/homepage-sections' },
   { pattern: /^\/admin-submissions$/, redirect: '/admin/submissions' },
   { pattern: /^\/admin-livechat-inbox$/, redirect: '/admin/livechat-inbox' },

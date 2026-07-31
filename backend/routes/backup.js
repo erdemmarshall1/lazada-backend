@@ -3,8 +3,9 @@ const router = express.Router();
 const archiver = require('archiver');
 const path = require('path');
 const fs = require('fs');
-const { adminAuth } = require('../middleware/auth');
-const { fail } = require('../utils/response');
+const mongoose = require('mongoose');
+const { adminAuth, superAdminAuth } = require('../middleware/auth');
+const { success, fail } = require('../utils/response');
 
 const BACKUP_ROOT = path.join(__dirname, '..', '..', 'Full Backup');
 
@@ -189,6 +190,182 @@ router.post('/backup/c', adminAuth, async (req, res) => {
     res.json({ success: true, path: zipPath, size, sizeMB: (size / 1024 / 1024).toFixed(2) });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Maintenance Mode + Backup Status ─────────────────
+router.get('/backup/status', adminAuth, async (req, res) => {
+  try {
+    const Setting = require('../models/Setting');
+    const docs = await Setting.find({ key: { $in: ['maintenanceMode', 'maintenance_message', 'maintenance_until'] } }).lean();
+    const map = {};
+    for (const d of docs) map[d.key] = d.value;
+    let dbStats = null;
+    try { dbStats = await mongoose.connection.db.stats(); } catch (e) {}
+    res.json(success({
+      maintenance: {
+        enabled: !!map.maintenanceMode,
+        message: map.maintenance_message || '',
+        until: map.maintenance_until || null,
+      },
+      database: {
+        collections: dbStats ? dbStats.collections : models.length,
+        dataSizeMB: dbStats ? (dbStats.dataSize / 1024 / 1024).toFixed(2) : null,
+        storageSizeMB: dbStats ? (dbStats.storageSize / 1024 / 1024).toFixed(2) : null,
+      },
+      backupCollections: models.length,
+    }));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/maintenance', adminAuth, async (req, res) => {
+  try {
+    const { enabled, message, until } = req.body;
+    const Setting = require('../models/Setting');
+    const ops = [
+      Setting.findOneAndUpdate({ key: 'maintenanceMode' }, { $set: { value: enabled ? 1 : 0, type: 'number' } }, { upsert: true, new: true }),
+      Setting.findOneAndUpdate({ key: 'maintenance_message' }, { $set: { value: message || 'We are currently performing scheduled maintenance. Please check back shortly.' } }, { upsert: true, new: true }),
+    ];
+    if (until !== undefined) {
+      ops.push(Setting.findOneAndUpdate({ key: 'maintenance_until' }, { $set: { value: until || '' } }, { upsert: true, new: true }));
+    }
+    await Promise.all(ops);
+    const { refreshMaintenanceCache } = require('../middleware/maintenance');
+    const state = await refreshMaintenanceCache();
+    res.json(success(state, enabled ? 'Maintenance mode enabled' : 'Maintenance mode disabled'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+// ── Backup history (server-side "Full Backup" folder) ──
+router.get('/backup/list', adminAuth, async (req, res) => {
+  try {
+    const items = [];
+    if (fs.existsSync(BACKUP_ROOT)) {
+      for (const entry of fs.readdirSync(BACKUP_ROOT)) {
+        try {
+          const fp = path.join(BACKUP_ROOT, entry);
+          const st = fs.statSync(fp);
+          items.push({
+            name: entry,
+            isDir: st.isDirectory(),
+            sizeMB: st.isDirectory() ? null : (st.size / 1024 / 1024).toFixed(2),
+            modifiedAt: st.mtime,
+          });
+        } catch (e) {}
+      }
+    }
+    items.sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt));
+    res.json(success(items));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+// ── Restore ──────────────────────────────────────────
+const multer = require('multer');
+const uploadRestore = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 200 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const name = (file.originalname || '').toLowerCase();
+    if (name.endsWith('.zip') || name.endsWith('.json') || /zip|json/.test(file.mimetype || '')) return cb(null, true);
+    cb(new Error('Only .zip or .json backup files are allowed'), false);
+  },
+});
+
+const COLLECTION_WHITELIST = models.map(m => m.name);
+
+const extractCollections = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {};
+  if (obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data)) return obj.data;
+  if (!obj.success && obj.manifest) return obj;
+  return {};
+};
+
+const readCollectionsFromZip = (buffer) => new Promise((resolve, reject) => {
+  const yauzl = require('yauzl');
+  const results = {};
+  yauzl.fromBuffer(buffer, { lazyEntries: true }, (err, zipfile) => {
+    if (err) return reject(err);
+    zipfile.on('error', reject);
+    zipfile.readEntry();
+    zipfile.on('entry', (entry) => {
+      if (/^database\/.+\.json$/i.test(entry.fileName)) {
+        const name = path.basename(entry.fileName, '.json');
+        zipfile.openReadStream(entry, (err2, stream) => {
+          if (err2) return reject(err2);
+          const chunks = [];
+          stream.on('data', (c) => chunks.push(c));
+          stream.on('end', () => {
+            try {
+              results[name] = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+            } catch (e) {
+              results[name] = [];
+            }
+            zipfile.readEntry();
+          });
+          stream.on('error', reject);
+        });
+      } else {
+        zipfile.readEntry();
+      }
+    });
+    zipfile.on('end', () => resolve(results));
+  });
+});
+
+router.post('/backup/restore', superAdminAuth, uploadRestore.single('file'), async (req, res) => {
+  try {
+    const confirm = req.body?.confirm === 'true' || req.body?.confirm === true;
+    if (!confirm) return res.json(fail('You must confirm the restore (confirm: true)'));
+
+    let collectionsData = null;
+    if (req.file) {
+      const ext = (req.file.originalname || '').toLowerCase();
+      if (ext.endsWith('.json')) {
+        collectionsData = extractCollections(JSON.parse(req.file.buffer.toString('utf8')));
+      } else if (ext.endsWith('.zip')) {
+        collectionsData = await readCollectionsFromZip(req.file.buffer);
+      } else {
+        return res.json(fail('Unsupported backup file type'));
+      }
+    } else if (req.body?.data) {
+      if (typeof req.body.data === 'string') collectionsData = extractCollections(JSON.parse(req.body.data));
+      else collectionsData = extractCollections(req.body.data);
+    }
+
+    if (!collectionsData || Object.keys(collectionsData).length === 0) {
+      return res.json(fail('No collections found in the uploaded backup'));
+    }
+
+    const results = {};
+    const db = mongoose.connection.db;
+    for (const [name, docs] of Object.entries(collectionsData)) {
+      if (!COLLECTION_WHITELIST.includes(name)) {
+        results[name] = { status: 'skipped', reason: 'not a known collection' };
+        continue;
+      }
+      try {
+        const col = db.collection(name);
+        const deleted = (await col.deleteMany({})).deletedCount;
+        let inserted = 0;
+        if (Array.isArray(docs) && docs.length > 0) {
+          try {
+            const r = await col.insertMany(docs, { ordered: false });
+            inserted = Array.isArray(r) ? r.length : (r.insertedCount ?? docs.length);
+          } catch (e) {
+            inserted = docs.length - (e.writeErrors?.length || 0);
+          }
+        }
+        results[name] = { status: 'ok', deleted, inserted };
+      } catch (e) {
+        results[name] = { status: 'error', error: e.message };
+      }
+    }
+
+    const { refreshMaintenanceCache } = require('../middleware/maintenance');
+    await refreshMaintenanceCache();
+    res.json(success(results, 'Restore complete'));
+  } catch (error) {
+    res.status(500).json(fail(error.message));
   }
 });
 
