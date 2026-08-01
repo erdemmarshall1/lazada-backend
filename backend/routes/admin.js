@@ -7,6 +7,7 @@ const speakeasy = require('speakeasy');
 const { adminAuth } = require('../middleware/auth');
 const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES_IN } = require('../config/app');
 const walletController = require('../controllers/walletController');
+const shopController = require('../controllers/shopController');
 const User = require('../models/User');
 const Shop = require('../models/Shop');
 const Product = require('../models/Product');
@@ -395,6 +396,96 @@ router.put('/shops/:id/credit-score', adminAuth, async (req, res) => {
     const shop = await Shop.findByIdAndUpdate(req.params.id, { creditScore: score }, { new: true });
     if (!shop) return res.json(fail('Shop not found'));
     res.json(success(shop, `Credit score set to ${score}`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ── Merchant metrics (used by the Adjustment Settings UI) ──
+router.get('/shops/:id/stats', adminAuth, async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return res.json(fail('Shop not found'));
+    const stats = await shopController.getShopStats(shop);
+    const wallet = await Wallet.findOne({ userId: shop.userId });
+    res.json(success({
+      ...stats,
+      followerCount: shop.followerCount || 0,
+      salesCount: shop.salesCount || 0,
+      balance: wallet?.balance || 0,
+      adjustments: shop.adjustments || {},
+    }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+const ADJUST_FIELDS = {
+  todayOrders: 'adjustments.todayOrders',
+  cumulativeOrders: 'adjustments.cumulativeOrders',
+  todaySales: 'adjustments.todaySales',
+  totalSales: 'adjustments.totalSales',
+  todayProfit: 'adjustments.todayProfit',
+  totalProfit: 'adjustments.totalProfit',
+};
+
+router.post('/shops/:id/adjust', adminAuth, async (req, res) => {
+  try {
+    const { metric, delta } = req.body;
+    const amount = Number(delta);
+    if (!metric || !amount || isNaN(amount)) {
+      return res.json(fail('metric and a non-zero numeric delta are required'));
+    }
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return res.json(fail('Shop not found'));
+
+    if (metric === 'creditScore') {
+      const next = Math.max(0, Math.min(1000, (shop.creditScore || 0) + amount));
+      await Shop.findByIdAndUpdate(req.params.id, { creditScore: next });
+      return res.json(success({ metric, value: next }, `Credit score adjusted to ${next}`));
+    }
+
+    if (metric === 'followers') {
+      const next = Math.max(0, (shop.followerCount || 0) + amount);
+      await Shop.findByIdAndUpdate(req.params.id, { followerCount: next });
+      return res.json(success({ metric, value: next }, `Followers adjusted to ${next}`));
+    }
+
+    if (metric === 'balance') {
+      const wallet = await Wallet.findOne({ userId: shop.userId });
+      if (!wallet && amount < 0) return res.json(fail('Insufficient balance'));
+      const current = wallet?.balance || 0;
+      const next = current + amount;
+      if (next < 0) return res.json(fail('Resulting balance cannot be negative'));
+      let w = wallet;
+      if (!w) w = await Wallet.create({ userId: shop.userId });
+      const tx = await Transaction.create({
+        userId: shop.userId,
+        type: 'admin',
+        amount,
+        balanceBefore: current,
+        balanceAfter: next,
+        status: 1,
+        description: amount >= 0 ? `Admin adjustment credit` : 'Admin adjustment debit',
+      });
+      w.balance = next;
+      if (amount >= 0) w.totalEarned = (w.totalEarned || 0) + amount;
+      else w.totalSpent = (w.totalSpent || 0) + Math.abs(amount);
+      await w.save();
+      tx.balanceAfter = next;
+      await tx.save();
+      return res.json(success({ metric, value: next, transaction: tx }, `Balance adjusted to ${next}`));
+    }
+
+    const field = ADJUST_FIELDS[metric];
+    if (!field) return res.json(fail('Invalid metric'));
+    const newShop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { [field]: amount } },
+      { new: true }
+    );
+    const value = (newShop.adjustments || {})[metric] || 0;
+    res.json(success({ metric, value }, `${metric} adjusted by ${amount}`));
   } catch (error) {
     res.json(fail(error.message));
   }

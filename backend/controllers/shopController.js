@@ -155,82 +155,92 @@ exports.update = async (req, res) => {
   }
 };
 
+exports.getShopStats = async (shop) => {
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999)
+  const [productCount, orderCount, totalSales, ordersByStatus, pendingShipmentCount, refundRequestCount, todayOrderCount, todayRevenueArr] = await Promise.all([
+    Product.countDocuments({ shopId: shop._id }),
+    Order.countDocuments({ shopId: shop._id }),
+    Order.aggregate([
+      { $match: { shopId: shop._id, status: { $in: [3, 4, 5] } } },
+      { $group: { _id: null, total: { $sum: '$finalAmount' } } },
+    ]),
+    Order.aggregate([
+      { $match: { shopId: shop._id } },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]),
+    Order.countDocuments({ shopId: shop._id, status: 1 }),
+    Order.countDocuments({ shopId: shop._id, refundStatus: 1 }),
+    Order.countDocuments({ shopId: shop._id, createdAt: { $gte: todayStart, $lte: todayEnd } }),
+    Order.aggregate([
+      { $match: { shopId: shop._id, status: { $in: [3, 4, 5] }, paymentTime: { $gte: todayStart, $lte: todayEnd } } },
+      { $group: { _id: null, total: { $sum: '$finalAmount' } } },
+    ]),
+  ]);
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+  const monthlyRevenue = await Order.aggregate([
+    { $match: { shopId: shop._id, status: { $in: [3, 5] }, createdAt: { $gte: sixMonthsAgo } } },
+    { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: { $sum: '$finalAmount' } } },
+    { $sort: { _id: 1 } },
+  ])
+  const monthlyOrders = await Order.aggregate([
+    { $match: { shopId: shop._id, createdAt: { $gte: sixMonthsAgo } } },
+    { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, count: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
+  ])
+  const statusMap = ordersByStatus.reduce((acc, cur) => { acc[cur._id] = cur.count; return acc }, {})
+
+  const completedOrders = await Order.countDocuments({ shopId: shop._id, status: 3 })
+  const cancelledOrders = await Order.countDocuments({ shopId: shop._id, status: 6 })
+  const totalProcessed = completedOrders + cancelledOrders
+  const computedCredit = totalProcessed === 0 ? 100 : Math.round((completedOrders / totalProcessed) * 100)
+
+  const profitResult = await Product.aggregate([
+    { $match: { shopId: shop._id, profitPercentage: { $exists: true, $ne: null } } },
+    { $group: { _id: null, avgPct: { $avg: '$profitPercentage' } } },
+  ])
+  const avgProfitPct = (profitResult.length > 0 ? profitResult[0].avgPct : 20) || 20
+  const totalSalesAmount = totalSales.length > 0 ? totalSales[0].total : 0
+  const todayRevenueAmount = todayRevenueArr.length > 0 ? todayRevenueArr[0].total : 0
+  const profitMultiplier = avgProfitPct / (100 + avgProfitPct)
+  const totalProfit = totalSalesAmount * profitMultiplier
+  const todayProfit = todayRevenueAmount * profitMultiplier
+  const monthlyProfits = monthlyRevenue.map(m => ({
+    _id: m._id,
+    total: m.total * profitMultiplier,
+  }))
+
+  const adj = shop.adjustments || {}
+  return {
+    productCount,
+    orderCount: orderCount + (Number(adj.cumulativeOrders) || 0),
+    totalSales: totalSalesAmount + (Number(adj.totalSales) || 0),
+    totalProfit: totalProfit + (Number(adj.totalProfit) || 0),
+    todayProfit: todayProfit + (Number(adj.todayProfit) || 0),
+    avgProfitPct,
+    ordersByStatus: statusMap,
+    pendingShipmentCount,
+    refundRequestCount,
+    monthlyRevenue,
+    monthlyProfits,
+    monthlyOrders,
+    todayOrderCount: todayOrderCount + (Number(adj.todayOrders) || 0),
+    todayRevenue: todayRevenueAmount + (Number(adj.todaySales) || 0),
+    creditScore: Number.isFinite(Number(shop.creditScore)) && shop.creditScore >= 0
+      ? shop.creditScore
+      : computedCredit,
+    computedCredit,
+  };
+};
+
 exports.getTotalInfo = async (req, res) => {
   try {
     const shop = await Shop.findOne({ userId: req.user._id });
     if (!shop) return res.json(fail('No shop found'));
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999)
-    const [productCount, orderCount, totalSales, ordersByStatus, pendingShipmentCount, refundRequestCount, todayOrderCount, todayRevenueArr] = await Promise.all([
-      Product.countDocuments({ shopId: shop._id }),
-      Order.countDocuments({ shopId: shop._id }),
-      Order.aggregate([
-        { $match: { shopId: shop._id, status: { $in: [3, 4, 5] } } },
-        { $group: { _id: null, total: { $sum: '$finalAmount' } } },
-      ]),
-      Order.aggregate([
-        { $match: { shopId: shop._id } },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-        { $sort: { _id: 1 } },
-      ]),
-      Order.countDocuments({ shopId: shop._id, status: 1 }),
-      Order.countDocuments({ shopId: shop._id, refundStatus: 1 }),
-      Order.countDocuments({ shopId: shop._id, createdAt: { $gte: todayStart, $lte: todayEnd } }),
-      Order.aggregate([
-        { $match: { shopId: shop._id, status: { $in: [3, 4, 5] }, paymentTime: { $gte: todayStart, $lte: todayEnd } } },
-        { $group: { _id: null, total: { $sum: '$finalAmount' } } },
-      ]),
-    ]);
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-    const monthlyRevenue = await Order.aggregate([
-      { $match: { shopId: shop._id, status: { $in: [3, 5] }, createdAt: { $gte: sixMonthsAgo } } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: { $sum: '$finalAmount' } } },
-      { $sort: { _id: 1 } },
-    ])
-    const monthlyOrders = await Order.aggregate([
-      { $match: { shopId: shop._id, createdAt: { $gte: sixMonthsAgo } } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, count: { $sum: 1 } } },
-      { $sort: { _id: 1 } },
-    ])
-    const statusMap = ordersByStatus.reduce((acc, cur) => { acc[cur._id] = cur.count; return acc }, {})
-
-    const completedOrders = await Order.countDocuments({ shopId: shop._id, status: 3 })
-    const cancelledOrders = await Order.countDocuments({ shopId: shop._id, status: 6 })
-    const totalProcessed = completedOrders + cancelledOrders
-    const creditScore = totalProcessed === 0 ? 100 : Math.round((completedOrders / totalProcessed) * 100)
-
-    const profitResult = await Product.aggregate([
-      { $match: { shopId: shop._id, profitPercentage: { $exists: true, $ne: null } } },
-      { $group: { _id: null, avgPct: { $avg: '$profitPercentage' } } },
-    ])
-    const avgProfitPct = (profitResult.length > 0 ? profitResult[0].avgPct : 20) || 20
-    const totalSalesAmount = totalSales.length > 0 ? totalSales[0].total : 0
-    const todayRevenueAmount = todayRevenueArr.length > 0 ? todayRevenueArr[0].total : 0
-    const profitMultiplier = avgProfitPct / (100 + avgProfitPct)
-    const totalProfit = totalSalesAmount * profitMultiplier
-    const todayProfit = todayRevenueAmount * profitMultiplier
-    const monthlyProfits = monthlyRevenue.map(m => ({
-      _id: m._id,
-      total: m.total * profitMultiplier,
-    }))
-
-    res.json(success({
-      productCount, orderCount,
-      totalSales: totalSalesAmount,
-      totalProfit,
-      todayProfit,
-      avgProfitPct,
-      ordersByStatus: statusMap,
-      pendingShipmentCount,
-      refundRequestCount,
-      monthlyRevenue,
-      monthlyProfits,
-      monthlyOrders,
-      todayOrderCount,
-      todayRevenue: todayRevenueAmount,
-      creditScore,
-    }));
+    const stats = await exports.getShopStats(shop);
+    res.json(success(stats));
   } catch (error) {
     res.json(fail(error.message));
   }

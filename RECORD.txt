@@ -202,6 +202,71 @@ Used in: backend/scripts/upload_to_cloudinary*.js, backend/utils/response.js,
     - Build: npm run build (2250 modules, 0 errors)
     - Commit: 647b0f4, pushed to master and preview branches
 
+22. Maintenance & Backup — Activities History + Re-download (Aug 01, 2026)
+    - Backend: Created models/BackupActivity.js — logs backup/maintenance actions
+      (backup_zip, backup_json, backup_server, restore, maintenance_on, maintenance_off)
+      with actor, filename, filePath, sizeMB, status, error
+    - Backend: routes/backup.js now logs activity on every backup / restore / maintenance action
+    - Backend: Added GET /home/admin/backup/activity (paginated history)
+    - Backend: Added GET /home/admin/backup/download?name= (re-download stored server backups)
+    - Frontend: AdminMaintenance.vue — Activities History table with action filter,
+      pagination, status tags, and Download buttons for re-downloading backups
+    - Fixes (Login as Seller 404):
+      - AdminSellers.vue login-as-seller URL fixed to /home/admin/login-as-seller/:userId
+      - Backend: added missing POST /home/admin/login-as-user/:userId route (was called by
+        AdminUserDetail/AdminUserEdit but did not exist)
+
+23. Email Service Fix + SMTP Test (Aug 01, 2026)
+    - Backend: services/emailService.js — added missing exports.sendMail (fixed
+      "emailService.sendMail is not a function")
+    - Backend: added POST /home/admin/email-settings/test — sends a live test email
+      via nodemailer using current settings, returns messageId/previewUrl
+    - Frontend: AdminEmailSettings.vue — SMTP provider presets (Gmail, Zoho, Brevo,
+      Mailtrap, Ethereal) that autofill host/port/secure, plus "Test SMTP Connection" button
+
+24. Admin → User Internal Messages (Single / Bulk) (Aug 01, 2026)
+    - Backend: admin.js routes:
+      - GET /home/admin/messages/recipients (search + role filter)
+      - POST /home/admin/messages/send (modes: single / role / selected / all) — inserts
+        internal messages + notifications with socket push
+      - GET /home/admin/messages/history (grouped sent history)
+    - Frontend: Created AdminMessages.vue (Single + Bulk tabs, remote user search, role
+      selection, selected-user multi-pick, sent history table)
+    - Router: /admin/messages route + /admin-messages redirect
+    - Sidebar: Messages menu item added in AdminLayout
+
+25. Image / Banner Popup Advertisement (Aug 01, 2026)
+    - Backend: models/Banner.js — added popup fields (position: 'popup', popupDuration,
+      popupDelay, popupStartAt, popupEndAt, popupFrequency, popupDismissible)
+    - Backend: admin banner add/update routes persist the new popup settings
+    - Backend: routes/banner.js — added GET /main/banner/popup (only active banners within
+      start/end schedule)
+    - Frontend: AdminBanners.vue — Popup Advertisement position option with duration,
+      delay, schedule, frequency and dismissible controls
+    - Frontend: Created components/PopupAd.vue — global popup overlay that fetches active
+      popup ads, respects delay/duration/frequency (24h) and links through; mounted in App.vue
+
+26. First-Time User Walkthrough (Aug 01, 2026)
+    - Frontend: Created components/WalkthroughTour.vue — 3-step walkthrough for first-time
+      users (Register → Apply Store → Earn 20% Profit) with direct action buttons linking
+      to /register, /applystore and /mystore; gated by localStorage (theoutnet_walkthrough_seen)
+    - Mounted in App.vue
+
+27. Admin Adjustment Settings — Merchant Metrics (Aug 01, 2026)
+    - Backend: models/Shop.js — added adjustments subdocument (todayOrders, cumulativeOrders,
+      todaySales, totalSales, todayProfit, totalProfit) as additive offsets
+    - Backend: controllers/shopController.js — extracted getShopStats(shop) helper; getTotalInfo
+      now merges adjustment offsets into computed metrics and returns the stored Shop.creditScore
+      (admin-set value now visible to the seller, instead of an overwritten computed value)
+    - Backend: routes/admin.js — added:
+      - GET /home/admin/shops/:id/stats (computed metrics + balance + followerCount + adjustments)
+      - POST /home/admin/shops/:id/adjust (metric + delta, increase/decrease) supporting
+        creditScore, followers, balance (with Transaction ledger), and the 6 computed offsets
+    - Frontend: AdminShopDetail.vue — new "Adjustment Settings" section with per-metric
+      current value, −step button, delta input, and + Apply button for all 9 metrics
+      (Credit Score, Today's/Cumulative Orders, Today's/Total Sales, Today's/Sales Profit,
+      Followers, Account Balance)
+
 === EXISTING DEPLOYMENTS ===
 
 GitHub: https://github.com/erdemmarshall1/lazada-backend.git

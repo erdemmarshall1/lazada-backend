@@ -25,6 +25,14 @@ const shopSchema = new mongoose.Schema({
   salesCount: { type: Number, default: 0 },
   productCount: { type: Number, default: 0 },
   followerCount: { type: Number, default: 0 },
+  adjustments: {
+    todayOrders: { type: Number, default: 0 },
+    cumulativeOrders: { type: Number, default: 0 },
+    todaySales: { type: Number, default: 0 },
+    totalSales: { type: Number, default: 0 },
+    todayProfit: { type: Number, default: 0 },
+    totalProfit: { type: Number, default: 0 },
+  },
   translations: {
     name: { type: Map, of: String, default: {} },
     description: { type: Map, of: String, default: {} },
