@@ -124,4 +124,5 @@ exports.sendRefundNotification = async (user, order) => {
   });
 };
 
+exports.sendMail = sendMail;
 exports.clearTransporterCache = clearTransporterCache;

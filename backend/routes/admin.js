@@ -470,6 +470,138 @@ router.post('/login-as-seller/:userId', adminAuth, async (req, res) => {
   }
 });
 
+router.post('/login-as-user/:userId', adminAuth, async (req, res) => {
+  try {
+    const targetUser = await User.findById(req.params.userId).select('-password');
+    if (!targetUser) return res.json(fail('User not found'));
+    const token = jwt.sign(
+      { id: targetUser._id, role: targetUser.role },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    res.json(success({ token, username: targetUser.username, sellerId: targetUser.sellerId }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ---- Admin -> User internal messages (single / bulk) ----
+const Message = require('../models/Message');
+
+router.get('/messages/recipients', adminAuth, async (req, res) => {
+  try {
+    const { role, search } = req.query;
+    const filter = { status: 1 };
+    if (role && ['seller', 'buyer', 'admin', 'super_admin', 'manager', 'staff'].includes(role)) {
+      filter.role = role;
+    }
+    if (search) {
+      filter.$or = [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+      ];
+    }
+    const users = await User.find(filter)
+      .select('username email phone role sellerId createdAt')
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean();
+    res.json(success(users));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.post('/messages/send', adminAuth, async (req, res) => {
+  try {
+    const { mode, userId, role, userIds, content } = req.body;
+    if (!content || !String(content).trim()) return res.json(fail('Message content is required'));
+    const text = String(content).trim();
+
+    let recipients = [];
+    if (mode === 'single') {
+      if (!userId) return res.json(fail('userId is required for single message'));
+      const user = await User.findById(userId).select('_id').lean();
+      if (!user) return res.json(fail('Target user not found'));
+      recipients = [user._id];
+    } else if (mode === 'selected') {
+      if (!Array.isArray(userIds) || userIds.length === 0) return res.json(fail('Select at least one user'));
+      const users = await User.find({ _id: { $in: userIds }, status: 1 }).select('_id').lean();
+      recipients = users.map(u => u._id);
+    } else if (mode === 'role') {
+      const filter = { status: 1 };
+      if (role && ['seller', 'buyer', 'admin', 'super_admin', 'manager', 'staff'].includes(role)) {
+        filter.role = role;
+      }
+      const users = await User.find(filter).select('_id').lean();
+      recipients = users.map(u => u._id);
+    } else if (mode === 'all') {
+      const users = await User.find({ status: 1 }).select('_id').lean();
+      recipients = users.map(u => u._id);
+    } else {
+      return res.json(fail('Invalid message mode'));
+    }
+
+    if (recipients.length === 0) return res.json(fail('No recipients matched'));
+
+    const adminUser = await User.findById(req.user._id).select('username').lean();
+    const docs = recipients.map(id => ({
+      fromUserId: req.user._id,
+      toUserId: id,
+      content: text,
+      type: 'internal',
+    }));
+    await Message.insertMany(docs, { ordered: false });
+
+    const { createNotification } = require('../controllers/notificationController');
+    const io = req.app?.get('io');
+    const notifMsg = text.length > 120 ? text.slice(0, 120) + '...' : text;
+    await Promise.all(recipients.map(id =>
+      createNotification(id, 'message', 'New Message from Admin', notifMsg, {}, '/internalmsg', io).catch(() => {})
+    ));
+
+    res.json(success({ recipients: recipients.length }, `Message sent to ${recipients.length} user(s)`));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// History of internal messages sent by admins (grouped by content + timestamp)
+router.get('/messages/history', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const page = Math.max(parseInt(p || '1', 10), 1);
+    const pageSize = Math.min(Math.max(parseInt(ps || '50', 10), 1), 200);
+    const skip = (page - 1) * pageSize;
+    const group = {
+      content: { $first: '$content' },
+      createdAt: { $first: '$createdAt' },
+      recipients: { $sum: 1 },
+    };
+    const [list, totalAgg] = await Promise.all([
+      Message.aggregate([
+        { $match: { type: 'internal', fromUserId: req.user._id } },
+        { $sort: { createdAt: -1 } },
+        { $group: { _id: '$createdAt', ...group } },
+        { $sort: { _id: -1 } },
+        { $skip: skip },
+        { $limit: pageSize },
+      ]),
+      Message.aggregate([
+        { $match: { type: 'internal', fromUserId: req.user._id } },
+        { $group: { _id: '$createdAt' } },
+        { $count: 'total' },
+      ]),
+    ]);
+    const total = totalAgg[0]?.total || 0;
+    const listOut = list.map(x => ({ _id: String(x._id), content: x.content, createdAt: x.createdAt, details: { recipients: x.recipients } }));
+    res.json(success({ list: listOut, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Products ----
 router.get('/products', adminAuth, async (req, res) => {
   try {
@@ -1145,6 +1277,34 @@ router.put('/email-settings', adminAuth, async (req, res) => {
   }
 });
 
+// Test SMTP connection by sending a test email using current settings
+router.post('/email-settings/test', adminAuth, async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const { host, port, user, pass, fromEmail, fromName, to } = req.body || {};
+  const recipient = to || req.user?.email || fromEmail;
+  if (!host || !port || !user || !pass) {
+    return res.json(fail('SMTP host, port, user and password are required to test'));
+  }
+  if (!recipient) return res.json(fail('No recipient email available'));
+  try {
+    const transporter = nodemailer.createTransport({
+      host, port: Number(port),
+      secure: Number(port) === 465,
+      auth: { user, pass },
+    });
+    const info = await transporter.sendMail({
+      from: `"${fromName || 'The Outnet'}" <${fromEmail || user}>`,
+      to: recipient,
+      subject: 'SMTP Test - THE OUTNET',
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:20px"><h2>SMTP Connection Works</h2><p>This is a test email from the THE OUTNET admin panel. Your SMTP settings are valid and emails can now be sent.</p><p style="font-size:12px;color:#888">Sent: ${new Date().toISOString()}</p></div>`,
+    });
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    res.json(success({ messageId: info.messageId, previewUrl, to: recipient }, 'Test email sent successfully'));
+  } catch (error) {
+    res.json(fail(`SMTP test failed: ${error.message}`));
+  }
+});
+
 // ---- TEMPORARY: Fix ALL product images ----
 router.post('/finalize-product-images', adminAuth, async (req, res) => {
   try {
@@ -1510,7 +1670,15 @@ router.post('/banners/add', adminAuth, upload.single('file'), async (req, res) =
     let image = req.body.image || '';
     if (req.file) image = '/uploads/' + req.file.filename;
     if (!image) return res.json(fail('Image is required'));
-    const banner = await Banner.create({ title, image, link, sort: Number(sort) || 0, position: position || 'home', status: 1 });
+    const banner = await Banner.create({
+      title, image, link, sort: Number(sort) || 0, position: position || 'home', status: 1,
+      popupDuration: Number(req.body.popupDuration) || 10,
+      popupDelay: Number(req.body.popupDelay) || 0,
+      popupStartAt: req.body.popupStartAt || null,
+      popupEndAt: req.body.popupEndAt || null,
+      popupDismissible: req.body.popupDismissible !== 'false' && req.body.popupDismissible !== false,
+      popupFrequency: Number(req.body.popupFrequency) || 1,
+    });
     res.json(success(banner));
   } catch (error) { res.json(fail(error.message)); }
 });
@@ -1523,6 +1691,12 @@ router.post('/banners/update/:id', adminAuth, upload.single('file'), async (req,
     if (req.body.sort !== undefined) update.sort = Number(req.body.sort);
     if (req.body.position !== undefined) update.position = req.body.position;
     if (req.body.status !== undefined) update.status = Number(req.body.status);
+    if (req.body.popupDuration !== undefined) update.popupDuration = Number(req.body.popupDuration);
+    if (req.body.popupDelay !== undefined) update.popupDelay = Number(req.body.popupDelay);
+    if (req.body.popupStartAt !== undefined) update.popupStartAt = req.body.popupStartAt || null;
+    if (req.body.popupEndAt !== undefined) update.popupEndAt = req.body.popupEndAt || null;
+    if (req.body.popupDismissible !== undefined) update.popupDismissible = req.body.popupDismissible !== 'false' && req.body.popupDismissible !== false;
+    if (req.body.popupFrequency !== undefined) update.popupFrequency = Number(req.body.popupFrequency);
     if (req.file) update.image = '/uploads/' + req.file.filename;
     else if (req.body.image) update.image = req.body.image;
     const banner = await Banner.findByIdAndUpdate(req.params.id, update, { new: true });

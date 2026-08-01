@@ -6,8 +6,27 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const { adminAuth, superAdminAuth } = require('../middleware/auth');
 const { success, fail } = require('../utils/response');
+const BackupActivity = require('../models/BackupActivity');
 
 const BACKUP_ROOT = path.join(__dirname, '..', '..', 'Full Backup');
+
+const logActivity = async ({ action, req, filename = '', filePath = '', sizeMB = null, details = {}, status = 'ok', error = '' }) => {
+  try {
+    await BackupActivity.create({
+      action,
+      actor: req?.user?.username || req?.body?.actor || '',
+      actorId: req?.user?._id || null,
+      filename,
+      filePath,
+      sizeMB,
+      details,
+      status,
+      error,
+    });
+  } catch (e) {
+    console.error('Failed to log backup activity:', e.message);
+  }
+};
 
 const models = [
   { name: 'users', model: require('../models/User') },
@@ -46,6 +65,7 @@ const models = [
   { name: 'notifications', model: require('../models/Notification') },
   { name: 'login_history', model: require('../models/LoginHistory') },
   { name: 'audit_logs', model: require('../models/AuditLog') },
+  { name: 'backup_activities', model: require('../models/BackupActivity') },
   { name: 'submissions', model: require('../models/Submission') },
   { name: 'sessions', model: require('../models/Session') },
   { name: 'push_subscriptions', model: require('../models/PushSubscription') },
@@ -94,8 +114,9 @@ router.post('/backup', adminAuth, async (req, res) => {
   try {
     const data = await dumpAllCollections();
     const archive = archiver('zip', { zlib: { level: 1 } });
+    const filename = `full_backup_${new Date().toISOString().slice(0, 10)}.zip`;
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="full_backup_${new Date().toISOString().slice(0, 10)}.zip"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     archive.pipe(res);
 
     for (const [name, docs] of Object.entries(data)) {
@@ -110,7 +131,9 @@ router.post('/backup', adminAuth, async (req, res) => {
 
     archive.append(JSON.stringify(buildManifest('endpoint_download'), null, 2), { name: 'manifest.json' });
     archive.finalize();
+    logActivity({ action: 'backup_zip', req, filename, details: { collections: models.length, method: 'endpoint_download' } });
   } catch (err) {
+    logActivity({ action: 'backup_zip', req, status: 'error', error: err.message });
     res.status(500).json(fail(err.message));
   }
 });
@@ -119,8 +142,11 @@ router.post('/backup', adminAuth, async (req, res) => {
 router.post('/backup/d', adminAuth, async (req, res) => {
   try {
     const data = await dumpAllCollections();
-    res.json({ success: true, data, manifest: buildManifest('json_dump') });
+    const filename = `full_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    logActivity({ action: 'backup_json', req, filename, details: { collections: models.length, method: 'json_dump' } });
+    res.json({ success: true, data, manifest: buildManifest('json_dump'), filename });
   } catch (err) {
+    logActivity({ action: 'backup_json', req, status: 'error', error: err.message });
     res.status(500).json(fail(err.message));
   }
 });
@@ -148,8 +174,10 @@ router.post('/backup/b', adminAuth, async (req, res) => {
 
     fs.writeFileSync(path.join(dest, 'manifest.json'), JSON.stringify(buildManifest('railway_cli'), null, 2));
 
+    logActivity({ action: 'backup_server', req, filePath: dest, details: { method: 'railway_cli', collections: models.length } });
     res.json({ success: true, path: dest, note: `Backup saved to ${dest}` });
   } catch (err) {
+    logActivity({ action: 'backup_server', req, status: 'error', error: err.message });
     res.status(500).json(fail(err.message));
   }
 });
@@ -187,8 +215,10 @@ router.post('/backup/c', adminAuth, async (req, res) => {
     await new Promise((resolve) => output.on('close', resolve));
 
     const size = fs.statSync(zipPath).size;
+    logActivity({ action: 'backup_server', req, filename: path.basename(zipPath), filePath: zipPath, sizeMB: (size / 1024 / 1024).toFixed(2), details: { method: 'standalone_script', collections: models.length } });
     res.json({ success: true, path: zipPath, size, sizeMB: (size / 1024 / 1024).toFixed(2) });
   } catch (err) {
+    logActivity({ action: 'backup_server', req, status: 'error', error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -232,6 +262,7 @@ router.put('/maintenance', adminAuth, async (req, res) => {
     await Promise.all(ops);
     const { refreshMaintenanceCache } = require('../middleware/maintenance');
     const state = await refreshMaintenanceCache();
+    logActivity({ action: enabled ? 'maintenance_on' : 'maintenance_off', req, details: { message, until } });
     res.json(success(state, enabled ? 'Maintenance mode enabled' : 'Maintenance mode disabled'));
   } catch (error) { res.json(fail(error.message)); }
 });
@@ -257,6 +288,44 @@ router.get('/backup/list', adminAuth, async (req, res) => {
     items.sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt));
     res.json(success(items));
   } catch (error) { res.json(fail(error.message)); }
+});
+
+// ── Backup / Maintenance activity history ──
+router.get('/backup/activity', adminAuth, async (req, res) => {
+  try {
+    const { page: p, pageSize: ps } = req.query;
+    const page = Math.max(parseInt(p || '1', 10), 1);
+    const pageSize = Math.min(Math.max(parseInt(ps || '50', 10), 1), 200);
+    const skip = (page - 1) * pageSize;
+    const [list, total] = await Promise.all([
+      BackupActivity.find({}).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
+      BackupActivity.countDocuments({}),
+    ]);
+    res.json(success({ list, total, page, pageSize }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+// ── Re-download a stored backup file from the server folder ──
+router.get('/backup/download', adminAuth, async (req, res) => {
+  try {
+    const name = (req.query.name || '');
+    if (!name || name.includes('..') || name.includes('/') || name.includes('\\')) {
+      return res.json(fail('Invalid backup filename'));
+    }
+    const filePath = path.join(BACKUP_ROOT, name);
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      return res.json(fail('Backup file not found'));
+    }
+    const fileSize = fs.statSync(filePath).size;
+    logActivity({ action: 'backup_zip', req, filename: name, filePath, sizeMB: (fileSize / 1024 / 1024).toFixed(2), details: { method: 're-download' } });
+    res.setHeader('Content-Type', name.endsWith('.zip') ? 'application/zip' : 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
+    return res.sendFile(filePath);
+  } catch (error) {
+    res.status(500).json(fail(error.message));
+  }
 });
 
 // ── Restore ──────────────────────────────────────────
@@ -363,8 +432,10 @@ router.post('/backup/restore', superAdminAuth, uploadRestore.single('file'), asy
 
     const { refreshMaintenanceCache } = require('../middleware/maintenance');
     await refreshMaintenanceCache();
+    logActivity({ action: 'restore', req, filename: req.file?.originalname || '', details: { results } });
     res.json(success(results, 'Restore complete'));
   } catch (error) {
+    logActivity({ action: 'restore', req, status: 'error', error: error.message });
     res.status(500).json(fail(error.message));
   }
 });
