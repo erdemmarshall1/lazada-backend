@@ -491,6 +491,40 @@ router.post('/shops/:id/adjust', adminAuth, async (req, res) => {
   }
 });
 
+// ── Shop account field settings (email, createdAt, updatedAt) ──
+router.put('/shops/:id/meta', adminAuth, async (req, res) => {
+  try {
+    const { field, value } = req.body;
+    if (!field) return res.json(fail('field is required'));
+
+    if (field === 'email') {
+      const email = String(value || '').trim().toLowerCase();
+      if (!email) return res.json(fail('Email is required'));
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.json(fail('Invalid email format'));
+      const shop = await Shop.findById(req.params.id);
+      if (!shop) return res.json(fail('Shop not found'));
+      const existing = await User.findOne({ email, _id: { $ne: shop.userId } });
+      if (existing) return res.json(fail('Email already in use by another account'));
+      await User.findByIdAndUpdate(shop.userId, { email });
+      const updatedShop = await Shop.findByIdAndUpdate(req.params.id, { email }, { new: true });
+      return res.json(success({ field, value: updatedShop.email }, `Email updated to ${updatedShop.email}`));
+    }
+
+    if (field === 'createdAt' || field === 'updatedAt') {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return res.json(fail('Invalid date'));
+      const shop = await Shop.findById(req.params.id);
+      if (!shop) return res.json(fail('Shop not found'));
+      await Shop.updateOne({ _id: req.params.id }, { $set: { [field]: date } }, { timestamps: false });
+      return res.json(success({ field, value: date.toISOString() }, `${field === 'createdAt' ? 'Created date' : 'Updated date'} set to ${date.toISOString()}`));
+    }
+
+    return res.json(fail('Invalid field. Must be email, createdAt, or updatedAt.'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 router.post('/migrate-seller-ids', adminAuth, async (req, res) => {
   try {
     const Counter = require('../models/Counter');
