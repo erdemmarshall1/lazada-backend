@@ -189,7 +189,7 @@ exports.sendResetCode = async (req, res) => {
     user.resetPasswordCode = code;
     user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
-    await emailService.sendMail({
+    emailService.sendMail({
       to: user.email,
       subject: 'Reset your password - THE OUTNET',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto">
@@ -200,7 +200,7 @@ exports.sendResetCode = async (req, res) => {
 <p>This code expires in 15 minutes.</p>
 <p>If you didn't request this, you can ignore this email.</p>
 </div>`,
-    });
+    }).catch(err => console.error('Reset email send failed:', err.message));
     res.json(success(null, 'Reset code sent to your email'));
   } catch (error) {
     res.json(fail(error.message));

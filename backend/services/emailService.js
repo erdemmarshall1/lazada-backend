@@ -22,6 +22,9 @@ const getTransporter = async () => {
       host, port,
       secure: port === 465,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
     return transporter;
   }
@@ -29,6 +32,9 @@ const getTransporter = async () => {
   transporter = nodemailer.createTransport({
     host: 'smtp.ethereal.email', port: 587,
     secure: false, auth: { user: testAccount.user, pass: testAccount.pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
   console.log('Email: using Ethereal test account:', testAccount.user);
   return transporter;
