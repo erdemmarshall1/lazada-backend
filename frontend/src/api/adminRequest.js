@@ -189,7 +189,7 @@ service.interceptors.response.use(
 )
 
 export const adminRequest = service
-export const adminGet = (url, params) => service.get(url, { params })
+export const adminGet = (url, params, config) => service.get(url, { params, ...config })
 export const adminPost = (url, data) => service.post(url, data)
 export const adminPut = (url, data) => service.put(url, data)
 export const adminDel = (url) => service.delete(url)

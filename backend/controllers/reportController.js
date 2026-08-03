@@ -36,7 +36,9 @@ exports.getDashboard = async (req, res) => {
 
 exports.getSalesReport = async (req, res) => {
   try {
-    const { startDate, endDate, groupBy = 'day', page, pageSize } = req.query;
+    const { startDate, endDate, groupBy = 'day' } = req.query;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize) || 20));
     const match = { status: { $in: [3, 4, 5] } };
     if (startDate || endDate) {
       match.createdAt = {};
@@ -45,8 +47,9 @@ exports.getSalesReport = async (req, res) => {
     }
 
     const dateFormat = groupBy === 'month' ? '%Y-%m' : groupBy === 'year' ? '%Y' : '%Y-%m-%d';
+    const aggOpts = { allowDiskUse: true };
 
-    const [overview, timeSeries, topProducts, paymentBreakdown, categorySales, paginatedOrders, recentOrders, recentPayments, recentShopApps] = await Promise.all([
+    const [overview, timeSeries, topProducts, paymentBreakdown, categorySales, totalOrders, recentOrders, recentPayments, recentShopApps] = await Promise.all([
       Order.aggregate([
         { $match: match },
         { $group: {
@@ -57,7 +60,7 @@ exports.getSalesReport = async (req, res) => {
           orderCount: { $sum: 1 },
           avgOrderValue: { $avg: '$finalAmount' },
         }},
-      ]),
+      ], aggOpts),
       Order.aggregate([
         { $match: match },
         { $group: {
@@ -67,7 +70,7 @@ exports.getSalesReport = async (req, res) => {
           discount: { $sum: '$discount' },
         }},
         { $sort: { _id: 1 } },
-      ]),
+      ], aggOpts),
       Order.aggregate([
         { $match: match },
         { $unwind: '$items' },
@@ -79,7 +82,7 @@ exports.getSalesReport = async (req, res) => {
         }},
         { $sort: { totalSold: -1 } },
         { $limit: 20 },
-      ]),
+      ], aggOpts),
       Order.aggregate([
         { $match: match },
         { $group: {
@@ -87,7 +90,7 @@ exports.getSalesReport = async (req, res) => {
           count: { $sum: 1 },
           total: { $sum: '$finalAmount' },
         }},
-      ]),
+      ], aggOpts),
       Order.aggregate([
         { $match: match },
         { $unwind: '$items' },
@@ -100,11 +103,8 @@ exports.getSalesReport = async (req, res) => {
           totalSold: { $sum: '$items.quantity' },
         }},
         { $sort: { totalRevenue: -1 } },
-      ]),
-      Order.find(match).sort({ createdAt: -1 })
-        .skip((Number(page) - 1) * Number(pageSize))
-        .limit(Number(pageSize))
-        .lean(),
+      ], aggOpts),
+      Order.countDocuments(match),
       Order.find().sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
       Transaction.find({ status: 0 }).sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
       Shop.find({ status: 0 }).sort({ createdAt: -1 }).limit(10).populate('userId', 'username email').lean(),
@@ -118,21 +118,18 @@ exports.getSalesReport = async (req, res) => {
       categorySales.forEach(c => { if (c._id) c.categoryName = catMap[c._id.toString()] || 'Unknown'; });
     }
 
-    const totalOrders = await Order.countDocuments(match);
-
     res.json(success({
       overview: overview[0] || { totalRevenue: 0, totalDiscount: 0, totalShipping: 0, orderCount: 0, avgOrderValue: 0 },
       timeSeries,
       topProducts,
       paymentBreakdown,
       categorySales,
-      orders: paginatedOrders,
       recentOrders,
       recentPayments,
       recentShopApps,
       total: totalOrders,
-      page: Number(page) || 1,
-      pageSize: Number(pageSize) || 20,
+      page,
+      pageSize,
     }));
   } catch (error) {
     res.json(fail(error.message));

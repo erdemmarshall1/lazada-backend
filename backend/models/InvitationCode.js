@@ -8,4 +8,6 @@ const invitationCodeSchema = new mongoose.Schema({
   usedAt: { type: Date, default: null },
 }, { timestamps: true });
 
+invitationCodeSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('InvitationCode', invitationCodeSchema);

@@ -209,50 +209,55 @@ const statusTypes = {
 }
 
 const fetchSalesData = async () => {
-  const weeks = parseInt(revenueWeeks.value)
-  const endDate = new Date()
-  const startDate = new Date(endDate)
-  startDate.setDate(startDate.getDate() - weeks * 7)
-  const res = await adminGet('/home/report/sales', { startDate: startDate.toISOString(), endDate: endDate.toISOString() })
-  if (res?.code !== 0 || !res?.data) return
-  const d = res.data
-  buildLineChart(d.timeSeries)
-  buildDoughnutChart(d.categorySales)
-  const items = []
-  ;(d.recentOrders || []).forEach(o => items.push({
-    type: 'order',
-    ref: o.orderNo || o._id?.slice(-8),
-    user: o.userId?.username || '—',
-    amount: o.finalAmount || o.totalAmount || 0,
-    status: o.status,
-    statusLabel: statusLabels[o.status] || 'Unknown',
-    statusType: statusTypes[o.status] || 'info',
-    date: o.createdAt,
-    _id: o._id,
-  }))
-  ;(d.recentPayments || []).forEach(t => items.push({
-    type: 'payment',
-    ref: t._id?.slice(-8),
-    user: t.userId?.username || '—',
-    amount: t.amount || 0,
-    status: t.status,
-    statusLabel: t.status === 0 ? 'Pending' : t.status === 1 ? 'Approved' : 'Rejected',
-    statusType: t.status === 0 ? 'warning' : t.status === 1 ? 'success' : 'danger',
-    date: t.createdAt,
-    _id: t._id,
-  }))
-  ;(d.recentShopApps || []).forEach(s => items.push({
-    type: 'shop',
-    ref: s._id?.slice(-8),
-    user: s.userId?.username || '—',
-    amount: null,
-    status: s.status,
-    statusLabel: 'Pending',
-    statusType: 'warning',
-    date: s.createdAt,
-    _id: s._id,
-  }))
-  recentActivity.value = items.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10)
+  try {
+    const weeks = parseInt(revenueWeeks.value)
+    const endDate = new Date()
+    const startDate = new Date(endDate)
+    startDate.setDate(startDate.getDate() - weeks * 7)
+    const res = await adminGet('/home/report/sales', { startDate: startDate.toISOString(), endDate: endDate.toISOString() }, { timeout: 60000 })
+    if (res?.code !== 0 || !res?.data) return
+    const d = res.data
+    buildLineChart(d.timeSeries)
+    buildDoughnutChart(d.categorySales)
+    const items = []
+    ;(d.recentOrders || []).forEach(o => items.push({
+      type: 'order',
+      ref: o.orderNo || o._id?.slice(-8),
+      user: o.userId?.username || '—',
+      amount: o.finalAmount || o.totalAmount || 0,
+      status: o.status,
+      statusLabel: statusLabels[o.status] || 'Unknown',
+      statusType: statusTypes[o.status] || 'info',
+      date: o.createdAt,
+      _id: o._id,
+    }))
+    ;(d.recentPayments || []).forEach(t => items.push({
+      type: 'payment',
+      ref: t._id?.slice(-8),
+      user: t.userId?.username || '—',
+      amount: t.amount || 0,
+      status: t.status,
+      statusLabel: t.status === 0 ? 'Pending' : t.status === 1 ? 'Approved' : 'Rejected',
+      statusType: t.status === 0 ? 'warning' : t.status === 1 ? 'success' : 'danger',
+      date: t.createdAt,
+      _id: t._id,
+    }))
+    ;(d.recentShopApps || []).forEach(s => items.push({
+      type: 'shop',
+      ref: s._id?.slice(-8),
+      user: s.userId?.username || '—',
+      amount: null,
+      status: s.status,
+      statusLabel: 'Pending',
+      statusType: 'warning',
+      date: s.createdAt,
+      _id: s._id,
+    }))
+    recentActivity.value = items.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10)
+  } catch (e) {
+    // Dashboard still renders metric cards / recent activity from other calls.
+    // The interceptor already surfaced the timeout/error toast.
+  }
 }
 
 const viewOrder = (row) => {
@@ -333,8 +338,11 @@ const quickGenerate = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchStats(), fetchSalesData()])
-  loading.value = false
+  try {
+    await Promise.allSettled([fetchStats(), fetchSalesData()])
+  } finally {
+    loading.value = false
+  }
   const socket = getSocket()
   if (socket) {
     socket.on('newOrder', fetchStats)

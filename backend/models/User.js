@@ -76,4 +76,6 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
+userSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('User', userSchema);
