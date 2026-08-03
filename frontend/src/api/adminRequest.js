@@ -5,7 +5,7 @@ export const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
 const service = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: 60000,
 })
 
 let isRefreshing = false

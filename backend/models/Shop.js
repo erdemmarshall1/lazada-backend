@@ -41,6 +41,9 @@ const shopSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+shopSchema.index({ createdAt: -1 });
+shopSchema.index({ status: 1, createdAt: -1 });
+
 shopSchema.pre('save', async function(next) {
   if (this.isNew && this.status === 1 && !this.storeNumber) {
     const Counter = mongoose.model('Counter');

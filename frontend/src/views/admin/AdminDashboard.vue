@@ -181,24 +181,18 @@ const quickLinks = [
 
 const fetchStats = async () => {
   const results = await Promise.allSettled([
-    adminGet('/home/admin/users?pageSize=1'),
-    adminGet('/home/admin/shops?pageSize=1'),
-    adminGet('/home/admin/products?pageSize=1'),
-    adminGet('/home/admin/transactions?pageSize=1'),
-    adminGet('/home/admin/platform-wallet'),
-    adminGet('/home/admin/invitation-codes?pageSize=1'),
+    adminGet('/home/admin/dashboard-stats'),
   ])
-  const extract = (r) => r.status === 'fulfilled' ? r.value : null
-  const u = extract(results[0]); const s = extract(results[1])
-  const p = extract(results[2]); const t = extract(results[3])
-  const w = extract(results[4]); const ic = extract(results[5])
-  metricCards.value[0].value = u?.data?.total ?? 0
-  metricCards.value[1].value = s?.data?.total ?? 0
-  metricCards.value[2].value = p?.data?.total ?? 0
-  metricCards.value[3].value = t?.data?.total ?? 0
-  if (w?.code === 0 && w?.data) metricCards.value[4].value = '$' + (w.data.totalRevenue?.toFixed(2) ?? '0.00')
-  metricCards.value[5].value = ic?.data?.total ?? 0
-  summaryText.value = `${u?.data?.total ?? 0} users · ${s?.data?.total ?? 0} shops · ${t?.data?.total ?? 0} transactions`
+  const r = results[0]
+  const d = r.status === 'fulfilled' && r.value?.code === 0 ? r.value?.data : null
+  if (!d) return
+  metricCards.value[0].value = d.users ?? 0
+  metricCards.value[1].value = d.shops ?? 0
+  metricCards.value[2].value = d.products ?? 0
+  metricCards.value[3].value = d.transactions ?? 0
+  metricCards.value[4].value = '$' + (d.revenue?.toFixed(2) ?? '0.00')
+  metricCards.value[5].value = d.invitationCodes ?? 0
+  summaryText.value = `${d.users ?? 0} users · ${d.shops ?? 0} shops · ${d.transactions ?? 0} transactions`
 }
 
 const statusLabels = {

@@ -8,7 +8,7 @@ export const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
 const service = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: 60000,
 })
 
 let isRefreshing = false
@@ -53,6 +53,9 @@ export const imgUrl = (path, options = {}) => {
   if (!path) return TRANSPARENT_PIXEL
   if (path.startsWith('http://') || path.startsWith('https://')) {
     if (needsProxy(path)) return `${API_BASE}/home/image/proxy?url=${encodeURIComponent(path)}`
+    return path
+  }
+  if (path.startsWith('/uploads/')) {
     return path
   }
   if (path.startsWith('/')) {

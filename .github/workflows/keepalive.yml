@@ -1,0 +1,14 @@
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: curl -fsS -o /dev/null -w "backend health %{http_code} in %{time_total}s\n" https://lazada-backend-1.onrender.com/health
+        timeout-minutes: 2

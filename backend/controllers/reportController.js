@@ -1,3 +1,6 @@
+const REPORT_CACHE_TTL = 60 * 1000;
+let reportCache = { key: null, data: null, expiresAt: 0 };
+
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
@@ -37,6 +40,11 @@ exports.getDashboard = async (req, res) => {
 exports.getSalesReport = async (req, res) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
+    const cacheKey = [startDate || '', endDate || '', groupBy].join('|');
+    const now = Date.now();
+    if (reportCache.key === cacheKey && reportCache.expiresAt > now) {
+      return res.json(success(reportCache.data));
+    }
     const page = Math.max(1, Number(req.query.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize) || 20));
     const match = { status: { $in: [3, 4, 5] } };
@@ -118,7 +126,7 @@ exports.getSalesReport = async (req, res) => {
       categorySales.forEach(c => { if (c._id) c.categoryName = catMap[c._id.toString()] || 'Unknown'; });
     }
 
-    res.json(success({
+    const payload = {
       overview: overview[0] || { totalRevenue: 0, totalDiscount: 0, totalShipping: 0, orderCount: 0, avgOrderValue: 0 },
       timeSeries,
       topProducts,
@@ -130,7 +138,9 @@ exports.getSalesReport = async (req, res) => {
       total: totalOrders,
       page,
       pageSize,
-    }));
+    };
+    reportCache = { key: cacheKey, data: payload, expiresAt: Date.now() + REPORT_CACHE_TTL };
+    res.json(success(payload));
   } catch (error) {
     res.json(fail(error.message));
   }

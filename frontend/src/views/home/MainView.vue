@@ -59,7 +59,7 @@
               </div>
               <div class="home-hots-content">
                 <div class="home-hots-item" v-for="item in hotProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
+                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" loading="lazy" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>
@@ -75,7 +75,7 @@
               </div>
               <div class="home-goods-content">
                 <div class="home-hots-item" v-for="item in recommendedProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
+                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" loading="lazy" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>
@@ -91,7 +91,7 @@
               </div>
               <div class="home-goods-content" style="grid-template-columns: repeat(4, 1fr); height: auto;">
                 <div class="home-hots-item" v-for="item in findProducts" :key="item._id" @click="goDetail(item._id)">
-                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" @error="$imgFallback" />
+                  <img class="home-hots-img" :src="$imgUrl(item.images?.[0])" :alt="item.name" loading="lazy" @error="$imgFallback" />
                   <div class="home-hots-text">{{ item.name }}</div>
                   <div class="home-hots-price">${{ formatPrice(item.minPrice || item.sales_price) }}</div>
                 </div>

@@ -780,6 +780,32 @@ router.get('/platform-wallet', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Dashboard stats (single call for the admin dashboard metric cards) ----
+router.get('/dashboard-stats', adminAuth, async (req, res) => {
+  try {
+    const PlatformWallet = require('../models/PlatformWallet');
+    const [users, shops, products, transactions, invitationCodes, wallet] = await Promise.all([
+      User.countDocuments(),
+      Shop.countDocuments(),
+      Product.countDocuments(),
+      Transaction.countDocuments(),
+      InvitationCode.countDocuments(),
+      PlatformWallet.findOne(),
+    ]);
+    res.json(success({
+      users,
+      shops,
+      products,
+      transactions,
+      invitationCodes,
+      revenue: wallet?.totalRevenue || 0,
+      platformBalance: wallet?.balance || 0,
+    }));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Platform wallet management (credit / debit / history) ----
 router.get('/platform-wallet/history', adminAuth, async (req, res) => {
   try {
