@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://supportive-delight-production-b90c.up.railway.app'
+const BACKEND_URL = 'https://lazada-backend-1.onrender.com'
 
 const PROXY_PREFIXES = ['/home/', '/uploads/']
 const ADMIN_PREFIX = '/admin/'

@@ -161,6 +161,7 @@ const routes = [
       { path: 'submissions', name: 'admin-submissions', component: () => import('@/views/admin/AdminSubmissions.vue'), meta: { title: 'Inquiries', requiresAuth: true, adminLayout: true } },
 
       { path: 'livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true, adminLayout: true } },
+      { path: 'messages', name: 'admin-messages', component: () => import('@/views/admin/AdminMessages.vue'), meta: { title: 'Messages', requiresAuth: true, adminLayout: true } },
       { path: 'livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true, adminLayout: true } },
       { path: 'seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true, adminLayout: true } },
       { path: 'logistics', name: 'admin-logistics', component: () => import('@/views/admin/AdminLogistics.vue'), meta: { title: 'Logistics', requiresAuth: true, adminLayout: true } },
@@ -205,6 +206,7 @@ const adminPathRules = [
   { pattern: /^\/admin-submissions$/, redirect: '/admin/submissions' },
   { pattern: /^\/admin-livechat-inbox$/, redirect: '/admin/livechat-inbox' },
   { pattern: /^\/admin-livechat-settings$/, redirect: '/admin/livechat-settings' },
+  { pattern: /^\/admin-messages$/, redirect: '/admin/messages' },
   { pattern: /^\/admin-seller-id-settings$/, redirect: '/admin/seller-id-settings' },
   { pattern: /^\/admin-logistics$/, redirect: '/admin/logistics' },
   { pattern: /^\/superadmin-dashboard$/, redirect: '/admin/superadmin-dashboard' },

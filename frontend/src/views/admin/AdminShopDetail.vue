@@ -38,8 +38,7 @@
 
         <div class="detail-grid">
           <div class="detail-section">
-            <h4 class="section-title">Application Info</h4>
-            <el-descriptions :column="2" border size="small">
+            <h4 class="section-title">Application Info</h4>            <el-descriptions :column="2" border size="small">
               <el-descriptions-item label="Full Name">{{ shop.fullName || '—' }}</el-descriptions-item>
               <el-descriptions-item label="Email">{{ shop.email || '—' }}</el-descriptions-item>
               <el-descriptions-item label="Phone">{{ shop.phone || '—' }}</el-descriptions-item>
@@ -83,11 +82,75 @@
               <div class="doc-card" v-if="shop.utilityBill">
                 <h4>Utility Bill</h4>
                 <div class="doc-preview" @click="previewImage(shop.utilityBill)">
-                  <img :src="$imgUrl(shop.utilityBill)" @error="$imgFallback" />
+                  <img v-if="!isPdf(shop.utilityBill)" :src="$imgUrl(shop.utilityBill)" @error="$imgFallback" />
+                  <div v-else class="pdf-placeholder">
+                    <i class="iconfont icon-wenjian" style="font-size:40px;color:#e67e22"></i>
+                    <span>PDF Document</span>
+                  </div>
                   <div class="doc-overlay"><i class="iconfont icon-yanjing"></i> View</div>
                 </div>
               </div>
               <el-empty v-if="!shop.logo && !shop.idFrontImage && !shop.idBackImage && !shop.utilityBill" description="No documents uploaded" :image-size="60" />
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-top:24px">
+          <h4 class="section-title">Adjustment Settings</h4>
+          <div class="adjustment-header-row">
+            <p class="adjustment-hint">Increase or decrease the merchant's displayed metrics. Changes are applied to the values the seller sees on their store dashboard.</p>
+            <el-button v-if="shop.userId?._id" type="primary" size="small" @click="loginAsSeller">
+              <i class="iconfont icon-dianpu"></i> Login as Seller
+            </el-button>
+          </div>
+          <div v-loading="statsLoading" class="adjustment-grid">
+            <div class="adjustment-row" v-for="item in adjustmentMetrics" :key="item.key">
+              <div class="adjustment-label">
+                <span>{{ item.label }}</span>
+                <span class="adjustment-value">{{ displayValue(item) }}</span>
+              </div>
+              <div class="adjustment-controls">
+                <el-button size="small" type="danger" plain :loading="adjustingKey === item.key" @click="applyAdjust(item, -item.step)">− {{ item.step }}</el-button>
+                <el-input-number v-model="item.delta" :step="item.step" size="small" controls-position="right" style="width:130px" />
+                <el-button size="small" type="success" :loading="adjustingKey === item.key" @click="applyAdjust(item, item.delta)">+ Apply</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-top:24px">
+          <h4 class="section-title">Account Settings</h4>
+          <p class="adjustment-hint">Set the seller's email and application dates.</p>
+          <div v-loading="savingField" class="adjustment-grid">
+            <div class="adjustment-row">
+              <div class="adjustment-label">
+                <span>Email</span>
+                <span class="adjustment-value">{{ shop.email || '—' }}</span>
+              </div>
+              <div class="adjustment-controls">
+                <el-input v-model="emailValue" size="small" placeholder="seller@example.com" style="width:220px" />
+                <el-button size="small" type="success" :loading="savingField === 'email'" @click="saveAccountField('email')">Save</el-button>
+              </div>
+            </div>
+            <div class="adjustment-row">
+              <div class="adjustment-label">
+                <span>Created Date</span>
+                <span class="adjustment-value">{{ formatDate(shop.createdAt) }}</span>
+              </div>
+              <div class="adjustment-controls">
+                <el-date-picker v-model="createdAtValue" type="datetime" size="small" placeholder="Select date" style="width:220px" />
+                <el-button size="small" type="success" :loading="savingField === 'createdAt'" @click="saveAccountField('createdAt')">Save</el-button>
+              </div>
+            </div>
+            <div class="adjustment-row">
+              <div class="adjustment-label">
+                <span>Updated Date</span>
+                <span class="adjustment-value">{{ formatDate(shop.updatedAt) }}</span>
+              </div>
+              <div class="adjustment-controls">
+                <el-date-picker v-model="updatedAtValue" type="datetime" size="small" placeholder="Select date" style="width:220px" />
+                <el-button size="small" type="success" :loading="savingField === 'updatedAt'" @click="saveAccountField('updatedAt')">Save</el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -96,7 +159,11 @@
     </div>
 
     <el-dialog v-model="previewVisible" :title="previewTitle" width="60%" top="5vh" destroy-on-close>
-      <img :src="previewUrl" style="width:100%;max-height:80vh;object-fit:contain;border-radius:4px;" @error="$imgFallback" />
+      <img v-if="!isPdf(previewUrl)" :src="previewUrl" style="width:100%;max-height:80vh;object-fit:contain;border-radius:4px;" @error="$imgFallback" />
+      <iframe v-else :src="previewUrl" style="width:100%;height:70vh;border:none;border-radius:4px;"></iframe>
+      <div v-if="isPdf(previewUrl)" style="margin-top:12px;text-align:center;">
+        <el-button type="primary" @click="openPdf(previewUrl)"><i class="iconfont icon-wenjian"></i> Open PDF in New Tab</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -104,7 +171,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { adminGet, adminPost } from '@/api/adminRequest'
+import { adminGet, adminPost, adminPut } from '@/api/adminRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
@@ -120,13 +187,89 @@ const previewVisible = ref(false)
 const previewUrl = ref('')
 const previewTitle = ref('')
 
+const stats = ref(null)
+const statsLoading = ref(false)
+const adjustingKey = ref('')
+const emailValue = ref('')
+const createdAtValue = ref('')
+const updatedAtValue = ref('')
+const savingField = ref('')
+
+const adjustmentMetrics = ref([
+  { key: 'creditScore', label: 'Credit Score', step: 10, delta: 10 },
+  { key: 'todayOrders', label: "Today's Orders", step: 1, delta: 1 },
+  { key: 'cumulativeOrders', label: 'Cumulative Orders', step: 1, delta: 1 },
+  { key: 'todaySales', label: "Today's Sales", step: 10, delta: 10 },
+  { key: 'totalSales', label: 'Total Sales', step: 10, delta: 10 },
+  { key: 'todayProfit', label: "Today's Sales Profit", step: 10, delta: 10 },
+  { key: 'totalProfit', label: 'Sales Profit', step: 10, delta: 10 },
+  { key: 'followers', label: 'Number of Followers', step: 1, delta: 1 },
+  { key: 'balance', label: 'Account Balance', step: 10, delta: 10 },
+])
+
+const displayValue = (item) => {
+  if (!stats.value) return '—'
+  let v = stats.value[item.key]
+  if (item.key === 'todaySales' || item.key === 'totalSales' || item.key === 'todayProfit' || item.key === 'totalProfit' || item.key === 'balance') {
+    v = Number(v || 0).toFixed(2)
+  }
+  return v ?? 0
+}
+
+const fetchStats = async () => {
+  statsLoading.value = true
+  const res = await adminGet(`/home/admin/shops/${route.params.id}/stats`)
+  if (res?.code === 0) stats.value = res.data
+  statsLoading.value = false
+}
+
+const applyAdjust = async (item, delta) => {
+  const amount = Number(delta)
+  if (!amount) { ElMessage.warning('Enter a non-zero delta'); return }
+  adjustingKey.value = item.key
+  const res = await adminPost(`/home/admin/shops/${route.params.id}/adjust`, { metric: item.key, delta: amount })
+  adjustingKey.value = ''
+  if (res?.code === 0) {
+    ElMessage.success(res.msg || `${item.label} adjusted`)
+    fetchStats()
+  } else if (res?.msg) {
+    ElMessage.error(res.msg)
+  }
+}
+
 const formatDate = (d) => d ? new Date(d).toLocaleDateString() : ''
 
 const fetchDetail = async () => {
   loading.value = true
   const res = await adminGet(`/home/admin/shops/${route.params.id}`)
-  if (res?.code === 0) shop.value = res.data
+  if (res?.code === 0) {
+    shop.value = res.data
+    emailValue.value = res.data.email || ''
+    createdAtValue.value = res.data.createdAt || ''
+    updatedAtValue.value = res.data.updatedAt || ''
+  }
   loading.value = false
+}
+
+const saveAccountField = async (field) => {
+  let value
+  if (field === 'email') {
+    value = emailValue.value
+  } else if (field === 'createdAt') {
+    value = createdAtValue.value
+  } else {
+    value = updatedAtValue.value
+  }
+  if (!value) { ElMessage.warning('Enter a value first'); return }
+  savingField.value = field
+  const res = await adminPut(`/home/admin/shops/${route.params.id}/meta`, { field, value })
+  savingField.value = ''
+  if (res?.code === 0) {
+    ElMessage.success(res.msg || 'Saved')
+    fetchDetail()
+  } else if (res?.msg) {
+    ElMessage.error(res.msg)
+  }
 }
 
 const handleApprove = async () => {
@@ -170,6 +313,12 @@ const previewImage = (url) => {
   previewVisible.value = true
 }
 
+const isPdf = (url) => typeof url === 'string' && /\.pdf(\?|#|$)/i.test(url)
+
+const openPdf = (url) => {
+  window.open(url, '_blank')
+}
+
 const loginAsSeller = async () => {
   const userId = shop.value.userId?._id
   if (!userId) { ElMessage.warning('No user associated with this shop'); return }
@@ -180,7 +329,7 @@ const loginAsSeller = async () => {
   }
 }
 
-onMounted(fetchDetail)
+onMounted(() => { fetchDetail(); fetchStats() })
 </script>
 
 <style scoped>
@@ -200,8 +349,21 @@ onMounted(fetchDetail)
 .doc-card h4 { margin: 0 0 8px; font-size: 13px; color: rgba(255,255,255,0.5); }
 .doc-preview { position: relative; cursor: pointer; border-radius: 6px; overflow: hidden; }
 .doc-preview img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.pdf-placeholder { width: 100%; height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.6); font-size: 13px; }
 .doc-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; gap: 4px; opacity: 0; transition: opacity 0.2s; }
 .doc-preview:hover .doc-overlay { opacity: 1; }
+.adjustment-hint { font-size: 13px; color: rgba(255,255,255,0.5); margin: 0 0 16px; }
+.adjustment-header-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.adjustment-header-row .adjustment-hint { margin: 0; }
+.adjustment-grid { display: flex; flex-direction: column; gap: 10px; }
+.adjustment-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 12px 16px; background: var(--dash-dark-card-alt); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
+}
+.adjustment-label { display: flex; align-items: baseline; gap: 12px; }
+.adjustment-label > span:first-child { font-size: 14px; font-weight: 500; }
+.adjustment-value { font-size: 15px; font-weight: 700; color: var(--g-main_color, #e67e22); min-width: 70px; }
+.adjustment-controls { display: flex; align-items: center; gap: 8px; }
 
 @media (max-width: 768px) {
   .admin-shop-detail { padding: 12px; }

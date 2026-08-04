@@ -6,6 +6,18 @@
     <el-form ref="formRef" :model="form" :rules="formRules" label-position="top" v-loading="loading">
       <el-divider content-position="left">SMTP Configuration</el-divider>
       <div class="g-flex" style="gap:16px;flex-wrap:wrap">
+        <el-form-item label="SMTP Provider Preset" style="flex:1;min-width:220px">
+          <el-select v-model="presetKey" placeholder="Load a free SMTP preset..." clearable style="width:100%" @change="applyPreset">
+            <el-option label="Gmail (App Password)" value="gmail" />
+            <el-option label="Zoho Mail" value="zoho" />
+            <el-option label="Brevo / Sendinblue" value="brevo" />
+            <el-option label="Mailtrap (Testing)" value="mailtrap" />
+            <el-option label="Ethereal (Testing)" value="ethereal" />
+          </el-select>
+          <div class="field-hint">Pick a provider to auto-fill host/port, then enter your credentials below.</div>
+        </el-form-item>
+      </div>
+      <div class="g-flex" style="gap:16px;flex-wrap:wrap">
         <el-form-item label="SMTP Host" prop="host" style="flex:2;min-width:240px">
           <el-input v-model="form.host" placeholder="smtp.example.com" />
         </el-form-item>
@@ -27,6 +39,16 @@
         </el-form-item>
         <el-form-item label="From Email" prop="fromEmail" style="flex:1;min-width:200px">
           <el-input v-model="form.fromEmail" placeholder="noreply@shopifywholesale.com" />
+        </el-form-item>
+      </div>
+      <div class="g-flex" style="gap:16px;flex-wrap:wrap;align-items:flex-end">
+        <el-form-item label="Test Recipient" style="flex:1;min-width:200px">
+          <el-input v-model="form.testTo" placeholder="email to send the test to (defaults to your email)" />
+        </el-form-item>
+        <el-form-item style="margin-bottom:18px">
+          <el-button :loading="testing" :disabled="!form.host || !form.user || !form.pass" @click="testSmtp">
+            <i class="iconfont icon-email" style="margin-right:6px"></i> Test SMTP Connection
+          </el-button>
         </el-form-item>
       </div>
 
@@ -59,7 +81,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminGet, adminRequest } from '@/api/adminRequest'
 import { Check } from '@element-plus/icons-vue'
 
@@ -67,6 +89,52 @@ const formRef = ref(null)
 const loading = ref(false)
 const saving = ref(false)
 const saved = ref(false)
+const testing = ref(false)
+const presetKey = ref('')
+
+const PRESETS = {
+  gmail: { host: 'smtp.gmail.com', port: 465, hint: 'Use a Google App Password (not your Gmail password).' },
+  zoho: { host: 'smtp.zoho.com', port: 465, hint: 'Use your Zoho Mail account credentials.' },
+  brevo: { host: 'smtp-relay.brevo.com', port: 587, hint: 'Use your Brevo SMTP key as the password.' },
+  mailtrap: { host: 'sandbox.smtp.mailtrap.io', port: 2525, hint: 'Mailtrap captures emails in a test inbox.' },
+  ethereal: { host: 'smtp.ethereal.email', port: 587, hint: 'Ethereal generates throwaway test credentials.' },
+}
+
+const applyPreset = (key) => {
+  const p = PRESETS[key]
+  if (!p) return
+  form.host = p.host
+  form.port = p.port
+  ElMessage.info(p.hint)
+}
+
+const testSmtp = async () => {
+  testing.value = true
+  try {
+    const res = await adminRequest.post('/home/admin/email-settings/test', {
+      host: form.host,
+      port: form.port,
+      user: form.user,
+      pass: form.pass,
+      fromName: form.fromName,
+      fromEmail: form.fromEmail,
+      to: form.testTo || '',
+    })
+    if (res?.code === 0) {
+      const d = res.data || {}
+      ElMessage.success(res.msg || 'SMTP test passed')
+      if (d.previewUrl) {
+        ElMessageBox.alert(`Test email sent to ${d.to}.${d.previewUrl ? `\n\nPreview: ${d.previewUrl}` : ''}`, 'SMTP OK', { type: 'success' })
+      }
+    } else {
+      ElMessage.error(res?.msg || 'SMTP test failed')
+    }
+  } catch (err) {
+    ElMessage.error(err?.response?.data?.msg || err?.message || 'SMTP test failed')
+  } finally {
+    testing.value = false
+  }
+}
 
 const form = reactive({
   host: 'smtp.ethereal.email',
@@ -79,6 +147,7 @@ const form = reactive({
   sendPaymentConfirmation: true,
   sendShippingUpdate: true,
   sendRefundNotification: true,
+  testTo: '',
 })
 
 const formRules = {
@@ -131,6 +200,7 @@ onMounted(loadSettings)
 .admin-email-settings h2 { margin-bottom: 4px; }
 .admin-email-settings .desc { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 16px; }
 .toggle-label { margin-left: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
+.field-hint { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
 .el-divider { margin: 24px 0 16px; }
 .el-form-item { margin-bottom: 18px; }
 </style>

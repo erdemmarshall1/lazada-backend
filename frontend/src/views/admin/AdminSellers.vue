@@ -126,7 +126,7 @@ const generateSellerId = async (row) => {
   if (res?.code === 0) { ElMessage.success(res.msg); fetchShops() } else if (res?.msg) ElMessage.error(res.msg)
 }
 const loginAsSeller = async (row) => {
-  const res = await adminPost(`/home/admin/auth/login-as-seller/${row.userId?._id || row.userId}`)
+  const res = await adminPost(`/home/admin/login-as-seller/${row.userId?._id || row.userId}`)
   if (res?.data?.token) {
     localStorage.setItem('seller_temp_token', res.data.token)
     window.open(`/mystore?temp_token=${res.data.token}`, '_blank')

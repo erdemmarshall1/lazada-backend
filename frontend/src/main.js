@@ -74,6 +74,7 @@ app.config.globalProperties.$imgFallback = function (e) {
     return;
   }
 
+  if (path && path.startsWith('/uploads/') && tryUrl(path, 'backendTried')) return;
   if (path && tryUrl(withAuto(path), 'cdnTried')) return;
   if (filename && !path.includes('/product_images/') && tryUrl(withAuto(`/uploads/product_images/${filename}`), 'productImagesTried')) return;
   if (filename && tryUrl(withAuto(`/${filename}`), 'filenameTried')) return;

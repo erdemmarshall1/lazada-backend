@@ -11,6 +11,8 @@
     </div>
     <SwUpdateBanner />
     <LiveChatWidget />
+    <PopupAd />
+    <WalkthroughTour />
     <audio ref="audioPlay" class="c_audio_play" :src="audioSrc" controls style="display:none"></audio>
     <el-backtop :right="24" :bottom="48" />
   </div>
@@ -24,6 +26,8 @@ import { useAppStore } from '@/stores/app'
 import { setDocumentLang } from '@/locales'
 import SwUpdateBanner from '@/components/SwUpdateBanner.vue'
 import LiveChatWidget from '@/components/LiveChatWidget.vue'
+import PopupAd from '@/components/PopupAd.vue'
+import WalkthroughTour from '@/components/WalkthroughTour.vue'
 
 const router = useRouter()
 const store = useAppStore()

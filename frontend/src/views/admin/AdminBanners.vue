@@ -16,6 +16,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="title" label="Title" />
+      <el-table-column label="Position" width="110">
+        <template #default="{ row }">
+          <el-tag :type="row.position === 'popup' ? 'warning' : 'info'" size="small">{{ row.position }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="link" label="Link" />
       <el-table-column prop="sort" label="Sort" width="80" />
       <el-table-column label="Status" width="100">
@@ -46,6 +51,37 @@
         <el-form-item label="Link">
           <el-input v-model="addForm.link" placeholder="/miaoshalist" />
         </el-form-item>
+        <el-form-item label="Position">
+          <el-select v-model="addForm.position" style="width:100%">
+            <el-option label="Homepage" value="home" />
+            <el-option label="Category" value="category" />
+            <el-option label="Popup Advertisement" value="popup" />
+          </el-select>
+        </el-form-item>
+        <template v-if="addForm.position === 'popup'">
+          <el-form-item label="Display Duration (seconds)">
+            <el-input-number v-model="addForm.popupDuration" :min="1" :max="600" style="width:100%" />
+          </el-form-item>
+          <el-form-item label="Delay Before Show (seconds)">
+            <el-input-number v-model="addForm.popupDelay" :min="0" :max="3600" style="width:100%" />
+          </el-form-item>
+          <div class="g-flex" style="gap:12px;flex-wrap:wrap">
+            <el-form-item label="Start At (optional)">
+              <el-date-picker v-model="addForm.popupStartAt" type="datetime" placeholder="Start displaying" style="width:100%" value-format="YYYY-MM-DDTHH:mm:ss" />
+            </el-form-item>
+            <el-form-item label="End At (optional)">
+              <el-date-picker v-model="addForm.popupEndAt" type="datetime" placeholder="Stop displaying" style="width:100%" value-format="YYYY-MM-DDTHH:mm:ss" />
+            </el-form-item>
+          </div>
+          <el-form-item label="Show Frequency">
+            <el-input-number v-model="addForm.popupFrequency" :min="1" :max="30" style="width:100%" />
+            <div class="field-hint">How many times this popup may be shown to the same visitor (per 24h).</div>
+          </el-form-item>
+          <el-form-item label="Dismissible">
+            <el-switch v-model="addForm.popupDismissible" />
+            <span class="toggle-label">Allow users to close the popup</span>
+          </el-form-item>
+        </template>
         <el-form-item label="Sort Order">
           <el-input-number v-model="addForm.sort" :min="0" />
         </el-form-item>
@@ -70,6 +106,37 @@
         <el-form-item label="Link">
           <el-input v-model="editForm.link" />
         </el-form-item>
+        <el-form-item label="Position">
+          <el-select v-model="editForm.position" style="width:100%">
+            <el-option label="Homepage" value="home" />
+            <el-option label="Category" value="category" />
+            <el-option label="Popup Advertisement" value="popup" />
+          </el-select>
+        </el-form-item>
+        <template v-if="editForm.position === 'popup'">
+          <el-form-item label="Display Duration (seconds)">
+            <el-input-number v-model="editForm.popupDuration" :min="1" :max="600" style="width:100%" />
+          </el-form-item>
+          <el-form-item label="Delay Before Show (seconds)">
+            <el-input-number v-model="editForm.popupDelay" :min="0" :max="3600" style="width:100%" />
+          </el-form-item>
+          <div class="g-flex" style="gap:12px;flex-wrap:wrap">
+            <el-form-item label="Start At (optional)">
+              <el-date-picker v-model="editForm.popupStartAt" type="datetime" placeholder="Start displaying" style="width:100%" value-format="YYYY-MM-DDTHH:mm:ss" />
+            </el-form-item>
+            <el-form-item label="End At (optional)">
+              <el-date-picker v-model="editForm.popupEndAt" type="datetime" placeholder="Stop displaying" style="width:100%" value-format="YYYY-MM-DDTHH:mm:ss" />
+            </el-form-item>
+          </div>
+          <el-form-item label="Show Frequency">
+            <el-input-number v-model="editForm.popupFrequency" :min="1" :max="30" style="width:100%" />
+            <div class="field-hint">How many times this popup may be shown to the same visitor (per 24h).</div>
+          </el-form-item>
+          <el-form-item label="Dismissible">
+            <el-switch v-model="editForm.popupDismissible" />
+            <span class="toggle-label">Allow users to close the popup</span>
+          </el-form-item>
+        </template>
         <el-form-item label="Sort Order">
           <el-input-number v-model="editForm.sort" :min="0" />
         </el-form-item>
@@ -110,10 +177,22 @@ const imgUrl = (url) => {
 }
 const onImgError = (e) => { e.target.src = IMG_FALLBACK }
 
-const addForm = reactive({ image: '', title: '', link: '', sort: 0 })
+const addForm = reactive({
+  image: '', title: '', link: '', sort: 0,
+  position: 'home',
+  popupDuration: 10, popupDelay: 0,
+  popupStartAt: '', popupEndAt: '',
+  popupFrequency: 1, popupDismissible: true,
+})
 const onAddUpload = (res) => { if (res.code === 0) addForm.image = res.data.url }
 
-const editForm = reactive({ _id: '', image: '', title: '', link: '', sort: 0 })
+const editForm = reactive({
+  _id: '', image: '', title: '', link: '', sort: 0,
+  position: 'home',
+  popupDuration: 10, popupDelay: 0,
+  popupStartAt: '', popupEndAt: '',
+  popupFrequency: 1, popupDismissible: true,
+})
 const onEditUpload = (res) => { if (res.code === 0) editForm.image = res.data.url }
 
 const fetchBanners = async () => {
@@ -131,6 +210,10 @@ const doAdd = async () => {
   if (res?.code !== 0) { if (res?.msg) ElMessage.error(res.msg); return }
   showAdd.value = false
   addForm.image = ''; addForm.title = ''; addForm.link = ''; addForm.sort = 0
+  addForm.position = 'home'
+  addForm.popupDuration = 10; addForm.popupDelay = 0
+  addForm.popupStartAt = ''; addForm.popupEndAt = ''
+  addForm.popupFrequency = 1; addForm.popupDismissible = true
   ElMessage.success('Banner added')
   await fetchBanners()
 }
@@ -141,6 +224,13 @@ const editBanner = (b) => {
   editForm.title = b.title || ''
   editForm.link = b.link || ''
   editForm.sort = b.sort || 0
+  editForm.position = b.position || 'home'
+  editForm.popupDuration = b.popupDuration ?? 10
+  editForm.popupDelay = b.popupDelay ?? 0
+  editForm.popupStartAt = b.popupStartAt || ''
+  editForm.popupEndAt = b.popupEndAt || ''
+  editForm.popupFrequency = b.popupFrequency ?? 1
+  editForm.popupDismissible = b.popupDismissible !== false
   showEdit.value = true
 }
 
@@ -172,3 +262,17 @@ const deleteBanner = async (b) => {
 
 onMounted(() => fetchBanners())
 </script>
+
+<style scoped>
+.field-hint {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+.toggle-label {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #666;
+}
+</style>

@@ -79,9 +79,68 @@
             <el-table-column label="Modified" width="180">
               <template #default="{ row }">{{ new Date(row.modifiedAt).toLocaleString() }}</template>
             </el-table-column>
+            <el-table-column label="Actions" width="140">
+              <template #default="{ row }">
+                <el-button v-if="!row.isDir" size="small" type="primary" plain :loading="downloadingName === row.name" @click="downloadBackupFile(row)">
+                  <i class="iconfont icon-xiazai" style="margin-right:4px"></i> Download
+                </el-button>
+                <el-tag v-else size="small" type="info">Folder</el-tag>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </template>
+    </div>
+
+    <div class="page-card">
+      <div class="page-header">
+        <i class="iconfont icon-shijian"></i>
+        <h2>Activities History</h2>
+        <span class="subtitle">All backup, restore and maintenance actions</span>
+      </div>
+      <div class="activity-filter" style="margin-bottom:12px">
+        <el-select v-model="activityAction" placeholder="All actions" clearable style="width:200px" @change="loadActivities">
+          <el-option label="Backup (ZIP)" value="backup_zip" />
+          <el-option label="Backup (JSON)" value="backup_json" />
+          <el-option label="Server Backup" value="backup_server" />
+          <el-option label="Restore" value="restore" />
+          <el-option label="Maintenance ON" value="maintenance_on" />
+          <el-option label="Maintenance OFF" value="maintenance_off" />
+        </el-select>
+      </div>
+      <div class="g-responsive-table">
+        <el-table :data="activities" v-loading="activitiesLoading" size="small" style="width:100%">
+          <el-table-column label="Date" width="170">
+            <template #default="{ row }">{{ new Date(row.createdAt).toLocaleString() }}</template>
+          </el-table-column>
+          <el-table-column label="Action" width="150">
+            <template #default="{ row }">
+              <el-tag size="small" :type="actionTagType(row.action)">{{ actionLabel(row.action) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="actor" label="Admin" width="120" />
+          <el-table-column prop="filename" label="File" min-width="180" show-overflow-tooltip />
+          <el-table-column label="Size" width="90">
+            <template #default="{ row }">{{ row.sizeMB !== null ? row.sizeMB + ' MB' : '—' }}</template>
+          </el-table-column>
+          <el-table-column label="Status" width="90">
+            <template #default="{ row }">
+              <el-tag size="small" :type="row.status === 'ok' ? 'success' : 'danger'">{{ row.status }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="Actions" width="140">
+            <template #default="{ row }">
+              <el-button v-if="row.filename && (row.action === 'backup_zip' || row.action === 'backup_json') && backupExists(row.filename)" size="small" type="primary" plain :loading="downloadingName === row.filename" @click="downloadBackupFile({ name: row.filename })">
+                <i class="iconfont icon-xiazai" style="margin-right:4px"></i> Download
+              </el-button>
+              <span v-else-if="row.error" style="font-size:12px;color:#f56c6c">{{ row.error }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div class="pagination-wrap" style="margin-top:16px;display:flex;justify-content:flex-end" v-if="activityTotal > activityPageSize">
+        <el-pagination background layout="prev, pager, next" :total="activityTotal" :page-size="activityPageSize" v-model:current-page="activityPage" @current-change="loadActivities" small />
+      </div>
     </div>
 
     <div class="page-card restore-card">
@@ -163,6 +222,70 @@ const restoreConfirm = ref(false)
 const restoring = ref(false)
 const restoreResult = ref(null)
 
+const activities = ref([])
+const activitiesLoading = ref(false)
+const activityAction = ref('')
+const activityPage = ref(1)
+const activityPageSize = ref(50)
+const activityTotal = ref(0)
+const downloadingName = ref('')
+
+const ACTION_LABELS = {
+  backup_zip: 'Backup (ZIP)',
+  backup_json: 'Backup (JSON)',
+  backup_server: 'Server Backup',
+  restore: 'Restore',
+  maintenance_on: 'Maintenance ON',
+  maintenance_off: 'Maintenance OFF',
+}
+const actionLabel = (a) => ACTION_LABELS[a] || a
+const actionTagType = (a) => {
+  if (a === 'maintenance_on') return 'danger'
+  if (a === 'maintenance_off') return 'warning'
+  if (a === 'restore') return 'primary'
+  return 'success'
+}
+const backupExists = (name) => backupList.value.some((b) => b.name === name && !b.isDir)
+
+const loadActivities = async () => {
+  activitiesLoading.value = true
+  const res = await adminGet('/home/admin/backup/activity', {
+    page: activityPage.value,
+    pageSize: activityPageSize.value,
+    action: activityAction.value || undefined,
+  })
+  if (res?.code === 0 && res?.data) {
+    activities.value = res.data.list || []
+    activityTotal.value = res.data.total || 0
+  }
+  activitiesLoading.value = false
+}
+
+const downloadBackupFile = async (row) => {
+  if (!row?.name) return
+  downloadingName.value = row.name
+  try {
+    const token = getToken()
+    const res = await axios.get(`${API_BASE}/home/admin/backup/download`, {
+      params: { name: row.name },
+      headers: {
+        token,
+        Authorization: `Bearer ${token}`,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      responseType: 'blob',
+      timeout: 120000,
+    })
+    downloadBlob(res.data, row.name)
+    ElMessage.success('Backup downloaded')
+    loadActivities()
+  } catch (err) {
+    ElMessage.error(err?.response?.data?.msg || 'Failed to download backup')
+  } finally {
+    downloadingName.value = ''
+  }
+}
+
 const restoreResultRows = computed(() => {
   if (!restoreResult.value) return []
   return Object.entries(restoreResult.value).map(([collection, info]) => ({
@@ -199,6 +322,7 @@ const saveMaintenance = async () => {
     if (res?.code === 0) {
       ElMessage.success(res.msg || 'Maintenance settings saved')
       await loadStatus()
+      loadActivities()
     } else {
       ElMessage.error(res?.msg || 'Failed to save maintenance settings')
     }
@@ -240,6 +364,7 @@ const downloadZip = async () => {
     const date = new Date().toISOString().slice(0, 10)
     downloadBlob(res.data, `full_backup_${date}.zip`)
     ElMessage.success('Backup downloaded')
+    loadActivities()
   } catch (err) {
     ElMessage.error(err?.response?.data?.msg || 'Failed to download backup')
   } finally {
@@ -256,6 +381,7 @@ const downloadJson = async () => {
       const date = new Date().toISOString().slice(0, 10)
       downloadBlob(new Blob([payload], { type: 'application/json' }), `full_backup_${date}.json`)
       ElMessage.success('JSON dump downloaded')
+      loadActivities()
     } else {
       ElMessage.error('Failed to generate JSON dump')
     }
@@ -289,6 +415,7 @@ const confirmRestore = async () => {
     if (res?.code === 0) {
       restoreResult.value = res.data
       ElMessage.success(res.msg || 'Restore complete')
+      loadActivities()
     } else {
       ElMessage.error(res?.msg || 'Restore failed')
     }
@@ -302,6 +429,7 @@ const confirmRestore = async () => {
 onMounted(() => {
   loadStatus()
   loadBackupList()
+  loadActivities()
 })
 </script>
 
