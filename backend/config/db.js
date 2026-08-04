@@ -13,6 +13,10 @@ const connectDB = async () => {
       return true;
     } catch (error) {
       console.error(`MongoDB connection error: ${error.message}`);
+      if (process.env.NODE_ENV === 'production') {
+        console.error('Refusing to start in-memory MongoDB in production (memory heavy). Check MONGODB_URI.');
+        return false;
+      }
     }
   }
   console.log('Starting in-memory MongoDB...');
