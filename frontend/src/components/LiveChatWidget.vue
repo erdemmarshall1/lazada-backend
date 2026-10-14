@@ -10,7 +10,6 @@
     <transition name="lcw-slide">
       <div v-if="open" class="lcw-panel">
         <div class="lcw-header">
-          <h4>{{ $t('liveChat.needHelp') }}</h4>
           <p>{{ $t('liveChat.supportReady') }}</p>
         </div>
         <div class="lcw-body">
