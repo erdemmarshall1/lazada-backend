@@ -25,13 +25,19 @@
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleIdFrontUpload" accept="image/*" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
           <el-button type="primary">{{ $t('store.apply.uploadIdFront') }}</el-button>
         </el-upload>
-        <div v-if="form.idFrontImage" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.idFrontImage.split('/').pop() }}</div>
+        <div v-if="form.idFrontImage" class="upload-hint">
+          {{ $t('store.apply.uploadedLabel') }} {{ form.idFrontImage.split('/').pop() }}
+          <img :src="$imgUrl(form.idFrontImage)" class="doc-thumb" />
+        </div>
       </el-form-item>
       <el-form-item :label="$t('store.apply.idBackLabel')" prop="idBackImage">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleIdBackUpload" accept="image/*" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
           <el-button type="primary">{{ $t('store.apply.uploadIdBack') }}</el-button>
         </el-upload>
-        <div v-if="form.idBackImage" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.idBackImage.split('/').pop() }}</div>
+        <div v-if="form.idBackImage" class="upload-hint">
+          {{ $t('store.apply.uploadedLabel') }} {{ form.idBackImage.split('/').pop() }}
+          <img :src="$imgUrl(form.idBackImage)" class="doc-thumb" />
+        </div>
       </el-form-item>
       <el-form-item :label="$t('store.apply.idNumberLabel')" prop="idNumber">
         <el-input v-model="form.idNumber" :placeholder="$t('store.apply.idNumberLabel')" />
@@ -43,7 +49,11 @@
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
           <el-button type="primary">{{ $t('store.apply.uploadUtility') }}</el-button>
         </el-upload>
-        <div v-if="form.utilityBill" class="upload-hint">{{ $t('store.apply.uploadedLabel') }} {{ form.utilityBill.split('/').pop() }}</div>
+        <div v-if="form.utilityBill" class="upload-hint">
+          {{ $t('store.apply.uploadedLabel') }} {{ form.utilityBill.split('/').pop() }}
+          <img v-if="!isPdfUrl(form.utilityBill)" :src="$imgUrl(form.utilityBill)" class="doc-thumb" />
+          <a v-else :href="form.utilityBill" target="_blank" rel="noopener" class="doc-thumb-pdf"><i class="iconfont icon-wenjian"></i> View PDF</a>
+        </div>
       </el-form-item>
       <el-form-item :label="$t('store.apply.emailLabel')" prop="email">
         <el-input v-model="form.email" :placeholder="$t('store.apply.emailLabel')" />
@@ -115,6 +125,8 @@ const computedRules = computed(() => {
   return base
 })
 
+const isPdfUrl = (url) => typeof url === 'string' && /\.pdf(\?|#|$)/i.test(url)
+
 const uploadImage = async (file) => {
   try {
     const res = await uploadFile(file)
@@ -127,10 +139,9 @@ const uploadImage = async (file) => {
   }
 }
 
-const handleLogoUpload = (file) => {
-  const reader = new FileReader()
-  reader.onload = (e) => { form.storeLogo = e.target.result }
-  reader.readAsDataURL(file)
+const handleLogoUpload = async (file) => {
+  const url = await uploadImage(file)
+  if (url) form.storeLogo = url
   return false
 }
 
@@ -186,14 +197,14 @@ const submit = async () => {
     fullName: form.fullName,
     email: form.email,
     storeLogo: form.storeLogo,
+    idFrontImage: form.idFrontImage,
+    idBackImage: form.idBackImage,
+    utilityBill: form.utilityBill,
+    idNumber: form.idNumber,
   }
   if (!isEditing.value) {
     payload.password = form.password
     payload.invitationCode = form.invitationCode
-    payload.idFrontImage = form.idFrontImage
-    payload.idBackImage = form.idBackImage
-    payload.utilityBill = form.utilityBill
-    payload.idNumber = form.idNumber
   }
   const res = await qe(post(endpoint, payload))
   submitting.value = false
@@ -216,7 +227,9 @@ onMounted(() => {
 .avatar-uploader:hover { border-color: var(--g-main_color); }
 .avatar { width: 120px; height: 120px; object-fit: cover; }
 .avatar-uploader-icon { font-size: 28px; color: #8c939d; }
-.upload-hint { font-size: 12px; color: var(--g-main_color); margin-top: 4px; }
+.upload-hint { font-size: 12px; color: var(--g-main_color); margin-top: 4px; display: flex; flex-direction: column; gap: 6px; }
+.doc-thumb { width: 140px; height: 90px; object-fit: contain; border: 1px solid var(--el-border-color); border-radius: 6px; background: #fff; display: block; }
+.doc-thumb-pdf { display: inline-flex; align-items: center; gap: 6px; width: 140px; height: 90px; justify-content: center; border: 1px solid var(--el-border-color); border-radius: 6px; color: #e67e22; text-decoration: none; }
 .form-tip { font-size: 12px; color: #999; margin-top: 4px; }
 @media (max-width: 768px) {
   .el-form { width: 100% !important; }

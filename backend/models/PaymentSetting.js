@@ -4,6 +4,7 @@ const paymentSettingSchema = new mongoose.Schema({
   method: { type: String, required: true, unique: true },
   label: { type: String, required: true },
   walletAddress: { type: String, default: '' },
+  qrCode: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
   sort: { type: Number, default: 0 },
   translations: {

@@ -17,7 +17,7 @@
       <el-button @click="showWithdraw = true">{{ $t('user.balance.withdraw') }}</el-button>
     </div>
 
-    <el-dialog v-model="showDeposit" :title="$t('user.balance.deposit')" width="520px">
+    <el-dialog v-model="showDeposit" :title="$t('user.balance.deposit')" :width="isMobile ? '92%' : '520px'" align-center>
       <el-form ref="formRef" :model="formData" :rules="rules" label-position="top">
         <el-form-item :label="$t('user.balance.amountLabel')" prop="depositAmount">
           <el-input-number v-model="formData.depositAmount" :min="1" :max="100000" style="width:100%" />
@@ -67,7 +67,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="showWithdraw" :title="$t('user.balance.withdraw')" width="480px">
+    <el-dialog v-model="showWithdraw" :title="$t('user.balance.withdraw')" :width="isMobile ? '92%' : '480px'" align-center>
       <el-form ref="withdrawFormRef" :model="withdrawFormData" :rules="withdrawRules" label-position="top">
         <el-form-item :label="$t('user.balance.amountLabel')" prop="withdrawAmount">
           <el-input-number v-model="withdrawFormData.withdrawAmount" :min="1" :max="balance" style="width:100%" />
@@ -106,6 +106,9 @@ import { ElMessage } from 'element-plus'
 import { get, post, qe, API_BASE, imgUrl } from '@/api/request'
 import QRCode from 'qrcode'
 import TransactionPasswordDialog from '@/components/TransactionPasswordDialog.vue'
+import { useBreakpoint } from '@/composables/useBreakpoint'
+
+const { isMobile } = useBreakpoint()
 
 const balance = ref(0)
 const showDeposit = ref(false)
@@ -300,7 +303,11 @@ const DEFAULT_PAYMENT_METHODS = [
 const onPaymentMethodChange = (method) => {
   const setting = settings.value.find(s => s.method === method)
   selectedWallet.value = setting?.walletAddress || DEFAULT_WALLET
-  updateQR(selectedWallet.value)
+  if (setting?.qrCode) {
+    qrDataUrl.value = imgUrl(setting.qrCode)
+  } else {
+    updateQR(selectedWallet.value)
+  }
 }
 
 const loadSettings = async () => {
@@ -327,7 +334,7 @@ onMounted(async () => {
 .balance-row .balance-amount { font-size: 28px; font-weight: 700; }
 .balance-divider { height: 1px; background: rgba(255,255,255,0.25); margin: 12px 0; }
 .qr-section { text-align: center; margin-top: 16px; padding: 16px; border: 1px dashed var(--g-border); border-radius: 8px; }
-.qr-section img { width: 200px; height: 200px; }
+.qr-section img { width: 200px; height: 200px; max-width: 100%; object-fit: contain; }
 .qr-section p { font-size: 12px; color: var(--g-text-light); margin-top: 8px; }
 .receipt-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 8px 12px; background: var(--g-off-white); border-radius: 8px; cursor: pointer; }
 .receipt-preview img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid var(--g-border); }

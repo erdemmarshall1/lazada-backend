@@ -175,6 +175,68 @@ router.post('/auth/logout', adminAuth, async (req, res) => {
   }
 });
 
+// ---- Admin: own profile & password ----
+router.get('/profile', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password -fundPassword -backupCodes -twoFactorSecret');
+    if (!user) return res.json(fail('User not found'));
+    res.json(success(user, 'Profile loaded'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/profile', adminAuth, async (req, res) => {
+  try {
+    const { username, email, phone, avatar } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.json(fail('User not found'));
+
+    if (username !== undefined) {
+      const name = String(username).trim();
+      if (!name) return res.json(fail('Username is required'));
+      const existing = await User.findOne({ username: name, _id: { $ne: user._id } });
+      if (existing) return res.json(fail('Username already in use'));
+      user.username = name;
+    }
+
+    if (email !== undefined) {
+      const mail = String(email).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return res.json(fail('Invalid email format'));
+      const existing = await User.findOne({ email: mail, _id: { $ne: user._id } });
+      if (existing) return res.json(fail('Email already in use by another account'));
+      user.email = mail;
+    }
+
+    if (phone !== undefined) user.phone = String(phone);
+    if (avatar !== undefined) user.avatar = avatar;
+
+    await user.save();
+    res.json(success(user, 'Profile updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
+router.put('/profile/password', adminAuth, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) return res.json(fail('Old and new password are required'));
+    if (newPassword.length < 6) return res.json(fail('New password must be at least 6 characters'));
+    const user = await User.findById(req.user._id);
+    if (!user) return res.json(fail('User not found'));
+    const isMatch = await user.matchPassword(oldPassword);
+    if (!isMatch) return res.json(fail('Old password incorrect'));
+    user.password = newPassword;
+    user.needsPasswordSetup = false;
+    await user.save();
+    adminRecordLogin(user._id, req, 'change_password', true);
+    res.json(success(null, 'Password updated'));
+  } catch (error) {
+    res.json(fail(error.message));
+  }
+});
+
 // ---- Pending transactions ----
 /**
  * @openapi
@@ -585,7 +647,7 @@ router.post('/login-as-seller/:userId', adminAuth, async (req, res) => {
     const targetUser = await User.findById(req.params.userId).select('-password');
     if (!targetUser) return res.json(fail('User not found'));
     const token = jwt.sign(
-      { id: targetUser._id, role: targetUser.role },
+      { id: targetUser._id, role: targetUser.role, type: 'access', version: targetUser.tokenVersion || '' },
       JWT_SECRET,
       { expiresIn: '15m' }
     );
@@ -600,7 +662,7 @@ router.post('/login-as-user/:userId', adminAuth, async (req, res) => {
     const targetUser = await User.findById(req.params.userId).select('-password');
     if (!targetUser) return res.json(fail('User not found'));
     const token = jwt.sign(
-      { id: targetUser._id, role: targetUser.role },
+      { id: targetUser._id, role: targetUser.role, type: 'access', version: targetUser.tokenVersion || '' },
       JWT_SECRET,
       { expiresIn: '15m' }
     );
@@ -1307,11 +1369,11 @@ router.get('/payment-settings', adminAuth, async (req, res) => {
 
 router.post('/payment-settings', adminAuth, async (req, res) => {
   try {
-    const { method, label, walletAddress, isActive, sort } = req.body;
+    const { method, label, walletAddress, qrCode, isActive, sort } = req.body;
     if (!method || !label) return res.json(fail('Method and label are required'));
     const existing = await PaymentSetting.findOne({ method });
     if (existing) return res.json(fail('Payment method already exists'));
-    const doc = await PaymentSetting.create({ method, label, walletAddress, isActive, sort });
+    const doc = await PaymentSetting.create({ method, label, walletAddress, qrCode, isActive, sort });
     res.json(success(doc, 'Payment setting created'));
   } catch (error) {
     res.json(fail(error.message));
@@ -1320,11 +1382,12 @@ router.post('/payment-settings', adminAuth, async (req, res) => {
 
 router.put('/payment-settings/:id', adminAuth, async (req, res) => {
   try {
-    const { method, label, walletAddress, isActive, sort } = req.body;
+    const { method, label, walletAddress, qrCode, isActive, sort } = req.body;
     const update = {};
     if (method !== undefined) update.method = method;
     if (label !== undefined) update.label = label;
     if (walletAddress !== undefined) update.walletAddress = walletAddress;
+    if (qrCode !== undefined) update.qrCode = qrCode;
     if (isActive !== undefined) update.isActive = isActive;
     if (sort !== undefined) update.sort = sort;
     const doc = await PaymentSetting.findByIdAndUpdate(req.params.id, update, { new: true });

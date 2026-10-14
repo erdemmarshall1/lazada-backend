@@ -13,10 +13,12 @@
       <el-table-column prop="phone" label="Phone" />
       <el-table-column prop="role" label="Role" />
       <el-table-column label="Registered"><template #default="{row}">{{ new Date(row.createdAt).toLocaleDateString() }}</template></el-table-column>
-      <el-table-column label="Actions" width="220">
+      <el-table-column label="Actions" width="360">
         <template #default="{row}">
           <el-button size="small" @click="$router.push('/admin/users/privacy/' + row._id)">Privacy</el-button>
+          <el-button size="small" @click="$router.push('/admin/users/detail/' + row._id)">View</el-button>
           <el-button size="small" type="primary" @click="$router.push('/admin/users/edit/' + row._id)">Edit</el-button>
+          <el-button size="small" type="success" :loading="loginingId === row._id" @click="loginAsUser(row)">Login as User</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -30,13 +32,33 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { adminGet } from '@/api/adminRequest'
+import { ElMessage } from 'element-plus'
+import { adminGet, adminPost } from '@/api/adminRequest'
 
 const users = ref([])
 const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+const loginingId = ref('')
+
+const loginAsUser = async (row) => {
+  loginingId.value = row._id
+  try {
+    const res = await adminPost(`/home/admin/login-as-user/${row._id}`)
+    if (res?.code === 0) {
+      localStorage.setItem('seller_temp_token', res.data.token)
+      ElMessage.success(`Logged in as ${res.data.username}`)
+      window.open('/myaccount?temp_token=' + res.data.token, '_blank')
+    } else {
+      ElMessage.error(res?.msg || 'Login failed')
+    }
+  } catch {
+    ElMessage.error('Login failed')
+  } finally {
+    loginingId.value = ''
+  }
+}
 
 const fetch = async () => {
   loading.value = true

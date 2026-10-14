@@ -348,7 +348,7 @@ onMounted(() => { fetchDetail(); fetchStats() })
 .doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
 .doc-card h4 { margin: 0 0 8px; font-size: 13px; color: rgba(255,255,255,0.5); }
 .doc-preview { position: relative; cursor: pointer; border-radius: 6px; overflow: hidden; }
-.doc-preview img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.doc-preview img { width: 100%; height: 140px; object-fit: contain; display: block; background: rgba(255,255,255,0.04); }
 .pdf-placeholder { width: 100%; height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.6); font-size: 13px; }
 .doc-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; gap: 4px; opacity: 0; transition: opacity 0.2s; }
 .doc-preview:hover .doc-overlay { opacity: 1; }

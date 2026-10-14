@@ -12,6 +12,19 @@
             <span v-else style="color:#999">-</span>
           </template>
         </el-table-column>
+        <el-table-column label="QR Code" width="110" align="center">
+          <template #default="{row}">
+            <el-image
+              v-if="row.qrCode"
+              :src="imgUrl(row.qrCode)"
+              :preview-src-list="[imgUrl(row.qrCode)]"
+              fit="contain"
+              style="width:56px;height:56px;border-radius:4px;background:#fff;padding:2px"
+              preview-teleported
+            />
+            <span v-else style="color:#999;font-size:12px">None</span>
+          </template>
+        </el-table-column>
         <el-table-column label="Active" width="80" align="center">
           <template #default="{row}">
             <el-switch :model-value="row.isActive" @change="toggleActive(row)" />
@@ -39,6 +52,26 @@
         </el-form-item>
         <el-form-item label="Wallet Address">
           <el-input v-model="form.walletAddress" type="textarea" :rows="2" placeholder="Wallet address for receiving payments" />
+        </el-form-item>
+        <el-form-item label="Wallet QR Code">
+          <div class="qr-upload-row">
+            <el-upload
+              :show-file-list="false"
+              :before-upload="handleQrUpload"
+              accept="image/*"
+            >
+              <div v-if="form.qrCode" class="qr-upload-preview">
+                <img :src="imgUrl(form.qrCode)" alt="QR code" />
+              </div>
+              <div v-else class="qr-upload-placeholder">
+                <i class="iconfont icon-shangchuan"></i>
+                <span>Upload QR</span>
+              </div>
+            </el-upload>
+            <el-button v-if="form.qrCode" size="small" type="danger" plain @click="form.qrCode = ''">Remove</el-button>
+            <span v-if="uploadingQr" style="margin-left:10px;color:#888;font-size:13px">Uploading…</span>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:4px">Shown to users on the top-up form. If empty, a QR code is generated from the wallet address.</div>
         </el-form-item>
         <el-form-item label="Sort Order">
           <el-input-number v-model="form.sort" :min="0" :max="999" />
@@ -82,6 +115,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminGet, adminPost, adminRequest } from '@/api/adminRequest'
+import { uploadFile, imgUrl } from '@/api/request'
 
 const list = ref([])
 const loading = ref(false)
@@ -102,9 +136,38 @@ const form = reactive({
   method: '',
   label: '',
   walletAddress: '',
+  qrCode: '',
   isActive: true,
   sort: 0,
 })
+
+const uploadingQr = ref(false)
+
+const handleQrUpload = async (file) => {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('Only image files are allowed')
+    return false
+  }
+  if (file.size / 1024 / 1024 > 10) {
+    ElMessage.error('File size must be less than 10MB')
+    return false
+  }
+  uploadingQr.value = true
+  try {
+    const res = await uploadFile(file)
+    if (res?.code === 0 && res.data?.url) {
+      form.qrCode = res.data.url
+      ElMessage.success('QR code uploaded')
+    } else {
+      ElMessage.error(res?.msg || 'Upload failed')
+    }
+  } catch {
+    ElMessage.error('Upload failed')
+  } finally {
+    uploadingQr.value = false
+  }
+  return false
+}
 
 const formRules = {
   method: [{ required: true, message: 'Method key is required', trigger: 'blur' }],
@@ -124,6 +187,7 @@ const openAddDialog = () => {
   form.method = ''
   form.label = ''
   form.walletAddress = ''
+  form.qrCode = ''
   form.isActive = true
   form.sort = 0
   dialogVisible.value = true
@@ -135,6 +199,7 @@ const openEditDialog = (row) => {
   form.method = row.method
   form.label = row.label
   form.walletAddress = row.walletAddress || ''
+  form.qrCode = row.qrCode || ''
   form.isActive = row.isActive
   form.sort = row.sort ?? 0
   dialogVisible.value = true
@@ -222,4 +287,9 @@ onMounted(() => {
 .admin-payment-settings h2 { margin-bottom: 16px; }
 .approval-settings-section { margin-top: 20px; }
 .approval-settings-section h3 { margin-bottom: 16px; font-size: 18px; }
+.qr-upload-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.qr-upload-preview img { width: 96px; height: 96px; object-fit: contain; border-radius: 6px; border: 1px solid var(--el-border-color); background: #fff; padding: 4px; display: block; }
+.qr-upload-placeholder { width: 96px; height: 96px; border: 1px dashed var(--el-border-color); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: #8c939d; font-size: 12px; }
+.qr-upload-placeholder:hover { border-color: var(--g-main_color); color: var(--g-main_color); }
+.qr-upload-placeholder i { font-size: 22px; }
 </style>

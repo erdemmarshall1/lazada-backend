@@ -102,7 +102,7 @@ const loginAsUser = async () => {
     if (res?.code === 0) {
       localStorage.setItem('seller_temp_token', res.data.token)
       ElMessage.success(`Logged in as ${res.data.username}`)
-      window.open('/', '_blank')
+      window.open('/myaccount?temp_token=' + res.data.token, '_blank')
     }
   } catch {} finally { logining.value = false }
 }

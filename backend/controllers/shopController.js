@@ -137,7 +137,7 @@ exports.apply = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, phone, address, fullName, email, storeLogo, idNumber } = req.body;
+    const { name, description, phone, address, fullName, email, storeLogo, idNumber, idFrontImage, idBackImage, utilityBill } = req.body;
     const shop = await Shop.findOne({ userId: req.user._id });
     if (!shop) return res.json(fail('No shop found'));
     if (name !== undefined) shop.name = name;
@@ -148,6 +148,9 @@ exports.update = async (req, res) => {
     if (email !== undefined) shop.email = email;
     if (storeLogo !== undefined) shop.logo = storeLogo;
     if (idNumber !== undefined) shop.idNumber = idNumber;
+    if (idFrontImage !== undefined) shop.idFrontImage = idFrontImage;
+    if (idBackImage !== undefined) shop.idBackImage = idBackImage;
+    if (utilityBill !== undefined) shop.utilityBill = utilityBill;
     await shop.save();
     res.json(success(shop, 'Store updated'));
   } catch (error) {

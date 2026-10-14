@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [master, admin]
+    branches: [master, admin, preview]
 
 jobs:
   deploy-backend:
