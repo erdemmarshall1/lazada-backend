@@ -203,17 +203,6 @@
       "title": "แจกจ่ายไปยังร้านค้าของคุณ",
       "wholesalePrice": "การขายส่ง: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "พูดคุยกับเราบน WhatsApp",
-      "inAppChat": "แชทในแอป",
-      "messageTelegram": "ส่งข้อความถึงเราทางโทรเลข",
-      "needHelp": "ต้องการความช่วยเหลือ?",
-      "sendMessage": "ส่งข้อความถึงเรา",
-      "supportReady": "ทีมสนับสนุนของเราพร้อมที่จะช่วยเหลือคุณ",
-      "telegram": "โทรเลข",
-      "typicalReply": "ปกติจะตอบกลับภายใน 1 ชั่วโมง",
-      "whatsapp": "วอทส์แอพพ์"
-    },
     "notificationBell": {
       "ariaLabel": "การแจ้งเตือน",
       "empty": "ไม่มีการแจ้งเตือน",

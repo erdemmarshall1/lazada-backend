@@ -10,7 +10,6 @@
       <router-view />
     </div>
     <SwUpdateBanner />
-    <LiveChatWidget />
     <PopupAd />
     <WalkthroughTour />
     <audio ref="audioPlay" class="c_audio_play" :src="audioSrc" controls style="display:none"></audio>
@@ -25,7 +24,6 @@ import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { setDocumentLang } from '@/locales'
 import SwUpdateBanner from '@/components/SwUpdateBanner.vue'
-import LiveChatWidget from '@/components/LiveChatWidget.vue'
 import PopupAd from '@/components/PopupAd.vue'
 import WalkthroughTour from '@/components/WalkthroughTour.vue'
 

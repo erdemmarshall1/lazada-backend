@@ -203,17 +203,6 @@
       "title": "Distribusikan ke Toko Anda",
       "wholesalePrice": "Grosir: ${harga}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Ngobrol dengan kami di WhatsApp",
-      "inAppChat": "Obrolan Dalam Aplikasi",
-      "messageTelegram": "Kirim pesan kepada kami di Telegram",
-      "needHelp": "Butuh bantuan?",
-      "sendMessage": "Kirimkan pesan kepada kami",
-      "supportReady": "Tim dukungan kami siap membantu Anda",
-      "telegram": "Telegram",
-      "typicalReply": "Biasanya membalas dalam 1 jam",
-      "whatsapp": "Ada apa"
-    },
     "notificationBell": {
       "ariaLabel": "Pemberitahuan",
       "empty": "Tidak ada pemberitahuan",

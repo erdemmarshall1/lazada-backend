@@ -296,21 +296,6 @@ async function translateSystemSettings(SystemSettings) {
   console.log('Done.')
 }
 
-async function translateLiveChat(LiveChatSetting) {
-  if (TYPE_FILTER && TYPE_FILTER !== 'LiveChatSetting') return
-  if (SKIP_LIST.includes('LiveChatSetting')) { console.log('Skipping LiveChatSetting...'); return }
-  const settings = await LiveChatSetting.findOne()
-  if (!settings) return
-  console.log('\n=== Translating LiveChatSetting ===')
-  for (const lang of TARGET_LANGS) {
-    await translateSingleField(settings, lang, 'widgetTitle')
-    await translateSingleField(settings, lang, 'autoGreeting')
-    await translateSingleField(settings, lang, 'offlineMessage')
-  }
-  if (!DRY_RUN) { settings.markModified('translations'); await settings.save() }
-  console.log('Done.')
-}
-
 async function main() {
   console.log('Connecting to MongoDB...');
   await mongoose.connect(MONGO_URI);
@@ -326,7 +311,6 @@ async function main() {
   const HomepageSectionModel = mongoose.model('HomepageSection', require('../models/HomepageSection').schema);
   const ShopModel = mongoose.model('Shop', require('../models/Shop').schema);
   const SystemSettingsModel = mongoose.model('SystemSettings', require('../models/SystemSettings').schema);
-  const LiveChatSettingModel = mongoose.model('LiveChatSetting', require('../models/LiveChatSetting').schema);
   const ShippingMethodModel = mongoose.model('ShippingMethod', require('../models/ShippingMethod').schema);
   const PaymentSettingModel = mongoose.model('PaymentSetting', require('../models/PaymentSetting').schema);
   const TaxRateModel = mongoose.model('TaxRate', require('../models/TaxRate').schema);
@@ -402,10 +386,6 @@ async function main() {
   contentTypes.push({
     name: 'SystemSettings',
     run: () => translateSystemSettings(SystemSettingsModel),
-  })
-  contentTypes.push({
-    name: 'LiveChatSetting',
-    run: () => translateLiveChat(LiveChatSettingModel),
   })
 
   for (const ct of contentTypes) {

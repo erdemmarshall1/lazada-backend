@@ -1272,17 +1272,6 @@
       "markAllRead": "Mark all read",
       "empty": "No notifications"
     },
-"liveChat": {
-      "needHelp": "Need help?",
-      "supportReady": "Our support team is ready to assist you",
-      "whatsapp": "WhatsApp",
-      "chatWhatsapp": "Chat with us on WhatsApp",
-      "telegram": "Telegram",
-      "messageTelegram": "Message us on Telegram",
-      "inAppChat": "In-App Chat",
-      "sendMessage": "Send us a message",
-      "typicalReply": "Typically replies within 1 hour"
-    },
     "stripePayment": {
       "title": "Pay with Card",
       "cancel": "Cancel",

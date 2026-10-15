@@ -203,17 +203,6 @@
       "title": "あなたのストアに配布する",
       "wholesalePrice": "卸売: ${価格}"
     },
-    "liveChat": {
-      "chatWhatsapp": "WhatsApp でチャットしてください",
-      "inAppChat": "アプリ内チャット",
-      "messageTelegram": "電報でメッセージを送ってください",
-      "needHelp": "助けが必要ですか?",
-      "sendMessage": "メッセージを送ってください",
-      "supportReady": "当社のサポートチームがいつでもお手伝いいたします",
-      "telegram": "電報",
-      "typicalReply": "通常 1 時間以内に返信します",
-      "whatsapp": "ワッツアップ"
-    },
     "notificationBell": {
       "ariaLabel": "通知",
       "empty": "通知はありません",

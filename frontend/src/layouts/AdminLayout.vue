@@ -169,7 +169,7 @@ const breadcrumbs = computed(() => {
       settings: 'Settings', 'homepage-sections': 'Homepage Sections',
       maintenance: 'Maintenance & Backup',
       submissions: 'Inquiries',
-      'livechat-inbox': 'Live Chat Inbox', 'livechat-settings': 'Live Chat Settings',
+      'livechat-inbox': 'Live Chat Inbox',
       messages: 'Messages',
       'user-privacy': 'User Privacy', 'user-detail': 'User Detail',
       'shop-detail': 'Shop Detail', logistics: 'Logistics', 'superadmin-dashboard': 'Super Admin',
@@ -223,7 +223,6 @@ const menuGroups = computed(() => [
       { icon: 'iconfont icon-xinxi', label: 'Inquiries', path: '/admin/submissions' },
       { icon: 'iconfont icon-kefu', label: 'Live Chat Inbox', path: '/admin/livechat-inbox' },
       { icon: 'iconfont icon-xiaoxi', label: 'Messages', path: '/admin/messages' },
-      { icon: 'iconfont icon-shezhi', label: 'Live Chat Settings', path: '/admin/livechat-settings' },
     ]
   },
   {

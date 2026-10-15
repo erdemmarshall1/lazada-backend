@@ -203,17 +203,6 @@
       "title": "Distribua para sua loja",
       "wholesalePrice": "Atacado: ${preço}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Converse conosco no WhatsApp",
-      "inAppChat": "Bate-papo no aplicativo",
-      "messageTelegram": "Envie-nos uma mensagem no Telegram",
-      "needHelp": "Precisar de ajuda?",
-      "sendMessage": "Envie-nos uma mensagem",
-      "supportReady": "Nossa equipe de suporte está pronta para ajudá-lo",
-      "telegram": "Telegrama",
-      "typicalReply": "Normalmente responde dentro de 1 hora",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Notificações",
       "empty": "Sem notificações",

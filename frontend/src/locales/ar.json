@@ -203,17 +203,6 @@
       "title": "التوزيع على متجرك",
       "wholesalePrice": "البيع بالجملة: ${السعر}"
     },
-    "liveChat": {
-      "chatWhatsapp": "تحدث معنا على الواتساب",
-      "inAppChat": "الدردشة داخل التطبيق",
-      "messageTelegram": "راسلنا على تيليجرام",
-      "needHelp": "بحاجة الى مساعدة؟",
-      "sendMessage": "أرسل لنا رسالة",
-      "supportReady": "فريق الدعم لدينا جاهز لمساعدتك",
-      "telegram": "برقية",
-      "typicalReply": "يتم الرد عادةً خلال ساعة واحدة",
-      "whatsapp": "واتساب"
-    },
     "notificationBell": {
       "ariaLabel": "إشعارات",
       "empty": "لا الإخطارات",

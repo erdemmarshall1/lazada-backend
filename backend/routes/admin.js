@@ -2246,40 +2246,6 @@ router.delete('/logistics/shipping-methods/:id', adminAuth, async (req, res) => 
   } catch (error) { res.json(fail(error.message)); }
 });
 
-// ---- Live Chat Settings ----
-router.get('/live-chat-settings', adminAuth, async (req, res) => {
-  try {
-    const LiveChatSetting = require('../models/LiveChatSetting');
-    let settings = await LiveChatSetting.findOne().populate('agentIds', 'username email avatar');
-    if (!settings) {
-      settings = await LiveChatSetting.create({});
-      settings = await LiveChatSetting.findById(settings._id).populate('agentIds', 'username email avatar');
-    }
-    res.json(success(settings));
-  } catch (error) { res.json(fail(error.message)); }
-});
-
-router.put('/live-chat-settings', adminAuth, async (req, res) => {
-  try {
-    const LiveChatSetting = require('../models/LiveChatSetting');
-    const { enabled, widgetTitle, widgetColor, widgetPosition, autoGreeting, offlineMessage, agentIds } = req.body;
-    let settings = await LiveChatSetting.findOne();
-    if (!settings) {
-      settings = await LiveChatSetting.create({ enabled, widgetTitle, widgetColor, widgetPosition, autoGreeting, offlineMessage, agentIds });
-    } else {
-      if (enabled !== undefined) settings.enabled = enabled;
-      if (widgetTitle !== undefined) settings.widgetTitle = widgetTitle;
-      if (widgetColor !== undefined) settings.widgetColor = widgetColor;
-      if (widgetPosition !== undefined) settings.widgetPosition = widgetPosition;
-      if (autoGreeting !== undefined) settings.autoGreeting = autoGreeting;
-      if (offlineMessage !== undefined) settings.offlineMessage = offlineMessage;
-      if (agentIds !== undefined) settings.agentIds = agentIds;
-      await settings.save();
-    }
-    res.json(success(settings, 'Live chat settings saved'));
-  } catch (error) { res.json(fail(error.message)); }
-});
-
 // ---- Geo / Device Analytics ----
 router.get('/geo-devices/summary', adminAuth, async (req, res) => {
   try {

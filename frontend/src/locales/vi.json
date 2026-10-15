@@ -203,17 +203,6 @@
       "title": "Phân phối đến cửa hàng của bạn",
       "wholesalePrice": "Bán buôn: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Trò chuyện với chúng tôi trên WhatsApp",
-      "inAppChat": "Trò chuyện trong ứng dụng",
-      "messageTelegram": "Nhắn tin cho chúng tôi trên Telegram",
-      "needHelp": "Cần giúp đỡ?",
-      "sendMessage": "Gửi tin nhắn cho chúng tôi",
-      "supportReady": "Nhóm hỗ trợ của chúng tôi sẵn sàng hỗ trợ bạn",
-      "telegram": "điện tín",
-      "typicalReply": "Thường trả lời trong vòng 1 giờ",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Thông báo",
       "empty": "Không có thông báo",

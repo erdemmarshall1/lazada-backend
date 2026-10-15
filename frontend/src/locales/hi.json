@@ -203,17 +203,6 @@
       "title": "अपने स्टोर पर वितरित करें",
       "wholesalePrice": "थोक: ${कीमत}"
     },
-    "liveChat": {
-      "chatWhatsapp": "हमारे साथ व्हाट्सएप पर चैट करें",
-      "inAppChat": "इन-ऐप चैट",
-      "messageTelegram": "हमें टेलीग्राम पर संदेश भेजें",
-      "needHelp": "मदद की ज़रूरत है?",
-      "sendMessage": "हमें एक संदेश भेजें",
-      "supportReady": "हमारी सहायता टीम आपकी सहायता के लिए तैयार है",
-      "telegram": "टेलीग्राम",
-      "typicalReply": "आमतौर पर 1 घंटे के भीतर उत्तर देता है",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "सूचनाएं",
       "empty": "कोई सूचना नहीं",

@@ -203,17 +203,6 @@
       "title": "Mağazanıza Dağıtın",
       "wholesalePrice": "Toptan satış: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Bizimle WhatsApp'ta sohbet edin",
-      "inAppChat": "Uygulama İçi Sohbet",
-      "messageTelegram": "Bize Telegram'dan mesaj gönderin",
-      "needHelp": "Yardıma mı ihtiyacınız var?",
-      "sendMessage": "Bize bir mesaj gönderin",
-      "supportReady": "Destek ekibimiz size yardımcı olmaya hazır",
-      "telegram": "Telgraf",
-      "typicalReply": "Genellikle 1 saat içinde yanıt verir",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Bildirimler",
       "empty": "Bildirim yok",

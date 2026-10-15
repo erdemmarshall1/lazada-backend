@@ -203,17 +203,6 @@
       "title": "Edarkan ke Kedai Anda",
       "wholesalePrice": "Borong: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Sembang dengan kami di WhatsApp",
-      "inAppChat": "Sembang Dalam Apl",
-      "messageTelegram": "Mesej kami di Telegram",
-      "needHelp": "Perlukan bantuan?",
-      "sendMessage": "Hantar mesej kepada kami",
-      "supportReady": "Pasukan sokongan kami sedia membantu anda",
-      "telegram": "Telegram",
-      "typicalReply": "Biasanya membalas dalam masa 1 jam",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Pemberitahuan",
       "empty": "Tiada pemberitahuan",

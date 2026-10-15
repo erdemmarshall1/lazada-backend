@@ -45,7 +45,7 @@
       <el-form-item :label="$t('store.apply.inviteCodeLabel')" prop="invitationCode">
         <el-input v-model="form.invitationCode" :placeholder="$t('store.apply.inviteCodePlaceholder')" />
       </el-form-item>
-      <el-form-item :label="$t('store.apply.utilityLabel')" prop="utilityBill">
+      <el-form-item :label="$t('store.apply.utilityLabel') + ' (Optional)'" prop="utilityBill">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
           <el-button type="primary">{{ $t('store.apply.uploadUtility') }}</el-button>
         </el-upload>

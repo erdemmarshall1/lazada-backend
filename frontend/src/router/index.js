@@ -116,7 +116,6 @@ const routes = [
           { path: '/admin-user-detail/:id', name: 'mycenter-admin-user-detail', component: () => import('@/views/admin/AdminUserDetail.vue'), meta: { title: 'User Detail', requiresAuth: true } },
           { path: '/admin-shop-detail/:id', name: 'mycenter-admin-shop-detail', component: () => import('@/views/admin/AdminShopDetail.vue'), meta: { title: 'Shop Detail', requiresAuth: true } },
           { path: '/admin-livechat-inbox', name: 'mycenter-admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true } },
-          { path: '/admin-livechat-settings', name: 'mycenter-admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true } },
           { path: '/admin-seller-id-settings', name: 'mycenter-admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true } },
         ],
       },
@@ -162,7 +161,6 @@ const routes = [
 
       { path: 'livechat-inbox', name: 'admin-livechat-inbox', component: () => import('@/views/admin/AdminLiveChatInbox.vue'), meta: { title: 'Live Chat Inbox', requiresAuth: true, adminLayout: true } },
       { path: 'messages', name: 'admin-messages', component: () => import('@/views/admin/AdminMessages.vue'), meta: { title: 'Messages', requiresAuth: true, adminLayout: true } },
-      { path: 'livechat-settings', name: 'admin-livechat-settings', component: () => import('@/views/admin/AdminLiveChatSettings.vue'), meta: { title: 'Live Chat Settings', requiresAuth: true, adminLayout: true } },
       { path: 'seller-id-settings', name: 'admin-seller-id-settings', component: () => import('@/views/admin/AdminSellerIdSettings.vue'), meta: { title: 'Seller ID Settings', requiresAuth: true, adminLayout: true } },
       { path: 'logistics', name: 'admin-logistics', component: () => import('@/views/admin/AdminLogistics.vue'), meta: { title: 'Logistics', requiresAuth: true, adminLayout: true } },
       { path: 'superadmin-dashboard', name: 'admin-superadmin-dashboard', component: () => import('@/views/admin/SuperAdminDashboard.vue'), meta: { title: 'Super Admin', requiresAuth: true, adminLayout: true } },
@@ -205,7 +203,6 @@ const adminPathRules = [
   { pattern: /^\/admin-homepage-sections$/, redirect: '/admin/homepage-sections' },
   { pattern: /^\/admin-submissions$/, redirect: '/admin/submissions' },
   { pattern: /^\/admin-livechat-inbox$/, redirect: '/admin/livechat-inbox' },
-  { pattern: /^\/admin-livechat-settings$/, redirect: '/admin/livechat-settings' },
   { pattern: /^\/admin-messages$/, redirect: '/admin/messages' },
   { pattern: /^\/admin-seller-id-settings$/, redirect: '/admin/seller-id-settings' },
   { pattern: /^\/admin-logistics$/, redirect: '/admin/logistics' },

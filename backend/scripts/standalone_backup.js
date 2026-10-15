@@ -27,7 +27,6 @@ const models = [
   { name: 'browse_history', model: require('../models/BrowseHistory') },
   { name: 'favorites', model: require('../models/Favorite') },
   { name: 'email_settings', model: require('../models/EmailSetting') },
-  { name: 'live_chat_settings', model: require('../models/LiveChatSetting') },
 ];
 
 const run = async () => {

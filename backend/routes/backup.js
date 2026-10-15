@@ -53,7 +53,6 @@ const models = [
   { name: 'browse_history', model: require('../models/BrowseHistory') },
   { name: 'favorites', model: require('../models/Favorite') },
   { name: 'email_settings', model: require('../models/EmailSetting') },
-  { name: 'live_chat_settings', model: require('../models/LiveChatSetting') },
   { name: 'system_settings', model: require('../models/SystemSettings') },
   { name: 'settings', model: require('../models/Setting') },
   { name: 'counters', model: require('../models/Counter') },

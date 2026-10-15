@@ -203,17 +203,6 @@
       "title": "Verteilen Sie es an Ihren Shop",
       "wholesalePrice": "Großhandel: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Chatten Sie mit uns auf WhatsApp",
-      "inAppChat": "In-App-Chat",
-      "messageTelegram": "Schreiben Sie uns eine Nachricht per Telegram",
-      "needHelp": "Brauchen Sie Hilfe?",
-      "sendMessage": "Senden Sie uns eine Nachricht",
-      "supportReady": "Unser Support-Team steht Ihnen gerne zur Seite",
-      "telegram": "Telegramm",
-      "typicalReply": "Normalerweise antwortet man innerhalb einer Stunde",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Benachrichtigungen",
       "empty": "Keine Benachrichtigungen",

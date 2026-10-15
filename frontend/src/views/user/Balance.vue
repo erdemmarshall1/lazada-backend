@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="balance-actions g-flex" style="gap:12px;margin-top:16px">
-      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="showDeposit = true">{{ $t('user.balance.deposit') }}</el-button>
+      <el-button type="primary" style="background:var(--g-main_color);border-color:var(--g-main_color)" @click="openDeposit">{{ $t('user.balance.deposit') }}</el-button>
       <el-button @click="showWithdraw = true">{{ $t('user.balance.withdraw') }}</el-button>
     </div>
 
@@ -310,6 +310,16 @@ const onPaymentMethodChange = (method) => {
   }
 }
 
+const openDeposit = () => {
+  showDeposit.value = true
+  if (!formData.depositPaymentMethod && paymentMethods.value.length) {
+    formData.depositPaymentMethod = paymentMethods.value[0].value
+  }
+  if (formData.depositPaymentMethod) {
+    onPaymentMethodChange(formData.depositPaymentMethod)
+  }
+}
+
 const loadSettings = async () => {
   const res = await get('/home/payment-settings')
   if (res?.code === 0 && res?.data) {
@@ -322,7 +332,7 @@ onMounted(async () => {
   await loadBalance()
   if (route.query.deposit === 'true') {
     await nextTick()
-    showDeposit.value = true
+    openDeposit()
   }
 })
 </script>

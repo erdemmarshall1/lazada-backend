@@ -203,17 +203,6 @@
       "title": "Distribueer naar uw winkel",
       "wholesalePrice": "Groothandel: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Chat met ons op WhatsApp",
-      "inAppChat": "In-app-chat",
-      "messageTelegram": "Stuur ons een bericht op Telegram",
-      "needHelp": "Hulp nodig?",
-      "sendMessage": "Stuur ons een bericht",
-      "supportReady": "Ons ondersteuningsteam staat klaar om u te helpen",
-      "telegram": "Telegram",
-      "typicalReply": "Antwoordt doorgaans binnen 1 uur",
-      "whatsapp": "WhatsAppen"
-    },
     "notificationBell": {
       "ariaLabel": "Meldingen",
       "empty": "Geen meldingen",

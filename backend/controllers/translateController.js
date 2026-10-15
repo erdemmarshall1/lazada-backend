@@ -8,7 +8,6 @@ const Banner = require('../models/Banner');
 const HomepageSection = require('../models/HomepageSection');
 const Shop = require('../models/Shop');
 const SystemSettings = require('../models/SystemSettings');
-const LiveChatSetting = require('../models/LiveChatSetting');
 const ShippingMethod = require('../models/ShippingMethod');
 const PaymentSetting = require('../models/PaymentSetting');
 const TaxRate = require('../models/TaxRate');
@@ -18,7 +17,7 @@ const Notification = require('../models/Notification');
 const { success, fail } = require('../utils/response');
 const { SUPPORTED_LANGS } = require('../utils/translate');
 
-const MODELS = { Product, Category, Menu, Page, Blog, Faq, Banner, HomepageSection, Shop, SystemSettings, LiveChatSetting, ShippingMethod, PaymentSetting, TaxRate, Currency, Coupon, Notification }
+const MODELS = { Product, Category, Menu, Page, Blog, Faq, Banner, HomepageSection, Shop, SystemSettings, ShippingMethod, PaymentSetting, TaxRate, Currency, Coupon, Notification }
 
 exports.updateTranslation = async (req, res) => {
   try {

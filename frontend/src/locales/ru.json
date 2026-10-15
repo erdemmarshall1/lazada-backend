@@ -203,17 +203,6 @@
       "title": "Распространение в вашем магазине",
       "wholesalePrice": "Оптовая продажа: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "Пообщайтесь с нами в WhatsApp",
-      "inAppChat": "Чат в приложении",
-      "messageTelegram": "Напишите нам в Telegram",
-      "needHelp": "Нужна помощь?",
-      "sendMessage": "Отправьте нам сообщение",
-      "supportReady": "Наша служба поддержки готова помочь вам",
-      "telegram": "Телеграмма",
-      "typicalReply": "Обычно отвечает в течение 1 часа",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "Уведомления",
       "empty": "Нет уведомлений",

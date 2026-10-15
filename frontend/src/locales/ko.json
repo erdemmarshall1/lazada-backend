@@ -203,17 +203,6 @@
       "title": "귀하의 매장에 배포",
       "wholesalePrice": "도매: ${price}"
     },
-    "liveChat": {
-      "chatWhatsapp": "WhatsApp에서 우리와 채팅하세요",
-      "inAppChat": "인앱 채팅",
-      "messageTelegram": "텔레그램으로 메시지를 보내주세요",
-      "needHelp": "도움이 필요하신가요?",
-      "sendMessage": "메시지 보내기",
-      "supportReady": "우리 지원팀이 당신을 도와드릴 준비가 되어있습니다",
-      "telegram": "전보",
-      "typicalReply": "일반적으로 1시간 이내에 답변",
-      "whatsapp": "왓츠앱"
-    },
     "notificationBell": {
       "ariaLabel": "알림",
       "empty": "알림 없음",

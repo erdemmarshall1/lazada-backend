@@ -203,17 +203,6 @@
       "title": "分发到您的商店",
       "wholesalePrice": "批发：${价格}"
     },
-    "liveChat": {
-      "chatWhatsapp": "通过 WhatsApp 与我们聊天",
-      "inAppChat": "应用内聊天",
-      "messageTelegram": "在 Telegram 上给我们留言",
-      "needHelp": "需要帮助吗？",
-      "sendMessage": "给我们留言",
-      "supportReady": "我们的支持团队随时准备为您提供帮助",
-      "telegram": "电报",
-      "typicalReply": "通常在 1 小时内回复",
-      "whatsapp": "WhatsApp"
-    },
     "notificationBell": {
       "ariaLabel": "通知",
       "empty": "无通知",
