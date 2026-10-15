@@ -71,7 +71,7 @@
             <el-button v-if="form.qrCode" size="small" type="danger" plain @click="form.qrCode = ''">Remove</el-button>
             <span v-if="uploadingQr" style="margin-left:10px;color:#888;font-size:13px">Uploading…</span>
           </div>
-          <div style="font-size:12px;color:#999;margin-top:4px">Shown to users on the top-up form. If empty, a QR code is generated from the wallet address.</div>
+          <div style="font-size:12px;color:#999;margin-top:4px">Shown to users on the top-up form. If empty, no QR code is shown.</div>
         </el-form-item>
         <el-form-item label="Sort Order">
           <el-input-number v-model="form.sort" :min="0" :max="999" />

@@ -104,7 +104,6 @@ import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { get, post, qe, API_BASE, imgUrl } from '@/api/request'
-import QRCode from 'qrcode'
 import TransactionPasswordDialog from '@/components/TransactionPasswordDialog.vue'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 
@@ -280,15 +279,6 @@ const loadBalance = async () => {
   if (res?.data && res.data.length > 0) balance.value = res.data[0].balance || 0
 }
 
-const updateQR = async (address) => {
-  if (!address) { qrDataUrl.value = ''; return }
-  try {
-    qrDataUrl.value = await QRCode.toDataURL(address, { width: 200, margin: 2 })
-  } catch {
-    qrDataUrl.value = ''
-  }
-}
-
 const DEFAULT_WALLET = 'lv2939dhH93j299jd20Ooo92jj3j8dj!88jd'
 
 const DEFAULT_PAYMENT_METHODS = [
@@ -303,11 +293,7 @@ const DEFAULT_PAYMENT_METHODS = [
 const onPaymentMethodChange = (method) => {
   const setting = settings.value.find(s => s.method === method)
   selectedWallet.value = setting?.walletAddress || DEFAULT_WALLET
-  if (setting?.qrCode) {
-    qrDataUrl.value = imgUrl(setting.qrCode)
-  } else {
-    updateQR(selectedWallet.value)
-  }
+  qrDataUrl.value = setting?.qrCode ? imgUrl(setting.qrCode) : ''
 }
 
 const openDeposit = () => {
