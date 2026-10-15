@@ -11,6 +11,13 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+
+const TAWK_CHAT_URL = 'https://tawk.to/chat/6a780c68cad4c71d48708d60/1jvif0udu'
+
+onMounted(() => {
+  window.location.replace(TAWK_CHAT_URL)
+})
 </script>
 
 <style scoped>
