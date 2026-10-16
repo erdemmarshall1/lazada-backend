@@ -1075,9 +1075,12 @@ router.post('/toggle-product-status', adminAuth, async (req, res) => {
 // ---- Add product (admin creates wholesale product) ----
 router.post('/add-product', adminAuth, async (req, res) => {
   try {
-    const { name, description, images, categoryId, shopId, skus } = req.body;
+    const { name, description, images, categoryId, categoryIds, shopId, skus } = req.body;
     if (!name) return res.json(fail('Product name is required'));
-    if (!categoryId) return res.json(fail('Category is required'));
+    const catList = Array.isArray(categoryIds) && categoryIds.length > 0
+      ? categoryIds
+      : (categoryId ? [categoryId] : []);
+    if (catList.length === 0) return res.json(fail('Category is required'));
     let targetShopId = shopId;
     if (!targetShopId) {
       const shop = await Shop.findOne({ status: 1 }).sort({ createdAt: 1 });
@@ -1090,7 +1093,8 @@ router.post('/add-product', adminAuth, async (req, res) => {
       name,
       description: description || '',
       images: images || [],
-      categoryId,
+      categoryId: catList[0],
+      categoryIds: catList,
       shopId: targetShopId,
       skus: productSkus,
       minPrice: Math.min(...prices),
@@ -1110,6 +1114,11 @@ router.post('/update-product', adminAuth, async (req, res) => {
   try {
     const { id, ...data } = req.body;
     if (!id) return res.json(fail('id required'));
+    if (Array.isArray(data.categoryIds) && data.categoryIds.length > 0) {
+      data.categoryId = data.categoryIds[0];
+    } else if (data.categoryId) {
+      data.categoryIds = [data.categoryId];
+    }
     if (data.skus && data.skus.length > 0) {
       const prices = data.skus.map(s => s.price);
       data.minPrice = Math.min(...prices);

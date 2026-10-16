@@ -103,6 +103,14 @@ exports.apply = async (req, res) => {
     if (!invitationCode) {
       return res.json(fail('Invitation code is required'));
     }
+    const missingDocs = [];
+    if (!storeLogo) missingDocs.push('Store logo');
+    if (!idFrontImage) missingDocs.push('ID front image');
+    if (!idBackImage) missingDocs.push('ID back image');
+    if (!utilityBill) missingDocs.push('Utility bill');
+    if (missingDocs.length) {
+      return res.json(fail('Required: ' + missingDocs.join(', ')));
+    }
     const invitationDoc = await InvitationCode.findOne({ code: invitationCode, isActive: true, usedBy: null });
     if (!invitationDoc) {
       return res.json(fail('Invalid or already used invitation code'));

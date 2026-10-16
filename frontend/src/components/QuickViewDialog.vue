@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :model-value="visible" title="" width="760px" :close-on-click-modal="false" @close="emit('close')" @update:model-value="v => !v && emit('close')" class="quick-view-dialog">
+  <el-dialog :model-value="visible" title="" width="min(760px, 92vw)" :top="'6vh'" :close-on-click-modal="false" @close="emit('close')" @update:model-value="v => !v && emit('close')" class="quick-view-dialog">
     <div v-loading="loading" class="qv-body">
       <template v-if="product && !loading">
         <div class="qv-main g-flex">
@@ -166,7 +166,8 @@ watch(() => props.visible, async (val) => {
 <style scoped>
 .quick-view-dialog :deep(.el-dialog__body) { padding: 0; }
 .quick-view-dialog :deep(.el-dialog__header) { display: none; }
-.qv-body { min-height: 300px; }
+.quick-view-dialog :deep(.el-dialog) { border-radius: 10px; max-width: calc(100vw - 24px); }
+.qv-body { min-height: 240px; max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .qv-main { gap: 20px; padding: 24px; }
 .qv-left { width: 340px; flex-shrink: 0; }
 .qv-main-image { width: 100%; aspect-ratio: 1; border: 1px solid var(--g-border); border-radius: 8px; overflow: hidden; }
@@ -191,14 +192,36 @@ watch(() => props.visible, async (val) => {
 .qv-qty-label { font-size: 13px; color: #666; }
 .qv-stock { font-size: 11px; color: #999; }
 .qv-actions { gap: 8px; flex-wrap: wrap; }
+.qv-actions .el-button + .el-button { margin-left: 0; }
 .qv-footer { margin-top: 16px; text-align: right; padding-top: 12px; border-top: 1px solid var(--g-border); }
 
 @media (max-width: 768px) {
-  :deep(.el-dialog) { width: 92% !important; max-width: 500px; }
-  .qv-main { flex-direction: column; padding: 16px; }
+  :deep(.el-dialog) { width: 94% !important; max-width: 560px; margin-top: 8vh !important; }
+  .qv-body { max-height: 78vh; }
+  .qv-main { flex-direction: column; padding: 16px; gap: 14px; }
   .qv-left { width: 100%; }
+  .qv-main-image { max-width: 320px; margin: 0 auto; }
+  .qv-thumbs { justify-content: center; }
+  .qv-thumb { width: 56px; height: 56px; }
+  .qv-sku-value { min-height: 34px; padding: 6px 16px; }
   .qv-name { font-size: 16px; }
   .qv-price { font-size: 20px; }
-  .qv-actions .el-button { flex: 1 1 auto; }
+  .qv-actions .el-button { flex: 1 1 auto; min-height: 40px; }
+  .qv-footer { text-align: center; }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-dialog) { width: 96% !important; }
+  .qv-main { padding: 12px; }
+  .qv-main-image { max-width: 100%; }
+  .qv-name { font-size: 15px; }
+  .qv-price { font-size: 18px; }
+  .qv-original { font-size: 12px; }
+  .qv-skus { margin-bottom: 10px; }
+  .qv-sku-value { font-size: 12px; min-height: 36px; }
+  .qv-qty { gap: 8px; }
+  .qv-actions { gap: 6px; }
+  .qv-actions .el-button { flex: 1 1 100%; }
+  .qv-actions .el-button.is-circle { flex: 0 0 auto; }
 }
 </style>

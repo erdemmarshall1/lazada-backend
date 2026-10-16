@@ -225,14 +225,26 @@ const isTokenExpired = (token) => {
   }
 }
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const store = useAppStore()
   const adminStore = useAdminAppStore()
 
   if (to.query.temp_token) {
-    localStorage.setItem('seller_temp_token', to.query.temp_token)
-    store.setToken(to.query.temp_token)
+    const tempToken = String(to.query.temp_token)
+    localStorage.setItem('seller_temp_token', tempToken)
+    // Impersonation must not inherit the previous session (identity/refresh).
+    localStorage.removeItem('theoutnet_refresh_token')
+    store.setRefreshToken('')
+    store.setUserInfo({})
+    store.setToken(tempToken)
+    try {
+      const { get } = await import('@/api/request')
+      const res = await get('/home/user/getInfo')
+      if (res?.data) store.setUserInfo(res.data)
+      try { const { connectSocket } = await import('@/socket'); connectSocket() } catch {}
+    } catch {}
     const { temp_token, ...rest } = to.query
+    if (!store.token) { next({ name: 'login' }); return }
     next({ path: to.path, query: rest })
     return
   }

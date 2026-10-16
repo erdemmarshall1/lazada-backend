@@ -73,7 +73,7 @@
       </div>
       <div class="detail-section">
         <h3>{{ $t('product.goodDetail.description') }}</h3>
-        <div class="product-desc">{{ product.description }}</div>
+        <div class="product-desc" v-html="product.description"></div>
       </div>
       <div class="detail-section">
         <h3>{{ $t('product.goodDetail.youMayAlsoLike') }}</h3>
@@ -187,12 +187,10 @@ const visitStore = () => {
   }
 }
 
+const TAWK_CHAT_URL = 'https://tawk.to/chat/6a780c68cad4c71d48708d60/1jvif0udu'
+
 const consultStore = () => {
-  if (window.Tawk_API) {
-    window.Tawk_API.maximize()
-  } else {
-    ElMessage.info('No chat support available at this time')
-  }
+  window.open(TAWK_CHAT_URL, '_blank')
 }
 
 const fetchRelatedProducts = async () => {
@@ -260,7 +258,11 @@ onMounted(async () => {
 .action-buttons { gap: 12px; }
 .detail-section { background: var(--g-white); border-radius: 8px; padding: 24px; margin: 16px 16px 0; }
 .detail-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--g-border); }
-.product-desc { font-size: 14px; line-height: 1.8; color: #666; }
+.product-desc { font-size: 14px; line-height: 1.8; color: #666; word-break: break-word; }
+.product-desc :deep(img) { max-width: 100%; height: auto; }
+.product-desc :deep(ul), .product-desc :deep(ol) { padding-left: 22px; margin: 6px 0; }
+.product-desc :deep(a) { color: var(--g-main_color); }
+.product-desc :deep(h1), .product-desc :deep(h2), .product-desc :deep(h3) { color: var(--g-text); margin: 12px 0 8px; }
 .review-item { padding: 12px 0; border-bottom: 1px solid var(--g-border); }
 .review-user { gap: 8px; margin-bottom: 6px; }
 .review-username { font-weight: 600; font-size: 14px; }

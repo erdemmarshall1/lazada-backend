@@ -60,7 +60,7 @@
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" v-model:current-page="page" @current-change="fetch" />
     </div>
 
-    <el-dialog v-model="showEdit" :title="editItem ? 'Edit Product' : 'Add Product'" width="720px" destroy-on-close>
+    <el-dialog v-model="showEdit" :title="editItem ? 'Edit Product' : 'Add Product'" width="min(760px, 94vw)" top="6vh" destroy-on-close>
       <el-form :model="editForm" label-position="top">
         <el-form-item label="Product Images">
           <div class="edit-img-list">
@@ -68,10 +68,10 @@
               <img :src="$imgUrl(img)" style="width:100px;height:100px;object-fit:cover;border-radius:6px" @error="$imgFallback" />
               <el-button size="small" circle type="danger" class="img-remove-btn" @click="removeImage(idx)">x</el-button>
             </div>
-            <el-upload :show-file-list="false" :before-upload="handleImageUpload" accept="image/*">
+            <el-upload :show-file-list="false" :before-upload="handleImageUpload" accept="image/*" multiple drag>
               <div class="edit-img-add">
                 <span style="font-size:24px;color:#999">+</span>
-                <span style="font-size:12px;color:#999;margin-top:4px">Add Image</span>
+                <span style="font-size:12px;color:#999;margin-top:4px">Select / Drop images</span>
               </div>
             </el-upload>
           </div>
@@ -100,18 +100,40 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Category">
-          <el-select v-model="editForm.categoryId" style="width:100%" filterable>
+        <el-form-item label="Categories (select one or more)">
+          <el-select v-model="editForm.categoryIds" multiple filterable collapse-tags collapse-tags-tooltip placeholder="Select categories" style="width:100%">
             <el-option v-for="cat in categories" :key="cat._id" :label="cat.name" :value="cat._id" />
           </el-select>
         </el-form-item>
+
+        <div v-if="showSizes" class="size-block">
+          <div class="size-title">Sizes</div>
+          <div class="size-group" v-for="group in sizeGroups" :key="group.label">
+            <div class="size-group-label">{{ group.label }}</div>
+            <div class="size-values">
+              <span
+                v-for="opt in group.options"
+                :key="group.label + opt"
+                class="size-chip"
+                :class="{ active: editForm.sizes.includes(opt) }"
+                @click="toggleSize(opt)"
+              >{{ opt }}</span>
+            </div>
+          </div>
+          <div class="size-custom">
+            <el-input v-model="customSize" size="small" placeholder="Add custom size" style="width:160px" @keyup.enter="addCustomSize" />
+            <el-button size="small" @click="addCustomSize">Add</el-button>
+            <span v-if="editForm.sizes.length" class="size-selected">Selected: {{ editForm.sizes.join(', ') }}</span>
+          </div>
+        </div>
+
         <el-form-item label="Shop" v-if="!editItem">
           <el-select v-model="editForm.shopId" style="width:100%" filterable>
             <el-option v-for="shop in shops" :key="shop._id" :label="shop.name" :value="shop._id" />
           </el-select>
         </el-form-item>
         <el-form-item label="Description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" />
+          <HtmlEditor v-model="editForm.description" height="200px" placeholder="Write the product description…" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -129,6 +151,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminGet, adminPost } from '@/api/adminRequest'
 import { get as publicGet, uploadFile, qe } from '@/api/request'
+import HtmlEditor from '@/components/HtmlEditor.vue'
 
 const products = ref([])
 const loading = ref(false)
@@ -141,9 +164,53 @@ const showEdit = ref(false)
 const saving = ref(false)
 const editItem = ref(null)
 const imageFilter = ref('')
+const customSize = ref('')
 const editForm = ref({
-  name: '', brand: '', description: '', categoryId: '', price: 0, stock: 100, images: [], shopId: '',
+  name: '', brand: '', description: '', categoryIds: [], price: 0, stock: 100, images: [], shopId: '', sizes: [],
 })
+
+const CLOTHING_KEYWORDS = ['clothing', 'apparel', 'fashion', 'dress', 'shirt', 'top', 'jeans', 'coat', 'jacket', 'suit', 'skirt', 'hoodie', 'sweater', 'outfit', 'wear']
+const SHOE_KEYWORDS = ['shoe', 'sneaker', 'boot', 'sandal', 'footwear', 'heel', 'loafer', 'slipper']
+const BAG_KEYWORDS = ['bag', 'handbag', 'tote', 'purse', 'backpack', 'luggage', 'wallet', 'clutch']
+
+const selectedCatNames = computed(() => {
+  const ids = editForm.value.categoryIds || []
+  return categories.value
+    .filter(c => ids.includes(c._id))
+    .map(c => (c.name || '').toLowerCase())
+})
+
+const sizeGroups = computed(() => {
+  const names = selectedCatNames.value
+  const has = (kws) => names.some(n => kws.some(k => n.includes(k)))
+  const groups = []
+  if (has(CLOTHING_KEYWORDS)) {
+    groups.push({ label: 'Clothing sizes', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] })
+  }
+  if (has(SHOE_KEYWORDS)) {
+    groups.push({ label: 'Shoe sizes (EU)', options: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'] })
+  }
+  if (has(BAG_KEYWORDS)) {
+    groups.push({ label: 'Bag sizes', options: ['Mini', 'Small', 'Medium', 'Large', 'One Size'] })
+  }
+  return groups
+})
+
+const showSizes = computed(() => sizeGroups.value.length > 0)
+
+const toggleSize = (size) => {
+  const list = editForm.value.sizes
+  const i = list.indexOf(size)
+  if (i >= 0) list.splice(i, 1)
+  else list.push(size)
+}
+
+const addCustomSize = () => {
+  const s = customSize.value.trim()
+  if (!s) return
+  if (!editForm.value.sizes.includes(s)) editForm.value.sizes.push(s)
+  customSize.value = ''
+}
 
 const isRemoteImage = (row) => {
   const src = row.images?.[0] || row.image || row.img
@@ -152,10 +219,6 @@ const isRemoteImage = (row) => {
 
 const handleImgError = (e, row) => {
   row._imgStatus = 'broken'
-}
-
-const handleImgLoad = (e, row) => {
-  row._imgStatus = 'ok'
 }
 
 const filteredProducts = computed(() => {
@@ -178,22 +241,34 @@ const fetch = async () => {
 
 const openEdit = (row) => {
   editItem.value = row
+  const catIds = Array.isArray(row.categoryIds) && row.categoryIds.length
+    ? [...row.categoryIds]
+    : (row.categoryId ? [row.categoryId] : [])
+  const sizes = []
+  ;(row.skus || []).forEach(sku => {
+    ;(sku.attrs || []).forEach(a => {
+      if ((a.name || '').toLowerCase() === 'size' && a.value && !sizes.includes(a.value)) sizes.push(a.value)
+    })
+  })
   editForm.value = {
     name: row.name || '',
     brand: row.brand || '',
     description: row.description || '',
-    categoryId: row.categoryId || '',
+    categoryIds: catIds,
     price: row.minPrice || row.price || 0,
     stock: row.skus?.[0]?.stock || 0,
     images: row.images?.length > 0 ? [...row.images] : (row.image ? [row.image] : row.img ? [row.img] : []),
     shopId: '',
+    sizes,
   }
+  customSize.value = ''
   showEdit.value = true
 }
 
 const openAdd = () => {
   editItem.value = null
-  editForm.value = { name: '', brand: '', description: '', categoryId: '', price: 0, stock: 100, images: [], shopId: '' }
+  editForm.value = { name: '', brand: '', description: '', categoryIds: [], price: 0, stock: 100, images: [], shopId: '', sizes: [] }
+  customSize.value = ''
   showEdit.value = true
 }
 
@@ -215,14 +290,20 @@ const handleImageUpload = async (file) => {
 }
 
 const saveProduct = async () => {
+  if (!editForm.value.name) { ElMessage.warning('Product title is required'); return }
+  if (!editForm.value.categoryIds.length) { ElMessage.warning('Please select at least one category'); return }
   saving.value = true
+  const skus = editForm.value.sizes.length > 0
+    ? editForm.value.sizes.map(size => ({ price: editForm.value.price, stock: editForm.value.stock, attrs: [{ name: 'Size', value: size }] }))
+    : [{ price: editForm.value.price, stock: editForm.value.stock, attrs: [] }]
   const payload = {
     name: editForm.value.name,
     brand: editForm.value.brand,
     description: editForm.value.description,
-    categoryId: editForm.value.categoryId,
+    categoryId: editForm.value.categoryIds[0],
+    categoryIds: editForm.value.categoryIds,
     images: editForm.value.images,
-    skus: [{ price: editForm.value.price, stock: editForm.value.stock, attrs: [] }],
+    skus,
   }
   let res
   if (editItem.value) {
@@ -258,5 +339,15 @@ onMounted(async () => {
 .img-remove-btn { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; min-width: auto; padding: 0; font-size: 12px; line-height: 1; }
 .edit-img-add { width: 100px; height: 100px; border: 1px dashed var(--g-border); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .edit-img-add:hover { border-color: var(--g-main_color); }
+.size-block { margin: 4px 0 18px; padding: 12px 14px; border: 1px solid var(--g-border); border-radius: 8px; background: #fafbfc; }
+.size-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333; }
+.size-group { margin-bottom: 10px; }
+.size-group-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+.size-values { display: flex; flex-wrap: wrap; gap: 8px; }
+.size-chip { padding: 5px 14px; border: 1px solid var(--g-border); border-radius: 20px; font-size: 13px; cursor: pointer; user-select: none; background: #fff; }
+.size-chip:hover { border-color: var(--g-main_color); }
+.size-chip.active { background: var(--g-main_color); color: #fff; border-color: var(--g-main_color); }
+.size-custom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.size-selected { font-size: 12px; color: #666; }
 @media (max-width: 768px) { .admin-products { padding: 12px; } }
 </style>

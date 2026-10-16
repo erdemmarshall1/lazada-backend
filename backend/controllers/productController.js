@@ -52,20 +52,29 @@ exports.getSearchList = async (req, res) => {
     if (isRecommended === 'true') {
       query.isRecommended = true;
     }
+    const andConds = [];
     if (keyword) {
-      query.$or = [
-        { $text: { $search: keyword } },
-        { tags: { $regex: keyword, $options: 'i' } },
-      ];
+      andConds.push({
+        $or: [
+          { $text: { $search: keyword } },
+          { tags: { $regex: keyword, $options: 'i' } },
+        ],
+      });
     }
     if (categoryId) {
       const cat = await Category.findById(categoryId);
       if (cat) {
         const subCats = await Category.find({ parentId: categoryId }).select('_id');
         const catIds = [categoryId, ...subCats.map(c => c._id)];
-        query.categoryId = { $in: catIds };
+        andConds.push({
+          $or: [
+            { categoryId: { $in: catIds } },
+            { categoryIds: { $in: catIds } },
+          ],
+        });
       }
     }
+    if (andConds.length > 0) query.$and = andConds;
     if (minPrice || maxPrice) {
       query.minPrice = {};
       if (minPrice) query.minPrice.$gte = Number(minPrice);

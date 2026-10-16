@@ -6,7 +6,7 @@
     <div v-if="loadingInfo" v-loading="loadingInfo" style="height:200px"></div>
 
     <el-form v-else ref="formRef" :model="form" :rules="computedRules" label-position="top" style="max-width:600px;margin-top:16px">
-      <el-form-item :label="$t('store.apply.logoLabel')">
+      <el-form-item :label="$t('store.apply.logoLabel')" prop="storeLogo">
         <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="handleLogoUpload" accept="image/*">
           <img v-if="form.storeLogo" :src="$imgUrl(form.storeLogo)" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
@@ -45,7 +45,7 @@
       <el-form-item :label="$t('store.apply.inviteCodeLabel')" prop="invitationCode">
         <el-input v-model="form.invitationCode" :placeholder="$t('store.apply.inviteCodePlaceholder')" />
       </el-form-item>
-      <el-form-item :label="$t('store.apply.utilityLabel') + ' (Optional)'" prop="utilityBill">
+      <el-form-item :label="$t('store.apply.utilityLabel')" prop="utilityBill">
         <el-upload class="upload-demo" :show-file-list="true" :before-upload="handleUtilityBillUpload" accept="image/*,.pdf" :limit="1" :on-exceed="() => ElMessage.warning('Only one file allowed')">
           <el-button type="primary">{{ $t('store.apply.uploadUtility') }}</el-button>
         </el-upload>
@@ -110,6 +110,10 @@ const validateConfirmPassword = (rule, value, callback) => {
 
 const computedRules = computed(() => {
   const base = {
+    storeLogo: [{ required: true, message: 'Store logo is required', trigger: 'change' }],
+    idFrontImage: [{ required: true, message: 'ID front image is required', trigger: 'change' }],
+    idBackImage: [{ required: true, message: 'ID back image is required', trigger: 'change' }],
+    utilityBill: [{ required: true, message: 'Utility bill is required', trigger: 'change' }],
     fullName: [{ required: true, message: 'Full name is required', trigger: 'blur' }],
     name: [{ required: true, message: 'Store name is required', trigger: 'blur' }],
     address: [{ required: true, message: 'Address is required', trigger: 'blur' }],

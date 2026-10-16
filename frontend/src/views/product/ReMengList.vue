@@ -60,6 +60,7 @@ onMounted(async () => {
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
 .qv-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: #fff; text-align: center; padding: 6px; font-size: 12px; opacity: 0; transition: opacity 0.2s; cursor: pointer; }
 .product-card:hover .qv-overlay { opacity: 1; }
+@media (hover: none), (max-width: 768px) { .qv-overlay { opacity: 1; } }
 .product-info { padding: 8px; }
 .product-name { font-size: 13px; margin-bottom: 6px; }
 .price-current { font-size: 16px; font-weight: 700; color: var(--g-main_color); }

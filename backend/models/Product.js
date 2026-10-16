@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema({
   description: { type: String, default: '' },
   images: [{ type: String }],
   categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+  categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   skus: [skuSchema],
   minPrice: { type: Number, default: 0 },
@@ -47,6 +48,7 @@ const productSchema = new mongoose.Schema({
 
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ categoryId: 1 });
+productSchema.index({ categoryIds: 1 });
 productSchema.index({ shopId: 1 });
 productSchema.index({ isHot: 1, isRecommended: 1 });
 productSchema.index({ minPrice: 1, maxPrice: 1 });
