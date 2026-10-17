@@ -109,26 +109,24 @@
             </div>
           </div>
           <p class="automation-hint">
-            Shipments advance automatically through each stage once the configured dwell time (hours) has elapsed.
-            Terminal stages &mdash; Receiver Signed, Delivery Failed and Returned &mdash; are never auto-changed.
+            Shipments advance automatically through every stage and are delivered within the
+            delivery window for the receiver's destination zone. Zone A = local / near,
+            Zone B = standard, Zone C = remote (each clamped to 2-4 days).
+            Terminal stages &mdash; Delivery Failed and Returned &mdash; are never auto-changed.
           </p>
           <div v-loading="automationLoading" style="max-width:560px">
             <el-form label-position="top">
               <el-form-item label="Enable automatic progression">
                 <el-switch v-model="automation.enabled" />
               </el-form-item>
-              <el-form-item
-                v-for="stage in automation.stages"
-                :key="stage.status"
-                :label="`${stage.status}. ${stage.label} — dwell before next stage (hours)`"
-              >
-                <el-input-number
-                  v-model="stage.hours"
-                  :min="0"
-                  :step="1"
-                  :disabled="stage.status === 5"
-                  style="width:100%"
-                />
+              <el-form-item label="Zone A — local / near (delivery days)">
+                <el-input-number v-model="automation.zones.A" :min="2" :max="4" :step="1" style="width:100%" />
+              </el-form-item>
+              <el-form-item label="Zone B — standard (delivery days)">
+                <el-input-number v-model="automation.zones.B" :min="2" :max="4" :step="1" style="width:100%" />
+              </el-form-item>
+              <el-form-item label="Zone C — remote (delivery days)">
+                <el-input-number v-model="automation.zones.C" :min="2" :max="4" :step="1" style="width:100%" />
               </el-form-item>
             </el-form>
           </div>
@@ -264,7 +262,7 @@ const editMethodId = ref(null)
 const savingMethod = ref(false)
 const methodForm = ref({ name: '', carrier: '', type: 'flat', rate: 0, freeShippingThreshold: 0, estimatedDays: '3-7', sort: 0, status: 1 })
 
-const automation = ref({ enabled: true, stages: [] })
+const automation = ref({ enabled: true, zones: { A: 2, B: 3, C: 4 } })
 const automationLoading = ref(false)
 const savingAutomation = ref(false)
 const runningAutomation = ref(false)
@@ -397,7 +395,7 @@ const fetchAutomation = async () => {
   automationLoading.value = true
   const res = await adminGet('/home/admin/logistics/automation')
   if (res?.code === 0) {
-    automation.value = { enabled: res.data?.enabled !== false, stages: res.data?.stages || [] }
+    automation.value = { enabled: res.data?.enabled !== false, zones: res.data?.zones || { A: 2, B: 3, C: 4 } }
   }
   automationLoading.value = false
 }
@@ -408,7 +406,7 @@ const saveAutomation = async () => {
   savingAutomation.value = false
   if (res?.code === 0) {
     ElMessage.success(res.msg || 'Automation saved')
-    if (res.data) automation.value = { enabled: res.data.enabled !== false, stages: res.data.stages || [] }
+    if (res.data) automation.value = { enabled: res.data.enabled !== false, zones: res.data.zones || { A: 2, B: 3, C: 4 } }
   } else if (res?.msg) ElMessage.error(res.msg)
 }
 

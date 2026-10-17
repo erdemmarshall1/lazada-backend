@@ -5,6 +5,7 @@ const Shop = require('../models/Shop');
 const Wallet = require('../models/Wallet');
 const PlatformWallet = require('../models/PlatformWallet');
 const Transaction = require('../models/Transaction');
+const { planDelivery } = require('../services/logisticsService');
 const { success, fail, paginate } = require('../utils/response');
 
 const CARRIERS = [
@@ -107,6 +108,10 @@ const create = async (req, res) => {
 
     const finalTrackingNo = trackingNo || genTrackingNo(carrier);
 
+    const receiverAddress = [order.shippingAddress?.province, order.shippingAddress?.city, order.shippingAddress?.district, order.shippingAddress?.detail].filter(Boolean).join(', ');
+    const senderAddress = shop.address || '';
+    const { zone: deliveryZone, days: deliveryWindowDays } = await planDelivery(receiverAddress, senderAddress);
+
     const shipping = await Shipping.create({
       orderId,
       shopId: shop._id,
@@ -114,13 +119,15 @@ const create = async (req, res) => {
       trackingNo: finalTrackingNo,
       status: 0,
       statusHistory: [{ status: 0, location: '', description: 'Order preparation started', timestamp: new Date() }],
-      estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      deliveryZone,
+      deliveryWindowDays,
+      estimatedDelivery: new Date(Date.now() + deliveryWindowDays * 24 * 60 * 60 * 1000),
       senderName: shop.name,
       senderPhone: shop.phone,
       senderAddress: shop.address,
       receiverName: order.shippingAddress?.name || '',
       receiverPhone: order.shippingAddress?.phone || '',
-      receiverAddress: [order.shippingAddress?.province, order.shippingAddress?.city, order.shippingAddress?.district, order.shippingAddress?.detail].filter(Boolean).join(', '),
+      receiverAddress,
       packageWeight,
       packageLength,
       packageWidth,

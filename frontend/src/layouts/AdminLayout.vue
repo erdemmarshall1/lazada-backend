@@ -266,7 +266,7 @@ onBeforeUnmount(() => {
 .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--dash-accent), var(--dash-purple-end)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; flex-shrink: 0; }
 .logo-text { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; }
 .sidebar-toggle { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; }
-.sidebar-toggle:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.sidebar-toggle:hover { color: #fff; background: var(--dash-hover); }
 .sidebar-menu { flex: 1; overflow-y: auto; padding: 8px 0; }
 .sidebar-menu::-webkit-scrollbar { width: 4px; }
 .sidebar-menu::-webkit-scrollbar-track { background: transparent; }
@@ -279,14 +279,14 @@ onBeforeUnmount(() => {
 .menu-arrow.rotated { transform: rotate(90deg); }
 .menu-item { display: flex; align-items: center; gap: 12px; padding: 9px 16px 9px 44px; cursor: pointer; font-size: 13px; color: #a0aec0; transition: all 0.2s; border-left: 3px solid transparent; }
 .admin-sidebar.collapsed .menu-item { padding: 12px 0; justify-content: center; }
-.menu-item:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.menu-item:hover { color: #fff; background: var(--dash-hover); }
 .menu-item.active { color: #fff; background: rgba(var(--dash-accent-rgb),0.12); border-left-color: var(--dash-accent); }
 .menu-item .iconfont { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
 .menu-item span { white-space: nowrap; overflow: hidden; }
 .admin-glow-item { position: relative; overflow: hidden; }
-.admin-glow-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(var(--dash-accent-rgb),0.08) 0%, transparent 70%); pointer-events: none; }
+.admin-glow-item::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; background: radial-gradient(ellipse at 50% 0%, rgba(22,50,79,0.35) 0%, transparent 70%); pointer-events: none; }
 .admin-glow-item:hover::before { opacity: 1; }
-.admin-glow-item:hover { border-left-color: rgba(var(--dash-accent-rgb),0.4); }
+.admin-glow-item:hover { border-left-color: var(--dash-hover-solid); }
 .admin-glow-item--active { border-left-color: var(--dash-accent) !important; box-shadow: 0 0 16px rgba(var(--dash-accent-rgb),0.12), inset 3px 0 8px -3px rgba(var(--dash-accent-rgb),0.2); }
 .admin-glow-section { position: relative; }
 .admin-glow-section:hover { color: #fff; }
@@ -301,14 +301,14 @@ onBeforeUnmount(() => {
 .user-role { font-size: 11px; color: #6c7a8d; }
 .sidebar-footer-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .footer-action-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 16px; padding: 6px; border-radius: 4px; display: flex; align-items: center; }
-.footer-action-btn:hover { color: var(--dash-accent); background: rgba(255,255,255,0.06); }
+.footer-action-btn:hover { color: var(--dash-accent); background: var(--dash-hover); }
 .logout-btn { background: none; border: none; color: #6c7a8d; cursor: pointer; font-size: 18px; padding: 6px; border-radius: 4px; display: flex; align-items: center; }
 .logout-btn:hover { color: #e74c3c; background: rgba(255,255,255,0.06); }
 .admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .admin-topbar { display: flex; align-items: center; justify-content: space-between; height: 60px; background: var(--dash-dark-card); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); z-index: 10; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .topbar-left { display: flex; align-items: center; gap: 16px; }
-.hamburger-btn { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: rgba(255,255,255,0.5); padding: 4px; }
-.hamburger-btn:hover { color: #fff; }
+.hamburger-btn { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: rgba(255,255,255,0.5); padding: 4px; border-radius: 4px; }
+.hamburger-btn:hover { color: #fff; background: var(--dash-hover); }
 .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 13px; color: rgba(255,255,255,0.6); }
 .breadcrumb-sep { color: rgba(255,255,255,0.3); margin: 0 2px; }
 .breadcrumb-item.active { color: rgba(255,255,255,0.92); font-weight: 600; }
@@ -318,14 +318,14 @@ onBeforeUnmount(() => {
 .topbar-search i { color: rgba(255,255,255,0.5); font-size: 14px; }
 .topbar-search input { border: none; background: none; outline: none; font-size: 13px; color: rgba(255,255,255,0.85); width: 100%; }
 .topbar-search input::placeholder { color: rgba(255,255,255,0.5); }
-.topbar-notif { position: relative; cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.5); padding: 4px; }
-.topbar-notif:hover { color: #fff; }
+.topbar-notif { position: relative; cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.5); padding: 4px; border-radius: 4px; }
+.topbar-notif:hover { color: #fff; background: var(--dash-hover); }
 .notif-badge { position: absolute; top: -2px; right: -4px; background: #e74c3c; color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .topbar-user { cursor: pointer; }
 .user-avatar-small { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--dash-accent), var(--dash-purple-end)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
 .topbar-lang-btn { cursor: pointer; }
 .topbar-lang-trigger { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s, background 0.2s; }
-.topbar-lang-trigger:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.topbar-lang-trigger:hover { color: #fff; background: var(--dash-hover); }
 .admin-content { flex: 1; overflow-y: auto; }
 .content-wrapper { padding: 24px; max-width: 1440px; }
 @media (max-width: 1024px) {

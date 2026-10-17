@@ -14,6 +14,8 @@ const shippingSchema = new mongoose.Schema({
   trackingNo: { type: String, default: '' },
   status: { type: Number, enum: [0, 1, 2, 3, 4, 5, 6, 7], default: 0 },
   statusHistory: [trackingEventSchema],
+  deliveryZone: { type: String, default: '' },
+  deliveryWindowDays: { type: Number, default: 0 },
   estimatedDelivery: { type: Date },
   deliveredAt: { type: Date },
   senderName: { type: String, default: '' },
