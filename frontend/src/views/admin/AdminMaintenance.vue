@@ -437,7 +437,7 @@ onMounted(() => {
 .field-hint { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
 .backup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .backup-action {
-  background: var(--g-white, #ffffff);
+  background: var(--dash-dark-card-alt);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   padding: 18px;

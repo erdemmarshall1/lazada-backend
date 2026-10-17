@@ -23,11 +23,29 @@
         <p>No notifications</p>
       </div>
     </div>
+
+    <el-dialog
+      v-model="msgDialog.visible"
+      :title="msgDialog.title || 'New Message from Admin'"
+      width="min(480px, 92vw)"
+      append-to-body
+      :close-on-click-modal="false"
+      class="ton-admin-msg-dialog"
+      @closed="onMsgDialogClosed"
+    >
+      <div class="ton-admin-msg-body">{{ msgDialog.message }}</div>
+      <template #footer>
+        <div class="ton-admin-msg-footer">
+          <el-button class="ton-admin-msg-close" @click="closeMsgDialog">Close</el-button>
+          <el-button type="primary" @click="openMsgInbox">View in inbox</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { get, put } from '@/api/request'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -40,6 +58,20 @@ const notifications = ref([])
 const unreadCount = ref(0)
 const wrapperRef = ref(null)
 let socket = null
+
+const msgDialog = reactive({ visible: false, title: '', message: '' })
+let msgQueue = []
+
+const showNextMsg = () => {
+  if (!msgQueue.length) { msgDialog.visible = false; return }
+  const n = msgQueue.shift()
+  msgDialog.title = n.title || 'New Message from Admin'
+  msgDialog.message = n.message || ''
+  msgDialog.visible = true
+}
+const closeMsgDialog = () => { msgDialog.visible = false }
+const onMsgDialogClosed = () => { if (msgQueue.length) showNextMsg() }
+const openMsgInbox = () => { msgDialog.visible = false; msgQueue = []; router.push('/internalmsg') }
 
 const toggle = () => { open.value = !open.value }
 const close = () => { open.value = false }
@@ -114,7 +146,13 @@ onMounted(() => {
         notifications.value.unshift(notif)
         unreadCount.value++
         store.userUnreadMsgNum = unreadCount.value
-        
+
+        // Pop up internal messages sent by admin (with a Close option).
+        if (notif.type === 'message') {
+          msgQueue.push(notif)
+          if (!msgDialog.visible) showNextMsg()
+        }
+
         // Show browser notification if tab is inactive
         if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
           new Notification(notif.title, {
@@ -164,4 +202,7 @@ onUnmounted(() => {
 .ton-notif-type-review { background: #e8f4fd; color: #2980b9; }
 .ton-notif-type-message { background: #f0eef6; color: #8e44ad; }
 .ton-notif-empty { padding: 40px 16px; text-align: center; color: #999; font-size: 13px; }
+.ton-admin-msg-body { font-size: 14px; line-height: 1.6; color: #333; white-space: pre-wrap; word-break: break-word; max-height: 50vh; overflow-y: auto; }
+.ton-admin-msg-footer { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 480px) { .ton-admin-msg-footer { flex-direction: column-reverse; } .ton-admin-msg-footer .el-button { width: 100%; margin-left: 0; } }
 </style>

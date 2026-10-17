@@ -70,6 +70,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { adminGet, adminPut, adminPost } from '@/api/adminRequest'
+import { preOpenImpersonationTab, openImpersonation, closeImpersonationTab } from '@/utils/impersonate'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -154,14 +155,18 @@ const resetPassword = async () => {
 
 const loginAsUser = async () => {
   logining.value = true
+  const win = preOpenImpersonationTab()
   try {
     const res = await adminPost(`/home/admin/login-as-user/${userId}`)
     if (res?.code === 0) {
       localStorage.setItem('seller_temp_token', res.data.token)
       ElMessage.success(`Logged in as ${res.data.username}`)
-      window.open('/', '_blank')
+      openImpersonation(win, '/myaccount', res.data.token)
+    } else {
+      closeImpersonationTab(win)
+      ElMessage.error(res?.msg || 'Login failed')
     }
-  } catch {} finally { logining.value = false }
+  } catch { closeImpersonationTab(win) } finally { logining.value = false }
 }
 
 onMounted(fetchUser)

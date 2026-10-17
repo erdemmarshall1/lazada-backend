@@ -34,6 +34,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminGet, adminPost } from '@/api/adminRequest'
+import { preOpenImpersonationTab, openImpersonation, closeImpersonationTab } from '@/utils/impersonate'
 
 const users = ref([])
 const loading = ref(false)
@@ -44,16 +45,19 @@ const loginingId = ref('')
 
 const loginAsUser = async (row) => {
   loginingId.value = row._id
+  const win = preOpenImpersonationTab()
   try {
     const res = await adminPost(`/home/admin/login-as-user/${row._id}`)
     if (res?.code === 0) {
       localStorage.setItem('seller_temp_token', res.data.token)
       ElMessage.success(`Logged in as ${res.data.username}`)
-      window.open('/myaccount?temp_token=' + res.data.token, '_blank')
+      openImpersonation(win, '/myaccount', res.data.token)
     } else {
+      closeImpersonationTab(win)
       ElMessage.error(res?.msg || 'Login failed')
     }
   } catch {
+    closeImpersonationTab(win)
     ElMessage.error('Login failed')
   } finally {
     loginingId.value = ''

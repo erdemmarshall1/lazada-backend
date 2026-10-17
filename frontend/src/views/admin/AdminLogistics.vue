@@ -99,6 +99,40 @@
             </el-table>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane label="Automation" name="automation">
+          <div class="admin-cms-header">
+            <h3>Automatic Status Progression</h3>
+            <div class="g-flex" style="gap:8px">
+              <el-button size="small" :loading="runningAutomation" @click="runAutomation">Run Now</el-button>
+              <el-button type="primary" size="small" :loading="savingAutomation" @click="saveAutomation">Save</el-button>
+            </div>
+          </div>
+          <p class="automation-hint">
+            Shipments advance automatically through each stage once the configured dwell time (hours) has elapsed.
+            Terminal stages &mdash; Receiver Signed, Delivery Failed and Returned &mdash; are never auto-changed.
+          </p>
+          <div v-loading="automationLoading" style="max-width:560px">
+            <el-form label-position="top">
+              <el-form-item label="Enable automatic progression">
+                <el-switch v-model="automation.enabled" />
+              </el-form-item>
+              <el-form-item
+                v-for="stage in automation.stages"
+                :key="stage.status"
+                :label="`${stage.status}. ${stage.label} — dwell before next stage (hours)`"
+              >
+                <el-input-number
+                  v-model="stage.hours"
+                  :min="0"
+                  :step="1"
+                  :disabled="stage.status === 5"
+                  style="width:100%"
+                />
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
 
@@ -205,7 +239,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 const activeTab = ref('shipments')
 
 const stats = ref(null)
-const statusLabels = { 0: 'Pending Pickup', 1: 'Picked Up', 2: 'In Transit', 3: 'Out for Delivery', 4: 'Delivered', 5: 'Delivery Failed', 6: 'Returned' }
+const statusLabels = { 0: 'Order Preparation', 1: 'Picked Up', 2: 'In Transit', 3: 'Out for Delivery', 4: 'Delivered', 5: 'Receiver Signed', 6: 'Delivery Failed', 7: 'Returned' }
 
 const carriers = ref([])
 const filter = ref({ status: '', carrier: '', search: '' })
@@ -230,13 +264,18 @@ const editMethodId = ref(null)
 const savingMethod = ref(false)
 const methodForm = ref({ name: '', carrier: '', type: 'flat', rate: 0, freeShippingThreshold: 0, estimatedDays: '3-7', sort: 0, status: 1 })
 
+const automation = ref({ enabled: true, stages: [] })
+const automationLoading = ref(false)
+const savingAutomation = ref(false)
+const runningAutomation = ref(false)
+
 const carrierName = (id) => {
   const c = carriers.value.find(c => c.id === id)
   return c ? c.name : id || '-'
 }
 
 const statusTagType = (status) => {
-  const map = { 0: 'info', 1: 'warning', 2: 'primary', 3: 'warning', 4: 'success', 5: 'danger', 6: 'info' }
+  const map = { 0: 'info', 1: 'warning', 2: 'primary', 3: 'warning', 4: 'success', 5: 'success', 6: 'danger', 7: 'info' }
   return map[status] || 'info'
 }
 
@@ -354,10 +393,41 @@ const deleteMethod = async (id) => {
   } catch {}
 }
 
+const fetchAutomation = async () => {
+  automationLoading.value = true
+  const res = await adminGet('/home/admin/logistics/automation')
+  if (res?.code === 0) {
+    automation.value = { enabled: res.data?.enabled !== false, stages: res.data?.stages || [] }
+  }
+  automationLoading.value = false
+}
+
+const saveAutomation = async () => {
+  savingAutomation.value = true
+  const res = await adminPut('/home/admin/logistics/automation', automation.value)
+  savingAutomation.value = false
+  if (res?.code === 0) {
+    ElMessage.success(res.msg || 'Automation saved')
+    if (res.data) automation.value = { enabled: res.data.enabled !== false, stages: res.data.stages || [] }
+  } else if (res?.msg) ElMessage.error(res.msg)
+}
+
+const runAutomation = async () => {
+  runningAutomation.value = true
+  const res = await adminPost('/home/admin/logistics/automation/run')
+  runningAutomation.value = false
+  if (res?.code === 0) {
+    ElMessage.success(`Advanced ${res.data?.advanced || 0} shipment(s)`)
+    fetchStats()
+    fetchShipments()
+  } else if (res?.msg) ElMessage.error(res.msg)
+}
+
 onMounted(async () => {
   await Promise.all([fetchStats(), fetchCarriers()])
   fetchShipments()
   fetchMethods()
+  fetchAutomation()
 })
 </script>
 
@@ -395,5 +465,11 @@ onMounted(async () => {
   font-size: 15px;
   margin-bottom: 8px;
   color: var(--el-text-color-primary, #303133);
+}
+.automation-hint {
+  font-size: 13px;
+  color: var(--el-text-color-secondary, #909399);
+  margin-bottom: 16px;
+  max-width: 640px;
 }
 </style>

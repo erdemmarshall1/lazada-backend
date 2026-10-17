@@ -21,13 +21,14 @@ const CARRIERS = [
 ];
 
 const TRACKING_STATUS = {
-  0: 'Pending Pickup',
+  0: 'Order Preparation',
   1: 'Picked Up',
   2: 'In Transit',
   3: 'Out for Delivery',
   4: 'Delivered',
-  5: 'Delivery Failed',
-  6: 'Returned',
+  5: 'Receiver Signed',
+  6: 'Delivery Failed',
+  7: 'Returned',
 };
 
 const genTrackingNo = (carrier) => {
@@ -112,7 +113,7 @@ const create = async (req, res) => {
       carrier,
       trackingNo: finalTrackingNo,
       status: 0,
-      statusHistory: [{ status: 0, location: '', description: 'Shipping label created', timestamp: new Date() }],
+      statusHistory: [{ status: 0, location: '', description: 'Order preparation started', timestamp: new Date() }],
       estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       senderName: shop.name,
       senderPhone: shop.phone,

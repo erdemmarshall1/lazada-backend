@@ -12,9 +12,13 @@
         <el-table-column prop="code" label="Code" width="160" />
         <el-table-column label="Status" width="110">
           <template #default="{row}">
-            <el-tag v-if="row.usedBy" type="info" size="small">Used</el-tag>
-            <el-tag v-else-if="!row.isActive" type="danger" size="small">Deactivated</el-tag>
+            <el-tag v-if="!row.isActive" type="danger" size="small">Deactivated</el-tag>
             <el-tag v-else type="success" size="small">Active</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Uses" width="90">
+          <template #default="{row}">
+            <el-tag type="warning" size="small" effect="plain">{{ row.usedCount || 0 }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="Created" width="160">
@@ -23,15 +27,15 @@
         <el-table-column label="Created By" width="140">
           <template #default="{row}">{{ row.createdBy?.username || '-' }}</template>
         </el-table-column>
-        <el-table-column label="Used By" min-width="160">
+        <el-table-column label="Last Used By" min-width="160">
           <template #default="{row}">{{ row.usedBy?.name || '-' }}</template>
         </el-table-column>
-        <el-table-column label="Used At" width="160">
+        <el-table-column label="Last Used At" width="160">
           <template #default="{row}">{{ row.usedAt ? new Date(row.usedAt).toLocaleString() : '-' }}</template>
         </el-table-column>
         <el-table-column label="Action" width="120" fixed="right">
           <template #default="{row}">
-            <el-button size="small" type="warning" :disabled="!row.isActive || row.usedBy" @click="deactivate(row._id)">
+            <el-button size="small" type="warning" :disabled="!row.isActive" @click="deactivate(row._id)">
               Deactivate
             </el-button>
           </template>

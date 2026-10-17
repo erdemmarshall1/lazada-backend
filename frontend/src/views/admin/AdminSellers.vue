@@ -73,6 +73,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { adminGet, adminPost, adminPut } from '@/api/adminRequest'
+import { preOpenImpersonationTab, openImpersonation, closeImpersonationTab } from '@/utils/impersonate'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const shops = ref([])
@@ -126,11 +127,17 @@ const generateSellerId = async (row) => {
   if (res?.code === 0) { ElMessage.success(res.msg); fetchShops() } else if (res?.msg) ElMessage.error(res.msg)
 }
 const loginAsSeller = async (row) => {
-  const res = await adminPost(`/home/admin/login-as-seller/${row.userId?._id || row.userId}`)
-  if (res?.data?.token) {
-    localStorage.setItem('seller_temp_token', res.data.token)
-    window.open(`/mystore?temp_token=${res.data.token}`, '_blank')
-  }
+  const win = preOpenImpersonationTab()
+  try {
+    const res = await adminPost(`/home/admin/login-as-seller/${row.userId?._id || row.userId}`)
+    if (res?.data?.token) {
+      localStorage.setItem('seller_temp_token', res.data.token)
+      openImpersonation(win, '/mystore', res.data.token)
+    } else {
+      closeImpersonationTab(win)
+      if (res?.msg) ElMessage.error(res.msg)
+    }
+  } catch { closeImpersonationTab(win) }
 }
 const updateLevel = async (row) => {
   const res = await adminPut(`/home/admin/shops/${row._id}/level`, { level: row.level })

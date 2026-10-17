@@ -251,6 +251,8 @@ const startServer = (dbConnected) => {
     escrowService.start();
     const autoClosureService = require('./services/autoClosureService');
     autoClosureService.start();
+    const logisticsService = require('./services/logisticsService');
+    logisticsService.start();
   }
 
   // Self-ping to prevent Railway free tier sleep (every 10 minutes)

@@ -111,9 +111,9 @@ exports.apply = async (req, res) => {
     if (missingDocs.length) {
       return res.json(fail('Required: ' + missingDocs.join(', ')));
     }
-    const invitationDoc = await InvitationCode.findOne({ code: invitationCode, isActive: true, usedBy: null });
+    const invitationDoc = await InvitationCode.findOne({ code: invitationCode, isActive: true });
     if (!invitationDoc) {
-      return res.json(fail('Invalid or already used invitation code'));
+      return res.json(fail('Invalid or deactivated invitation code'));
     }
     const existing = await Shop.findOne({ userId: req.user._id });
     if (existing) return res.json(fail('You already have a shop'));
@@ -125,7 +125,11 @@ exports.apply = async (req, res) => {
       idNumber: idNumber || '', invitationCode: invitationCode || '',
       status: 0,
     });
-    await InvitationCode.findByIdAndUpdate(invitationDoc._id, { usedBy: shop._id, usedAt: new Date() });
+    await InvitationCode.findByIdAndUpdate(invitationDoc._id, {
+      $set: { usedBy: shop._id, usedAt: new Date() },
+      $inc: { usedCount: 1 },
+      $push: { usedByShops: shop._id },
+    });
     const updateData = { role: 'seller' };
     if (fullName) updateData.fullName = fullName;
     if (email) updateData.email = email;

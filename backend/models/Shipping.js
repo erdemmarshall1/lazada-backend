@@ -12,7 +12,7 @@ const shippingSchema = new mongoose.Schema({
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   carrier: { type: String, default: '' },
   trackingNo: { type: String, default: '' },
-  status: { type: Number, enum: [0, 1, 2, 3, 4, 5, 6], default: 0 },
+  status: { type: Number, enum: [0, 1, 2, 3, 4, 5, 6, 7], default: 0 },
   statusHistory: [trackingEventSchema],
   estimatedDelivery: { type: Date },
   deliveredAt: { type: Date },

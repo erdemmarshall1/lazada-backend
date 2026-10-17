@@ -50,7 +50,7 @@
               :key="evt._id"
               :timestamp="formatDate(evt.timestamp)"
               placement="top"
-              :color="evt.status === 4 ? '#67C23A' : '#409EFF'"
+              :color="(evt.status === 4 || evt.status === 5) ? '#67C23A' : '#409EFF'"
               :hollow="evt.status !== shipping.status"
             >
               <p><strong>{{ evt.statusLabel }}</strong></p>
@@ -94,8 +94,8 @@ const orderNoInput = ref('')
 const carrierMap = { sf:'SF Express', yto:'YTO Express', zto:'ZTO Express', sto:'STO Express', yd:'Yunda Express', ems:'EMS', ups:'UPS', fedex:'FedEx', dhl:'DHL', tnt:'TNT' }
 const carrierName = (id) => carrierMap[id] || id || '—'
 const statusTagType = (s) => {
-  if (s === 4) return 'success'
-  if (s === 5 || s === 6) return 'danger'
+  if (s === 4 || s === 5) return 'success'
+  if (s === 6 || s === 7) return 'danger'
   if (s === 3) return 'warning'
   if (s === 2) return 'primary'
   return 'info'

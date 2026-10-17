@@ -230,7 +230,8 @@ router.beforeEach(async (to, from, next) => {
   const adminStore = useAdminAppStore()
 
   if (to.query.temp_token) {
-    const tempToken = String(to.query.temp_token)
+    const tempToken = String(to.query.temp_token).trim()
+    if (!tempToken) { next({ name: 'login' }); return }
     localStorage.setItem('seller_temp_token', tempToken)
     // Impersonation must not inherit the previous session (identity/refresh).
     localStorage.removeItem('theoutnet_refresh_token')

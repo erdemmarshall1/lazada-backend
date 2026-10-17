@@ -84,7 +84,7 @@
           <div><strong>Estimated Delivery:</strong> {{ formatDate(previewShipment.estimatedDelivery) }}</div>
         </div>
         <el-timeline style="margin-top:16px">
-          <el-timeline-item v-for="evt in previewShipment.statusHistory" :key="evt._id" :timestamp="formatDate(evt.timestamp)" placement="top" :color="evt.status === 4 ? '#67C23A' : '#409EFF'">
+          <el-timeline-item v-for="evt in previewShipment.statusHistory" :key="evt._id" :timestamp="formatDate(evt.timestamp)" placement="top" :color="(evt.status === 4 || evt.status === 5) ? '#67C23A' : '#409EFF'">
             <p><strong>{{ evt.statusLabel }}</strong></p>
             <p v-if="evt.location" style="color:#666;font-size:13px">{{ evt.location }}</p>
             <p v-if="evt.description" style="color:#999;font-size:12px">{{ evt.description }}</p>
@@ -109,7 +109,7 @@ const currentPage = ref(1)
 const filterStatus = ref('')
 const stats = ref(null)
 const store = useAppStore()
-const statusLabels = { 0:'Pending Pickup', 1:'Picked Up', 2:'In Transit', 3:'Out for Delivery', 4:'Delivered', 5:'Delivery Failed', 6:'Returned' }
+const statusLabels = { 0:'Order Preparation', 1:'Picked Up', 2:'In Transit', 3:'Out for Delivery', 4:'Delivered', 5:'Receiver Signed', 6:'Delivery Failed', 7:'Returned' }
 const carrierMap = { sf:'SF Express', yto:'YTO Express', zto:'ZTO Express', sto:'STO Express', yd:'Yunda Express', ems:'EMS', ups:'UPS', fedex:'FedEx', dhl:'DHL', tnt:'TNT' }
 
 const trackingDialog = ref(false)
@@ -124,8 +124,8 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
 const carrierName = (id) => carrierMap[id] || id || '—'
 const statusTagType = (s) => {
-  if (s === 4) return 'success'
-  if (s === 5 || s === 6) return 'danger'
+  if (s === 4 || s === 5) return 'success'
+  if (s === 6 || s === 7) return 'danger'
   if (s === 3) return 'warning'
   if (s === 2) return 'primary'
   return 'info'

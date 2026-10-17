@@ -172,6 +172,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { adminGet, adminPost, adminPut } from '@/api/adminRequest'
+import { preOpenImpersonationTab, openImpersonation, closeImpersonationTab } from '@/utils/impersonate'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
@@ -322,11 +323,17 @@ const openPdf = (url) => {
 const loginAsSeller = async () => {
   const userId = shop.value.userId?._id
   if (!userId) { ElMessage.warning('No user associated with this shop'); return }
-  const res = await adminPost(`/home/admin/login-as-seller/${userId}`)
-  if (res?.data?.token) {
-    localStorage.setItem('seller_temp_token', res.data.token)
-    window.open(`/mystore?temp_token=${res.data.token}`, '_blank')
-  }
+  const win = preOpenImpersonationTab()
+  try {
+    const res = await adminPost(`/home/admin/login-as-seller/${userId}`)
+    if (res?.data?.token) {
+      localStorage.setItem('seller_temp_token', res.data.token)
+      openImpersonation(win, '/mystore', res.data.token)
+    } else {
+      closeImpersonationTab(win)
+      if (res?.msg) ElMessage.error(res.msg)
+    }
+  } catch { closeImpersonationTab(win) }
 }
 
 onMounted(() => { fetchDetail(); fetchStats() })

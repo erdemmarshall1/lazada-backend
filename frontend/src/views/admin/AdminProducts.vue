@@ -70,8 +70,8 @@
             </div>
             <el-upload :show-file-list="false" :before-upload="handleImageUpload" accept="image/*" multiple drag>
               <div class="edit-img-add">
-                <span style="font-size:24px;color:#999">+</span>
-                <span style="font-size:12px;color:#999;margin-top:4px">Select / Drop images</span>
+                <span style="font-size:24px;color:rgba(255,255,255,0.7)">+</span>
+                <span style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px">Select / Drop images</span>
               </div>
             </el-upload>
           </div>
@@ -339,15 +339,15 @@ onMounted(async () => {
 .img-remove-btn { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; min-width: auto; padding: 0; font-size: 12px; line-height: 1; }
 .edit-img-add { width: 100px; height: 100px; border: 1px dashed var(--g-border); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .edit-img-add:hover { border-color: var(--g-main_color); }
-.size-block { margin: 4px 0 18px; padding: 12px 14px; border: 1px solid var(--g-border); border-radius: 8px; background: #fafbfc; }
-.size-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333; }
+.size-block { margin: 4px 0 18px; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: var(--dash-dark-card-alt); }
+.size-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: rgba(255,255,255,0.92); }
 .size-group { margin-bottom: 10px; }
-.size-group-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+.size-group-label { font-size: 12px; color: rgba(255,255,255,0.65); margin-bottom: 6px; }
 .size-values { display: flex; flex-wrap: wrap; gap: 8px; }
-.size-chip { padding: 5px 14px; border: 1px solid var(--g-border); border-radius: 20px; font-size: 13px; cursor: pointer; user-select: none; background: #fff; }
-.size-chip:hover { border-color: var(--g-main_color); }
-.size-chip.active { background: var(--g-main_color); color: #fff; border-color: var(--g-main_color); }
+.size-chip { padding: 5px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 20px; font-size: 13px; cursor: pointer; user-select: none; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.85); }
+.size-chip:hover { border-color: var(--dash-accent); }
+.size-chip.active { background: var(--dash-accent); color: #08191d; border-color: var(--dash-accent); font-weight: 600; }
 .size-custom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-.size-selected { font-size: 12px; color: #666; }
+.size-selected { font-size: 12px; color: rgba(255,255,255,0.65); }
 @media (max-width: 768px) { .admin-products { padding: 12px; } }
 </style>

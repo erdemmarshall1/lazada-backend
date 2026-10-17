@@ -2125,8 +2125,9 @@ const CARRIERS = [
 ];
 
 const TRACKING_STATUS = {
-  0: 'Pending Pickup', 1: 'Picked Up', 2: 'In Transit',
-  3: 'Out for Delivery', 4: 'Delivered', 5: 'Delivery Failed', 6: 'Returned',
+  0: 'Order Preparation', 1: 'Picked Up', 2: 'In Transit',
+  3: 'Out for Delivery', 4: 'Delivered', 5: 'Receiver Signed',
+  6: 'Delivery Failed', 7: 'Returned',
 };
 
 router.get('/logistics/stats', adminAuth, async (req, res) => {
@@ -2215,6 +2216,30 @@ router.put('/logistics/:id/tracking', adminAuth, async (req, res) => {
       });
     }
     res.json(success(shipping, 'Tracking updated'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+// ---- Logistics Automation ----
+const logisticsService = require('../services/logisticsService');
+
+router.get('/logistics/automation', adminAuth, async (req, res) => {
+  try {
+    const config = await logisticsService.getConfig();
+    res.json(success(config));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.put('/logistics/automation', adminAuth, async (req, res) => {
+  try {
+    const config = await logisticsService.setConfig(req.body || {});
+    res.json(success(config, 'Logistics automation saved'));
+  } catch (error) { res.json(fail(error.message)); }
+});
+
+router.post('/logistics/automation/run', adminAuth, async (req, res) => {
+  try {
+    const result = await logisticsService.advanceShipments();
+    res.json(success(result, 'Automation run complete'));
   } catch (error) { res.json(fail(error.message)); }
 });
 
