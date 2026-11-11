@@ -792,11 +792,58 @@ router.get('/messages/history', adminAuth, async (req, res) => {
 // ---- Products ----
 router.get('/products', adminAuth, async (req, res) => {
   try {
-    const { page: p, pageSize: ps } = req.query;
+    const {
+      page: p, pageSize: ps, search, categoryId, status, color,
+      minPrice, maxPrice, stock, imageSource, sort,
+    } = req.query;
     const { skip, limit, page, pageSize } = paginate(p, ps);
+    const query = {};
+
+    if (search && String(search).trim()) {
+      const rx = new RegExp(String(search).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      query.$or = [{ name: rx }, { brand: rx }, { description: rx }];
+    }
+    if (categoryId) {
+      query.$and = query.$and || [];
+      query.$and.push({ $or: [{ categoryId }, { categoryIds: categoryId }] });
+    }
+    if (status === 'active') query.status = 1;
+    if (status === 'inactive') query.status = 0;
+    if (color) {
+      query.skus = {
+        $elemMatch: {
+          attrs: { $elemMatch: { name: /colou?r/i, value: new RegExp('^' + String(color).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
+        },
+      };
+    }
+    if (minPrice !== undefined && minPrice !== '') {
+      query.maxPrice = { ...(query.maxPrice || {}), $gte: Number(minPrice) };
+    }
+    if (maxPrice !== undefined && maxPrice !== '') {
+      query.minPrice = { ...(query.minPrice || {}), $lte: Number(maxPrice) };
+    }
+    if (stock === 'in') query.$expr = { $gt: [{ $sum: '$skus.stock' }, 5] };
+    if (stock === 'low') query.$expr = { $and: [{ $gt: [{ $sum: '$skus.stock' }, 0] }, { $lte: [{ $sum: '$skus.stock' }, 5] }] };
+    if (stock === 'out') query.$expr = { $lte: [{ $sum: '$skus.stock' }, 0] };
+    if (imageSource === 'remote') query['images.0'] = /^https?:\/\//i;
+    if (imageSource === 'local') query['images.0'] = /^\/uploads\//i;
+    if (imageSource === 'none') {
+      query.$and = query.$and || [];
+      query.$and.push({ $or: [{ images: { $exists: false } }, { images: { $size: 0 } }, { 'images.0': '' }] });
+    }
+
+    const sortMap = {
+      newest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
+      price_asc: { minPrice: 1 },
+      price_desc: { minPrice: -1 },
+      sales_desc: { salesCount: -1 },
+      name_asc: { name: 1 },
+    };
+    const sortBy = sortMap[sort] || sortMap.newest;
     const [list, total] = await Promise.all([
-      Product.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Product.countDocuments(),
+      Product.find(query).sort(sortBy).skip(skip).limit(limit),
+      Product.countDocuments(query),
     ]);
     res.json(success({ list, total, page, pageSize }));
   } catch (error) {
@@ -1075,7 +1122,7 @@ router.post('/toggle-product-status', adminAuth, async (req, res) => {
 // ---- Add product (admin creates wholesale product) ----
 router.post('/add-product', adminAuth, async (req, res) => {
   try {
-    const { name, description, images, categoryId, categoryIds, shopId, skus } = req.body;
+    const { name, brand, description, images, categoryId, categoryIds, shopId, skus } = req.body;
     if (!name) return res.json(fail('Product name is required'));
     const catList = Array.isArray(categoryIds) && categoryIds.length > 0
       ? categoryIds
@@ -1091,6 +1138,7 @@ router.post('/add-product', adminAuth, async (req, res) => {
     const prices = productSkus.map(s => s.price);
     const product = await Product.create({
       name,
+      brand: brand || '',
       description: description || '',
       images: images || [],
       categoryId: catList[0],
@@ -1174,6 +1222,7 @@ router.post('/bulk-import-products', adminAuth, async (req, res) => {
       const prices = (p.skus || []).map(s => s.price);
       batch.push({
         name: p.name,
+        brand: p.brand || '',
         description: p.description || '',
         images: p.images || [],
         categoryId: p.categoryId,

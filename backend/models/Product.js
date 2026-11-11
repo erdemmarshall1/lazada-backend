@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const skuSchema = new mongoose.Schema({
-  attrs: [{ name: String, value: String }],
+  attrs: [{ name: String, value: String, hex: { type: String, default: '' }, image: { type: String, default: '' } }],
   price: { type: Number, required: true },
   originalPrice: { type: Number, default: 0 },
   stock: { type: Number, required: true, default: 0 },
@@ -12,6 +12,7 @@ const skuSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  brand: { type: String, default: '', index: true },
   description: { type: String, default: '' },
   images: [{ type: String }],
   categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
