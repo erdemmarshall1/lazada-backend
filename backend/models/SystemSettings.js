@@ -14,6 +14,7 @@ const systemSettingsSchema = new mongoose.Schema({
   pushEnabled: { type: Boolean, default: false },
   faviconUrl: { type: String, default: '' },
   customCSS: { type: String, default: '' },
+  showRecommendedForYou: { type: Boolean, default: true },
   translations: {
     siteName: { type: Map, of: String, default: {} },
   },
